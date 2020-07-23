@@ -1,0 +1,12 @@
+Package: potools
+Type: Package
+Title: Tools for Portability in R Packages (po Directory)
+Version: 0.1.0
+Author: Michael Chirico
+Depends: R (>= 3.6.2)
+Imports: data.table
+Suggests: testthat
+Maintainer: Michael Chirico <MichaelChirico4@gmail.com>
+Description: Translating messages in R packages is managed using the po top-level directory and the gettext program. This package provides some helper functions for building this support in R packages, e.g. common validation & I/O tasks.
+License: GPL-3
+Encoding: UTF-8

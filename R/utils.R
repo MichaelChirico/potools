@@ -1,12 +1,33 @@
-#' Determine whether a path is a package by
-#'   looking for the Package: field in a dcf file
-#' @param dir a (one) path
-is_package_tld = function(dir) {
+#' get the name of the package as found in the Package
+#'   field of the file at dir/DESCRIPTION (or return NA if none)
+get_package_name = function(dir) {
   if (length(dir) > 1L) stop("Please provide a single directory path")
   desc_path = file.path(dir, 'DESCRIPTION')
   desc_info = na.omit(file.info(desc_path))
-  if (nrow(desc_info) != 1L || desc_info$isdir || !desc_info$size) return(FALSE)
-  !anyNA(read.dcf(desc_path, 'Package'))
+  if (nrow(desc_info) != 1L || desc_info$isdir || !desc_info$size) return(NA_character_)
+  read.dcf(desc_path, 'Package')[1L]
+}
+
+#' simple function for creating a po.h header that enables
+#'   _(...) to be used as a simple wrapper macro for
+#'   identifying translatable strings for gettext, as is
+#'   done in base R and recommended by R-exts:
+#'     https://cran.r-project.org/doc/manuals/R-exts.html#Internationalization
+#' @param src_dir the package/src directory path
+#' @param pkg the package name
+po_header_contents_fmt = '
+#ifdef ENABLE_NLS
+#include <libintl.h>
+#define _(String) dgettext("%s", String)
+#else
+#define _(String) (String)
+#endif
+'
+write_po_header = function(src_dir, pkg) {
+  writeLines(
+    trimws(sprintf(po_header_contents_fmt, pkg), 'left'),
+    file.path(src_dir, 'po.h')
+  )
 }
 
 #' Workhorse function for setting up translation infrastructure for a package.
@@ -14,7 +35,13 @@ is_package_tld = function(dir) {
 #' @param copyright see `tools::update_pkg_po`
 #' @param bugs see `tools::update_pkg_po`
 initialize_translations = function(dir, copyright, bugs) {
-  if (!is_package_tld(dir)) stop(domain = NA, gettextf(
+  if (!nzchar(Sys.which('gettext')))
+    warning(
+      "gettext wasn't found on this system, or at least it's not on the PATH for this session. ",
+      "Please ensure this is rectified before testing your translations
+
+  pkg = get_package_name(dir)
+  if (is.na(pkg)) stop(domain = NA, gettextf(
     "Translations are added within a package context, but %s doesn't appear to be a package directory (at a minimum, there should be a DESCRIPTION file in DCF format with a Package field)",
     dir, domain = "R-potools"
   ))
@@ -36,8 +63,9 @@ initialize_translations = function(dir, copyright, bugs) {
     })
 
     top_header = names(sort(-table(unlist(src_direct_includes)))[1L])
-
     orphans = names(Filter(function(x) !top_header %in% x, src_direct_includes))
+
+    write_po_header(file.path(dir, 'src'), pkg)
   }
 
   tools::update_pkg_po(dir, copyright=copyright, bugs=bugs)

@@ -2,7 +2,11 @@
 #'   looking for the Package: field in a dcf file
 #' @param dir a (one) path
 is_package_tld = function(dir) {
-
+  if (length(dir) > 1L) stop("Please provide a single directory path")
+  desc_path = file.path(dir, 'DESCRIPTION')
+  desc_info = na.omit(file.info(desc_path))
+  if (nrow(desc_info) != 1L || desc_info$isdir || !desc_info$size) return(FALSE)
+  !anyNA(read.dcf(desc_path, 'Package'))
 }
 
 #' Workhorse function for setting up translation infrastructure for a package.

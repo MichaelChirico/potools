@@ -38,7 +38,7 @@ write_po_header = function(src_dir, pkg) {
 uses_src_po = function(src_contents) {
   if ('po.h' %in% names(src_contents)) return(TRUE)
   for (flines in src_contents) {
-    if (any(grepl('#\\s*define _.*\\bdgettext\\(', flines))) return(TRUE)
+    if (any(grepl('#\\s*define _.*\\bdgettext\\(', flines, ignore.case=TRUE))) return(TRUE)
   }
   return(FALSE)
 }
@@ -65,8 +65,9 @@ initialize_translations = function(dir, copyright, bugs) {
     function(f) readLines(file.path(dir, 'src', f), warn=FALSE)
   )
 
-  if (!length(src_files) || !uses_src_po(src_contents))
+  if (!length(src_files) || uses_src_po(src_contents))
     return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
+
   # could be improved, somewhat sloppy for now. a more robust version would treat the
   #   src files as a DAG, and look for where to "inject" a po.h header so as to "infect"
   #   all the source files with as few possible #include "po.h" as possible.
@@ -76,14 +77,9 @@ initialize_translations = function(dir, copyright, bugs) {
   #   added to one of the other "local" headers included in those orphans (this is done
   #   in data.table) but I eschew that for now.
   if (any(is_src <- grepl('\\.c(?:pp)?', src_files))) {
-    if (!'po.h' %in% src_files) {
-      found_po_header = FALSE
-      for (src_file in grep('\\.(?:c|cpp|h)', src_files, value=TRUE)) {
-        if (length(grep(readLines(file.path(dir, 'src', f)grepl('\\.
-      }
-    }
-    src_direct_includes = sapply(src_files[is_src], simplify=FALSE, function(f) {
-      flines = readLines(file.path(dir, 'src', f), warn=FALSE)
+    write_po_header(file.path(dir, 'src'), pkg)
+
+    src_direct_includes = sapply(src_contents[is_src], simplify=FALSE, function(flines) {
       direct_includes = grep('#\\s*include "', flines, value=TRUE, ignore.case=TRUE)
       gsub('.*#\\s*include "([^"]+)".*', '\\1', direct_includes)
     })
@@ -91,7 +87,22 @@ initialize_translations = function(dir, copyright, bugs) {
     top_header = names(sort(-table(unlist(src_direct_includes)))[1L])
     orphans = names(Filter(function(x) !top_header %in% x, src_direct_includes))
 
-    write_po_header(file.path(dir, 'src'), pkg)
+    # insert the include for "po.h" after the last include currently in the file;
+    #   if there are no includes yet, put "po.h" at the top of the file
+    for (needs_po in c(top_header, orphans)) {
+      flines = src_contents[[needs_po]]
+      last_include_idx = tail(grep('#\\s*include', flines, ignore.case=TRUE), 1L)
+      if (length(last_include_idx)) {
+        outlines = c(
+          head(flines, last_include_idx),
+          '#include "po.h"',
+          tail(flines, -last_include_idx)
+        )
+      } else {
+        outlines = c('#include "po.h"', flines)
+      }
+      writeLines(outlines, file.path(dir, 'src', needs_po))
+    }
   }
 
   tools::update_pkg_po(dir, copyright=copyright, bugs=bugs)

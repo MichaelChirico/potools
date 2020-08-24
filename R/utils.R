@@ -30,15 +30,28 @@ write_po_header = function(src_dir, pkg) {
   )
 }
 
+#' Try to determine if this package has already been set up for use with
+#'   src translations through two potential pathways:
+#'   (1) The po.h header file
+#'   (2) A macro definition of _ as a dgettext wrapper
+#' @param src_contents the contents of src files, as returned by `readLines`
+uses_src_po = function(src_contents) {
+  if ('po.h' %in% names(src_contents)) return(TRUE)
+  for (flines in src_contents) {
+    if (any(grepl('#\\s*define _.*\\bdgettext\\(', flines))) return(TRUE)
+  }
+  return(FALSE)
+}
+
 #' Workhorse function for setting up translation infrastructure for a package.
 #' @param dir a directory containing a package
 #' @param copyright see `tools::update_pkg_po`
 #' @param bugs see `tools::update_pkg_po`
 initialize_translations = function(dir, copyright, bugs) {
-  if (!nzchar(Sys.which('gettext')))
-    warning(
-      "gettext wasn't found on this system, or at least it's not on the PATH for this session. ",
-      "Please ensure this is rectified before testing your translations
+  if (!nzchar(Sys.which('xgettext'))) warning(
+    "gettext wasn't found on this system, or at least it's not on the PATH for this session. ",
+    "Please ensure this is rectified before testing your translations."
+  )
 
   pkg = get_package_name(dir)
   if (is.na(pkg)) stop(domain = NA, gettextf(
@@ -46,7 +59,14 @@ initialize_translations = function(dir, copyright, bugs) {
     dir, domain = "R-potools"
   ))
 
-  src_files = list.files(file.path(dir, 'src'))
+  src_files = list.files(file.path(dir, 'src'), pattern='\\.(?:c|cpp|h)')
+  src_contents = sapply(
+    src_files, simplify=FALSE,
+    function(f) readLines(file.path(dir, 'src', f), warn=FALSE)
+  )
+
+  if (!length(src_files) || !uses_src_po(src_contents))
+    return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
   # could be improved, somewhat sloppy for now. a more robust version would treat the
   #   src files as a DAG, and look for where to "inject" a po.h header so as to "infect"
   #   all the source files with as few possible #include "po.h" as possible.
@@ -56,6 +76,12 @@ initialize_translations = function(dir, copyright, bugs) {
   #   added to one of the other "local" headers included in those orphans (this is done
   #   in data.table) but I eschew that for now.
   if (any(is_src <- grepl('\\.c(?:pp)?', src_files))) {
+    if (!'po.h' %in% src_files) {
+      found_po_header = FALSE
+      for (src_file in grep('\\.(?:c|cpp|h)', src_files, value=TRUE)) {
+        if (length(grep(readLines(file.path(dir, 'src', f)grepl('\\.
+      }
+    }
     src_direct_includes = sapply(src_files[is_src], simplify=FALSE, function(f) {
       flines = readLines(file.path(dir, 'src', f), warn=FALSE)
       direct_includes = grep('#\\s*include "', flines, value=TRUE, ignore.case=TRUE)

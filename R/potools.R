@@ -135,7 +135,7 @@ find_new_src_messages = function(pkg = '.', macro = '_') {
 #' @param dir a directory containing a package
 #' @param copyright see `tools::update_pkg_po`
 #' @param bugs see `tools::update_pkg_po`
-initialize_translations = function(dir, copyright, bugs) {
+initialize_translations = function(dir = '.', copyright, bugs) {
   if (!nzchar(Sys.which('xgettext'))) warning(
     "gettext wasn't found on this system, or at least it's not on the PATH for this session. ",
     "Please ensure this is rectified before testing your translations."
@@ -153,8 +153,14 @@ initialize_translations = function(dir, copyright, bugs) {
     function(f) readLines(file.path(dir, 'src', f), warn=FALSE)
   )
 
-  if (!length(src_files) || uses_src_po(src_contents))
+  if (!length(src_files)) return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
+  if (uses_src_po(src_contents)) {
+    if (!file.exists(src_po <- file.path(dir, 'po', sprintf('%s.pot', pkg)))) {
+      dir.create(file.path(dir, 'po'), showWarnings=FALSE)
+      file.create(src_po)
+    }
     return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
+  }
 
   # could be improved, somewhat sloppy for now. a more robust version would treat the
   #   src files as a DAG, and look for where to "inject" a po.h header so as to "infect"
@@ -166,6 +172,10 @@ initialize_translations = function(dir, copyright, bugs) {
   #   in data.table) but I eschew that for now.
   if (any(is_src <- grepl('\\.c(?:pp)?', src_files))) {
     write_po_header(file.path(dir, 'src'), pkg)
+
+    # need to create this file for update_pkg_po to work completely
+    dir.create(file.path(dir, 'po'), showWarnings=FALSE)
+    file.create(file.path(dir, 'po', sprintf('%s.pot', pkg)))
 
     src_direct_includes = sapply(src_contents[is_src], simplify=FALSE, function(flines) {
       direct_includes = grep('#\\s*include "', flines, value=TRUE, ignore.case=TRUE)

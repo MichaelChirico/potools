@@ -25,7 +25,7 @@ po_header_contents_fmt = '
 '
 write_po_header = function(src_dir, pkg) {
   writeLines(
-    trimws(sprintf(po_header_contents_fmt, pkg), 'left'),
+    trimws(sprintf(po_header_contents_fmt, pkg)),
     file.path(src_dir, 'po.h')
   )
 }

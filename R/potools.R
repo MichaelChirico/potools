@@ -135,7 +135,7 @@ find_new_src_messages = function(pkg = '.', macro = '_') {
 #' @param dir a directory containing a package
 #' @param copyright see `tools::update_pkg_po`
 #' @param bugs see `tools::update_pkg_po`
-initialize_translations = function(dir = '.', copyright, bugs) {
+initialize_translations = function(dir = '.', copyright, bugs, verbose=TRUE) {
   if (!nzchar(Sys.which('xgettext'))) warning(
     "gettext wasn't found on this system, or at least it's not on the PATH for this session. ",
     "Please ensure this is rectified before testing your translations."
@@ -153,11 +153,24 @@ initialize_translations = function(dir = '.', copyright, bugs) {
     function(f) readLines(file.path(dir, 'src', f), warn=FALSE)
   )
 
-  if (!length(src_files)) return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
+  # TODO; tools::update_pkg_po fails on src _unless there are some translated strings_.
+  #   not sure exactly what to do about this.
+  if (!length(src_files)) {
+    if (verbose) message("Didn't find any src messages to translate; simply running tools::update_pkg_po, which will work for this package.")
+    return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
+  }
   if (uses_src_po(src_contents)) {
+    if (verbose) message("Detected a pre-existing setup for translating src messages (e.g. a po.h header)")
     if (!file.exists(src_po <- file.path(dir, 'po', sprintf('%s.pot', pkg)))) {
+      if (verbose) message(domain=NA, gettextf(
+        "Creating the file po/%s.pot for src message templates", pkg, domain="R-potools"
+      ))
       dir.create(file.path(dir, 'po'), showWarnings=FALSE)
       file.create(src_po)
+    }
+    if (!uses_src_translation(src_contents)) {
+      if (verbose) message('No messages in src are translated yet. Wrap string literals with _() to mark them for translation, e.g. "Error! Try again!" becomes _("Error! Try again!")')
+      return(NULL)
     }
     return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
   }
@@ -170,6 +183,8 @@ initialize_translations = function(dir = '.', copyright, bugs) {
   #   any "orphan" src files which don't include that header. In principle it could be
   #   added to one of the other "local" headers included in those orphans (this is done
   #   in data.table) but I eschew that for now.
+  # Below could also condition on whether a src file does/doesn't have any string literals...
+  if (verbose) message("No existing setup for translating src messages detected; creating src/po.h and adding an #include as needed...")
   if (any(is_src <- grepl('\\.c(?:pp)?', src_files))) {
     write_po_header(file.path(dir, 'src'), pkg)
 
@@ -188,6 +203,9 @@ initialize_translations = function(dir = '.', copyright, bugs) {
     # insert the include for "po.h" after the last include currently in the file;
     #   if there are no includes yet, put "po.h" at the top of the file
     for (needs_po in c(top_header, orphans)) {
+      if (verbose) message(domain=NA, gettextf(
+        "Adding #include of po.h to src/%s", needs_po, domain="R-potools"
+      ))
       flines = src_contents[[needs_po]]
       last_include_idx = tail(grep('#\\s*include', flines, ignore.case=TRUE), 1L)
       if (length(last_include_idx)) {
@@ -203,5 +221,6 @@ initialize_translations = function(dir = '.', copyright, bugs) {
     }
   }
 
-  tools::update_pkg_po(dir, copyright=copyright, bugs=bugs)
+  if (vebose) message('Translation is now prepared -- please translate strings in the src directory by wrapping them with _(), e.g. "Error! Try again!" becomes _("Error! Try again!")')
+  return(NULL)
 }

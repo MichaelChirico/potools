@@ -6,3 +6,4 @@
  - tools to find cat() output that's not gettext'd
  - initialize translations function -- should add a po.h header in src/, and *.po headers for some input languages (a separate function for initialize_language)
  - for updating messages -- `fuzzy`, `#~`, what the hell is this? Why not present an interactive version that doesn't require as much intimate knowledge of `xgettext` idiosyncrasies?
+ - interactive prompt for translating messages (never need to touch a .po file)

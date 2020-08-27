@@ -42,3 +42,11 @@ uses_src_po = function(src_contents) {
   }
   return(FALSE)
 }
+
+#' Check if any messages in src use a translation already. If not,
+#'   `tools::update_pkg_po` errors
+uses_src_translation = function(src_contents) {
+  any(sapply(src_contents, function(flines) {
+    any(grepl('\\b_\\("', flines))
+  }))
+}

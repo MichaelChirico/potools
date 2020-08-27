@@ -5,7 +5,27 @@ get_package_name = function(dir) {
   desc_path = file.path(dir, 'DESCRIPTION')
   desc_info = na.omit(file.info(desc_path))
   if (nrow(desc_info) != 1L || desc_info$isdir || !desc_info$size) return(NA_character_)
-  read.dcf(desc_path, 'Package')[1L]
+  pkg = read.dcf(desc_path, 'Package')[1L]
+  if (is.na(pkg)) stop(domain = NA, gettextf(
+    "Translations are added within a package context, but %s doesn't appear to be a package directory (at a minimum, there should be a DESCRIPTION file in DCF format with a Package field)",
+    dir, domain = "R-potools"
+  ))
+  pkg
+}
+
+#' small wrapper to list the (code) contents of the `src` directory
+#' @param dir a file path to a package directory
+list_src_files = function(dir) list.files(file.path(dir, 'src'), pattern='\\.(?:c|cpp|h)')
+
+#' load the src code with `readLines`. only one of `dir` or `src_files` should be used
+#' @param dir a file path to a package directory
+#' @param src_files the files in `src` in a package
+load_src_contents = function(dir, src_files) {
+  if (missing(src_files)) src_files = list_src_files(dir)
+ sapply(
+    src_files, simplify=FALSE,
+    function(f) readLines(file.path(dir, 'src', f), warn=FALSE)
+  )
 }
 
 #' simple function for creating a po.h header that enables

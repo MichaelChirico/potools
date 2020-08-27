@@ -142,19 +142,10 @@ initialize_translations = function(dir = '.', copyright, bugs, verbose=TRUE) {
   )
 
   pkg = get_package_name(dir)
-  if (is.na(pkg)) stop(domain = NA, gettextf(
-    "Translations are added within a package context, but %s doesn't appear to be a package directory (at a minimum, there should be a DESCRIPTION file in DCF format with a Package field)",
-    dir, domain = "R-potools"
-  ))
 
-  src_files = list.files(file.path(dir, 'src'), pattern='\\.(?:c|cpp|h)')
-  src_contents = sapply(
-    src_files, simplify=FALSE,
-    function(f) readLines(file.path(dir, 'src', f), warn=FALSE)
-  )
+  src_files = list_src_files(dir)
+  src_contents = load_src_contents(src_files = src_files)
 
-  # TODO; tools::update_pkg_po fails on src _unless there are some translated strings_.
-  #   not sure exactly what to do about this.
   if (!length(src_files)) {
     if (verbose) message("Didn't find any src messages to translate; simply running tools::update_pkg_po, which will work for this package.")
     return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
@@ -168,11 +159,13 @@ initialize_translations = function(dir = '.', copyright, bugs, verbose=TRUE) {
       dir.create(file.path(dir, 'po'), showWarnings=FALSE)
       file.create(src_po)
     }
-    if (!uses_src_translation(src_contents)) {
+    if (uses_src_translation(src_contents)) {
+      if (verbose) message("Running tools::update_pkg_po")
+      return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
+    } else {
       if (verbose) message('No messages in src are translated yet. Wrap string literals with _() to mark them for translation, e.g. "Error! Try again!" becomes _("Error! Try again!")')
       return(NULL)
     }
-    return(tools::update_pkg_po(dir, copyright=copyright, bugs=bugs))
   }
 
   # could be improved, somewhat sloppy for now. a more robust version would treat the
@@ -221,6 +214,30 @@ initialize_translations = function(dir = '.', copyright, bugs, verbose=TRUE) {
     }
   }
 
-  if (vebose) message('Translation is now prepared -- please translate strings in the src directory by wrapping them with _(), e.g. "Error! Try again!" becomes _("Error! Try again!")')
+  if (verbose) message('Translation is now prepared -- please translate strings in the src directory by wrapping them with _(), e.g. "Error! Try again!" becomes _("Error! Try again!")')
   return(NULL)
+}
+
+#' Browse through the src directory and identify message strings (literal character arrays)
+#'   which are not yet translated. This is a bit fuzzy because we don't want to
+#'   translate _every_ character array (e.g. `"a"` is not to be translated), but
+#'   we don't (basically can't) know the full set of calls that could result in
+#'   something send to stdout. So we build a standard/default set of `calls` to look
+#'   for, while also allowing for customization
+find_untranslated_src_messages = function(
+  dir = '.', calls = c('error', 'warning', 'Rprintf'),
+  ask_to_translate = interactive()
+) {
+  #anyone please has an AST builder for C in R???
+  calls_re = sprintf('\\b(?:%s)\\(', paste(calls, collapse='|'))
+  src_contents = load_src_contents(dir = dir)
+  for (flines in src_contents) {
+    nlines = length(flines)
+    linei = 1L
+    while (linei <= nlines) {
+      if (grepl(calls_re, flines[linei])) {
+      }
+      linei = linei + 1L
+    }
+  }
 }

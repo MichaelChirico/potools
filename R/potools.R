@@ -127,7 +127,6 @@ load_po = function(pkg = '.') {
 
 }
 
-find_new_src_messages = function(pkg = '.', macro = '_') {
-# look for char arrays that aren't _()-processed
-}
-
+# find_new_src_messages = function(pkg = '.', macro = '_') {
+# # look for char arrays that aren't _()-processed
+# }

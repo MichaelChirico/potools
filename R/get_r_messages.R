@@ -1,8 +1,12 @@
-# Extended/customized version of tools::xgettext. Mainly:
+# Extended/adapted version of tools::xgettext. Mainly:
 #   (1) We want the results of both asCall=TRUE and asCall=FALSE together
 #   (2) We want to keep the caller (e.g. stop(), message(), etc.) as well
-#   (3) Handle deduplication at a package level
-get_r_messages <- function (dir, verbose = FALSE, asCall = TRUE) {
+# To pair the results, instead of the asCall=TRUE approach, use deparse()
+#   of any messaging input (to be shown to user later as an "in-context"
+#   version of the strings to translate). Things can be a little wonky,
+#   however, e.g. for how asCall=TRUE/FALSE handles domain=NA and
+#   nested strings
+get_r_messages <- function (dir, verbose = FALSE) {
   dir = file.path(dir, 'R')
   r_files <- list_r_files(dir)
   for (os in c("unix", "windows")) {
@@ -25,8 +29,7 @@ get_r_messages <- function (dir, verbose = FALSE, asCall = TRUE) {
           if (as.character(e[[1L]]) == "gettextf") {
             e <- match.call(gettextf, e)
             e <- e["fmt"] # just look at fmt arg
-          } else if (as.character(e[[1L]]) == "gettext" &&
-                     !is.null(names(e))) {
+          } else if (as.character(e[[1L]]) == "gettext" && !is.null(names(e))) {
             e <- e[names(e) != "domain"] # remove domain arg
           }
         } else if (identical(e[[1L]], quote(ngettext))) return()
@@ -39,12 +42,16 @@ get_r_messages <- function (dir, verbose = FALSE, asCall = TRUE) {
         e <- e[!names(e) %in% c("call.", "immediate.", "domain")]
       }
       # keep call name (e[[1L]]); fine to ignore in find_strings2
-      if (!suppress) call_strings <<- c(call_strings, as.character(e))
+      call_i <<- call_i + 1L
+      out[[f]][[call_i]] <<- character()
+      if (!suppress) names(out[[f]])[call_i] <<- deparse1(e)
       if (as.character(e[[1L]]) == "gettextf") {
         e <- match.call(gettextf, e)
         e <- e["fmt"]
       }
+      literal_strings <- character()
       for (i in seq_along(e)) find_string_literals(e[[i]], suppress)
+      out[[f]][[call_i]] <<- trimws(literal_strings)
     } else if (is.recursive(e)) {
       for (i in seq_along(e)) find_strings(e[[i]])
     }
@@ -52,16 +59,20 @@ get_r_messages <- function (dir, verbose = FALSE, asCall = TRUE) {
 
   for (f in r_files) {
     if (verbose) message(gettextf("parsing '%s'", f, domain="R-tools"), domain = NA)
-    call_strings = literal_strings = character()
+    call_i = 0L
     for (e in parse(file = f)) find_strings(e)
-    call_strings <- trimws(call_strings)
-    literal_strings <- trimws(literal_strings)
-    # NB: length(call_strings) > 0 is weaker than length(literal_strings) > 0
-    if (length(call_strings)) out[[f]] <- list(call_strings, literal_strings)
+    # drop calls without literal strings, e.g. stop(msg) (i.e. not stop("msg"))
+    out[[f]] = out[[f]][lengths(out[[f]]) > 0L]
   }
   out[lengths(out) > 0L]
 }
 
 
-# these functions all have a domain= argument
+# these functions all have a domain= argument. taken from the xgettext source, but could be
+#   refreshed with the following (skipping bindtextdomain):
+# for (obj in ls(BASE <- asNamespace('base'))) {
+#     if (!is.function(f <- get(obj, envir = BASE))) next
+#     if (is.null(f_args <- args(f))) next
+#     if (any(names(formals(f_args)) == 'domain')) cat(obj, '\n')
+# }
 MSG_FUNS <- c("warning", "stop", "message", "packageStartupMessage", "gettext", "gettextf")

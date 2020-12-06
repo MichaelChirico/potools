@@ -30,7 +30,7 @@ translate_package = function(
 
   stopifnot(
     'Only one package at a time' = length(dir) == 1L,
-    "'dir' must be a character" = !is.character(dir),
+    "'dir' must be a character" = is.character(dir),
     "'languages' must be a characer vector" = missing(languages) || !is.character(languages)
   )
   dir = normalizePath(dir)
@@ -71,13 +71,9 @@ translate_package = function(
   }
   if (!update) dir.create(podir, showWarnings = FALSE)
 
-  if (verbose) message('Getting messages (twice) from tools::xgettext...')
-  messages_calls = tools::xgettext(dir, verbose = verbose)
-  # asCall=FALSE shows what's written to the .pot file, but asCall=TRUE
-  #   looks more like what's actually in the file. Use both below.
-  # don't print the same messages twice...
-  messages_text = tools::xgettext(dir, verbose = FALSE, asCall = FALSE)
-  if (verbose) message('Getting plural messages from tools::nxgettext...')
+  if (verbose) message('Getting R-level messages...')
+  messages_text = get_r_messages(dir, verbose = verbose)
+  if (verbose) message('Getting R-level plural messages from tools::nxgettext...')
   plural_messages = tools::xngettext(dir, verbose = verbose)
 
   if (verbose) message('Running tools::update_pkg_po()')

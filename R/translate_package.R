@@ -72,9 +72,7 @@ translate_package = function(
   if (!update) dir.create(podir, showWarnings = FALSE)
 
   if (verbose) message('Getting R-level messages...')
-  messages_text = get_r_messages(dir, verbose = verbose)
-  if (verbose) message('Getting R-level plural messages from tools::nxgettext...')
-  plural_messages = tools::xngettext(dir, verbose = verbose)
+  message_data = get_r_messages(dir, verbose = verbose)
 
   if (verbose) message('Running tools::update_pkg_po()')
   tools::update_pkg_po(dir, package, version, copyright, bugs)
@@ -100,22 +98,37 @@ RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
   #   awk '{print "  ", $1, " = ,"}'
 # alternatively, a more complete list can be found on some websites:
 #   https://saimana.com/list-of-country-locale-code/
-KNOWN_LANGUAGES = c(
-   da  = "Danish (Dansk)",
-   de  = "German (Deutsch)",
-   en  = "English",
-   en_GB  = "British English",
-   es  = "Spanish (Español)",
-   fa  = "Farsi (فارسی)",
-   fr  = "French (Français)",
-   it  = "Italian (Italiano)",
-   ja  = "Japanese (日本語)",
-   ko  = "Korean (한국어)",
-   nn  = "Dutch (Nederlands)",
-   pl  = "Polish (Polski)",
-   pt_BR  = "Brazilian Portugese (Português Brasileiro)",
-   ru  = "Russian (Русский)",
-   tr  = "Turkish (Türkçe)",
-   zh_CN  = "Mainland Chinese (普通话)",
-   zh_TW  = "Taiwanese Chinese (台湾话)"
-)
+KNOWN_LANGUAGES = fread("
+language,full_name
+da,Danish (Dansk)
+de,German (Deutsch)
+en,English
+en_GB,British English
+es,Spanish (Español)
+fa,Farsi (فارسی)
+fr,French (Français)
+it,Italian (Italiano)
+ja,Japanese (日本語)
+ko,Korean (한국어)
+nn,Dutch (Nederlands)
+pl,Polish (Polski)
+pt_BR,Brazilian Portugese (Português Brasileiro)
+ru,Russian (Русский)
+tr,Turkish (Türkçe)
+zh_CN,Mainland Chinese (普通话)
+zh_TW,Taiwanese Chinese (台湾话)
+")
+
+PO_HEADER_TEMPLATE = 'msgid ""
+msgstr ""
+"Project-Id-Version: data.table 1.12.5\n"
+"POT-Creation-Date: 2020-07-17 14:38\n"
+"PO-Revision-Date: 2019-11-16 18:37+0800\n"
+"Last-Translator: Xianying Tan <shrektan@126.com>\n"
+"Language-Team: Mandarin\n"
+"Language: Mandarin\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+'

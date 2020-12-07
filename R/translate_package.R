@@ -83,7 +83,9 @@ translate_package = function(
   }
 
   for (language in languages) {
-
+    if (update && file.exists(lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language)))) {
+      old_message_data = get_po_messages(lang_file)
+    }
   }
 }
 
@@ -92,43 +94,44 @@ SYSTEM_REQUIREMENTS = c('xgettext', 'msgmerge', 'msgfmt', 'msginit', 'msgconv')
 RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 
 # take from those present in r-devel:
-  # ls -1 ~/svn/R-devel/src/library/*/po/*.po | \
-  #   awk -F"[./]" '{print $10}' | \
-  #   sed -r 's/^R(Gui)?-//g' | sort -u | \
-  #   awk '{print "  ", $1, " = ,"}'
+# ls -1 ~/svn/R-devel/src/library/*/po/*.po | \
+#   awk -F"[./]" '{print $10}' | \
+#   sed -r 's/^R(Gui)?-//g' | sort -u | \
+#   awk '{print "  ", $1, " = ,"}'
 # alternatively, a more complete list can be found on some websites:
 #   https://saimana.com/list-of-country-locale-code/
+# nplurals,plural info from https://l10n.gnome.org/teams/<language>
 KNOWN_LANGUAGES = fread("
-language,full_name
-da,Danish (Dansk)
-de,German (Deutsch)
-en,English
-en_GB,British English
-es,Spanish (Español)
-fa,Farsi (فارسی)
-fr,French (Français)
-it,Italian (Italiano)
-ja,Japanese (日本語)
-ko,Korean (한국어)
-nn,Dutch (Nederlands)
-pl,Polish (Polski)
-pt_BR,Brazilian Portugese (Português Brasileiro)
-ru,Russian (Русский)
-tr,Turkish (Türkçe)
-zh_CN,Mainland Chinese (普通话)
-zh_TW,Taiwanese Chinese (台湾话)
+language,full_name_eng,full_name_native,nplurals,plural
+da,Danish,Dansk
+de,German,Deutsch
+en,English,English
+en_GB,British English,British English
+es,Spanish,Español
+fa,Farsi,فارسی,
+fr,French,Français,2,(n>1)
+it,Italian,Italiano,2,(n!=1)
+ja,Japanese,日本語,1,0
+ko,Korean,한국어,1,0
+nn,Dutch,Nederlands,2,(n!=1)
+pl,Polish,Polski,3,(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
+pt_BR,Brazilian Portugese,Português Brasileiro,2,(n>1)
+ru,Russian,Русский,3,(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
+tr,Turkish,Türkçe,1,0
+zh_CN,Mainland Chinese,普通话,1,0
+zh_TW,Taiwanese Chinese,台湾话,1,0
 ")
 
 PO_HEADER_TEMPLATE = 'msgid ""
 msgstr ""
-"Project-Id-Version: data.table 1.12.5\n"
-"POT-Creation-Date: 2020-07-17 14:38\n"
-"PO-Revision-Date: 2019-11-16 18:37+0800\n"
-"Last-Translator: Xianying Tan <shrektan@126.com>\n"
-"Language-Team: Mandarin\n"
-"Language: Mandarin\n"
+"Project-Id-Version: %s %s\n"
+"POT-Creation-Date: %s\n"
+"PO-Revision-Date: %s\n"
+"Last-Translator: %s\n"
+"Language-Team: %s\n"
+"Language: %s\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=%d; plural=%s;\n"
 '

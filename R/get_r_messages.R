@@ -89,7 +89,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
     singular = rbindlist(singular, idcol='file'),
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
-  msg[ , is_repeat := duplicated(string)]
+  msg[ , is_repeat := duplicated(msgid)]
 }
 
 
@@ -106,7 +106,7 @@ unnest_call = function(data, plural) {
   nonempty = any(lengths(data))
   data.table(
     call = rep(names(data), lengths(data)),
-    msg_id = if (plural && nonempty) rep(1:2, length(data)),
-    string = if (nonempty) unlist(data, use.names = FALSE)
+    plural_index = if (plural && nonempty) rep(1:2, length(data)),
+    msgid = if (nonempty) unlist(data, use.names = FALSE)
   )
 }

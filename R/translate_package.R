@@ -83,8 +83,25 @@ translate_package = function(
   }
 
   for (language in languages) {
+    metadata = KNOWN_LANGUAGES[.(langua)]
     if (update && file.exists(lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language)))) {
+      if (verbose) {
+        message(domain=NA, gettextf(
+          'Found existing translations for %s (%s/%s) in %s',
+          language, metadata$full_name_eng, metadata$full_name_native, lang_file, domain='R-potools'
+        ))
+      }
       old_message_data = get_po_messages(lang_file)
+    } else {
+      if (verbose) {
+        message(domain=NA, gettextf(
+          'Beginning new translations for %s (%s/%s)',
+          language, metadata$full_name_eng, metadata$full_name_native, domain='R-potools'
+        ))
+      }
+      message_data[(!is_repeat), {
+
+      }]
     }
   }
 }
@@ -102,13 +119,13 @@ RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 #   https://saimana.com/list-of-country-locale-code/
 # nplurals,plural info from https://l10n.gnome.org/teams/<language>
 KNOWN_LANGUAGES = fread("
-language,full_name_eng,full_name_native,nplurals,plural
-da,Danish,Dansk
-de,German,Deutsch
-en,English,English
-en_GB,British English,British English
-es,Spanish,Español
-fa,Farsi,فارسی,
+code,full_name_eng,full_name_native,nplurals,plural
+da,Danish,Dansk,2,(n!=1)
+de,German,Deutsch,2,(n!=1)
+en,English,English,2,(n!=1)
+en_GB,British English,British English,2,(n!=1)
+es,Spanish,Español,2,(n!=1)
+fa,Farsi,فارسی,1,0
 fr,French,Français,2,(n>1)
 it,Italian,Italiano,2,(n!=1)
 ja,Japanese,日本語,1,0
@@ -120,7 +137,7 @@ ru,Russian,Русский,3,(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n
 tr,Turkish,Türkçe,1,0
 zh_CN,Mainland Chinese,普通话,1,0
 zh_TW,Taiwanese Chinese,台湾话,1,0
-")
+", key='code')
 
 PO_HEADER_TEMPLATE = 'msgid ""
 msgstr ""

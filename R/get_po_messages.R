@@ -25,32 +25,64 @@ get_po_messages <- function(po_file) {
     msgid = character(n_msg),
     msgstr = character(n_msg)
   )
-  type = rep("singular", n_msg)
-  msgid = character(length(msg_start))
-  msgstr = character(length(msg_start))
-  msg_j = 1L
+  # inherits is_msg_continuation
   find_msg_end <- function(start_idx) {
     # returns the first FALSE found. since tail(.,1) is FALSE,
     #   guaranteed to give a match.
     # -start_idx includes skipping start_idx itself, so we won't
     #   end at the first line
-    match(FALSE, tail(is_msg_continuation, -start_idx)) - 1L
+    start_idx + match(FALSE, tail(is_msg_continuation, -start_idx)) - 1L
   }
-  build_msg <- function(x, tag) {
-    paste(gsub(sprintf('^(?:%s )?"|"$', tag), '', x), collapse = '')
+  # inherits polines
+  build_msg <- function(start, end, tag) {
+    paste(gsub(sprintf('^(?:%s )?"|"$', tag), '', po_lines[start:end]), collapse = '')
   }
+
+  msg_j = 1L
   while (msg_j <= length(msg_start)) {
     start = msg_start[msg_j]
     end = find_msg_end(start)
-    po_data[msg_j, msgid := build_msg(po_lines[start:end], 'msgid')]
+    set(po_data, msg_j, 'msgid', build_msg(start, end, 'msgid'))
 
     start = end + 1L
     if (grepl("^msgid_plural", po_lines[start])) {
+      browser()
+      set(po_data, msg_j, c('type', 'plural_index'), list('plural', 1L))
 
+      end = find_msg_end(start)
+      base_msg = build_msg(start, end, 'msgid_plural')
+      set(
+        po_data, msg_j + 1L,
+        c('type', 'plural_index', 'msgid'),
+        list('plural', 2L, base_msg)
+      )
+
+      start = end + 1L
+      plural_idx = 1L
+      while (start <= po_length && grepl('^msgstr\\[', po_lines[start])) {
+        end = find_msg_end(start)
+        set(
+          po_data, msg_j + plural_idx - 1L,
+          c('type', 'plural_index', 'msgstr'),
+          list('plural', plural_idx, build_msg(start, end, 'msgstr\\[\\d+\\]'))
+        )
+        # to ensure the msgid for a given plural_idx can be tracked back to the
+        #   same original message.
+        # TODO: this is starting to feel like a bad way to store plural messages.
+        #   maybe they should be kept in a separate table entirely? storing
+        #   plural msgid as a list column (ditto msgstr) feels more natural.
+        if (plural_idx > 2L) {
+          set(po_data, msg_j + plural_idx - 1L, 'msgid', base_msg)
+        }
+        start = end + 1L
+        plural_idx = plural_idx + 1L
+      }
+      msg_j = msg_j + max(2L, plural_idx - 1L)
     } else { # msgstr (not plural)
       end = find_msg_end(start)
-      po_data[msg_j, msgstr := build_msg(po_lines[start:end], 'msgstr')]
+      po_data[msg_j, 'msgstr' := build_msg(start, end, 'msgstr')]
       msg_j = msg_j + 1L
     }
   }
+  po_data[]
 }

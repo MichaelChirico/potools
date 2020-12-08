@@ -89,7 +89,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
     singular = rbindlist(singular, idcol='file'),
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
-  msg[ , is_repeat := duplicated(msgid)]
+  msg[ , 'is_repeat' := duplicated(msgid)][]
 }
 
 

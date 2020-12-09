@@ -88,7 +88,7 @@ translate_package = function(
   }
 
   for (language in languages) {
-    metadata = KNOWN_LANGUAGES[.(langua)]
+    metadata = KNOWN_LANGUAGES[.(language)]
     if (update && file.exists(lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language)))) {
       if (verbose) {
         message(domain=NA, gettextf(
@@ -104,25 +104,39 @@ translate_package = function(
           language, metadata$full_name_eng, metadata$full_name_native, domain='R-potools'
         ))
       }
-      quit_str = gettext("(To quit translating, press 'Esc'; progress is saved)", domain="R-potools")
+      message("(To quit translating, press 'Esc'; progress will be saved)")
+      if ('msgstr' %chin% names(message_data)) message_data[ , 'msgstr' := NULL]
       # go row-wise to facilitate quitting without losing progress
+      # TODO: incorporate existing translations
+      # TODO: suggest gettextf() call for stop("a", i, "message")
+      # TODO: deal with is_repeat
+      # TODO: output to .po
       for (ii in seq_len(nrow(message_data))) {
         if (message_data$type[ii] == 'plural') {
           translations <- character(metadata$nplurals)
-          for (jj in seq_len(metadata$nplurals)) {
+          for (jj in seq_len(metadata$nplurals)-1L) {
             translation[jj] <- readline(gettextf(
-              "Translating plural message %s inside call %s in %s.\nHow would you translate this message into %s %s?"
+              'File: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
+              white(message_data$file[ii]),
+              green(message_data$call[ii]),
+              red(message_data$msgid[ii]),
+              blue(metadata$full_name_eng),
+              yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj), range]),
+              domain = "R-potools"
             ))
           }
+        } else {
+          translation <- readline(gettextf(
+            'File: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',
+            white(message_data$file[ii]),
+            green(message_data$call[ii]),
+            red(message_data$msgid[ii]),
+            blue(metadata$full_name_eng),
+            domain = "R-potools"
+          ))
+          set(message_data, ii, 'msgstr', translation)
         }
       }
-      message_data[ , by = names(message_data), {
-        msgstr := if (.BY$type == 'plural') {
-          readline(sprintf("hi"))
-        } else {
-          readline("bye")
-        }
-      }]
     }
   }
 }
@@ -166,15 +180,36 @@ zh_TW,Taiwanese Chinese,台湾话,1,0
 #   translate that to something human-legible here.
 # NB: 'plural' is 0-based (like in the .po file), but
 #   'plural_index' is 1-based (to match the above R-level code).
+# NB: sep="#"... maybe a bad choice... but keeps the lines to 120
+#   characters and doesn't cause issues from sep=',' with , in text
 PLURAL_RANGE_STRINGS = fread("
-plural,plural_index,range
-0,0,independently of n
-(n!=1),0,when n = 1
-(n!=1),1,when n is not 1
-(n>1),0,when n is 0 or 1
-(n>1),1,when n is at bigger than 1
-(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2),0,
-")
+plural#plural_index#range
+0#0#independently of n
+(n!=1)#0#when n = 1
+(n!=1)#1#when n is not 1
+(n>1)#0#when n is 0 or 1
+(n>1)#1#when n is at bigger than 1
+(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#0#when n = 1
+(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#1#when n = 2-4, 22-24, 32-34, ...
+(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#2#when n = 0, 5-21, 25-31, 35-41, ...
+(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#0#when n = 1, 21, 31, 41, ...
+(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#1#when n = 2-4, 22-24, 32-34, ...
+(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#2#when n = 0, 5-20, 25-30, 35-40, ...
+", sep='#', key=c('plural', 'plural_index'))
+
+# just here to generate translations
+invisible({
+  gettext("independently of n", domain="R-potools")
+  gettext("when n = 1", domain="R-potools")
+  gettext("when n is not 1", domain="R-potools")
+  gettext("when n is 0 or 1", domain="R-potools")
+  gettext("when n is at bigger than 1", domain="R-potools")
+  gettext("when n = 2-4, 22-24, 32-34, ...", domain="R-potools")
+  gettext("when n = 0, 5-21, 25-31, 35-41, ...", domain="R-potools")
+  gettext("when n = 1, 21, 31, 41, ...", domain="R-potools")
+  gettext("when n = 1, 21, 31, 41, ...", domain="R-potools")
+  gettext("when n = 0, 5-20, 25-30, 35-40, ...", domain="R-potools")
+})
 
 PO_HEADER_TEMPLATE = 'msgid ""
 msgstr ""

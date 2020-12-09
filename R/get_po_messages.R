@@ -47,24 +47,24 @@ get_po_messages <- function(po_file) {
     start = end + 1L
     if (grepl("^msgid_plural", po_lines[start])) {
       browser()
-      set(po_data, msg_j, c('type', 'plural_index'), list('plural', 1L))
+      set(po_data, msg_j, c('type', 'plural_index'), list('plural', 0L))
 
       end = find_msg_end(start)
       base_msg = build_msg(start, end, 'msgid_plural')
       set(
         po_data, msg_j + 1L,
         c('type', 'plural_index', 'msgid'),
-        list('plural', 2L, base_msg)
+        list('plural', 1L, base_msg)
       )
 
       start = end + 1L
-      plural_idx = 1L
+      plural_index = 0L
       while (start <= po_length && grepl('^msgstr\\[', po_lines[start])) {
         end = find_msg_end(start)
         set(
-          po_data, msg_j + plural_idx - 1L,
+          po_data, msg_j + plural_idx,
           c('type', 'plural_index', 'msgstr'),
-          list('plural', plural_idx, build_msg(start, end, 'msgstr\\[\\d+\\]'))
+          list('plural', plural_index, build_msg(start, end, 'msgstr\\[\\d+\\]'))
         )
         # to ensure the msgid for a given plural_idx can be tracked back to the
         #   same original message.

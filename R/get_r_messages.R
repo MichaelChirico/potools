@@ -106,7 +106,7 @@ unnest_call = function(data, plural) {
   nonempty = any(lengths(data))
   data.table(
     call = rep(names(data), lengths(data)),
-    plural_index = if (plural && nonempty) rep(1:2, length(data)),
+    plural_index = if (plural && nonempty) rep(0:1, length(data)),
     msgid = if (nonempty) unlist(data, use.names = FALSE)
   )
 }

@@ -74,6 +74,11 @@ translate_package = function(
   if (verbose) message('Getting R-level messages...')
   message_data = get_r_messages(dir, verbose = verbose)
 
+  if (!nrow(message_data)) {
+    if (verbose) message('No messages to translate; finishing')
+    return(invisible())
+  }
+
   if (verbose) message('Running tools::update_pkg_po()')
   tools::update_pkg_po(dir, package, version, copyright, bugs)
 
@@ -99,8 +104,24 @@ translate_package = function(
           language, metadata$full_name_eng, metadata$full_name_native, domain='R-potools'
         ))
       }
-      message_data[(!is_repeat), {
-
+      quit_str = gettext("(To quit translating, press 'Esc'; progress is saved)", domain="R-potools")
+      # go row-wise to facilitate quitting without losing progress
+      for (ii in seq_len(nrow(message_data))) {
+        if (message_data$type[ii] == 'plural') {
+          translations <- character(metadata$nplurals)
+          for (jj in seq_len(metadata$nplurals)) {
+            translation[jj] <- readline(gettextf(
+              "Translating plural message %s inside call %s in %s.\nHow would you translate this message into %s %s?"
+            ))
+          }
+        }
+      }
+      message_data[ , by = names(message_data), {
+        msgstr := if (.BY$type == 'plural') {
+          readline(sprintf("hi"))
+        } else {
+          readline("bye")
+        }
       }]
     }
   }
@@ -118,6 +139,8 @@ RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 # alternatively, a more complete list can be found on some websites:
 #   https://saimana.com/list-of-country-locale-code/
 # nplurals,plural info from https://l10n.gnome.org/teams/<language>
+# NB: looks may be deceiving for right-to-left scripts (e.g. Farsi), where the
+#   displayed below might not be in the order it is parsed.
 KNOWN_LANGUAGES = fread("
 code,full_name_eng,full_name_native,nplurals,plural
 da,Danish,Dansk,2,(n!=1)
@@ -133,11 +156,25 @@ ko,Korean,한국어,1,0
 nn,Dutch,Nederlands,2,(n!=1)
 pl,Polish,Polski,3,(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
 pt_BR,Brazilian Portugese,Português Brasileiro,2,(n>1)
-ru,Russian,Русский,3,(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
+ru,Russian,Русский,3,(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2)
 tr,Turkish,Türkçe,1,0
 zh_CN,Mainland Chinese,普通话,1,0
 zh_TW,Taiwanese Chinese,台湾话,1,0
 ", key='code')
+
+# the 'plural' column above is designed for computers;
+#   translate that to something human-legible here.
+# NB: 'plural' is 0-based (like in the .po file), but
+#   'plural_index' is 1-based (to match the above R-level code).
+PLURAL_RANGE_STRINGS = fread("
+plural,plural_index,range
+0,0,independently of n
+(n!=1),0,when n = 1
+(n!=1),1,when n is not 1
+(n>1),0,when n is 0 or 1
+(n>1),1,when n is at bigger than 1
+(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2),0,
+")
 
 PO_HEADER_TEMPLATE = 'msgid ""
 msgstr ""

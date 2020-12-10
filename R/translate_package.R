@@ -113,9 +113,9 @@ translate_package = function(
       # TODO: output to .po
       for (ii in seq_len(nrow(message_data))) {
         if (message_data$type[ii] == 'plural') {
-          translations <- character(metadata$nplurals)
-          for (jj in seq_len(metadata$nplurals)-1L) {
-            translation[jj] <- readline(gettextf(
+          translation <- vector('list', metadata$nplurals)
+          for (jj in seq_len(metadata$nplurals)) {
+            translation[[jj]] <- readline(gettextf(
               'File: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
               white(message_data$file[ii]),
               green(message_data$call[ii]),
@@ -125,6 +125,7 @@ translate_package = function(
               domain = "R-potools"
             ))
           }
+          set(message_data, ii, 'plural_msgstr', list(translation))
         } else {
           translation <- readline(gettextf(
             'File: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',

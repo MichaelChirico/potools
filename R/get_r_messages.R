@@ -89,7 +89,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
     plural = rbindlist(plural, idcol='file'),
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
-  msg[ , 'is_repeat' := duplicated(msgid)][]
+  msg[ , 'is_repeat' := type == 'single' & duplicated(msgid)][]
 }
 
 
@@ -104,9 +104,10 @@ MSG_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext", "
 
 unnest_call = function(data, plural) {
   nonempty = any(lengths(data))
+  calls = names(data)
   names(data) = NULL
   data.table(
-    call = if (plural) names(data) else rep(names(data), lengths(data)),
+    call = if (plural) calls else rep(calls, lengths(data)),
     msgid = if (nonempty && !plural) unlist(data),
     plural_msgid = if (nonempty && plural) data
   )

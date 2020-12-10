@@ -14,7 +14,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
     if (dir.exists(os_dir)) rfiles = c(r_files, list_r_files(os_dir))
   }
   singular = plural = vector("list", length = length(r_files))
-  names(singular) = r_files
+  names(singular) = names(plural) = r_files
 
   # inherits singular_i, s_data
   find_singular_strings = function(e) {
@@ -64,7 +64,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
       suppress = do_suppress(e)
       if (!suppress && is.character(e[["msg1"]]) && is.character(e[["msg2"]])) {
         plural_i <<- plural_i + 1L
-        p_data[[plural_i]] <<- c(e[["msg1"]], e[["msg2"]])
+        p_data[[plural_i]] <<- list(e[["msg1"]], e[["msg2"]])
         names(p_data)[plural_i] <<- deparse1(e)
       }
     }
@@ -85,8 +85,8 @@ get_r_messages <- function (dir, verbose = FALSE) {
     plural[[f]] = unnest_call(p_data, plural=TRUE)
   }
   msg = rbind(
-    plural = rbindlist(plural, idcol='file'),
     singular = rbindlist(singular, idcol='file'),
+    plural = rbindlist(plural, idcol='file'),
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
   msg[ , 'is_repeat' := duplicated(msgid)][]
@@ -104,9 +104,10 @@ MSG_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext", "
 
 unnest_call = function(data, plural) {
   nonempty = any(lengths(data))
+  names(data) = NULL
   data.table(
-    call = rep(names(data), lengths(data)),
-    plural_index = if (plural && nonempty) rep(0:1, length(data)),
-    msgid = if (nonempty) unlist(data, use.names = FALSE)
+    call = if (plural) names(data) else rep(names(data), lengths(data)),
+    msgid = if (nonempty && !plural) unlist(data),
+    plural_msgid = if (nonempty && plural) data
   )
 }

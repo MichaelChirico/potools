@@ -7,6 +7,10 @@ get_po_messages <- function(po_file) {
   po_lines = readLines(po_file)
   po_length = length(po_lines)
 
+  # TODO: need a new column, fuzzy. Two cases:
+  #  (1) fuzzy guesses -- #, fuzzy appears in the line before msgid, msgid not commented
+  #  (2) deprecations -- #, fuzzy appears in the line before #~ msgid
+
   # number of msgstr corresponding to each msgid_plural depends on
   #   the language (e.g. just one for Chinese, but 3 for Polish).
   # the number of rows in the output is:

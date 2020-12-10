@@ -97,46 +97,55 @@ translate_package = function(
         ))
       }
       old_message_data = get_po_messages(lang_file)
-    } else {
-      if (verbose) {
-        message(domain=NA, gettextf(
-          'Beginning new translations for %s (%s/%s)',
-          language, metadata$full_name_eng, metadata$full_name_native, domain='R-potools'
-        ))
+      message_data[old_message_data, on = c('type', 'msgid'), msgstr := i.msgstr]
+      # can't join on lists :\
+      if (!all(vapply(old_message_data$plural_msgstr, is.null, logical(1L)))) {
+        message_data[ , 'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')]
+        old_message_data[ , 'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')]
+        message_data[old_message_data, on = c('type', 'join_id'), plural_msgstr := i.plural_msgstr]
+
+        message_data[ , 'join_id' := NULL]
+        old_message_data[ , 'join_id' := NULL]
       }
-      message("(To quit translating, press 'Esc'; progress will be saved)")
-      if ('msgstr' %chin% names(message_data)) message_data[ , 'msgstr' := NULL]
-      # go row-wise to facilitate quitting without losing progress
-      # TODO: incorporate existing translations
-      # TODO: suggest gettextf() call for stop("a", i, "message")
-      # TODO: deal with is_repeat
-      # TODO: output to .po
-      for (ii in seq_len(nrow(message_data))) {
-        if (message_data$type[ii] == 'plural') {
-          translation <- vector('list', metadata$nplurals)
-          for (jj in seq_len(metadata$nplurals)) {
-            translation[[jj]] <- readline(gettextf(
-              'File: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
-              white(message_data$file[ii]),
-              green(message_data$call[ii]),
-              red(message_data$msgid[ii]),
-              blue(metadata$full_name_eng),
-              yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj), range]),
-              domain = "R-potools"
-            ))
-          }
-          set(message_data, ii, 'plural_msgstr', list(translation))
-        } else {
-          translation <- readline(gettextf(
-            'File: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',
+    }
+    if (verbose) {
+      message(domain=NA, gettextf(
+        'Beginning new translations for %s (%s/%s)',
+        language, metadata$full_name_eng, metadata$full_name_native, domain='R-potools'
+      ))
+    }
+    message("(To quit translating, press 'Esc'; progress will be saved)")
+    if ('msgstr' %chin% names(message_data)) message_data[ , 'msgstr' := NULL]
+    # go row-wise to facilitate quitting without losing progress
+    # TODO: incorporate existing translations
+    # TODO: suggest gettextf() call for stop("a", i, "message")
+    # TODO: deal with is_repeat
+    # TODO: output to .po
+    for (ii in seq_len(nrow(message_data))) {
+      if (message_data$type[ii] == 'plural') {
+        translation <- vector('list', metadata$nplurals)
+        for (jj in seq_len(metadata$nplurals)) {
+          translation[[jj]] <- readline(gettextf(
+            'File: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
             white(message_data$file[ii]),
             green(message_data$call[ii]),
             red(message_data$msgid[ii]),
             blue(metadata$full_name_eng),
+            yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj), range]),
             domain = "R-potools"
           ))
-          set(message_data, ii, 'msgstr', translation)
         }
+        set(message_data, ii, 'plural_msgstr', list(translation))
+      } else {
+        translation <- readline(gettextf(
+          'File: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',
+          white(message_data$file[ii]),
+          green(message_data$call[ii]),
+          red(message_data$msgid[ii]),
+          blue(metadata$full_name_eng),
+          domain = "R-potools"
+        ))
+        set(message_data, ii, 'msgstr', translation)
       }
     }
   }

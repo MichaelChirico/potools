@@ -1,5 +1,5 @@
 translate_package = function(
-  dir='.', languages, patch_calls=TRUE,
+  dir='.', languages,
   copyright, bugs, verbose=FALSE,
 ) {
   if (!interactive()) {

@@ -2,3 +2,5 @@ importFrom(data.table, data.table, fread, rbindlist)
 importFrom(data.table, `:=`)
 
 importFrom(crayon, white, green, red, blue, yellow)
+
+export(translate_package)

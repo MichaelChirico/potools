@@ -102,19 +102,30 @@ translate_package = function(
       if (!all(vapply(old_message_data$plural_msgstr, is.null, logical(1L)))) {
         message_data[ , 'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')]
         old_message_data[ , 'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')]
-        message_data[old_message_data, on = c('type', 'join_id'), plural_msgstr := i.plural_msgstr]
+        message_data[old_message_data[type == 'plural'], on = c('type', 'join_id'), plural_msgstr := i.plural_msgstr]
 
         message_data[ , 'join_id' := NULL]
         old_message_data[ , 'join_id' := NULL]
       }
     }
+    new_idx = message_data[
+      (type == 'singular' & is.na(msgstr)) |
+        (type == 'plural' & !lengths(plural_msgstr)),
+      which = TRUE
+    ]
+    if (!length(new_idx)) {
+      if (verbose) message(domain=NA, gettextf(
+        'Translations for %s up to date! Skipping.', language, domain='R-potools'
+      ))
+      next
+    }
     if (verbose) {
       message(domain=NA, gettextf(
-        'Beginning new translations for %s (%s/%s)',
-        language, metadata$full_name_eng, metadata$full_name_native, domain='R-potools'
+        'Beginning new translations for %s (%s/%s); found %d untranslated messages',
+        language, metadata$full_name_eng, metadata$full_name_native, length(new_idx), domain='R-potools'
       ))
+      message("(To quit translating, press 'Esc'; progress will be saved)")
     }
-    message("(To quit translating, press 'Esc'; progress will be saved)")
     if ('msgstr' %chin% names(message_data)) message_data[ , 'msgstr' := NULL]
     # go row-wise to facilitate quitting without losing progress
     # TODO: incorporate existing translations

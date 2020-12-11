@@ -105,5 +105,12 @@ get_po_messages <- function(po_file) {
     plural_i = plural_i + 1L
     msg_j = msg_j + 1L
   }
+
+  # do here to vectorize over messages
+  po_data[type == 'singular', c('msgid', 'msgstr') := .(unescape_str(msgid), unescape_str(msgstr))]
+  po_data[type == 'plural', `:=`(
+    plural_msgid = lapply(plural_msgid, unescape_str),
+    plural_msgstr = lapply(plural_msgstr, unescape_str)
+  )]
   po_data[]
 }

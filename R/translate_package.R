@@ -1,6 +1,6 @@
 translate_package = function(
   dir='.', languages,
-  copyright, bugs, verbose=FALSE,
+  copyright, bugs, verbose=FALSE
 ) {
   if (!interactive()) {
     stop('This is an interactive function. For non-interactive use cases, start from tools::update_pkg_po.')
@@ -10,7 +10,7 @@ translate_package = function(
   stopifnot(
     'Only one package at a time' = length(dir) == 1L,
     "'dir' must be a character" = is.character(dir),
-    "'languages' must be a characer vector" = missing(languages) || !is.character(languages)
+    "'languages' must be a characer vector" = missing(languages) || is.character(languages)
   )
 
   dir = get_directory(dir)
@@ -40,18 +40,18 @@ translate_package = function(
   if (verbose) message('Getting R-level messages...')
   message_data = get_r_messages(dir, verbose = verbose)
   message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
-               ][ , {
-                 if (.N > 0L && verbose) message(domain=NA, gettextf(
-                   'Found %d messaging calls that might be better suited to use gettextf for ease of translation:',
-                   uniqueN(call), domain='R-potools'
-                 ))
-                 .SD
-               }][ , by = .(file, call), {
-                 cat(gettextf(
-                   '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
-                   red(.BY$call), white(.BY$file), blue(build_gettextf_call(.BY$call, package))
-                 ))
-               }]
+  ][ , {
+    if (.N > 0L && verbose) message(domain=NA, gettextf(
+      'Found %d messaging calls that might be better suited to use gettextf for ease of translation:',
+      uniqueN(call), domain='R-potools'
+    ))
+    .SD
+  }][ , by = .(file, call), {
+    cat(gettextf(
+      '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
+      red(.BY$call), white(.BY$file), blue(build_gettextf_call(.BY$call, package))
+    ))
+  }]
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')
@@ -92,12 +92,14 @@ translate_package = function(
         message_data[ , 'join_id' := NULL]
         old_message_data[ , 'join_id' := NULL]
       }
+      new_idx = message_data[
+        (type == 'singular' & is.na(msgstr)) |
+          (type == 'plural' & !lengths(plural_msgstr)),
+        which = TRUE
+      ]
+    } else {
+      new_idx = seq_len(nrow(message_data))
     }
-    new_idx = message_data[
-      (type == 'singular' & is.na(msgstr)) |
-        (type == 'plural' & !lengths(plural_msgstr)),
-      which = TRUE
-    ]
     if (!length(new_idx)) {
       if (verbose) message(domain=NA, gettextf(
         'Translations for %s up to date! Skipping.', language, domain='R-potools'
@@ -112,6 +114,9 @@ translate_package = function(
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
     # go row-wise to facilitate quitting without losing progress
+    # TODO: check message templates for consistency
+    # TODO: default value is to set msgstr=msgid
+    # TODO: need more spacing between message prompts
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation <- vector('list', metadata$nplurals)
@@ -120,7 +125,7 @@ translate_package = function(
             'File: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
             white(message_data$file[ii]),
             green(message_data$call[ii]),
-            red(message_data$msgid[ii]),
+            red(message_data$plural_msgid[ii][[1L]]),
             blue(metadata$full_name_eng),
             yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj), range]),
             domain = "R-potools"

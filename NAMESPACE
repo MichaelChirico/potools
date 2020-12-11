@@ -1,5 +1,5 @@
-importFrom(data.table, data.table, fread, rbindlist)
-importFrom(data.table, `:=`)
+importFrom(data.table, data.table, fread, rbindlist, set)
+importFrom(data.table, `:=`, "%chin%")
 
 importFrom(crayon, white, green, red, blue, yellow)
 

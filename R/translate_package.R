@@ -112,13 +112,11 @@ translate_package = function(
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
     # go row-wise to facilitate quitting without losing progress
-    # TODO: deal with is_repeat
-    # TODO: output to .po
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation <- vector('list', metadata$nplurals)
         for (jj in seq_len(metadata$nplurals)) {
-          translation[[jj]] <- readline(gettextf(
+          translation[[jj]] = readline(gettextf(
             'File: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
             white(message_data$file[ii]),
             green(message_data$call[ii]),
@@ -129,8 +127,8 @@ translate_package = function(
           ))
         }
         set(message_data, ii, 'plural_msgstr', list(translation))
-      } else {
-        translation <- readline(gettextf(
+      } else if (!message_data$is_repeat[ii]) {
+        translation = readline(gettextf(
           'File: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',
           white(message_data$file[ii]),
           green(message_data$call[ii]),
@@ -141,7 +139,15 @@ translate_package = function(
         set(message_data, ii, 'msgstr', translation)
       }
     }
+
+    author = readline('Thanks! Who should be credited with these translations?')
+    email = readline('And what is their email?')
+    author = sprintf("%s <%s>", author, email)
+    write_po_file(message_data, lang_file, package, version, author, metadata)
   }
+
+  if (verbose) message('Re-running tools::update_pkg_po() to update .mo files')
+  tools::update_pkg_po(dir, package, version, copyright, bugs)
 }
 
 # take from those present in r-devel:
@@ -209,17 +215,3 @@ invisible({
   gettext("when n = 1, 21, 31, 41, ...", domain="R-potools")
   gettext("when n = 0, 5-20, 25-30, 35-40, ...", domain="R-potools")
 })
-
-PO_HEADER_TEMPLATE = 'msgid ""
-msgstr ""
-"Project-Id-Version: %s %s\n"
-"POT-Creation-Date: %s\n"
-"PO-Revision-Date: %s\n"
-"Last-Translator: %s\n"
-"Language-Team: %s\n"
-"Language: %s\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=%d; plural=%s;\n"
-'

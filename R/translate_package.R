@@ -48,8 +48,8 @@ translate_package = function(
                  .SD
                }][ , by = .(file, call), {
                  cat(gettextf(
-                   'Multi-string call:\n%s\n< File:%s >\nPotential replacement:\n%s\n',
-                   red(.BY$call), white(.BY$file), blue()
+                   '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
+                   red(.BY$call), white(.BY$file), blue(build_gettextf_call(.BY$call, package))
                  ))
                }]
 
@@ -112,7 +112,6 @@ translate_package = function(
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
     # go row-wise to facilitate quitting without losing progress
-    # TODO: suggest gettextf() call for stop("a", i, "message")
     # TODO: deal with is_repeat
     # TODO: output to .po
     for (ii in new_idx) {

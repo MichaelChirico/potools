@@ -14,7 +14,7 @@ build_gettextf_call = function(txt, package) {
     '%s(domain=NA, gettextf("%s", %s, domain="R-%s"))',
     as.character(e[[1L]]),
     paste(string, collapse=''),
-    toString(vapply(lang_idx, function(ii) deparse(e[[ii + 1L]]), character(1L))),
+    toString(vapply(lang_idx, function(ii) agg_deparse(e[[ii + 1L]]), character(1L))),
     package
   )
 }

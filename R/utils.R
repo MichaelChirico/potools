@@ -79,3 +79,6 @@ unescape_str = function(x) {
   x = gsub('(?:^|[^\\])[\\]"', '"', x, fixed = TRUE)
   x
 }
+
+# ensure length-1 output of deparse
+agg_deparse = function(x) paste(deparse(x), collapse = ' ')

@@ -42,7 +42,7 @@ msgstr ""
 "Plural-Forms: nplurals=%d; plural=%s;\n"
 '
 
-# TODO: apparenlty not working:
+# TODO: apparently not working:
 #   R-zh_CN:po/R-zh_CN.po:4: end-of-line within string
 # po/R-zh_CN.po:5: end-of-line within string
 # po/R-zh_CN.po:6: end-of-line within string

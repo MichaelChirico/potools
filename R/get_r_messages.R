@@ -89,12 +89,12 @@ get_r_messages <- function (dir, verbose = FALSE) {
     plural = rbindlist(plural, idcol='file'),
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
-  msg[ , 'is_repeat' := type == 'single' & duplicated(msgid)][]
+  msg[ , 'is_repeat' := type == 'singular' & duplicated(msgid)]
 }
 
 
 # these functions all have a domain= argument. taken from the xgettext source, but could be
-#   refreshed with the following (skipping bindtextdomain):
+#   refreshed with the following (skipping bindtextdomain and .makeMessage):
 # for (obj in ls(BASE <- asNamespace('base'))) {
 #     if (!is.function(f <- get(obj, envir = BASE))) next
 #     if (is.null(f_args <- args(f))) next
@@ -102,13 +102,15 @@ get_r_messages <- function (dir, verbose = FALSE) {
 # }
 MSG_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext", "gettextf")
 
+# be sure to apply encodeString, which converts "\n" to \\n as required when
+#   (potentially) writing this out to .po later
 unnest_call = function(data, plural) {
   nonempty = any(lengths(data))
   calls = names(data)
   names(data) = NULL
   data.table(
     call = if (plural) calls else rep(calls, lengths(data)),
-    msgid = if (nonempty && !plural) unlist(data),
-    plural_msgid = if (nonempty && plural) data
+    msgid = if (nonempty && !plural) encodeString(unlist(data)),
+    plural_msgid = if (nonempty && plural) lapply(data, encodeString)
   )
 }

@@ -39,19 +39,25 @@ translate_package = function(
 
   if (verbose) message('Getting R-level messages...')
   message_data = get_r_messages(dir, verbose = verbose)
-  message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
-  ][ , {
-    if (.N > 0L && verbose) message(domain=NA, gettextf(
-      'Found %d messaging calls that might be better suited to use gettextf for ease of translation:',
-      uniqueN(call), domain='R-potools'
-    ))
-    .SD
-  }][ , by = .(file, call), {
-    cat(gettextf(
-      '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
-      red(.BY$call), white(.BY$file), blue(build_gettextf_call(.BY$call, package))
-    ))
-  }]
+
+  # check for calls like stop("a", i, "b", j) that are better suited for
+  #   translation as calls like
+  exit =
+    message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
+                 ][ , {
+                   if (.N > 0L && verbose) message(domain=NA, gettextf(
+                     'Found %d messaging calls that might be better suited to use gettextf for ease of translation:',
+                     uniqueN(call), domain='R-potools'
+                   ))
+                   .SD
+                 }][ , by = .(file, call), {
+                   cat(gettextf(
+                     '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
+                     red(.BY$call), white(.BY$file), blue(build_gettextf_call(.BY$call, package))
+                   ))
+                   TRUE
+                 }][ , if (.N > 0L) readline('Exit now to repair any of these? [Y/n]') else 'n']
+  if (!nzchar(exit) || tolower(exit) %chin% c('y', 'yes')) return(invisible())
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')
@@ -82,7 +88,7 @@ translate_package = function(
         ))
       }
       old_message_data = get_po_messages(lang_file)
-      message_data[old_message_data, on = c('type', 'msgid'), msgstr := i.msgstr]
+      message_data[old_message_data[type == 'singular'], on = c('type', 'msgid'), msgstr := i.msgstr]
       # can't join on lists :\
       if (!all(vapply(old_message_data$plural_msgstr, is.null, logical(1L)))) {
         message_data[ , 'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')]

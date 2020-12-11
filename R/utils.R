@@ -64,21 +64,5 @@ do_suppress = function(e) {
   !is.null(domain) && !is.name(domain) && is.na(domain)
 }
 
-# newlines in an R string, e.g. "\n" get printed literally in the .po file (c.f.
-#   difference b/w print("\n") and cat("\n")), so right now, "\n" is "over-escaped" --
-#   this step aims to "un-escape" to match the original R message. I'm not 100% sure this
-#   is always accurate yet. But I did check base for similar escapes:
-#   grep -Er '(^|[^\\])\\[^nt"\\]' ~/svn/R-devel/src/library/*/po/*.pot
-# NB This regex is confusing because of multiple layers of string escaping :)
-unescape_str = function(x) {
-  # order matters: consider "\\n"
-  x = gsub('\\\\', '\\', x, fixed = TRUE)
-  # now that backslashes are unescaped, if we see \\n, it's not a newline
-  x = gsub("(?:^|[^\\])[\\]n", "\n", x, fixed = TRUE)
-  x = gsub("(?:^|[^\\])[\\]t", "\t", x, fixed = TRUE)
-  x = gsub('(?:^|[^\\])[\\]"', '"', x, fixed = TRUE)
-  x
-}
-
 # ensure length-1 output of deparse
 agg_deparse = function(x) paste(deparse(x), collapse = ' ')

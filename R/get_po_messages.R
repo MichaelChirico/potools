@@ -7,6 +7,16 @@ get_po_messages <- function(po_file) {
   po_lines = readLines(po_file)
   po_length = length(po_lines)
 
+  if (po_length == 0L) {
+    return(data.table(
+      type = character(),
+      msgid = character(),
+      msgstr = character(),
+      plural_msgid = vector('list'),
+      plural_msgstr = vector('list')
+    ))
+  }
+
   # TODO: need a new column, fuzzy. Two cases:
   #  (1) fuzzy guesses -- #, fuzzy appears in the line before msgid, msgid not commented
   #  (2) deprecations -- #, fuzzy appears in the line before #~ msgid
@@ -30,6 +40,7 @@ get_po_messages <- function(po_file) {
   msgid_start = setdiff(msgid_start, plural_msgid_start)
   n_singular = length(msgid_start)
   n_plural = length(plural_msgid_start)
+  n_plural_msgstr = length(plural_msgstr_start)
 
   if (n_singular != length(msgstr_start)) {
     stop(domain=NA, gettextf(
@@ -38,10 +49,10 @@ get_po_messages <- function(po_file) {
     ))
   }
 
-  if (length(plural_msgstr_start) %% n_plural != 0L) {
+  if ((n_plural == 0L && n_plural_msgstr > 0L) || (n_plural > 0 && n_plural_msgstr %% n_plural != 0L)) {
     stop(domain=NA, gettextf(
       "Found %d msgid_plural, which does not evenly divide %d msgstr[n]; corrupted .po file",
-      length(plural_msgstr_start), n_plural, domain="R-potools"
+      n_plural_msgstr, n_plural, domain="R-potools"
     ))
   }
   # pre-calculate which lines contain message continuations. Append
@@ -56,6 +67,9 @@ get_po_messages <- function(po_file) {
     plural_msgid = vector('list'),
     plural_msgstr = vector('list')
   )
+  # may not have been caught above if the file is all fuzzy translations, e.g.
+  if (n_msg == 0L) return(po_data)
+
   # inherits is_msg_continuation
   find_msg_end <- function(start_idx) {
     # returns the first FALSE found. since tail(.,1) is FALSE,
@@ -91,13 +105,13 @@ get_po_messages <- function(po_file) {
     end = find_msg_end(start)
     msg2 = build_msg(start, end, 'msgid_plural')
 
-    set(po_data, msg_j, 'plural_msgid', list(list(msg1, msg2)))
+    set(po_data, msg_j, 'plural_msgid', list(c(msg1, msg2)))
 
     start = end + 1L
-    plural_msgstr = list()
+    plural_msgstr = character()
     while (start <= po_length && grepl('^msgstr\\[', po_lines[start])) {
       end = find_msg_end(start)
-      plural_msgstr = c(plural_msgstr, list(build_msg(start, end, 'msgstr\\[\\d+\\]')))
+      plural_msgstr = c(plural_msgstr, build_msg(start, end, 'msgstr\\[\\d+\\]'))
       start = end + 1L
     }
     set(po_data, msg_j, 'plural_msgstr', list(plural_msgstr))
@@ -106,11 +120,5 @@ get_po_messages <- function(po_file) {
     msg_j = msg_j + 1L
   }
 
-  # do here to vectorize over messages
-  po_data[type == 'singular', c('msgid', 'msgstr') := .(unescape_str(msgid), unescape_str(msgstr))]
-  po_data[type == 'plural', `:=`(
-    plural_msgid = lapply(plural_msgid, unescape_str),
-    plural_msgstr = lapply(plural_msgstr, unescape_str)
-  )]
   po_data[]
 }

@@ -5,51 +5,17 @@ translate_package = function(
   if (!interactive()) {
     stop('This is an interactive function. For non-interactive use cases, start from tools::update_pkg_po.')
   }
-  if (any(is_missing <- !nzchar(Sys.which(SYSTEM_REQUIREMENTS)))) {
-    if (.Platform$OS.type == 'windows') {
-      platform_msg = gettextf(
-        'These tools are available as an Rtools goodie, check %s',
-        RTOOLS_URL, domain='R-potools'
-      )
-    } else {
-      if (Sys.info()['sysname'] == 'Darwin') {
-        platform_msg = gettext(
-          'These GNU tools are commonly available, try installing from brew or apt-get', domain='R-potools'
-        )
-      } else {
-        platform_msg = gettext(
-          'These GNU tools are commonly available from the Linux package manager for your system', domain='R-potools'
-        )
-      }
-    }
-    stop(domain = NA, gettextf(
-      'Missing (or not on PATH) system requirements %s.\n%s',
-      toString(SYSTEM_REQUIREMENTS[is_missing]), platform_msg, domain='R-potools'
-    ))
-  }
+  check_sys_reqs()
 
   stopifnot(
     'Only one package at a time' = length(dir) == 1L,
     "'dir' must be a character" = is.character(dir),
     "'languages' must be a characer vector" = missing(languages) || !is.character(languages)
   )
-  dir = normalizePath(dir)
 
-  if (!file.exists(dir)) {
-    stop(domain=NA, gettextf('%s does not exist', dir, domain='R-potools'))
-  }
-  if (!file.info(dir)$isdir) {
-    stop(domain=NA, gettextf('%s is not a directory', dir, domain='R-potools'))
-  }
-  if (!file.exists(desc_file <- file.path(dir, 'DESCRIPTION'))) {
-    stop(domain=NA, gettextf('%s is not a package (missing DESCRIPTION', dir, domain='R-potools'))
-  }
-  desc_data <- read.dcf(desc_file, c('Package', 'Version'))[1L, ]
-  if (anyNA(desc_data)) {
-    stop(domain=NA, gettextf(
-      '%s is not a package (missing Package or Version field in DESCRIPTION', dir, domain='R-potools'
-    ))
-  }
+  dir = get_directory(dir)
+
+  desc_data = get_desc_data(dir)
   package <- desc_data['Package']
   version <- desc_data['Version']
 
@@ -73,11 +39,27 @@ translate_package = function(
 
   if (verbose) message('Getting R-level messages...')
   message_data = get_r_messages(dir, verbose = verbose)
+  message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
+               ][ , {
+                 if (.N > 0L && verbose) message(domain=NA, gettextf(
+                   'Found %d messaging calls that might be better suited to use gettextf for ease of translation:',
+                   uniqueN(call), domain='R-potools'
+                 ))
+                 .SD
+               }][ , by = .(file, call), {
+                 cat(gettextf(
+                   'Multi-string call:\n%s\n< File:%s >\nPotential replacement:\n%s\n',
+                   red(.BY$call), white(.BY$file), blue()
+                 ))
+               }]
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')
     return(invisible())
   }
+
+  if (verbose) message('Running message diagnostics...')
+
 
   if (verbose) message('Running tools::update_pkg_po()')
   tools::update_pkg_po(dir, package, version, copyright, bugs)
@@ -89,6 +71,9 @@ translate_package = function(
 
   for (language in languages) {
     metadata = KNOWN_LANGUAGES[.(language)]
+    if ('msgstr' %chin% names(message_data)) message_data[ , 'msgstr' := NULL]
+    if ('plural_msgstr' %chin% names(message_data)) message_data[ , 'plural_msgstr' := NULL]
+
     if (update && file.exists(lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language)))) {
       if (verbose) {
         message(domain=NA, gettextf(
@@ -126,13 +111,11 @@ translate_package = function(
       ))
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
-    if ('msgstr' %chin% names(message_data)) message_data[ , 'msgstr' := NULL]
     # go row-wise to facilitate quitting without losing progress
-    # TODO: incorporate existing translations
     # TODO: suggest gettextf() call for stop("a", i, "message")
     # TODO: deal with is_repeat
     # TODO: output to .po
-    for (ii in seq_len(nrow(message_data))) {
+    for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation <- vector('list', metadata$nplurals)
         for (jj in seq_len(metadata$nplurals)) {
@@ -161,10 +144,6 @@ translate_package = function(
     }
   }
 }
-
-# see ?tools::update_pkg_po
-SYSTEM_REQUIREMENTS = c('xgettext', 'msgmerge', 'msgfmt', 'msginit', 'msgconv')
-RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 
 # take from those present in r-devel:
 # ls -1 ~/svn/R-devel/src/library/*/po/*.po | \

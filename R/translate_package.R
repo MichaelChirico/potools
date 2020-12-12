@@ -136,8 +136,8 @@ translate_package = function(
 
     if (verbose) {
       message(
-        "***************************\n"
-        "** BEGINNING TRANSLATION **\n"
+        "***************************\n",
+        "** BEGINNING TRANSLATION **\n",
         "***************************\n\n",
         "Some helpful reminders:\n",
         " * You can skip a translation by entering nothing (just press RETURN)",
@@ -148,31 +148,26 @@ translate_package = function(
     }
     # go row-wise to facilitate quitting without losing progress
     # TODO: check message templates (count of %d, etc) for consistency
-    # TODO: string escaping hell
+    # TODO: bug in get_r_messages for dplyr
+    # TODO: options for prompt colors. maybe a template file? probably overkill.
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
-        translation <- character(metadata$nplurals)
-        for (jj in seq_len(metadata$nplurals)) {
-          translation[jj] = prompt(gettextf(
-            '\nFile: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
-            white(message_data$file[ii]),
-            green(message_data$call[ii]),
-            red(message_data$plural_msgid[[ii]][1L]),
-            blue(metadata$full_name_eng),
-            yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
-            domain = "R-potools"
-          ))
-        }
+        translation = read_translation(
+          message_data$plural_msgid[[ii]][1L],
+          'plural',
+          message_data$file[ii],
+          message_data$call[ii],
+          metadata
+        )
         set(message_data, ii, 'plural_msgstr', list(translation))
       } else if (!message_data$is_repeat[ii]) {
-        translation = prompt(gettextf(
-          '\nFile: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',
-          white(message_data$file[ii]),
-          green(message_data$call[ii]),
-          red(message_data$msgid[ii]),
-          blue(metadata$full_name_eng),
-          domain = "R-potools"
-        ))
+        translation = read_translation(
+          message_data$msgid[ii],
+          'singular',
+          message_data$file[ii],
+          message_data$call[ii],
+          metadata
+        )
         set(message_data, ii, 'msgstr', translation)
       }
     }

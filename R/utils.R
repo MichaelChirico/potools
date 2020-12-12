@@ -70,6 +70,17 @@ agg_deparse = function(x) paste(deparse(x), collapse = ' ')
 # shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
 escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)
 
+# attempt to _partially_ invert escape_string. namely, unescape quotes
+#   and backslashes that were added by escape_string.
+#   NB: we leave the control characters as is for visibility. it's very
+#   common for messages for translation to end with \n -- if we unescape
+#   this, a newline will be printed, and it will take a trained eye or
+#   some extra text decoration to draw attention to this. moreover, while
+#   I suspect there could be hope for \n, i think all is lost for \r and even \t.
+unescape_string = function(x) {
+  gsub('[\\]([\\"])', '\\1', x)
+}
+
 # would be great to use readline() but it has several fatal flaws:
 #   (1) the prompt argument is a buffer capped at 256 chars, which is far too few
 #   (2) readline is _strictly_ interactive -- it can't be tested.

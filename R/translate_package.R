@@ -77,9 +77,12 @@ translate_package = function(
 
   for (language in languages) {
     metadata = KNOWN_LANGUAGES[.(language)]
-    if ('msgstr' %chin% names(message_data)) message_data[ , 'msgstr' := NULL]
-    if ('plural_msgstr' %chin% names(message_data)) message_data[ , 'plural_msgstr' := NULL]
-
+    # overwrite any existing translations written in previous translation.
+    #   set blank initially (rather than deleting the column) to allow
+    #   for interrupting the translation -- if unset, write_po_file will
+    #   fail if both these columns are not yet present.
+    message_data[type == 'singular', msgstr := ""]
+    message_data[type == 'plural', plural_msgstr := .(list(rep("", metadata$nplurals)))]
     lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
@@ -100,8 +103,8 @@ translate_package = function(
         old_message_data[ , 'join_id' := NULL]
       }
       new_idx = message_data[
-        (type == 'singular' & is.na(msgstr)) |
-          (type == 'plural' & !lengths(plural_msgstr)),
+        (type == 'singular' & !nzchar(msgstr)) |
+          (type == 'plural' & !vapply(plural_msgstr, function(x) all(nzchar(x)), logical(1L))),
         which = TRUE
       ]
     } else {
@@ -120,6 +123,17 @@ translate_package = function(
       ))
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
+
+    author = prompt('Thanks! Who should be credited with these translations?')
+    email = prompt('And what is their email?')
+    author = sprintf("%s <%s>", author, email)
+
+    # on.exit this to allow ESC to quit mid-translation. the intent is for the
+    #   on.exit command to be overwritten on each iteration over languages --
+    #   only one partially-finished language should be written at a time.
+    INCOMPLETE = TRUE
+    on.exit(if (INCOMPLETE) write_po_file(message_data, lang_file, package, version, author, metadata))
+
     # go row-wise to facilitate quitting without losing progress
     # TODO: check message templates (count of %d, etc) for consistency
     # TODO: default value is to set msgstr=msgid? or msgstr=""
@@ -153,10 +167,10 @@ translate_package = function(
       }
     }
 
-    author = prompt('Thanks! Who should be credited with these translations?')
-    email = prompt('And what is their email?')
-    author = sprintf("%s <%s>", author, email)
+    # set INCOMPLETE after write_po_file for the event of a process interruption
+    #   between the loop finishing and the write_po_file command executing
     write_po_file(message_data, lang_file, package, version, author, metadata)
+    INCOMPLETE = FALSE
   }
 
   if (verbose) message('Re-running tools::update_pkg_po() to update .mo files')

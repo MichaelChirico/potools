@@ -13,27 +13,49 @@
 #    tough).
 read_translation = function(msgid, type, file, call, metadata) {
   msgid = unescape_string(msgid)
+  # NB: it's tempting to vectorize running get_fmt to e.g.
+  #   add a new column msgid_fmt to message_data. But
+  #   unescape_string here dashes hopes that could work.
+  #   Moreover we can't simply get the template _just prior_
+  #   to running escape_string in get_r_messages, because
+  #   escape_string and unescape_string are (intentionally)
+  #   not inverses. Bummer. So run it here, to make sure
+  #   the match positions are relative to the string that
+  #   will be shown to the user.
+  formats = get_fmt(msgid)[[1L]]
+  if (length(formats)) {
+    fmt_tags = get_fmt_tags(msgid, formats)
+  } else {
+    fmt_tags = ""
+  }
   if (type == 'plural') {
     translation <- character(metadata$nplurals)
+    # add enough blanks for Plural message:
+    if (nzchar(fmt_tags)) fmt_tags = paste0("\n                ", fmt_tags)
     for (jj in seq_len(metadata$nplurals)) {
-      translation[jj] = prompt(gettextf(
-        '\nFile: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
+      translation[jj] = prompt_with_templates(formats, gettextf(
+        '\nFile: %s\nCall: %s\nPlural message: %s%s\nHow would you translate this message into %s %s?',
         white(file),
         green(call),
         red(msgid),
+        fmt_tags,
         blue(metadata$full_name_eng),
         yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
         domain = "R-potools"
       ))
     }
   } else {
-    prompt(gettextf(
-      '\nFile: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',
+    # add enough blanks for Message:
+    if (nzchar(fmt_tags)) fmt_tags = paste0("\n         ", fmt_tags)
+    translation = prompt_with_templates(formats, gettextf(
+      '\nFile: %s\nCall: %s\nMessage: %s%s\nHow would you translate this message into %s?',
       white(file),
       green(call),
       red(msgid),
+      fmt_tags,
       blue(metadata$full_name_eng),
       domain = "R-potools"
     ))
   }
+  translation
 }

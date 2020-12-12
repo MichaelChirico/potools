@@ -81,6 +81,49 @@ unescape_string = function(x) {
   gsub('[\\]([\\"])', '\\1', x)
 }
 
+SPRINTF_TEMPLATE_REGEX =     paste0(
+  "[%]",
+  "(?:",
+  "[%]|", # % separately to reduce false positives -- it can't be used with other specials
+  "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
+  "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
+  "[aAdifeEgGosxX]", # there are more available at the C level...
+  ")"
+)
+# identify the sprintf string templates in a string. return it in a nicer format
+get_fmt = function(x) {
+  # taken from a thorough reading of ?sprintf. it will generate some false positives,
+  #   though it is a bit hard to cook up such examples (e.g., sprintf has no
+  #   problem with sprintf("%#0###     ++++0f", pi) )
+  format_starts = gregexpr(SPRINTF_TEMPLATE_REGEX, x)
+  # NULL when no match is easier to work with (can use lengths, e.g.)
+  lapply(format_starts, function(l) {
+    if (length(l) == 1L && l < 0L) return(NULL)
+    list(idx = as.integer(l), length = attr(l, 'match.length'))
+  })
+}
+
+# streamlined get_fmt for counting the matches
+count_fmt = function(x) lengths(gregexpr(SPRINTF_TEMPLATE_REGEX, x))
+
+# given a string like
+#   Found %d arguments in %s. Average %02.3f%%
+# get a second line highlighting the string format templates:
+#   Found %d arguments in %s. Average %02.3f%%
+#         ^^              ^^          ^----^^^
+get_fmt_tags = function(s, fmts) {
+  out = rep(" ", nchar(s))
+  for (ii in seq_along(fmts$idx)) {
+    start = fmts$idx[ii]
+    end = start + fmts$length[ii] - 1L
+    out[c(start, end)] = '^'
+    if (end - start > 1L) {
+      out[seq(start + 1L, end - 1L)] = '-'
+    }
+  }
+  paste(out, collapse="")
+}
+
 # would be great to use readline() but it has several fatal flaws:
 #   (1) the prompt argument is a buffer capped at 256 chars, which is far too few
 #   (2) readline is _strictly_ interactive -- it can't be tested.
@@ -91,6 +134,23 @@ prompt = function(..., encode = TRUE, conn = getOption('__potools_testing_prompt
   cat('\n')
   txt = readLines(conn, n=1L)
   return(if (encode) encodeString(txt) else txt)
+}
+
+# TODO: this only passes a somewhat superficial test, namely
+#   that the count of templates matches. However, a truly
+#   correct translation would have the same number of each kind
+#   of templates -- say 3 %d, 2 %s should not match 2 %d, 3 %s.
+prompt_with_templates = function(fmt, prompt_msg) {
+  if (!length(fmt)) return(prompt(prompt_msg))
+  while (TRUE) {
+    translation = prompt(prompt_msg)
+    if (!nzchar(translation) || (n_fmt <- count_fmt(translation)) == length(fmt$idx)) break
+    cat(gettextf(
+      "\n\n** Oops! You supplied %d templates; but the target message has %d. Retrying... **\n",
+      n_fmt, length(fmt$idx), domain='R-potools'
+    ))
+  }
+  translation
 }
 
 if (requireNamespace('crayon', quietly = TRUE)) {

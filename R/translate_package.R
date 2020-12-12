@@ -127,7 +127,7 @@ translate_package = function(
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation <- character(metadata$nplurals)
-        for (jj in seq_len(metadata$nplurals)) {
+        for (jj in seq_len(metadata$nplurals)-1L) {
           translation[jj] = prompt(gettextf(
             '\nFile: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
             white(message_data$file[ii]),
@@ -161,58 +161,6 @@ translate_package = function(
   if (verbose) message('Re-running tools::update_pkg_po() to update .mo files')
   tools::update_pkg_po(dir, package, version, copyright, bugs)
 }
-
-# take from those present in r-devel:
-# ls -1 ~/svn/R-devel/src/library/*/po/*.po | \
-#   awk -F"[./]" '{print $10}' | \
-#   sed -r 's/^R(Gui)?-//g' | sort -u | \
-#   awk '{print "  ", $1, " = ,"}'
-# alternatively, a more complete list can be found on some websites:
-#   https://saimana.com/list-of-country-locale-code/
-# nplurals,plural info from https://l10n.gnome.org/teams/<language>
-# NB: looks may be deceiving for right-to-left scripts (e.g. Farsi), where the
-#   displayed below might not be in the order it is parsed.
-KNOWN_LANGUAGES = fread("
-code,full_name_eng,full_name_native,nplurals,plural
-da,Danish,Dansk,2,(n!=1)
-de,German,Deutsch,2,(n!=1)
-en,English,English,2,(n!=1)
-en_GB,British English,British English,2,(n!=1)
-es,Spanish,Español,2,(n!=1)
-fa,Farsi,فارسی,1,0
-fr,French,Français,2,(n>1)
-it,Italian,Italiano,2,(n!=1)
-ja,Japanese,日本語,1,0
-ko,Korean,한국어,1,0
-nn,Dutch,Nederlands,2,(n!=1)
-pl,Polish,Polski,3,(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
-pt_BR,Brazilian Portugese,Português Brasileiro,2,(n>1)
-ru,Russian,Русский,3,(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2)
-tr,Turkish,Türkçe,1,0
-zh_CN,Mainland Chinese,普通话,1,0
-zh_TW,Taiwanese Chinese,台湾话,1,0
-", key='code')
-
-# the 'plural' column above is designed for computers;
-#   translate that to something human-legible here.
-# NB: 'plural' is 0-based (like in the .po file), but
-#   'plural_index' is 1-based (to match the above R-level code).
-# NB: sep="#"... maybe a bad choice... but keeps the lines to 120
-#   characters and doesn't cause issues from sep=',' with , in text
-PLURAL_RANGE_STRINGS = fread("
-plural#plural_index#range
-0#0#independently of n
-(n!=1)#0#when n = 1
-(n!=1)#1#when n is not 1
-(n>1)#0#when n is 0 or 1
-(n>1)#1#when n is at bigger than 1
-(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#0#when n = 1
-(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#1#when n = 2-4, 22-24, 32-34, ...
-(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#2#when n = 0, 5-21, 25-31, 35-41, ...
-(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#0#when n = 1, 21, 31, 41, ...
-(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#1#when n = 2-4, 22-24, 32-34, ...
-(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)#2#when n = 0, 5-20, 25-30, 35-40, ...
-", sep='#', key=c('plural', 'plural_index'))
 
 # just here to generate translations
 invisible({

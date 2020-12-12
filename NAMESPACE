@@ -1,6 +1,6 @@
-importFrom(data.table, data.table, fread, rbindlist, set)
-importFrom(data.table, `:=`, "%chin%")
+importFrom(data.table, data.table, fread, rbindlist, set, uniqueN, "%chin%")
+importFrom(data.table, `:=`, .BY, .N, .SD)
 
-importFrom(crayon, white, green, red, blue, yellow)
+importFrom(utils, globalVariables, tail)
 
 export(translate_package)

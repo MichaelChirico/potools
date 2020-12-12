@@ -1,0 +1,18 @@
+code,full_name_eng,full_name_native,nplurals,plural
+da,Danish,Dansk,2,(n!=1)
+de,German,Deutsch,2,(n!=1)
+en,English,English,2,(n!=1)
+en_GB,British English,British English,2,(n!=1)
+es,Spanish,Español,2,(n!=1)
+fa,Farsi,فارسی,1,0
+fr,French,Français,2,(n>1)
+it,Italian,Italiano,2,(n!=1)
+ja,Japanese,日本語,1,0
+ko,Korean,한국어,1,0
+nn,Dutch,Nederlands,2,(n!=1)
+pl,Polish,Polski,3,(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
+pt_BR,Brazilian Portugese,Português Brasileiro,2,(n>1)
+ru,Russian,Русский,3,(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2)
+tr,Turkish,Türkçe,1,0
+zh_CN,Mainland Chinese,普通话,1,0
+zh_TW,Taiwanese Chinese,台湾话,1,0

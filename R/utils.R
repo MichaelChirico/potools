@@ -67,13 +67,27 @@ do_suppress = function(e) {
 # ensure length-1 output of deparse
 agg_deparse = function(x) paste(deparse(x), collapse = ' ')
 
+# shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
+escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)
+
 # would be great to use readline() but it has several fatal flaws:
 #   (1) the prompt argument is a buffer capped at 256 chars, which is far too few
 #   (2) readline is _strictly_ interactive -- it can't be tested.
 # See this post for testing:
 #   https://debruine.github.io/posts/interactive-test/
-prompt = function(..., conn = getOption('__potools_testing_prompt_connection__', stdin())) {
+prompt = function(..., encode = TRUE, conn = getOption('__potools_testing_prompt_connection__', stdin())) {
   cat(...)
   cat('\n')
-  return(readLines(conn, n=1L))
+  txt = readLines(conn, n=1L)
+  return(if (encode) encodeString(txt) else txt)
+}
+
+if (requireNamespace('crayon', quietly = TRUE)) {
+  red = crayon::red
+  white = crayon::white
+  blue = crayon::blue
+  green = crayon::green
+  yellow = crayon::yellow
+} else {
+  red = white = blue = green = yellow = identity
 }

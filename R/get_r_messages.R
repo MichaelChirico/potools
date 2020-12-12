@@ -89,9 +89,10 @@ get_r_messages <- function (dir, verbose = FALSE) {
     plural = rbindlist(plural, idcol='file'),
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
+  msg[type == 'singular', msgid := escape_string(msgid)]
+  msg[type == 'plural', plural_msgid := lapply(plural_msgid, escape_string)]
   msg[ , 'is_repeat' := type == 'singular' & duplicated(msgid)]
 }
-
 
 # these functions all have a domain= argument. taken from the xgettext source, but could be
 #   refreshed with the following (skipping bindtextdomain and .makeMessage):
@@ -110,7 +111,7 @@ unnest_call = function(data, plural) {
   names(data) = NULL
   data.table(
     call = if (plural) calls else rep(calls, lengths(data)),
-    msgid = if (nonempty && !plural) encodeString(unlist(data)),
-    plural_msgid = if (nonempty && plural) lapply(data, encodeString)
+    msgid = if (nonempty && !plural) unlist(data),
+    plural_msgid = if (nonempty && plural) data
   )
 }

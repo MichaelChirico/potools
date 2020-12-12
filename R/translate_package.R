@@ -122,19 +122,20 @@ translate_package = function(
     }
     # go row-wise to facilitate quitting without losing progress
     # TODO: check message templates (count of %d, etc) for consistency
-    # TODO: default value is to set msgstr=msgid
+    # TODO: default value is to set msgstr=msgid? or msgstr=""
     # TODO: string escaping hell
+    # TODO: a "header" with some notes about translations before this loop
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation <- character(metadata$nplurals)
-        for (jj in seq_len(metadata$nplurals)-1L) {
+        for (jj in seq_len(metadata$nplurals)) {
           translation[jj] = prompt(gettextf(
             '\nFile: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
             white(message_data$file[ii]),
             green(message_data$call[ii]),
             red(message_data$plural_msgid[[ii]][1L]),
             blue(metadata$full_name_eng),
-            yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj), range]),
+            yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
             domain = "R-potools"
           ))
         }
@@ -162,7 +163,7 @@ translate_package = function(
   tools::update_pkg_po(dir, package, version, copyright, bugs)
 }
 
-# just here to generate translations
+# just here to generate translations. comes from the PLURAL_RANGE_STRINGS csv
 invisible({
   gettext("independently of n", domain="R-potools")
   gettext("when n = 1", domain="R-potools")
@@ -175,3 +176,24 @@ invisible({
   gettext("when n = 1, 21, 31, 41, ...", domain="R-potools")
   gettext("when n = 0, 5-20, 25-30, 35-40, ...", domain="R-potools")
 })
+
+# take from those present in r-devel:
+# ls -1 ~/svn/R-devel/src/library/*/po/*.po | \
+#   awk -F"[./]" '{print $10}' | \
+#   sed -r 's/^R(Gui)?-//g' | sort -u | \
+#   awk '{print "  ", $1, " = ,"}'
+# alternatively, a more complete list can be found on some websites:
+#   https://saimana.com/list-of-country-locale-code/
+# nplurals,plural info from https://l10n.gnome.org/teams/<language>
+# NB: looks may be deceiving for right-to-left scripts (e.g. Farsi), where the
+#   displayed below might not be in the order it is parsed.
+KNOWN_LANGUAGES = fread(system.file('extdata', 'language_metadata.csv', package='potools'), key='code')
+
+# the 'plural' column above is designed for computers;
+#   translate that to something human-legible here.
+# NB: 'plural' is 0-based (like in the .po file), but
+#   'plural_index' is 1-based (to match the above R-level code).
+PLURAL_RANGE_STRINGS = fread(
+  system.file('extdata', 'plurals_metadata.csv', package='potools'),
+  key = c('plural', 'plural_index')
+)

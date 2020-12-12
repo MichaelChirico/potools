@@ -76,7 +76,10 @@ get_r_messages <- function (dir, verbose = FALSE) {
     if (verbose) message(gettextf("parsing '%s'", f, domain="R-tools"), domain = NA)
     singular_i = plural_i = 0L
     s_data <- p_data <- vector("list")
-    for (e in parse(file = f)) {
+    # TODO: we could use the information from keep.source to be more informative,
+    #   and even go so far as to apply edits to the .R file on behalf of the user.
+    #   out of scope for now.
+    for (e in parse(file = f, keep.source = TRUE)) {
       find_singular_strings(e)
       find_plural_strings(e)
     }
@@ -89,9 +92,20 @@ get_r_messages <- function (dir, verbose = FALSE) {
     plural = rbindlist(plural, idcol='file'),
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
+  if (nrow(msg) == 0L) {
+    return(data.table(
+      type = character(),
+      file = character(),
+      call = character(),
+      msgid = character(),
+      plural_msgid = list(),
+      is_repeat = logical()
+    ))
+  }
   msg[type == 'singular', msgid := escape_string(msgid)]
   msg[type == 'plural', plural_msgid := lapply(plural_msgid, escape_string)]
   msg[ , 'is_repeat' := type == 'singular' & duplicated(msgid)]
+  msg[]
 }
 
 # these functions all have a domain= argument. taken from the xgettext source, but could be
@@ -106,12 +120,14 @@ MSG_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext", "
 # be sure to apply encodeString, which converts "\n" to \\n as required when
 #   (potentially) writing this out to .po later
 unnest_call = function(data, plural) {
-  nonempty = any(lengths(data))
+  empty = !any(lengths(data))
+  if (empty) return(data.table(NULL))
   calls = names(data)
   names(data) = NULL
+  if (plural) return(data.table(call = calls, msgid = "", plural_msgid = data))
   data.table(
-    call = if (plural) calls else rep(calls, lengths(data)),
-    msgid = if (nonempty && !plural) unlist(data),
-    plural_msgid = if (nonempty && plural) data
+    call = rep(calls, lengths(data)),
+    msgid = unlist(data),
+    plural_msgid = list()
   )
 }

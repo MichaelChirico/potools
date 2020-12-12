@@ -147,10 +147,8 @@ translate_package = function(
       )
     }
     # go row-wise to facilitate quitting without losing progress
-    # TODO: bug in get_r_messages for dplyr
     # TODO: options for prompt colors. maybe a template file? probably overkill.
     # TODO: long messages + options(width))
-    # TODO: double-check write_po_file merges with existing messages
     # TODO: highlight special characters (e.g. \\, \n)
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {

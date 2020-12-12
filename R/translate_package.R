@@ -56,8 +56,8 @@ translate_package = function(
                      red(.BY$call), white(.BY$file), blue(build_gettextf_call(.BY$call, package))
                    ))
                    TRUE
-                 }][ , if (.N > 0L) readline('Exit now to repair any of these? [Y/n]') else 'n']
-  if (!nzchar(exit) || tolower(exit) %chin% c('y', 'yes')) return(invisible())
+                 }][ , if (.N > 0L) prompt('Exit now to repair any of these? [y/N]') else 'n']
+  if (tolower(exit) %chin% c('y', 'yes')) return(invisible())
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')
@@ -80,7 +80,8 @@ translate_package = function(
     if ('msgstr' %chin% names(message_data)) message_data[ , 'msgstr' := NULL]
     if ('plural_msgstr' %chin% names(message_data)) message_data[ , 'plural_msgstr' := NULL]
 
-    if (update && file.exists(lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language)))) {
+    lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language))
+    if (update && file.exists(lang_file)) {
       if (verbose) {
         message(domain=NA, gettextf(
           'Found existing translations for %s (%s/%s) in %s',
@@ -120,18 +121,18 @@ translate_package = function(
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
     # go row-wise to facilitate quitting without losing progress
-    # TODO: check message templates for consistency
+    # TODO: check message templates (count of %d, etc) for consistency
     # TODO: default value is to set msgstr=msgid
-    # TODO: need more spacing between message prompts
+    # TODO: string escaping hell
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
-        translation <- vector('list', metadata$nplurals)
+        translation <- character(metadata$nplurals)
         for (jj in seq_len(metadata$nplurals)) {
-          translation[[jj]] = readline(gettextf(
-            'File: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
+          translation[jj] = prompt(gettextf(
+            '\nFile: %s\nCall: %s\nPlural message: "%s"\nHow would you translate this message into %s %s?',
             white(message_data$file[ii]),
             green(message_data$call[ii]),
-            red(message_data$plural_msgid[ii][[1L]]),
+            red(message_data$plural_msgid[[ii]][1L]),
             blue(metadata$full_name_eng),
             yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj), range]),
             domain = "R-potools"
@@ -139,8 +140,8 @@ translate_package = function(
         }
         set(message_data, ii, 'plural_msgstr', list(translation))
       } else if (!message_data$is_repeat[ii]) {
-        translation = readline(gettextf(
-          'File: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',
+        translation = prompt(gettextf(
+          '\nFile: %s\nCall: %s\nMessage: "%s"\nHow would you translate this message into %s?',
           white(message_data$file[ii]),
           green(message_data$call[ii]),
           red(message_data$msgid[ii]),
@@ -151,8 +152,8 @@ translate_package = function(
       }
     }
 
-    author = readline('Thanks! Who should be credited with these translations?')
-    email = readline('And what is their email?')
+    author = prompt('Thanks! Who should be credited with these translations?')
+    email = prompt('And what is their email?')
     author = sprintf("%s <%s>", author, email)
     write_po_file(message_data, lang_file, package, version, author, metadata)
   }

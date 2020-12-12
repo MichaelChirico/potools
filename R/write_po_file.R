@@ -28,18 +28,23 @@ write_po_file <- function(message_data, pofile, package, version, author, metada
   cat('\n', file=pofile, append=TRUE)
 }
 
+# balance here: keeping newlines in the string to facilitate writing,
+#   but need to escape the in-string newlines or they'll be written
+#   as newlines (not literal \n). encodeString is "soft-applied" here.
+#   might be better to tread this as a DCF and write it from a list
+#   instead of building it up from sprintf
 PO_HEADER_TEMPLATE = 'msgid ""
 msgstr ""
-"Project-Id-Version: %s %s\n"
-"POT-Creation-Date: %s\n"
-"PO-Revision-Date: %s\n"
-"Last-Translator: %s\n"
-"Language-Team: %s\n"
-"Language: %s\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=%d; plural=%s;\n"
+"Project-Id-Version: %s %s\\n"
+"POT-Creation-Date: %s\\n"
+"PO-Revision-Date: %s\\n"
+"Last-Translator: %s\\n"
+"Language-Team: %s\\n"
+"Language: %s\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Plural-Forms: nplurals=%d; plural=%s;\\n"
 '
 
 # TODO: apparently not working:

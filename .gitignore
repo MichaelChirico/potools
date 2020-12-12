@@ -5,3 +5,6 @@
 
 .sandbox
 
+potools.Rcheck
+potools_*.tar.gz
+

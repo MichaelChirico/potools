@@ -134,11 +134,21 @@ translate_package = function(
     INCOMPLETE = TRUE
     on.exit(if (INCOMPLETE) write_po_file(message_data, lang_file, package, version, author, metadata))
 
+    if (verbose) {
+      message(
+        "***************************\n"
+        "** BEGINNING TRANSLATION **\n"
+        "***************************\n\n",
+        "Some helpful reminders:\n",
+        " * You can skip a translation by entering nothing (just press RETURN)",
+        " * Special characters (like newlines, \\n, or tabs, \\t) should be written just like that (with an escape)",
+        " * Be sure to match message templates. The count of templates (%s, %d, etc.) must match in all languages",
+        " * While the count of templates must match, the _order_ can be changed by using e.g. %2$s to mean 'use the second input as a string here'"
+      )
+    }
     # go row-wise to facilitate quitting without losing progress
     # TODO: check message templates (count of %d, etc) for consistency
-    # TODO: default value is to set msgstr=msgid? or msgstr=""
     # TODO: string escaping hell
-    # TODO: a "header" with some notes about translations before this loop
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation <- character(metadata$nplurals)

@@ -12,7 +12,7 @@ write_po_file <- function(message_data, pofile, package, version, author, metada
     metadata$nplurals, metadata$plural
   ))
 
-  for (ii in seq_len(nrow(message_data))) {
+  for (ii in message_data[(!is_repeat), which = TRUE]) {
     message_data[ii, {
       if (type == 'singular') {
         cat(sprintf('\n\nmsgid "%s"\nmsgstr "%s"', msgid, msgstr), file=pofile, append=TRUE)
@@ -46,42 +46,3 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\\n"
 "Plural-Forms: nplurals=%d; plural=%s;\\n"
 '
-
-# TODO: apparently not working:
-#   R-zh_CN:po/R-zh_CN.po:4: end-of-line within string
-# po/R-zh_CN.po:5: end-of-line within string
-# po/R-zh_CN.po:6: end-of-line within string
-# po/R-zh_CN.po:7: end-of-line within string
-# po/R-zh_CN.po:8: end-of-line within string
-# po/R-zh_CN.po:9: end-of-line within string
-# po/R-zh_CN.po:10: end-of-line within string
-# po/R-zh_CN.po:11: end-of-line within string
-# po/R-zh_CN.po:12: end-of-line within string
-# po/R-zh_CN.po:13: end-of-line within string
-# po/R-zh_CN.po:14: end-of-line within string
-# po/R-zh_CN.po:15: end-of-line within string
-# po/R-zh_CN.po:16: end-of-line within string
-# po/R-zh_CN.po:17: end-of-line within string
-# po/R-zh_CN.po:18: end-of-line within string
-# po/R-zh_CN.po:19: end-of-line within string
-# po/R-zh_CN.po:20: end-of-line within string
-# po/R-zh_CN.po:21: end-of-line within string
-# po/R-zh_CN.po:22: end-of-line within string
-# po/R-zh_CN.po:23: end-of-line within string
-# po/R-zh_CN.po: warning: Charset "UTF-8Content-Transfer-Encoding:" is not a portable encoding name.
-#                         Message conversion to user's charset might not work.
-# po/R-zh_CN.po:58: missing 'msgstr' section
-# po/R-zh_CN.po:58:42: syntax error
-# po/R-zh_CN.po:58: keyword "s" unknown
-# po/R-zh_CN.po:59: end-of-line within string
-# po/R-zh_CN.po:59: keyword "Valid" unknown
-# po/R-zh_CN.po:59: keyword "fields" unknown
-# po/R-zh_CN.po:59: keyword "are" unknown
-# po/R-zh_CN.po:59: keyword "s" unknown
-# po/R-zh_CN.po:60: end-of-line within string
-# po/R-zh_CN.po:60: keyword "d" unknown
-# po/R-zh_CN.po:60: keyword "s" unknown
-# po/R-zh_CN.po:69:11: syntax error
-# po/R-zh_CN.po:69: keyword "$d" unknown
-# po/R-zh_CN.po:69: keyword "d" unknown
-

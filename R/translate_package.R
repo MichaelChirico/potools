@@ -150,7 +150,6 @@ translate_package = function(
     # go row-wise to facilitate quitting without losing progress
     # TODO: options for prompt colors. maybe a template file? probably overkill.
     # TODO: long messages + options(width))
-    # TODO: highlight special characters (e.g. \\, \n)
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation = read_translation(

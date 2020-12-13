@@ -44,12 +44,12 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
       }
       translation[jj] = prompt_with_templates(n_format, gettextf(
         '\nFile: %s\nCall: %s\nPlural message: %s%s\nHow would you translate this message into %s %s?%s',
-        white(file),
-        green(call),
-        red(msgid),
+        file_color(file),
+        call_color(call),
+        msgid_color(msgid),
         special_tags,
-        blue(metadata$full_name_eng),
-        yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
+        language_color(metadata$full_name_eng),
+        plural_range_color(PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
         fuzzy_tag,
         domain = "R-potools"
       ))
@@ -67,11 +67,11 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
     }
     translation = prompt_with_templates(n_format, gettextf(
       '\nFile: %s\nCall: %s\nMessage: %s%s\nHow would you translate this message into %s?%s',
-      white(file),
-      green(call),
-      red(msgid),
+      file_color(file),
+      call_color(call),
+      msgid_color(msgid),
       special_tags,
-      blue(metadata$full_name_eng),
+      language_color(metadata$full_name_eng),
       fuzzy_tag,
       domain = "R-potools"
     ))

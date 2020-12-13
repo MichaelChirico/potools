@@ -53,7 +53,9 @@ translate_package = function(
                  }][ , by = .(file, call), {
                    cat(gettextf(
                      '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
-                     red(.BY$call), white(.BY$file), blue(build_gettextf_call(.BY$call, package))
+                     call_color(.BY$call),
+                     file_color(.BY$file),
+                     build_gettextf_color(build_gettextf_call(.BY$call, package))
                    ))
                    TRUE
                  }][ , if (.N > 0L) prompt('Exit now to repair any of these? [y/N]') else 'n']
@@ -179,8 +181,7 @@ translate_package = function(
         " * Whenever templates or escaping is happening in a string, these will be 'highlighted' by carets (^) in the line below"
       )
     }
-    # go row-wise to facilitate quitting without losing progress
-    # TODO: options for prompt colors. maybe a template file? probably overkill.
+    # NB: go row-wise to facilitate quitting without losing progress
     # TODO: long messages + options(width))
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {

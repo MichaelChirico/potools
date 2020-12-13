@@ -166,11 +166,12 @@ prompt_with_templates = function(n_target, prompt_msg) {
 }
 
 if (requireNamespace('crayon', quietly = TRUE)) {
-  red = crayon::red
-  white = crayon::white
-  blue = crayon::blue
-  green = crayon::green
-  yellow = crayon::yellow
+  call_color = getOption('potools.call_color', crayon::green)
+  file_color = getOption('potools.file_color', crayon::white)
+  msgid_color = getOption('potools.msgid_color', crayon::red)
+  language_color = getOption('potools.language_color', crayon::cyan)
+  build_gettextf_color = getOption('potools.build_gettextf_color', crayon::blue)
+  plural_range_color = getOption('potools.plural_range_color', crayon::yellow)
 } else {
-  red = white = blue = green = yellow = identity
+  call_color = file_color = msgid_color = language_color = build_gettextf_color = plural_range_color = identity
 }

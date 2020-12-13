@@ -96,7 +96,7 @@ translate_package = function(
       old_message_data = get_po_messages(lang_file)
 
       if (any(idx <- old_message_data$fuzzy == 2L)) {
-        message(domain=NA, gettexf(
+        message(domain=NA, gettextf(
           'Found %d translations marked as deprecated in %s.',
           sum(idx), lang_file, domain='R-potools'
         ))

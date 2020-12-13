@@ -11,7 +11,7 @@
 #    expected to be noticeable
 #  - we want to help users get templates right (which can be
 #    tough).
-read_translation = function(msgid, type, file, call, metadata) {
+read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
   msgid = unescape_string(msgid)
   # NB: it's tempting to vectorize running get_fmt to e.g.
   #   add a new column msgid_fmt to message_data. But
@@ -34,27 +34,45 @@ read_translation = function(msgid, type, file, call, metadata) {
     # add enough blanks for Plural message:
     if (nzchar(special_tags)) special_tags = paste0("\n                ", special_tags)
     for (jj in seq_len(metadata$nplurals)) {
+      if (fuzzy == 1L) {
+        fuzzy_tag = gettextf(
+          "\n **Note: a similar message was previously translated as: **\n%s",
+          msgstr[[jj]], domain='R-potools'
+        )
+      } else {
+        fuzzy_tag = ""
+      }
       translation[jj] = prompt_with_templates(n_format, gettextf(
-        '\nFile: %s\nCall: %s\nPlural message: %s%s\nHow would you translate this message into %s %s?',
+        '\nFile: %s\nCall: %s\nPlural message: %s%s\nHow would you translate this message into %s %s?%s',
         white(file),
         green(call),
         red(msgid),
         special_tags,
         blue(metadata$full_name_eng),
         yellow(PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
+        fuzzy_tag,
         domain = "R-potools"
       ))
     }
   } else {
     # add enough blanks for Message:
     if (nzchar(special_tags)) special_tags = paste0("\n         ", special_tags)
+    if (fuzzy == 1L) {
+      fuzzy_tag = gettextf(
+        "\n **Note: a similar message was previously translated as: **\n%s",
+        msgstr, domain='R-potools'
+      )
+    } else {
+      fuzzy_tag = ""
+    }
     translation = prompt_with_templates(n_format, gettextf(
-      '\nFile: %s\nCall: %s\nMessage: %s%s\nHow would you translate this message into %s?',
+      '\nFile: %s\nCall: %s\nMessage: %s%s\nHow would you translate this message into %s?%s',
       white(file),
       green(call),
       red(msgid),
       special_tags,
       blue(metadata$full_name_eng),
+      fuzzy_tag,
       domain = "R-potools"
     ))
   }

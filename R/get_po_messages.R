@@ -10,16 +10,13 @@ get_po_messages <- function(po_file) {
   if (po_length == 0L) {
     return(data.table(
       type = character(),
+      fuzzy = integer(),
       msgid = character(),
       msgstr = character(),
       plural_msgid = vector('list'),
       plural_msgstr = vector('list')
     ))
   }
-
-  # TODO: need a new column, fuzzy. Two cases:
-  #  (1) fuzzy guesses -- #, fuzzy appears in the line before msgid, msgid not commented
-  #  (2) deprecations -- #, fuzzy appears in the line before #~ msgid
 
   # number of msgstr corresponding to each msgid_plural depends on
   #   the language (e.g. just one for Chinese, but 3 for Polish).
@@ -59,9 +56,11 @@ get_po_messages <- function(po_file) {
   #   FALSE for a while loop to terminate gracefully on hitting file end
   is_msg_continuation = c(grepl('^"', po_lines), FALSE)
 
+  # TODO: isn't n_msg just length(grep("^msgid ", po_lines))?
   n_msg = n_singular + n_plural
   po_data = data.table(
     type = rep(c("singular", "plural"), c(n_singular, n_plural)),
+    fuzzy = integer(n_msg),
     msgid = character(n_msg),
     msgstr = character(n_msg),
     plural_msgid = vector('list'),
@@ -89,9 +88,11 @@ get_po_messages <- function(po_file) {
     end = find_msg_end(start)
     set(po_data, msg_j, 'msgid', build_msg(start, end, 'msgid'))
 
+    set(po_data, msg_j, 'fuzzy', as.integer(start != 1L && grepl("^#, fuzzy", po_lines[start-1L])))
+
     start = end + 1L
     end = find_msg_end(start)
-    po_data[msg_j, 'msgstr' := build_msg(start, end, 'msgstr')]
+    set(po_data, msg_j, 'msgstr', build_msg(start, end, 'msgstr'))
     msg_j = msg_j + 1L
   }
 
@@ -100,6 +101,8 @@ get_po_messages <- function(po_file) {
     start = plural_msgid_start[plural_i]
     end = find_msg_end(start)
     msg1 = build_msg(start, end, 'msgid')
+
+    set(po_data, msg_j, 'fuzzy', as.integer(start != 1L && grepl("^#, fuzzy", po_lines[start-1L])))
 
     start = end + 1L
     end = find_msg_end(start)
@@ -118,6 +121,16 @@ get_po_messages <- function(po_file) {
 
     plural_i = plural_i + 1L
     msg_j = msg_j + 1L
+  }
+
+  writeLines(
+    gsub("^#~ ", "", grep("^#~ ", po_lines, value = TRUE)),
+    tmp <- tempfile()
+  )
+  deprecated = get_po_messages(tmp)
+  if (nrow(deprecated) > 0L) {
+    set(deprecated, NULL, 'fuzzy', 2L)
+    po_data = rbind(po_data, deprecated)
   }
 
   po_data[]

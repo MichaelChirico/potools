@@ -81,41 +81,48 @@ unescape_string = function(x) {
   gsub('[\\]([\\"])', '\\1', x)
 }
 
-SPRINTF_TEMPLATE_REGEX =     paste0(
-  "[%]",
+# two types of specials to highlight:
+#   (1: see ?sprintf) templates in the fmt argument to sprintf
+#   (2: see ?encodeString) escaped control characters: \\, \n, \t, \r, \v, \a, \b, \f
+# regex for sprintf templates is taken from a thorough reading of ?sprintf. it will
+#   generate some false positives, though it is a bit hard to cook up such examples
+#   (e.g., sprintf has no problem with sprintf("%#0###     ++++0f", pi) )
+SPECIALS_REGEX = paste0(
   "(?:",
-  "[%]|", # % separately to reduce false positives -- it can't be used with other specials
-  "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
-  "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
-  "[aAdifeEgGosxX]", # there are more available at the C level...
+    "[%]",
+    "(?:",
+      "[%]|", # % separately to reduce false positives -- it can't be used with other specials
+      "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
+      "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
+      "[aAdifeEgGosxX]", # there are more available at the C level...
+    ")",
+    "|",
+    "[\\][\\ntrvabf]",
   ")"
 )
-# identify the sprintf string templates in a string. return it in a nicer format
-get_fmt = function(x) {
-  # taken from a thorough reading of ?sprintf. it will generate some false positives,
-  #   though it is a bit hard to cook up such examples (e.g., sprintf has no
-  #   problem with sprintf("%#0###     ++++0f", pi) )
-  format_starts = gregexpr(SPRINTF_TEMPLATE_REGEX, x)
+# basically return the gregexpr output on SPECIALS_REGEX in a nicer format
+get_specials = function(x) {
+  special_starts = gregexpr(SPECIALS_REGEX, x)
   # NULL when no match is easier to work with (can use lengths, e.g.)
-  lapply(format_starts, function(l) {
+  lapply(special_starts, function(l) {
     if (length(l) == 1L && l < 0L) return(NULL)
     list(idx = as.integer(l), length = attr(l, 'match.length'))
   })
 }
 
-# streamlined get_fmt for counting the matches
-count_fmt = function(x) lengths(gregexpr(SPRINTF_TEMPLATE_REGEX, x))
+# streamlined get_specials for counting the matches
+count_specials = function(x) lengths(gregexpr(SPECIALS_REGEX, x))
 
 # given a string like
 #   Found %d arguments in %s. Average %02.3f%%
 # get a second line highlighting the string format templates:
-#   Found %d arguments in %s. Average %02.3f%%
-#         ^^              ^^          ^----^^^
-get_fmt_tags = function(s, fmts) {
+#   Found %d arguments in %s. \n Average %02.3f%%
+#         ^^              ^^  ^^         ^----^^^
+get_special_tags = function(s, specials) {
   out = rep(" ", nchar(s))
-  for (ii in seq_along(fmts$idx)) {
-    start = fmts$idx[ii]
-    end = start + fmts$length[ii] - 1L
+  for (ii in seq_along(specials$idx)) {
+    start = specials$idx[ii]
+    end = start + specials$length[ii] - 1L
     out[c(start, end)] = '^'
     if (end - start > 1L) {
       out[seq(start + 1L, end - 1L)] = '-'
@@ -144,7 +151,7 @@ prompt_with_templates = function(fmt, prompt_msg) {
   if (!length(fmt)) return(prompt(prompt_msg))
   while (TRUE) {
     translation = prompt(prompt_msg)
-    if (!nzchar(translation) || (n_fmt <- count_fmt(translation)) == length(fmt$idx)) break
+    if (!nzchar(translation) || (n_fmt <- count_specials(translation)) == length(fmt$idx)) break
     cat(gettextf(
       "\n\n** Oops! You supplied %d templates; but the target message has %d. Retrying... **\n",
       n_fmt, length(fmt$idx), domain='R-potools'

@@ -182,7 +182,6 @@ translate_package = function(
       )
     }
     # NB: go row-wise to facilitate quitting without losing progress
-    # TODO: long messages + options(width))
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation = read_translation(

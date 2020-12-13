@@ -76,9 +76,6 @@ get_r_messages <- function (dir, verbose = FALSE) {
     if (verbose) message(gettextf("parsing '%s'", f, domain="R-tools"), domain = NA)
     singular_i = plural_i = 0L
     s_data <- p_data <- vector("list")
-    # TODO: we could use the information from keep.source to be more informative,
-    #   and even go so far as to apply edits to the .R file on behalf of the user.
-    #   out of scope for now.
     for (e in parse(file = f, keep.source = TRUE)) {
       find_singular_strings(e)
       find_plural_strings(e)

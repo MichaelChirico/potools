@@ -148,10 +148,6 @@ prompt = function(..., encode = TRUE, conn = getOption('__potools_testing_prompt
   return(if (encode) encodeString(txt) else txt)
 }
 
-# TODO: this only passes a somewhat superficial test, namely
-#   that the count of templates matches. However, a truly
-#   correct translation would have the same number of each kind
-#   of templates -- say 3 %d, 2 %s should not match 2 %d, 3 %s.
 prompt_with_templates = function(n_target, prompt_msg) {
   if (n_target == 0) return(prompt(prompt_msg))
   while (TRUE) {

@@ -84,25 +84,26 @@ unescape_string = function(x) {
 # two types of specials to highlight:
 #   (1: see ?sprintf) templates in the fmt argument to sprintf
 #   (2: see ?encodeString) escaped control characters: \\, \n, \t, \r, \v, \a, \b, \f
+# NB: also tried combining these two regexes, but they're not used the same.
+#   For sprintf, we try to enforce consistency between the translated & original message
+#   (e.g. %d is used in both), but such consistency is not required for encoded strings.
 # regex for sprintf templates is taken from a thorough reading of ?sprintf. it will
 #   generate some false positives, though it is a bit hard to cook up such examples
 #   (e.g., sprintf has no problem with sprintf("%#0###     ++++0f", pi) )
-SPECIALS_REGEX = paste0(
+SPRINTF_TEMPLATE_REGEX = paste0(
+  "[%]",
   "(?:",
-    "[%]",
-    "(?:",
-      "[%]|", # % separately to reduce false positives -- it can't be used with other specials
-      "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
-      "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
-      "[aAdifeEgGosxX]", # there are more available at the C level...
-    ")",
-    "|",
-    "[\\][\\ntrvabf]",
+    "[%]|", # % separately to reduce false positives -- it can't be used with other specials
+    "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
+    "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
+    "[aAdifeEgGosxX]", # there are more available at the C level...
   ")"
 )
-# basically return the gregexpr output on SPECIALS_REGEX in a nicer format
+ENCODED_STRING_REGEX = "[\\][\\ntrvabf]"
+
+# basically return the gregexpr output on SPRINTF_TEMPLATE_REGEX|ENCODED_STRING_REGEX in a nicer format
 get_specials = function(x) {
-  special_starts = gregexpr(SPECIALS_REGEX, x)
+  special_starts = gregexpr(sprintf("(?:%s|%s)", SPRINTF_TEMPLATE_REGEX, ENCODED_STRING_REGEX), x)
   # NULL when no match is easier to work with (can use lengths, e.g.)
   lapply(special_starts, function(l) {
     if (length(l) == 1L && l < 0L) return(NULL)
@@ -111,7 +112,11 @@ get_specials = function(x) {
 }
 
 # streamlined get_specials for counting the matches
-count_specials = function(x) lengths(gregexpr(SPECIALS_REGEX, x))
+count_formats = function(x) vapply(
+  gregexpr(SPRINTF_TEMPLATE_REGEX, x),
+  function(x) if (length(x) == 1L && x == -1L) 0L else length(x),
+  integer(1L)
+)
 
 # given a string like
 #   Found %d arguments in %s. Average %02.3f%%
@@ -147,14 +152,14 @@ prompt = function(..., encode = TRUE, conn = getOption('__potools_testing_prompt
 #   that the count of templates matches. However, a truly
 #   correct translation would have the same number of each kind
 #   of templates -- say 3 %d, 2 %s should not match 2 %d, 3 %s.
-prompt_with_templates = function(fmt, prompt_msg) {
-  if (!length(fmt)) return(prompt(prompt_msg))
+prompt_with_templates = function(n_target, prompt_msg) {
+  if (n_target == 0) return(prompt(prompt_msg))
   while (TRUE) {
     translation = prompt(prompt_msg)
-    if (!nzchar(translation) || (n_fmt <- count_specials(translation)) == length(fmt$idx)) break
+    if (!nzchar(translation) || (n_fmt <- count_formats(translation)) == n_target) break
     cat(gettextf(
       "\n\n** Oops! You supplied %d templates; but the target message has %d. Retrying... **\n",
-      n_fmt, length(fmt$idx), domain='R-potools'
+      n_fmt, n_target, domain='R-potools'
     ))
   }
   translation

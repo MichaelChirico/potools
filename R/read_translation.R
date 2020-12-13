@@ -28,12 +28,13 @@ read_translation = function(msgid, type, file, call, metadata) {
   } else {
     special_tags = ""
   }
+  n_format = count_formats(msgid)
   if (type == 'plural') {
     translation <- character(metadata$nplurals)
     # add enough blanks for Plural message:
     if (nzchar(special_tags)) special_tags = paste0("\n                ", special_tags)
     for (jj in seq_len(metadata$nplurals)) {
-      translation[jj] = prompt_with_templates(specials, gettextf(
+      translation[jj] = prompt_with_templates(n_format, gettextf(
         '\nFile: %s\nCall: %s\nPlural message: %s%s\nHow would you translate this message into %s %s?',
         white(file),
         green(call),
@@ -47,7 +48,7 @@ read_translation = function(msgid, type, file, call, metadata) {
   } else {
     # add enough blanks for Message:
     if (nzchar(special_tags)) special_tags = paste0("\n         ", special_tags)
-    translation = prompt_with_templates(specials, gettextf(
+    translation = prompt_with_templates(n_format, gettextf(
       '\nFile: %s\nCall: %s\nMessage: %s%s\nHow would you translate this message into %s?',
       white(file),
       green(call),

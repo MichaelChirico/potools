@@ -2,15 +2,12 @@ translate_package = function(
   dir='.', languages,
   copyright, bugs, verbose=FALSE
 ) {
-  if (!interactive()) {
-    stop('This is an interactive function. For non-interactive use cases, start from tools::update_pkg_po.')
-  }
   check_sys_reqs()
 
   stopifnot(
     'Only one package at a time' = length(dir) == 1L,
     "'dir' must be a character" = is.character(dir),
-    "'languages' must be a characer vector" = missing(languages) || is.character(languages)
+    "'languages' must be a character vector" = missing(languages) || is.character(languages)
   )
 
   dir = get_directory(dir)

@@ -13,13 +13,16 @@ name: test-coverage
 
 jobs:
   test-coverage:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@v1
       - uses: r-lib/actions/setup-pandoc@v1
+      - name: Add system dependencies
+        run: apt-get install libcurl4-openssl-dev
+
       - name: Query dependencies
         run: |
           install.packages('remotes')

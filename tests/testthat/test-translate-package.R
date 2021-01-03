@@ -53,7 +53,7 @@ test_that("translate_package works on a simple package", {
       print(zh_translations)
 
       expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
-      expect_true(any(grepl("早上好", zh_translations, useBytes=TRUE)))
+      expect_true(any(grepl("早上好", zh_translations, fixed=TRUE, useBytes=TRUE)))
     }
   )
 })

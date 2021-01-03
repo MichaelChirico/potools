@@ -37,6 +37,13 @@ translate_package = function(
   if (verbose) message('Getting R-level messages...')
   message_data = get_r_messages(dir, verbose = verbose)
 
+  # for testing, we need a connection that stays open so that readLines(n=1L)
+  #   reads successive lines. originally tried passing a test connection as
+  #   an argument to prompt(), but that closed the connection each time -->
+  #   only the first line is ever read.
+  set_prompt_conn()
+  on.exit(unset_prompt_conn())
+
   # check for calls like stop("a", i, "b", j) that are better suited for
   #   translation as calls like
   exit =
@@ -163,7 +170,11 @@ translate_package = function(
     #   on.exit command to be overwritten on each iteration over languages --
     #   only one partially-finished language should be written at a time.
     INCOMPLETE = TRUE
-    on.exit(if (INCOMPLETE) write_po_file(message_data, lang_file, package, version, author, metadata))
+    on.exit({
+      if (INCOMPLETE) write_po_file(message_data, lang_file, package, version, author, metadata)
+      # since add=FALSE, we overwrite the above call; duplicate it here
+      unset_prompt_conn()
+    })
 
     if (verbose) {
       message(

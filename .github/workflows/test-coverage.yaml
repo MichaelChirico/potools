@@ -21,7 +21,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v1
       - uses: r-lib/actions/setup-pandoc@v1
       - name: Add system dependencies
-        run: apt-get install libcurl4-openssl-dev
+        run: sudo apt-get install libcurl4-openssl-dev
 
       - name: Query dependencies
         run: |

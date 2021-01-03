@@ -28,6 +28,7 @@ test_that("translate_package works on a simple package", {
       )
 
       pkg_files <- list.files(pkg, recursive=TRUE)
+      writeLines(pkg_files)
 
       expect_true("po/R-rMsg.pot" %in% pkg_files)
       # . here is en@quot/LC_MESSAGES; not sure how platform-robust that is
@@ -42,7 +43,6 @@ test_that("translate_package works on a simple package", {
       translate_package(pkg, "zh_CN")
 
       pkg_files <- list.files(pkg, recursive = TRUE)
-      writeLines(pkg_files)
 
       expect_true("po/R-zh_CN.po" %in% pkg_files)
       # . here is LC_MESSAGES; not sure how platform-robust that is
@@ -52,7 +52,7 @@ test_that("translate_package works on a simple package", {
       writeLines(zh_translations)
 
       expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
-      expect_true(any(grepl("早上好", zh_translations)))
+      expect_true(any(grepl("早上好", zh_translations, useBytes=TRUE)))
     }
   )
 })

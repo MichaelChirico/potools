@@ -31,8 +31,9 @@ test_that("translate_package works on a simple package", {
 
       expect_true("po/R-rMsg.pot" %in% pkg_files)
       # Windows doesn't produce the en@quot translations at all
-      skip_if(.Platform$OS.type == "windows")
-      expect_true(any(grepl("inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", pkg_files)))
+      if (.Platform$OS.type != "windows") {
+        expect_true(any(grepl("inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", pkg_files)))
+      }
     }
   )
   # do translations with mocked input

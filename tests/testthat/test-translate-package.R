@@ -50,7 +50,7 @@ test_that("translate_package works on a simple package", {
       expect_true(any(grepl("inst/po/zh_CN/.*/R-rMsg.mo", pkg_files)))
 
       zh_translations <- readLines(file.path(pkg, "po/R-zh_CN.po"))
-      writeLines(zh_translations)
+      print(zh_translations)
 
       expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
       expect_true(any(grepl("早上好", zh_translations, useBytes=TRUE)))

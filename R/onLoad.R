@@ -6,3 +6,5 @@ globalVariables(
   ),
   package = 'potools'
 )
+
+.potools = new.env()

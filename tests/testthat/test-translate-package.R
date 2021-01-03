@@ -12,3 +12,39 @@ test_that("translate_package handles empty packages", {
     expect_message(translate_package(pkg, verbose = TRUE), "No messages to translate", fixed = TRUE)
   })
 })
+
+test_that("translate_package works on a simple package", {
+  pkg <- test_path("test_packages/r_msg")
+  # simple run-through without doing translations
+  restore_package(
+    pkg,
+    {
+      translate_package(pkg)
+
+      pkg_files <- list.files(pkg, recursive = TRUE)
+
+      expect_true("po/R-rMsg.pot" %in% pkg_files)
+      # . here is en@quot/LC_MESSAGES; not sure how platform-robust that is
+      expect_true(any(grepl("inst/po/.*/R-rMsg.mo", pkg_files)))
+    }
+  )
+  # do translations with mocked input
+  restore_package(
+    pkg,
+    tmp_conn = test_path("mock_translations/test-translate-package-r_msg-1.input"),
+    {
+      translate_package(pkg, "zh_CN")
+
+      pkg_files <- list.files(pkg, recursive = TRUE)
+
+      expect_true("po/R-zh_CN.po" %in% pkg_files)
+      # . here is LC_MESSAGES; not sure how platform-robust that is
+      expect_true(any(grepl("inst/po/zh_CN/.*/R-rMsg.mo", pkg_files)))
+
+      zh_translations <- readLines(file.path(pkg, "po/R-zh_CN.po"))
+
+      expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
+      expect_true(any(grepl("早上好", zh_translations)))
+    }
+  )
+})

@@ -136,12 +136,27 @@ get_special_tags = function(s, specials) {
   paste(out, collapse="")
 }
 
+set_prompt_conn <- function() {
+  conn <- getOption('__potools_testing_prompt_connection__', stdin())
+  if (is.character(conn)) {
+    conn <- file(conn, "r")
+  }
+  assign("prompt_conn", conn, envir=.potools)
+  return(invisible())
+}
+
+unset_prompt_conn <- function() {
+  if (!exists("prompt_conn", envir=.potools) || inherits(.potools$prompt_conn, "terminal")) return(invisible())
+  close(.potools$prompt_conn)
+  return(invisible())
+}
+
 # would be great to use readline() but it has several fatal flaws:
 #   (1) the prompt argument is a buffer capped at 256 chars, which is far too few
 #   (2) readline is _strictly_ interactive -- it can't be tested.
 # See this post for testing:
 #   https://debruine.github.io/posts/interactive-test/
-prompt = function(..., encode = TRUE, conn = getOption('__potools_testing_prompt_connection__', stdin())) {
+prompt = function(..., encode = TRUE, conn = .potools$prompt_conn) {
   cat(...)
   cat('\n')
   txt = readLines(conn, n=1L)

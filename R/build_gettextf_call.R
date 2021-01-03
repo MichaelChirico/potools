@@ -1,6 +1,7 @@
 # take a call like stop("a", i, "b", j) and suggest
 #   stop(domain=NA, gettextf("a%sb%s", i, j, domain="R-pkg"))
 build_gettextf_call = function(txt, package) {
+  if (!length(txt)) return(invisible())
   e = str2lang(txt)
 
   string = character(length(e) - 1L)

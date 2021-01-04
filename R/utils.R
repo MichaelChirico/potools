@@ -1,6 +1,6 @@
 # normalizePath with some sanity checks added
 get_directory = function(dir) {
-  dir = normalizePath(dir)
+  dir = normalizePath(dir, mustWork=FALSE)
 
   if (!file.exists(dir)) {
     stop(domain=NA, gettextf('%s does not exist', dir, domain='R-potools'))
@@ -8,7 +8,7 @@ get_directory = function(dir) {
   if (!file.info(dir)$isdir) {
     stop(domain=NA, gettextf('%s is not a directory', dir, domain='R-potools'))
   }
-  return(dir)
+  return(normalizePath(dir))
 }
 
 # check dir is a package & return its name & version

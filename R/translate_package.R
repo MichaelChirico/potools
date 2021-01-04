@@ -171,7 +171,7 @@ translate_package = function(
     #   only one partially-finished language should be written at a time.
     INCOMPLETE = TRUE
     on.exit({
-      if (INCOMPLETE) write_po_file(message_data, lang_file, package, version, author, metadata)
+      if (INCOMPLETE) write_po_file(message_data, lang_file, package, version, author, metadata) # nocov
       # since add=FALSE, we overwrite the above call; duplicate it here
       unset_prompt_conn()
     })
@@ -189,7 +189,7 @@ translate_package = function(
         " * Whenever templates or escaping is happening in a string, these will be 'highlighted' by carets (^) in the line below"
       )
     }
-    # NB: go row-wise to facilitate quitting without losing progress
+    # NB: loop over rows to facilitate quitting without losing progress
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation = read_translation(

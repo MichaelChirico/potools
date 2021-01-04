@@ -19,12 +19,10 @@ test_that("translate_package works on a simple package", {
   restore_package(
     pkg,
     {
-      msg <- capture_messages(translate_package(pkg, verbose=TRUE))
-      expect_true(
-        Reduce(`&&`, lapply(
-          c("Running tools::update_pkg_po", "No languages provided"),
-          function(ptn) any(grepl(ptn, msg, fixed=TRUE))
-        ))
+      expect_messages(
+        translate_package(pkg, verbose=TRUE),
+        c("Running tools::update_pkg_po", "No languages provided"),
+        fixed = TRUE
       )
 
       pkg_files <- list.files(pkg, recursive=TRUE)
@@ -41,7 +39,11 @@ test_that("translate_package works on a simple package", {
     pkg,
     tmp_conn = test_path("mock_translations/test-translate-package-r_msg-1.input"),
     {
-      translate_package(pkg, "zh_CN")
+      expect_messages(
+        translate_package(pkg, "zh_CN", verbose=TRUE),
+        c("Beginning new translations", "BEGINNING TRANSLATION", "Re-running tools::update_pkg_po()"),
+        fixed = TRUE
+      )
 
       pkg_files <- list.files(pkg, recursive = TRUE)
 
@@ -53,6 +55,8 @@ test_that("translate_package works on a simple package", {
 
       expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
       expect_true(any(grepl("早上好", zh_translations)))
+      # plural message
+      expect_true(any(grepl("该起床了", zh_translations)))
     }
   )
 })

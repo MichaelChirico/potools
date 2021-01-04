@@ -15,5 +15,11 @@ restore_package <- function(dir, expr, tmp_conn) {
     old = options("__potools_testing_prompt_connection__" = tmp_conn)
     on.exit(options(old), add = TRUE)
   }
-  expr
+
+  invisible(capture.output(expr))
+}
+
+expect_messages = function(expr, msgs, ...) {
+  observed_messages = capture_messages(expr)
+  expect_true(all(vapply(msgs, function(msg) any(grepl(msg, observed_messages, ...)), logical(1L))))
 }

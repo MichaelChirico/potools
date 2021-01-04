@@ -160,11 +160,13 @@ prompt = function(..., encode = TRUE, conn = .potools$prompt_conn) {
   cat(...)
   cat('\n')
   if (inherits(conn, "terminal")) {
+    # nocov start <can only test interactively>
     txt = enc2utf8(readLines(conn, n=1L))
+    return(if (encode) encodeString(txt) else txt)
+    # nocov end
   } else {
-    txt = readLines(conn, n=1L, encoding="UTF-8")
+    return(readLines(conn, n=1L, encoding="UTF-8"))
   }
-  return(if (encode) encodeString(txt) else txt)
 }
 
 prompt_with_templates = function(n_target, prompt_msg) {

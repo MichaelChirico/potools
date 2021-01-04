@@ -52,7 +52,7 @@ test_that("translate_package works on a simple package", {
       zh_translations <- readLines(file.path(pkg, "po/R-zh_CN.po"), encoding='UTF-8')
 
       expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
-      expect_true(any(grepl(enc2utf8("早上好"), enc2utf8(zh_translations))))
+      expect_true(any(grepl("早上好", zh_translations)))
     }
   )
 })

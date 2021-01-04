@@ -8,14 +8,12 @@ function(x) {
 }
 
 function(x) {
-  stop(domain=NA, gettextf(
-    "Avg failures: %.02f; N failures: %d; failure: %s",
-    mean(x), length(x), deparse1(substitute(x))
-  ))
+  gettext("Hi there")
 }
 
 function(x) {
-  cat(sprintf(
-    ngettext(length(x), "small fail\n", "big fail\n")
+  stop(domain=NA, gettextf(
+    "Avg failures: %.02f; N failures: %d; failure: %s",
+    mean(x), length(x), deparse1(substitute(x))
   ))
 }

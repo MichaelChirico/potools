@@ -25,11 +25,11 @@ expect_all_match = function(inputs, target, ...) {
 
 expect_messages = function(expr, msgs, ...) {
   observed_messages = capture_messages(expr)
-  expect_all_match(msgs, observed_messages)
+  expect_all_match(msgs, observed_messages, ...)
 }
 
 expect_outputs = function(output, outs, ...) {
-  expect_all_match(outs, output)
+  expect_all_match(outs, output, ...)
 }
 
 test_package = function(pkg) test_path(file.path("test_packages", pkg))

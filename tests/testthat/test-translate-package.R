@@ -70,7 +70,7 @@ test_that("translate_package works on a simple package", {
       expect_true(any(grepl("该起床了", zh_translations)))
     }
   )
-  expect_outputs()
+  expect_outputs(prompts, c("^---^", "^^"), fixed=TRUE)
 })
 
 test_that("translate_package works on package with 'cracked' messages needing templates", {

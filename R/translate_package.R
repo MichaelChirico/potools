@@ -37,6 +37,13 @@ translate_package = function(
   if (verbose) message('Getting R-level messages...')
   message_data = get_r_messages(dir, verbose = verbose)
 
+  if (!nrow(message_data)) {
+    if (verbose) message('No messages to translate; finishing')
+    return(invisible())
+  }
+
+  if (verbose) message('Running message diagnostics...')
+
   # for testing, we need a connection that stays open so that readLines(n=1L)
   #   reads successive lines. originally tried passing a test connection as
   #   an argument to prompt(), but that closed the connection each time -->
@@ -64,14 +71,6 @@ translate_package = function(
                    TRUE
                  }][ , if (.N > 0L) prompt('Exit now to repair any of these? [y/N]') else 'n']
   if (tolower(exit) %chin% c('y', 'yes')) return(invisible())
-
-  if (!nrow(message_data)) {
-    if (verbose) message('No messages to translate; finishing')
-    return(invisible())
-  }
-
-  if (verbose) message('Running message diagnostics...')
-
 
   if (verbose) message('Running tools::update_pkg_po()')
   tools::update_pkg_po(dir, package, version, copyright, bugs)

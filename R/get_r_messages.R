@@ -11,7 +11,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
   r_files = list_r_files(dir)
   for (os in c("unix", "windows")) {
     os_dir = file.path(dir, os)
-    if (dir.exists(os_dir)) rfiles = c(r_files, list_r_files(os_dir))
+    if (dir.exists(os_dir)) r_files = c(r_files, list_r_files(os_dir))
   }
   # somehow on windows I was seeing absolute paths with \ but paths
   #   from list.files as / -- normalizePath makes it consistent

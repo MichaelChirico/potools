@@ -3,7 +3,6 @@
 #   two columns (file, call) are missing because (at least for R files)
 #   these are not recorded by gettext.
 get_po_messages <- function(po_file) {
-  if (!file.exists(po_file)) stop(domain=NA, gettextf("File not found: %s", po_file, domain="R-potools"))
   po_lines = readLines(po_file, encoding="UTF-8")
   po_length = length(po_lines)
 

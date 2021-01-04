@@ -59,7 +59,7 @@ check_sys_reqs = function() {
 
 # parse the R files in a directory. do this once & reuse the results.
 parse_r_files = function(dir) {
-  r_files = list_r_files(dir)
+  r_files = package_r_files(dir)
   out = lapply(r_files, parse, keep.source=TRUE)
   names(out) = r_files
   return(out)

@@ -76,8 +76,8 @@ get_r_messages <- function (exprs) {
       find_plural_strings(e)
     }
 
-    singular[[f]] = unnest_call(s_data, plural=FALSE)
-    plural[[f]] = unnest_call(p_data, plural=TRUE)
+    singular[[ii]] = unnest_call(s_data, plural=FALSE)
+    plural[[ii]] = unnest_call(p_data, plural=TRUE)
   }
   msg = rbind(
     singular = rbindlist(singular, idcol='file'),

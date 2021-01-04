@@ -1,6 +1,6 @@
 # check for calls like stop("a", i, "b", j) that are better suited for
 #   translation as calls like gettextf("a%db%d", i, j)
-check_cracked_messages = function(message_data, package) {
+check_cracked_messages = function(message_data, package, verbose) {
   exit =
     message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
                  ][ , {

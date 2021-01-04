@@ -33,8 +33,7 @@ check_untranslated_cat <- function (exprs, package) {
     f_data <- vector("list")
     for (e in exprs[[ii]]) find_untranslated_strings(e)
 
-    cat_calls[[f]] = f_data
+    cat_calls[[ii]] = f_data
   }
-
-
+  return(invisible())
 }

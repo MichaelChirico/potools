@@ -54,11 +54,11 @@ translate_package = function(
 
   if (verbose) message('Running message diagnostics...')
 
-  exit = check_cracked_messages(message_data, package)
+  exit = check_cracked_messages(message_data, package, verbose)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
   exit = check_untranslated_cat(dir, package)
-  if (exit %chin% c('y', 'yes')) return(invisible())
+  #if (exit %chin% c('y', 'yes')) return(invisible())
 
   if (verbose) message('Running tools::update_pkg_po()')
   tools::update_pkg_po(dir, package, version, copyright, bugs)

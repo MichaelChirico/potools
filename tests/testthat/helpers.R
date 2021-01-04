@@ -19,7 +19,16 @@ restore_package <- function(dir, expr, tmp_conn) {
   invisible(capture.output(expr))
 }
 
+expect_all_match = function(inputs, target, ...) {
+  expect_true(all(vapply(inputs, function(input) any(grepl(input, target, ...)), logical(1L))))
+}
+
 expect_messages = function(expr, msgs, ...) {
   observed_messages = capture_messages(expr)
-  expect_true(all(vapply(msgs, function(msg) any(grepl(msg, observed_messages, ...)), logical(1L))))
+  expect_all_match(msgs, observed_messages)
 }
+
+expect_outputs = function(output, outs, ...) {
+  expect_all_match(outs, output)
+}
+

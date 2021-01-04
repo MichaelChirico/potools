@@ -76,3 +76,19 @@ test_that("translate_package works on package with 'cracked' messages needing te
     }
   )
 })
+
+test_that("translate_package works on package with outdated (fuzzy) translations", {
+  pkg = test_path("test_packages/r_fuzzy")
+  # simple run-through without doing translations
+  prompts = restore_package(
+    pkg,
+    tmp_conn = test_path("mock_translations/test-translate-package-r_non_template-1.input"),
+    {
+      expect_messages(
+        translate_package(pkg, "zh_CN", verbose=TRUE),
+        "Found 1 messaging calls that might be better suited for gettextf",
+        fixed = TRUE
+      )
+    }
+  )
+})

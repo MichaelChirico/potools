@@ -159,7 +159,11 @@ unset_prompt_conn <- function() {
 prompt = function(..., encode = TRUE, conn = .potools$prompt_conn) {
   cat(...)
   cat('\n')
-  txt = readLines(conn, n=1L, encoding = if (inherits(conn, "terminal")) "unknown" else "UTF-8")
+  if (inherits(conn, "terminal")) {
+    txt = enc2utf8(readLines(conn, n=1L))
+  } else {
+    txt = readLines(conn, n=1L, encoding="UTF-8")
+  }
   return(if (encode) encodeString(txt) else txt)
 }
 

@@ -50,7 +50,7 @@ translate_package = function(
     message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
                  ][ , {
                    if (.N > 0L && verbose) message(domain=NA, gettextf(
-                     'Found %d messaging calls that might be better suited to use gettextf for ease of translation:',
+                     'Found %d messaging calls that might be better suited for gettextf for ease of translation:',
                      uniqueN(call), domain='R-potools'
                    ))
                    .SD

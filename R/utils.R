@@ -165,7 +165,7 @@ prompt = function(..., encode = TRUE, conn = .potools$prompt_conn) {
   cat(sprintf("bin rep of txt after enc2utf8: %s\n", paste(charToRaw(txt), sep=".")))
   txt = if (encode) encodeString(txt) else txt
   cat(sprintf("bin rep of txt after encodeString: %s\n", paste(charToRaw(txt), sep=".")))
-  return()
+  return(txt)
 }
 
 prompt_with_templates = function(n_target, prompt_msg) {

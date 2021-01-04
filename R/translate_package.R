@@ -42,14 +42,14 @@ translate_package = function(
     return(invisible())
   }
 
-  if (verbose) message('Running message diagnostics...')
-
   # for testing, we need a connection that stays open so that readLines(n=1L)
   #   reads successive lines. originally tried passing a test connection as
   #   an argument to prompt(), but that closed the connection each time -->
   #   only the first line is ever read.
   set_prompt_conn()
   on.exit(unset_prompt_conn())
+
+  if (verbose) message('Running message diagnostics...')
 
   # check for calls like stop("a", i, "b", j) that are better suited for
   #   translation as calls like

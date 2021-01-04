@@ -57,6 +57,12 @@ test_that("translate_package works on a simple package", {
       expect_true(any(grepl("早上好", zh_translations)))
       # plural message
       expect_true(any(grepl("该起床了", zh_translations)))
+
+      # now try re-translating the package
+      expect_messages(
+        translate_package(pkg, "zh_CN", verbose=TRUE),
+        "Found existing translations", "Translations for zh_CN are up to date!"
+      )
     }
   )
 })

@@ -3,10 +3,10 @@ write_po_file <- function(message_data, pofile, package, version, author, metada
   timestamp <- format(Sys.time(), tz = 'UTC')
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
   #   https://stackoverflow.com/q/10675360
-  file = file(pofile, "wb")
-  on.exit(close(file))
+  pofile_conn = file(pofile, "wb")
+  on.exit(close(pofile_conn))
 
-  writeLines(con=pofile, useBytes=TRUE, sprintf(
+  writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
     PO_HEADER_TEMPLATE,
     package, version,
     timestamp,
@@ -19,13 +19,13 @@ write_po_file <- function(message_data, pofile, package, version, author, metada
 
   for (ii in message_data[(!is_repeat), which = TRUE]) {
     message_data[ii, {
-      cat(sprintf("msgid=%s\tmsgstr=%s\n", msgid, paste(charToRaw(msgstr), collapse=".")))
+      #cat(sprintf("msgid=%s\tmsgstr=%s\n", msgid, paste(charToRaw(msgstr), collapse=".")))
       if (type == 'singular') {
-        writeLines(con=pofile, useBytes=TRUE, sprintf(
+        writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
           '\n\nmsgid "%s"\nmsgstr "%s"', msgid, msgstr
         ))
       } else {
-        writeLines(con=pofile, useBytes=TRUE, sprintf(
+        writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
           '\n\nmsgid "%s"\nmsgid_plural "%s"\n%s',
           plural_msgid[[c(1L, 1L)]], plural_msgid[[1:2]],
           paste(sprintf('msgstr[%d] "%s"', seq_along(plural_msgstr)-1L, unlist(plural_msgstr)), collapse='\n')

@@ -219,6 +219,8 @@ translate_package = function(
     # set INCOMPLETE after write_po_file for the event of a process interruption
     #   between the loop finishing and the write_po_file command executing
     write_po_file(message_data, lang_file, package, version, author, metadata)
+    #cat('po file contents as written:\n')
+    #writeLines(readLines(lang_file))
     INCOMPLETE = FALSE
   }
 

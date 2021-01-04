@@ -78,3 +78,46 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
   }
   translation
 }
+
+set_prompt_conn <- function() {
+  conn <- getOption('__potools_testing_prompt_connection__', stdin())
+  if (is.character(conn)) {
+    conn <- file(conn, "r")
+  }
+  assign("prompt_conn", conn, envir=.potools)
+  return(invisible())
+}
+
+unset_prompt_conn <- function() {
+  if (!exists("prompt_conn", envir=.potools) || inherits(.potools$prompt_conn, "terminal")) return(invisible())
+  close(.potools$prompt_conn)
+  return(invisible())
+}
+
+# would be great to use readline() but it has several fatal flaws:
+#   (1) the prompt argument is a buffer capped at 256 chars, which is far too few
+#   (2) readline is _strictly_ interactive -- it can't be tested.
+# See this post for testing:
+#   https://debruine.github.io/posts/interactive-test/
+prompt = function(..., conn = .potools$prompt_conn) {
+  cat(...)
+  cat('\n')
+  if (inherits(conn, "terminal")) {
+    return(enc2utf8(readLines(conn, n=1L))) # nocov
+  } else {
+    return(readLines(conn, n=1L, encoding="UTF-8"))
+  }
+}
+
+prompt_with_templates = function(n_target, prompt_msg) {
+  if (n_target == 0) return(prompt(prompt_msg))
+  while (TRUE) {
+    translation = prompt(prompt_msg)
+    if (!nzchar(translation) || (n_fmt <- count_formats(translation)) == n_target) break
+    cat(gettextf(
+      "\n\n** Oops! You supplied %d templates; but the target message has %d. Retrying... **\n",
+      n_fmt, n_target, domain='R-potools'
+    ))
+  }
+  translation
+}

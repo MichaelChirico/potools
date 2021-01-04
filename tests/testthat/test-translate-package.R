@@ -49,9 +49,10 @@ test_that("translate_package works on a simple package", {
       # . here is LC_MESSAGES; not sure how platform-robust that is
       expect_true(any(grepl("inst/po/zh_CN/.*/R-rMsg.mo", pkg_files)))
 
-      zh_translations <- readLines(file.path(pkg, "po/R-zh_CN.po"))
+      zh_translations <- readLines(file.path(pkg, "po/R-zh_CN.po"), encoding='UTF-8')
       print(charToRaw(enc2utf8(zh_translations)[16]))
       print(charToRaw(enc2utf8("早上好")))
+      writeLines(zh_translations)
 
       expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
       expect_true(any(grepl(enc2utf8("早上好"), enc2utf8(zh_translations))))

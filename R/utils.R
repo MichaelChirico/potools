@@ -59,8 +59,13 @@ check_sys_reqs = function() {
 
 list_r_files = function(dir) list.files(dir, full.names = TRUE, pattern = "(?i)\\.r")
 
-# second condition is for calls like (function(x) x+1)(2)
-is_name_call = function(e) is.call(e) && is.name(e[[1L]])
+# patch analogous fix for Bugzilla#18025 here
+`%is_name%` = function(e, f) is.name(e) && e %chin% f
+`%is_base_call%` = function(e, f) {
+  if (e %is_name% f) return(TRUE)
+  if (!is.call(e) || length(e) != 3L) return(FALSE)
+  return(e[[1L]] %is_name% "::" && e[[2L]] %is_name% "base" && e[[3L]] %is_name% f)
+}
 do_suppress = function(e) {
   domain = e[['domain']]
   !is.null(domain) && !is.name(domain) && is.na(domain)

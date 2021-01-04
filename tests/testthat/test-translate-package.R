@@ -16,7 +16,7 @@ test_that("translate_package arg checking errors work", {
 })
 
 test_that("translate_package handles empty packages", {
-  pkg <- test_path("test_packages/no_msg")
+  pkg <- test_package("no_msg")
   restore_package(pkg, {
     expect_invisible(translate_package(pkg))
 
@@ -25,7 +25,7 @@ test_that("translate_package handles empty packages", {
 })
 
 test_that("translate_package works on a simple package", {
-  pkg <- test_path("test_packages/r_msg")
+  pkg <- test_package("r_msg")
   # simple run-through without doing translations
   restore_package(
     pkg,
@@ -46,9 +46,9 @@ test_that("translate_package works on a simple package", {
     }
   )
   # do translations with mocked input
-  restore_package(
+  prompts <- restore_package(
     pkg,
-    tmp_conn = test_path("mock_translations/test-translate-package-r_msg-1.input"),
+    tmp_conn = mock_translation("test-translate-package-r_msg-1.input"),
     {
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
@@ -70,14 +70,15 @@ test_that("translate_package works on a simple package", {
       expect_true(any(grepl("该起床了", zh_translations)))
     }
   )
+  expect_outputs(prompts, c("^---^", "^^"), fixed=TRUE)
 })
 
 test_that("translate_package works on package with 'cracked' messages needing templates", {
-  pkg <- test_path("test_packages/r_non_template")
+  pkg <- test_package("r_non_template")
   # simple run-through without doing translations
   restore_package(
     pkg,
-    tmp_conn = test_path("mock_translations/test-translate-package-r_non_template-1.input"),
+    tmp_conn = mock_translation("test-translate-package-r_non_template-1.input"),
     {
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
@@ -86,4 +87,21 @@ test_that("translate_package works on package with 'cracked' messages needing te
       )
     }
   )
+})
+
+test_that("translate_package works on package with outdated (fuzzy) translations", {
+  pkg = test_package("r_fuzzy")
+  # simple run-through without doing translations
+  prompts = restore_package(
+    pkg,
+    tmp_conn = mock_translation("test-translate-package-r_fuzzy-1.input"),
+    {
+      expect_messages(
+        translate_package(pkg, "zh_CN", verbose=TRUE),
+        c("translations marked as deprecated", "SINGULAR MESSAGES", "PLURAL MESSAGES"),
+        fixed = TRUE
+      )
+    }
+  )
+  expect_match(prompts, "a similar message was previously translated as", all=FALSE)
 })

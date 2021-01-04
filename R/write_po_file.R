@@ -14,7 +14,7 @@ write_po_file <- function(message_data, pofile, package, version, author, metada
 
   for (ii in message_data[(!is_repeat), which = TRUE]) {
     message_data[ii, {
-      cat(sprintf("msgid=%s\tmsgstr=%s\n", msgid, msgstr))
+      cat(sprintf("msgid=%s\tmsgstr=%s\n", msgid, paste(charToRaw(msgstr), collapse=".")))
       if (type == 'singular') {
         cat(sprintf('\n\nmsgid "%s"\nmsgstr "%s"', msgid, msgstr), file=pofile, append=TRUE)
       } else {

@@ -160,8 +160,12 @@ prompt = function(..., encode = TRUE, conn = .potools$prompt_conn) {
   cat(...)
   cat('\n')
   txt = readLines(conn, n=1L, encoding = if (inherits(conn, "terminal")) "unknown" else "UTF-8")
+  cat(sprintf("bin rep of txt before enc2utf8: %s\n", paste(charToRaw(txt), sep=".")))
   txt = enc2utf8(txt)
-  return(if (encode) encodeString(txt) else txt)
+  cat(sprintf("bin rep of txt after enc2utf8: %s\n", paste(charToRaw(txt), sep=".")))
+  txt = if (encode) encodeString(txt) else txt
+  cat(sprintf("bin rep of txt after encodeString: %s\n", paste(charToRaw(txt), sep=".")))
+  return()
 }
 
 prompt_with_templates = function(n_target, prompt_msg) {

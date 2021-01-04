@@ -46,7 +46,7 @@ test_that("translate_package works on a simple package", {
     }
   )
   # do translations with mocked input
-  restore_package(
+  prompts <- restore_package(
     pkg,
     tmp_conn = test_path("mock_translations/test-translate-package-r_msg-1.input"),
     {
@@ -70,6 +70,7 @@ test_that("translate_package works on a simple package", {
       expect_true(any(grepl("该起床了", zh_translations)))
     }
   )
+  expect_outputs()
 })
 
 test_that("translate_package works on package with 'cracked' messages needing templates", {

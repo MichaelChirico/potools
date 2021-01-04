@@ -1,7 +1,7 @@
 test_that("translate_package arg checking errors work", {
-  expect_error(translate_package(c("dplyr", "data.table")), "Only one package at a time", fixed = TRUE)
-  expect_error(translate_package(1), "'dir' must be a character", fixed = TRUE)
-  expect_error(translate_package(languages = 1L), "'languages' must be a character vector", fixed = TRUE)
+  expect_error(translate_package(c("dplyr", "data.table")), "Only one package at a time", fixed=TRUE)
+  expect_error(translate_package(1), "'dir' must be a character", fixed=TRUE)
+  expect_error(translate_package(languages = 1L), "'languages' must be a character vector", fixed=TRUE)
 })
 
 test_that("translate_package handles empty packages", {
@@ -9,7 +9,7 @@ test_that("translate_package handles empty packages", {
   restore_package(pkg, {
     expect_invisible(translate_package(pkg))
 
-    expect_message(translate_package(pkg, verbose = TRUE), "No messages to translate", fixed = TRUE)
+    expect_message(translate_package(pkg, verbose=TRUE), "No messages to translate", fixed=TRUE)
   })
 })
 
@@ -19,13 +19,21 @@ test_that("translate_package works on a simple package", {
   restore_package(
     pkg,
     {
-      translate_package(pkg)
+      msg <- capture_messages(translate_package(pkg, verbose=TRUE))
+      expect_true(
+        Reduce(`&&`, lapply(
+          c("Running tools::update_pkg_po", "No languages provided"),
+          function(ptn) any(grepl(ptn, msg, fixed=TRUE))
+        ))
+      )
 
-      pkg_files <- list.files(pkg, recursive = TRUE)
+      pkg_files <- list.files(pkg, recursive=TRUE)
 
       expect_true("po/R-rMsg.pot" %in% pkg_files)
-      # . here is en@quot/LC_MESSAGES; not sure how platform-robust that is
-      expect_true(any(grepl("inst/po/.*/R-rMsg.mo", pkg_files)))
+      # Windows doesn't produce the en@quot translations at all
+      if (.Platform$OS.type != "windows") {
+        expect_true(any(grepl("inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", pkg_files)))
+      }
     }
   )
   # do translations with mocked input
@@ -41,7 +49,7 @@ test_that("translate_package works on a simple package", {
       # . here is LC_MESSAGES; not sure how platform-robust that is
       expect_true(any(grepl("inst/po/zh_CN/.*/R-rMsg.mo", pkg_files)))
 
-      zh_translations <- readLines(file.path(pkg, "po/R-zh_CN.po"))
+      zh_translations <- readLines(file.path(pkg, "po/R-zh_CN.po"), encoding='UTF-8')
 
       expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
       expect_true(any(grepl("早上好", zh_translations)))

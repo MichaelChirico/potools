@@ -1,7 +1,12 @@
 # output a .po file from a message data.table
 write_po_file <- function(message_data, pofile, package, version, author, metadata) {
   timestamp <- format(Sys.time(), tz = 'UTC')
-  cat(file=pofile, sprintf(
+  # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
+  #   https://stackoverflow.com/q/10675360
+  pofile_conn = file(pofile, "wb")
+  on.exit(close(pofile_conn))
+
+  writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
     PO_HEADER_TEMPLATE,
     package, version,
     timestamp,
@@ -15,9 +20,11 @@ write_po_file <- function(message_data, pofile, package, version, author, metada
   for (ii in message_data[(!is_repeat), which = TRUE]) {
     message_data[ii, {
       if (type == 'singular') {
-        cat(sprintf('\n\nmsgid "%s"\nmsgstr "%s"', msgid, msgstr), file=pofile, append=TRUE)
+        writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
+          '\n\nmsgid "%s"\nmsgstr "%s"', msgid, msgstr
+        ))
       } else {
-        cat(file=pofile, append=TRUE, sprintf(
+        writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
           '\n\nmsgid "%s"\nmsgid_plural "%s"\n%s',
           plural_msgid[[c(1L, 1L)]], plural_msgid[[1:2]],
           paste(sprintf('msgstr[%d] "%s"', seq_along(plural_msgstr)-1L, unlist(plural_msgstr)), collapse='\n')
@@ -25,7 +32,6 @@ write_po_file <- function(message_data, pofile, package, version, author, metada
       }
     }]
   }
-  cat('\n', file=pofile, append=TRUE)
 }
 
 # balance here: keeping newlines in the string to facilitate writing,

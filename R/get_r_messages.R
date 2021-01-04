@@ -8,11 +8,14 @@
 #   nested strings
 get_r_messages <- function (dir, verbose = FALSE) {
   dir = file.path(dir, 'R')
-  r_files <- list_r_files(dir)
+  r_files = list_r_files(dir)
   for (os in c("unix", "windows")) {
     os_dir = file.path(dir, os)
     if (dir.exists(os_dir)) rfiles = c(r_files, list_r_files(os_dir))
   }
+  # somehow on windows I was seeing absolute paths with \ but paths
+  #   from list.files as / -- normalizePath makes it consistent
+  r_files = normalizePath(r_files)
   singular = plural = vector("list", length = length(r_files))
   names(singular) = names(plural) = r_files
 

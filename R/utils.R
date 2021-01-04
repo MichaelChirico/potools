@@ -15,21 +15,22 @@ get_directory = function(dir) {
 get_desc_data = function(dir) {
   desc_file <- file.path(dir, 'DESCRIPTION')
   if (!file.exists(desc_file)) {
-    stop(domain=NA, gettextf('%s is not a package (missing DESCRIPTION', dir, domain='R-potools'))
+    stop(domain=NA, gettextf('%s is not a package (missing DESCRIPTION)', dir, domain='R-potools'))
   }
-  desc_data <- read.dcf(desc_file, c('Package', 'Version'))[1L, ]
-  if (anyNA(desc_data)) {
+  desc_data <- read.dcf(desc_file, c('Package', 'Version'))
+  if (nrow(desc_data) != 1L || anyNA(desc_data)) {
     stop(domain=NA, gettextf(
-      '%s is not a package (missing Package or Version field in DESCRIPTION', dir, domain='R-potools'
+      '%s is not a package (missing Package and/or Version field in DESCRIPTION)', dir, domain='R-potools'
     ))
   }
-  return(desc_data)
+  return(desc_data[1L, ])
 }
 
 # see ?tools::update_pkg_po
 SYSTEM_REQUIREMENTS = c('xgettext', 'msgmerge', 'msgfmt', 'msginit', 'msgconv')
 RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 
+# nocov start. in principal, could do another GH action on an ill-equipped machine?
 check_sys_reqs = function() {
   if (any(is_missing <- !nzchar(Sys.which(SYSTEM_REQUIREMENTS)))) {
     if (.Platform$OS.type == 'windows') {
@@ -54,6 +55,7 @@ check_sys_reqs = function() {
     ))
   }
 }
+# nocov end
 
 list_r_files = function(dir) list.files(dir, full.names = TRUE, pattern = "(?i)\\.r")
 

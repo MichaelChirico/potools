@@ -81,14 +81,6 @@ unescape_string = function(x) {
   gsub('[\\]([\\"])', '\\1', x)
 }
 
-# really only needed for testing, AFAICT.
-replace_specials = function(x) {
-  x = gsub("\\\n", "\n", x, fixed=TRUE)
-  x = gsub("\\\r", "\r", x, fixed=TRUE)
-  x = gsub("\\\t", "\t", x, fixed=TRUE)
-  x
-}
-
 # two types of specials to highlight:
 #   (1: see ?sprintf) templates in the fmt argument to sprintf
 #   (2: see ?encodeString) escaped control characters: \\, \n, \t, \r, \v, \a, \b, \f
@@ -168,8 +160,10 @@ prompt = function(..., encode = TRUE, conn = .potools$prompt_conn) {
   cat(...)
   cat('\n')
   if (inherits(conn, "terminal")) {
+    # nocov start <can only test interactively>
     txt = enc2utf8(readLines(conn, n=1L))
     return(if (encode) encodeString(txt) else txt)
+    # nocov end
   } else {
     return(readLines(conn, n=1L, encoding="UTF-8"))
   }

@@ -32,3 +32,5 @@ expect_outputs = function(output, outs, ...) {
   expect_all_match(outs, output)
 }
 
+test_package = function(pkg) test_path(file.path("test_packages", pkg))
+mock_translation = function(mocks) test_path(file.path("mock_translations", mocks))

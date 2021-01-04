@@ -52,7 +52,7 @@ translate_package = function(
   if (verbose) message('Running message diagnostics...')
 
   # check for calls like stop("a", i, "b", j) that are better suited for
-  #   translation as calls like
+  #   translation as calls like gettextf("a%db%d", i, j)
   exit =
     message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
                  ][ , {

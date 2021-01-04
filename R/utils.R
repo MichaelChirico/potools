@@ -156,14 +156,11 @@ unset_prompt_conn <- function() {
 #   (2) readline is _strictly_ interactive -- it can't be tested.
 # See this post for testing:
 #   https://debruine.github.io/posts/interactive-test/
-prompt = function(..., encode = TRUE, conn = .potools$prompt_conn) {
+prompt = function(..., conn = .potools$prompt_conn) {
   cat(...)
   cat('\n')
   if (inherits(conn, "terminal")) {
-    # nocov start <can only test interactively>
-    txt = enc2utf8(readLines(conn, n=1L))
-    return(if (encode) encodeString(txt) else txt)
-    # nocov end
+    return(enc2utf8(readLines(conn, n=1L))) # nocov
   } else {
     return(readLines(conn, n=1L, encoding="UTF-8"))
   }

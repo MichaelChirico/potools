@@ -150,7 +150,7 @@ translate_package = function(
     }
     if (!length(new_idx)) {
       if (verbose) message(domain=NA, gettextf(
-        'Translations for %s up to date! Skipping.', language, domain='R-potools'
+        'Translations for %s are up to date! Skipping.', language, domain='R-potools'
       ))
       next
     }

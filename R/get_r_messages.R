@@ -27,19 +27,19 @@ get_r_messages <- function (dir, verbose = FALSE) {
         if(!suppress) literal_strings <<- c(literal_strings, e)
       } else if (is.call(e)) {
         # both gettext & gettextf only have one possible string to extract, so separate
-        if (is.name(e[[1L]]) && (as.character(e[[1L]]) %in% c("gettext", "gettextf"))) {
+        if (e[[1L]] %is_base_call% c("gettext", "gettextf")) {
           suppress <- do_suppress(e)
-          if (as.character(e[[1L]]) == "gettextf") {
+          if (e[[1L]] %is_base_call% "gettextf") {
             e <- match.call(gettextf, e)
             e <- e["fmt"] # just look at fmt arg
-          } else if (as.character(e[[1L]]) == "gettext" && !is.null(names(e))) {
+          } else if (e[[1L]] %is_base_call% "gettext" && !is.null(names(e))) {
             e <- e[names(e) != "domain"] # remove domain arg
           }
-        } else if (identical(e[[1L]], quote(ngettext))) return()
+        } else if (identical(e[[1L]], quote(ngettext)) || identical(e[[1L]], quote(base::ngettext))) return()
         for(i in seq_along(e)) find_string_literals(e[[i]], suppress)
       }
     }
-    if (is_name_call(e) && as.character(e[[1L]]) %in% MSG_FUNS) {
+    if (is.call(e) && e[[1L]] %is_base_call% MSG_FUNS) {
       suppress = do_suppress(e)
       if (!is.null(names(e))) {
         e <- e[!names(e) %in% c("call.", "immediate.", "domain")]
@@ -48,7 +48,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
       singular_i <<- singular_i + 1L
       s_data[[singular_i]] <<- character()
       if (!suppress) names(s_data)[singular_i] <<- deparse1(e)
-      if (as.character(e[[1L]]) == "gettextf") {
+      if (e[[1L]] %is_base_call% "gettextf") {
         e = match.call(gettextf, e)
         e = e["fmt"]
       }
@@ -62,7 +62,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
 
   # inherits plural_i, p_data
   find_plural_strings = function(e) {
-    if (is.call(e) && is.name(e[[1L]]) && as.character(e[[1L]]) == "ngettext") {
+    if (is.call(e) && e[[1L]] %is_base_call% "ngettext") {
       e = match.call(ngettext, e)
       suppress = do_suppress(e)
       if (!suppress && is.character(e[["msg1"]]) && is.character(e[["msg2"]])) {

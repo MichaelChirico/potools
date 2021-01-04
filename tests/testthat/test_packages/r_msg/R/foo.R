@@ -1,5 +1,5 @@
 function(x) {
-  warning("I warned you!")
+  base::warning("I warned you!")
   x+1
 }
 

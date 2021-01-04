@@ -57,7 +57,7 @@ translate_package = function(
   exit = check_cracked_messages(message_data, package, verbose)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
-  exit = check_untranslated_cat(dir, package)
+  exit = check_untranslated_cat(r_exprs, package)
   #if (exit %chin% c('y', 'yes')) return(invisible())
 
   if (verbose) message('Running tools::update_pkg_po()')

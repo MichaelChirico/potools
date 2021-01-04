@@ -9,12 +9,25 @@ check_untranslated_cat <- function (exprs, package) {
         named_arg_str = ""
       } else {
         if ("file" %chin% names(e)) return(NULL)
-        named_idx = names(e) %chin% c("sep", "fill", "labels", "append")
+        # for non-file output, this is ignored
+        if (length(append_idx <- which(names(e) == "append"))) {
+          e = e[-append_idx]
+        }
+        if (length(sep_idx <- which(names(e) == "sep"))) {
+          # maybe could signal that this is being skipped somehow?
+          if (!is.character(e[[sep_idx]])) return(NULL)
+          sep = as.character(e[[sep_idx]])
+          e = e[-sep_idx]
+        } else {
+          sep = " "
+        }
+        named_idx = names(e) %chin% c("fill", "labels")
         # NB: also works when !length(named_idx)
         named_arg_str = toString(sprintf("%s=%s", names(e)[named_idx], as.character(e[named_idx])))
       }
       if (any(vapply(e[!named_idx], is.character, logical(1L)))) {
         call_i <<- call_i + 1L
+
         f_data[[call_i]] <<- list(
           call_text = deparse1(e),
           suggested = build_gettextf_call(e[!named_idx], package, named_arg_str)

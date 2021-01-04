@@ -107,14 +107,18 @@ translate_package = function(
         message('Typically, this means the corresponding error messages have been refactored.')
         message('Reproducing these messages here for your reference since they might still provide some utility.')
 
-        dashes = paste(rep('-', .9*getOption('width')), collapse='')
-        message(' ** SINGULAR MESSAGES **')
+        dashes = strrep('-', .9*getOption('width'))
         old_message_data[idx & type == 'singular', {
-          cat(rbind(dashes, msgid, msgstr), sep='\n')
+          if (.N > 0L) {
+            message(' ** SINGULAR MESSAGES **')
+            cat(rbind(dashes, msgid, msgstr), sep='\n')
+          }
         }]
-        message(' ** PLURAL MESSAGES **')
         old_message_data[idx & type == 'plural', {
-          cat(do.call(rbind, c(list(dashes), plural_msgid, plural_msgstr)), sep='\n')
+          if (.N > 0L) {
+            message(' ** PLURAL MESSAGES **')
+            cat(do.call(rbind, c(list(dashes), plural_msgid, plural_msgstr)), sep='\n')
+          }
         }]
 
         old_message_data = old_message_data[(!idx)]

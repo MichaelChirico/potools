@@ -7,18 +7,6 @@
 #   however, e.g. for how asCall=TRUE/FALSE handles domain=NA and
 #   nested strings
 get_r_messages <- function (dir, verbose = FALSE) {
-  dir = file.path(dir, 'R')
-  r_files = list_r_files(dir)
-  for (os in c("unix", "windows")) {
-    os_dir = file.path(dir, os)
-    if (dir.exists(os_dir)) r_files = c(r_files, list_r_files(os_dir))
-  }
-  # somehow on windows I was seeing absolute paths with \ but paths
-  #   from list.files as / -- normalizePath makes it consistent
-  r_files = normalizePath(r_files)
-  singular = plural = vector("list", length = length(r_files))
-  names(singular) = names(plural) = r_files
-
   # inherits singular_i, s_data
   find_singular_strings = function(e) {
     # inherits literal_strings
@@ -74,6 +62,11 @@ get_r_messages <- function (dir, verbose = FALSE) {
     else if (is.recursive(e))
       for (i in seq_along(e)) find_plural_strings(e[[i]])
   }
+
+  r_files = package_r_files(dir)
+
+  singular = plural = vector("list", length = length(r_files))
+  names(singular) = names(plural) = r_files
 
   for (f in r_files) {
     if (verbose) message(gettextf("parsing '%s'", f, domain="R-tools"), domain = NA)

@@ -57,7 +57,20 @@ check_sys_reqs = function() {
 }
 # nocov end
 
+# get R files in a directory
 list_r_files = function(dir) list.files(dir, full.names = TRUE, pattern = "(?i)\\.r")
+# get R files in a package
+package_r_files = function(dir) {
+  dir = file.path(dir, 'R')
+  r_files = list_r_files(dir)
+  for (os in c("unix", "windows")) {
+    os_dir = file.path(dir, os)
+    if (dir.exists(os_dir)) r_files = c(r_files, list_r_files(os_dir))
+  }
+  # somehow on windows I was seeing absolute paths with \ but paths
+  #   from list.files as / -- normalizePath makes it consistent
+  return(normalizePath(r_files))
+}
 
 # patch analogous fix for Bugzilla#18025 here
 `%is_name%` = function(e, f) is.name(e) && e %chin% f
@@ -70,9 +83,6 @@ do_suppress = function(e) {
   domain = e[['domain']]
   !is.null(domain) && !is.name(domain) && is.na(domain)
 }
-
-# ensure length-1 output of deparse
-agg_deparse = function(x) paste(deparse(x), collapse = ' ')
 
 # shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
 escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)

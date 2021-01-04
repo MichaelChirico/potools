@@ -107,7 +107,7 @@ translate_package = function(
         message('Typically, this means the corresponding error messages have been refactored.')
         message('Reproducing these messages here for your reference since they might still provide some utility.')
 
-        dashes = paste(rep('-', .9*getOption('width')), collapse='')
+        dashes = strrep('-', .9*getOption('width'))
         message(' ** SINGULAR MESSAGES **')
         old_message_data[idx & type == 'singular', {
           cat(rbind(dashes, msgid, msgstr), sep='\n')

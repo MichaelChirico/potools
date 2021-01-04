@@ -34,8 +34,11 @@ translate_package = function(
   }
   if (!update) dir.create(podir, showWarnings = FALSE)
 
+  if (verbose) message('Parsing R files...')
+  r_exprs = parse_r_files(dir)
+
   if (verbose) message('Getting R-level messages...')
-  message_data = get_r_messages(dir, verbose = verbose)
+  message_data = get_r_messages(r_exprs)
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')
@@ -54,7 +57,7 @@ translate_package = function(
   exit = check_cracked_messages(message_data, package)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
-  exit = check_untranslated_cat(dir)
+  exit = check_untranslated_cat(dir, package)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
   if (verbose) message('Running tools::update_pkg_po()')

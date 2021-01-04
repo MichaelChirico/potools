@@ -57,6 +57,14 @@ check_sys_reqs = function() {
 }
 # nocov end
 
+# parse the R files in a directory. do this once & reuse the results.
+parse_r_files = function(dir) {
+  r_files = list_r_files(dir)
+  out = lapply(r_files, parse, keep.source=TRUE)
+  names(out) = r_files
+  return(out)
+}
+
 # get R files in a directory
 list_r_files = function(dir) list.files(dir, full.names = TRUE, pattern = "(?i)\\.r")
 # get R files in a package

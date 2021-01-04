@@ -1,12 +1,14 @@
 # Extended/adapted/combined version of tools::{x,xn}gettext. Mainly:
 #   (1) We want the results of both asCall=TRUE and asCall=FALSE together
 #   (2) We want to keep the caller (e.g. stop(), message(), etc.) as well
+#   (3) Take the parse trees as input, rather than calculating locally,
+#       since this is re-used elsewhere in translate_package
 # To pair the results, instead of the asCall=TRUE approach, use deparse()
 #   of any messaging input (to be shown to user later as an "in-context"
 #   version of the strings to translate). Things can be a little wonky,
 #   however, e.g. for how asCall=TRUE/FALSE handles domain=NA and
 #   nested strings
-get_r_messages <- function (dir, verbose = FALSE) {
+get_r_messages <- function (exprs) {
   # inherits singular_i, s_data
   find_singular_strings = function(e) {
     # inherits literal_strings
@@ -30,7 +32,7 @@ get_r_messages <- function (dir, verbose = FALSE) {
     if (is.call(e) && e[[1L]] %is_base_call% MSG_FUNS) {
       suppress = do_suppress(e)
       if (!is.null(names(e))) {
-        e <- e[!names(e) %in% c("call.", "immediate.", "domain")]
+        e <- e[!names(e) %chin% c("call.", "immediate.", "domain")]
       }
       # keep call name (e[[1L]]); fine to ignore in find_strings2
       singular_i <<- singular_i + 1L
@@ -63,16 +65,13 @@ get_r_messages <- function (dir, verbose = FALSE) {
       for (i in seq_along(e)) find_plural_strings(e[[i]])
   }
 
-  r_files = package_r_files(dir)
+  singular = plural = vector("list", length = length(exprs))
+  names(singular) = names(plural) = names(exprs)
 
-  singular = plural = vector("list", length = length(r_files))
-  names(singular) = names(plural) = r_files
-
-  for (f in r_files) {
-    if (verbose) message(gettextf("parsing '%s'", f, domain="R-tools"), domain = NA)
+  for (ii in seq_along(exprs)) {
     singular_i = plural_i = 0L
     s_data <- p_data <- vector("list")
-    for (e in parse(file = f, keep.source = TRUE)) {
+    for (e in exprs[[ii]]) {
       find_singular_strings(e)
       find_plural_strings(e)
     }

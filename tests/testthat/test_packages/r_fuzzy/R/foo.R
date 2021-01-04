@@ -9,6 +9,6 @@ function(x) {
 
 function(x) {
   cat(sprintf(
-    ngettext(length(x), "small fail\n", "big fail\n")
+    ngettext(length(x), "SOMEWHAT EPIC FAIL\n", "MAJORLY EPIC FAIL\n")
   ))
 }

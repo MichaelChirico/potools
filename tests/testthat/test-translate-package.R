@@ -16,19 +16,20 @@ test_that("translate_package arg checking errors work", {
 })
 
 test_that("translate_package handles empty packages", {
-  pkg <- test_package("no_msg")
-  restore_package(pkg, {
-    expect_invisible(translate_package(pkg))
+  restore_package(
+    pkg <- test_package("no_msg"),
+    {
+      expect_invisible(translate_package(pkg))
 
-    expect_message(translate_package(pkg, verbose=TRUE), "No messages to translate", fixed=TRUE)
-  })
+      expect_message(translate_package(pkg, verbose=TRUE), "No messages to translate", fixed=TRUE)
+    }
+  )
 })
 
 test_that("translate_package works on a simple package", {
-  pkg <- test_package("r_msg")
   # simple run-through without doing translations
   restore_package(
-    pkg,
+    pkg <- test_package("r_msg"),
     {
       expect_messages(
         translate_package(pkg, verbose=TRUE),
@@ -74,14 +75,13 @@ test_that("translate_package works on a simple package", {
 })
 
 test_that("translate_package works on package with 'cracked' messages needing templates", {
-  pkg <- test_package("r_non_template")
   # simple run-through without doing translations
   restore_package(
-    pkg,
+    pkg <- test_package("r_non_template"),
     tmp_conn = mock_translation("test-translate-package-r_non_template-1.input"),
     {
       expect_messages(
-        translate_package(pkg, "zh_CN", verbose=TRUE),
+        translate_package(pkg, "zh_CN"),
         "Found 1 messaging calls that might be better suited for gettextf",
         fixed = TRUE
       )
@@ -90,10 +90,9 @@ test_that("translate_package works on package with 'cracked' messages needing te
 })
 
 test_that("translate_package works on package with outdated (fuzzy) translations", {
-  pkg = test_package("r_fuzzy")
   # simple run-through without doing translations
   prompts = restore_package(
-    pkg,
+    pkg <- test_package("r_fuzzy"),
     tmp_conn = mock_translation("test-translate-package-r_fuzzy-1.input"),
     {
       expect_messages(
@@ -104,4 +103,19 @@ test_that("translate_package works on package with outdated (fuzzy) translations
     }
   )
   expect_match(prompts, "a similar message was previously translated as", all=FALSE)
+})
+
+test_that("translate_package identifies potential translations in cat() calls", {
+  prompts = restore_package(
+    pkg <- test_package("r_cat_msg"),
+    tmp_conn = mock_translation("test-translate-package-r_cat_message-1.input"),
+    {
+      expect_messages(
+        translate_package(pkg, "zh_CN"),
+        "Found 3 untranslated messaging calls passed through cat()",
+        fixed = TRUE
+      )
+    }
+  )
+  expect_outputs(prompts, c("base::cat", 'cat(gettext("Oh no you don\'t!", domain="R-rCatMsg")'), fixed=TRUE)
 })

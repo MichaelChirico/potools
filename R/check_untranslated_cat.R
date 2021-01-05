@@ -59,16 +59,17 @@ check_untranslated_cat <- function (exprs, package) {
 
     cat_calls[[ii]] = f_data
   }
-  if (any(n_cat <- lengths(cat_calls) > 0L)) {
+  n_cat <- lengths(cat_calls)
+  if (any(n_cat > 0L)) {
     message(domain=NA, gettextf(
-      'Found %d untranslated messaging calls passed through cat:',
+      'Found %d untranslated messaging calls passed through cat():',
       sum(n_cat), domain='R-potools'
     ))
     for (ii in seq_along(cat_calls)) {
       file = names(cat_calls)[ii]
       for (call in cat_calls[[ii]]) {
          cat(gettextf(
-           '\nCall to cat() with untranslated strings:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
+           '\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
            call_color(call$call_text),
            file_color(file),
            build_gettextf_color(call$suggested)

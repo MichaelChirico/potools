@@ -1,10 +1,10 @@
 # check for calls like stop("a", i, "b", j) that are better suited for
 #   translation as calls like gettextf("a%db%d", i, j)
-check_cracked_messages = function(message_data, package, verbose) {
+check_cracked_messages = function(message_data, package) {
   exit =
     message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
                  ][ , {
-                   if (.N > 0L && verbose) message(domain=NA, gettextf(
+                   if (.N > 0L) message(domain=NA, gettextf(
                      'Found %d messaging calls that might be better suited for gettextf for ease of translation:',
                      uniqueN(call), domain='R-potools'
                    ))

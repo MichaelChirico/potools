@@ -34,8 +34,16 @@ translate_package = function(
   }
   if (!update) dir.create(podir, showWarnings = FALSE)
 
+  if (verbose) message('Parsing R files...')
+  r_exprs = parse_r_files(dir)
+
   if (verbose) message('Getting R-level messages...')
-  message_data = get_r_messages(dir, verbose = verbose)
+  message_data = get_r_messages(r_exprs)
+
+  if (!nrow(message_data)) {
+    if (verbose) message('No messages to translate; finishing')
+    return(invisible())
+  }
 
   # for testing, we need a connection that stays open so that readLines(n=1L)
   #   reads successive lines. originally tried passing a test connection as
@@ -44,34 +52,13 @@ translate_package = function(
   set_prompt_conn()
   on.exit(unset_prompt_conn())
 
-  # check for calls like stop("a", i, "b", j) that are better suited for
-  #   translation as calls like
-  exit =
-    message_data[type == 'singular', if (.N > 1L) .(msgid), by=.(file, call)
-                 ][ , {
-                   if (.N > 0L && verbose) message(domain=NA, gettextf(
-                     'Found %d messaging calls that might be better suited for gettextf for ease of translation:',
-                     uniqueN(call), domain='R-potools'
-                   ))
-                   .SD
-                 }][ , by = .(file, call), {
-                   cat(gettextf(
-                     '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
-                     call_color(.BY$call),
-                     file_color(.BY$file),
-                     build_gettextf_color(build_gettextf_call(.BY$call, package))
-                   ))
-                   TRUE
-                 }][ , if (.N > 0L) prompt('Exit now to repair any of these? [y/N]') else 'n']
-  if (tolower(exit) %chin% c('y', 'yes')) return(invisible())
-
-  if (!nrow(message_data)) {
-    if (verbose) message('No messages to translate; finishing')
-    return(invisible())
-  }
-
   if (verbose) message('Running message diagnostics...')
 
+  exit = check_cracked_messages(message_data, package)
+  if (exit %chin% c('y', 'yes')) return(invisible())
+
+  exit = check_untranslated_cat(r_exprs, package)
+  if (exit %chin% c('y', 'yes')) return(invisible())
 
   if (verbose) message('Running tools::update_pkg_po()')
   tools::update_pkg_po(dir, package, version, copyright, bugs)

@@ -19,17 +19,17 @@ restore_package <- function(dir, expr, tmp_conn) {
   invisible(capture.output(expr))
 }
 
-expect_all_match = function(inputs, target, ...) {
-  expect_true(all(vapply(inputs, function(input) any(grepl(input, target, ...)), logical(1L))))
+expect_all_match = function(inputs, target, ..., invert=FALSE) {
+  expect_true(all(vapply(inputs, function(input) length(grep(input, target, ..., invert=invert)) > 0L, logical(1L))))
 }
 
-expect_messages = function(expr, msgs, ...) {
+expect_messages = function(expr, msgs, ..., invert=FALSE) {
   observed_messages = capture_messages(expr)
-  expect_all_match(msgs, observed_messages, ...)
+  expect_all_match(msgs, observed_messages, ..., invert=invert)
 }
 
-expect_outputs = function(output, outs, ...) {
-  expect_all_match(outs, output, ...)
+expect_outputs = function(output, outs, ..., invert=FALSE) {
+  expect_all_match(outs, output, ..., invert=invert)
 }
 
 test_package = function(pkg) test_path(file.path("test_packages", pkg))

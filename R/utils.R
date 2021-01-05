@@ -57,7 +57,28 @@ check_sys_reqs = function() {
 }
 # nocov end
 
+# parse the R files in a directory. do this once & reuse the results.
+parse_r_files = function(dir) {
+  r_files = package_r_files(dir)
+  out = lapply(r_files, parse, keep.source=TRUE)
+  names(out) = r_files
+  return(out)
+}
+
+# get R files in a directory
 list_r_files = function(dir) list.files(dir, full.names = TRUE, pattern = "(?i)\\.r")
+# get R files in a package
+package_r_files = function(dir) {
+  dir = file.path(dir, 'R')
+  r_files = list_r_files(dir)
+  for (os in c("unix", "windows")) {
+    os_dir = file.path(dir, os)
+    if (dir.exists(os_dir)) r_files = c(r_files, list_r_files(os_dir))
+  }
+  # somehow on windows I was seeing absolute paths with \ but paths
+  #   from list.files as / -- normalizePath makes it consistent
+  return(normalizePath(r_files))
+}
 
 # patch analogous fix for Bugzilla#18025 here
 `%is_name%` = function(e, f) is.name(e) && e %chin% f
@@ -71,8 +92,29 @@ do_suppress = function(e) {
   !is.null(domain) && !is.name(domain) && is.na(domain)
 }
 
-# ensure length-1 output of deparse
-agg_deparse = function(x) paste(deparse(x), collapse = ' ')
+gettextify = function(e, sep = '', package) {
+  str_idx = vapply(e, is.character, logical(1L))
+
+  if (all(str_idx)) {
+    call_nm = "gettext"
+    dots = ""
+  } else {
+    call_nm = "gettextf"
+    dots = paste(",", toString(vapply(e[!str_idx], deparse1, character(1L))))
+  }
+
+  fmt = character(length(e))
+  fmt[str_idx] = as.character(e[str_idx])
+  fmt[!str_idx] = '%s'
+  if (length(fmt) > 1L) {
+    fmt = paste0(paste0(fmt[-length(fmt)], sep, collapse = ''), fmt[length(fmt)])
+  }
+
+  sprintf(
+    '%s("%s"%s, domain="R-%s")',
+    call_nm, fmt, dots, package
+  )
+}
 
 # shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
 escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)

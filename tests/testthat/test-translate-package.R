@@ -126,4 +126,9 @@ test_that("translate_package identifies potential translations in cat() calls", 
     ),
     fixed=TRUE
   )
+  expect_outputs(
+    prompts,
+    c("shouldn't be translated", "Miss me"),
+    fixed=TRUE, invert=TRUE
+  )
 })

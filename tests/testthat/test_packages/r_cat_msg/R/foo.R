@@ -5,6 +5,8 @@ function(x) {
 
 function(x) {
   cat("Oh no", "you don't!")
+  sep = ""
+  cat("Miss me", "with", "this", sep=sep)
 }
 
 function(x) {

@@ -92,6 +92,28 @@ do_suppress = function(e) {
   !is.null(domain) && !is.name(domain) && is.na(domain)
 }
 
+gettextify = function(e, sep = '', package) {
+  str_idx = vapply(e, is.character, logical(1L))
+
+  if (all(str_idx)) {
+    call_nm = "gettext"
+    dots = ""
+  } else {
+    call_nm = "gettextf"
+    dots = paste(",", toString(vapply(e[!str_idx], deparse1, character(1L))))
+  }
+
+  fmt = character(length(e))
+  fmt[str_idx] = as.character(e[str_idx])
+  fmt[!str_idx] = '%s'
+  fmt = paste0(paste0(fmt[-length(fmt)], sep, collapse = ''), fmt[length(fmt)])
+
+  sprintf(
+    '%s("%s"%s, domain="R-%s")',
+    call_nm, fmt, dots, package
+  )
+}
+
 # shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
 escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)
 

@@ -6,6 +6,7 @@ check_untranslated_cat <- function (exprs, package) {
     if (is.call(e) && e[[1L]] %is_base_call% 'cat') {
       if (is.null(names(e))) {
         named_idx = rep(FALSE, length(e))
+        sep = " "
         named_arg_str = ""
       } else {
         if ("file" %chin% names(e)) return(NULL)
@@ -23,14 +24,24 @@ check_untranslated_cat <- function (exprs, package) {
         }
         named_idx = names(e) %chin% c("fill", "labels")
         # NB: also works when !length(named_idx)
-        named_arg_str = toString(sprintf("%s=%s", names(e)[named_idx], as.character(e[named_idx])))
+        named_arg_str = sprintf(
+          ", %s",
+          toString(sprintf("%s=%s", names(e)[named_idx], as.character(e[named_idx])))
+        )
       }
-      if (any(vapply(e[!named_idx], is.character, logical(1L)))) {
+      if (any(str_idx <- vapply(e[!named_idx], is.character, logical(1L)))) {
         call_i <<- call_i + 1L
+        call_text = deparse1(e)
+        e = e[!named_idx]
+        suggested = sprintf(
+          'cat(%s%s)',
+          gettextify(e[-1L], sep, package),
+          named_arg_str
+        )
 
         f_data[[call_i]] <<- list(
-          call_text = deparse1(e),
-          suggested = build_gettextf_call(e[!named_idx], package, named_arg_str)
+          call_text = call_text,
+          suggested = suggested
         )
       }
     } else if (is.recursive(e)) {

@@ -1,5 +1,5 @@
 function(x) {
-  base::cat("I warned you!")
+  base::cat("I warned you!", fill=TRUE, append=TRUE)
   x+1
 }
 
@@ -9,6 +9,7 @@ function(x) {
 
 function(x) {
   cat("Hi there", file=tempfile())
+  cat("Hi", "boss", sep="xx")
 }
 
 function(x) {

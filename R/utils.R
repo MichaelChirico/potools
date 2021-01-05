@@ -106,7 +106,9 @@ gettextify = function(e, sep = '', package) {
   fmt = character(length(e))
   fmt[str_idx] = as.character(e[str_idx])
   fmt[!str_idx] = '%s'
-  fmt = paste0(paste0(fmt[-length(fmt)], sep, collapse = ''), fmt[length(fmt)])
+  if (length(fmt) > 1L) {
+    fmt = paste0(paste0(fmt[-length(fmt)], sep, collapse = ''), fmt[length(fmt)])
+  }
 
   sprintf(
     '%s("%s"%s, domain="R-%s")',

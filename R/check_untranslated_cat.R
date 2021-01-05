@@ -22,12 +22,16 @@ check_untranslated_cat <- function (exprs, package) {
         } else {
           sep = " "
         }
-        named_idx = names(e) %chin% c("fill", "labels")
-        # NB: also works when !length(named_idx)
-        named_arg_str = sprintf(
-          ", %s",
-          toString(sprintf("%s=%s", names(e)[named_idx], as.character(e[named_idx])))
-        )
+        if (is.null(names(e))) {
+          named_idx = rep(FALSE, length(e))
+          named_arg_str = ""
+        } else {
+          named_idx = names(e) %chin% c("fill", "labels")
+          named_arg_str = sprintf(
+            ", %s",
+            toString(sprintf("%s=%s", names(e)[named_idx], as.character(e[named_idx])))
+          )
+        }
       }
       if (any(str_idx <- vapply(e[!named_idx], is.character, logical(1L)))) {
         call_i <<- call_i + 1L

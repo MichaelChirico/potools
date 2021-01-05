@@ -112,10 +112,18 @@ test_that("translate_package identifies potential translations in cat() calls", 
     {
       expect_messages(
         translate_package(pkg, "zh_CN"),
-        "Found 3 untranslated messaging calls passed through cat()",
+        "Found 4 untranslated messaging calls passed through cat()",
         fixed = TRUE
       )
     }
   )
-  expect_outputs(prompts, c("base::cat", 'cat(gettext("Oh no you don\'t!", domain="R-rCatMsg")'), fixed=TRUE)
+  expect_outputs(
+    prompts,
+    c(
+      'cat(gettext("I warned you!", domain="R-rCatMsg"), fill=TRUE)',
+      'cat(gettext("Oh no you don\'t!", domain="R-rCatMsg"))',
+      "Hixxboss"
+    ),
+    fixed=TRUE
+  )
 })

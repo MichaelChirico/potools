@@ -132,3 +132,23 @@ test_that("translate_package identifies potential translations in cat() calls", 
     fixed=TRUE, invert=TRUE
   )
 })
+
+test_that('Unknown language flow works correctly', {
+  prompts = restore_package(
+    pkg <- test_package('r_msg'),
+    tmp_conn = mock_translation('test-translate-package-r_msg-2.input'),
+    {
+      expect_messages(
+        translate_package(pkg, 'ar_SY'),
+        # TODO: why isn't "Did not match any known 'plural's" matching?
+        c('not a known language', 'Please file an issue'),
+        fixed=TRUE
+      )
+    }
+  )
+  expect_outputs(
+    prompts,
+    c('How would you refer to this language in English?'),
+    fixed=TRUE
+  )
+})

@@ -24,10 +24,12 @@ write_po_file <- function(message_data, pofile, package, version, author, metada
           '\n\nmsgid "%s"\nmsgstr "%s"', msgid, msgstr
         ))
       } else {
+        # stored in list column, we need to [[1]]
+        msgstr = plural_msgstr[[1L]]
         writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
           '\n\nmsgid "%s"\nmsgid_plural "%s"\n%s',
           plural_msgid[[c(1L, 1L)]], plural_msgid[[1:2]],
-          paste(sprintf('msgstr[%d] "%s"', seq_along(plural_msgstr)-1L, unlist(plural_msgstr)), collapse='\n')
+          paste(sprintf('msgstr[%d] "%s"', seq_along(msgstr)-1L, msgstr), collapse='\n')
         ))
       }
     }]

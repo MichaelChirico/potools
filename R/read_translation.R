@@ -99,14 +99,23 @@ unset_prompt_conn <- function() {
 #   (2) readline is _strictly_ interactive -- it can't be tested.
 # See this post for testing:
 #   https://debruine.github.io/posts/interactive-test/
-prompt = function(..., conn = .potools$prompt_conn) {
+prompt = function(..., conn = .potools$prompt_conn, require_type) {
   cat(...)
   cat('\n')
   if (inherits(conn, "terminal")) {
-    return(enc2utf8(readLines(conn, n=1L))) # nocov
+    out = enc2utf8(readLines(conn, n=1L)) # nocov
   } else {
-    return(readLines(conn, n=1L, encoding="UTF-8"))
+    out = readLines(conn, n=1L, encoding="UTF-8")
   }
+  if (missing(require_type)) return(out)
+  out = type.convert(out, as.is = TRUE)
+  if (typeof(out) == require_type) return(out)
+
+  message(domain=NA, gettextf(
+    "Input must be of type '%s', but received '%s'. Trying again.",
+    require_type, typeof(out), domain="R-potools"
+  ))
+  return(prompt(..., conn=conn, require_type=require_type))
 }
 
 prompt_with_templates = function(n_target, prompt_msg) {

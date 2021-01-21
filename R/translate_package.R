@@ -70,6 +70,42 @@ translate_package = function(
 
   for (language in languages) {
     metadata = KNOWN_LANGUAGES[.(language)]
+    # if the language is unknown, the right join above won't match rows in KNOWN_LANGUAGES
+    if (is.na(metadata$full_name_eng)) {
+      message(
+        gettextf("'%s' is not a known language. ", language, domain="R-potools"),
+        domain=NA, appendLF=FALSE
+      )
+      message("Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>")
+      metadata[ , full_name_eng := prompt("How would you refer to this language in English?")]
+      metadata[ , full_name_native := prompt("How would you refer to this language in the language itself?")]
+      metadata[ , nplurals := prompt(
+        "How many pluralizations are there for this language [nplurals]?",
+        require_type = "integer"
+      )]
+      metadata[ , plural := prompt("What is the rule for deciding which plural applies as a function of n [plural]?")]
+      if (!metadata$plural %chin% PLURAL_RANGE_STRINGS$plural) {
+        message(domain=NA, gettextf(
+          "Supplied 'plural':\n%s\nDid not match any known 'plural's:\n%s\nUsing generic description of cases instead.",
+          metadata$plural, paste(unique(PLURAL_RANGE_STRINGS$plural), collapse = '\n'), domain="R-potools"
+        ))
+        plural_index = 0:(metadata$nplurals - 1L)
+        # not used in this function, so just x <- rbind(...) will only
+        #   overwrite locally, so we have to unlock the binding
+        unlockBinding("PLURAL_RANGE_STRINGS", asNamespace("potools"))
+        PLURAL_RANGE_STRINGS <<- rbind(
+          PLURAL_RANGE_STRINGS,
+          data.table(
+            plural = metadata$plural,
+            plural_index = plural_index,
+            range = paste0("for n where 'plural' resolves to ", plural_index)
+          )
+        )
+        setkey(PLURAL_RANGE_STRINGS, plural, plural_index)
+        lockBinding("PLURAL_RANGE_STRINGS", asNamespace("potools"))
+      }
+      message("Thanks! Please file an issue on GitHub to get this language recognized permanently")
+    }
     # overwrite any existing translations written in previous translation.
     #   set blank initially (rather than deleting the column) to allow
     #   for interrupting the translation -- if unset, write_po_file will

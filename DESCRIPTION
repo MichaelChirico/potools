@@ -1,6 +1,6 @@
 Package: potools
 Type: Package
-Title: Tools for Portability in R Packages (po Directory)
+Title: Tools for Internationalization and Portability in R Packages
 Version: 0.1.0
 Author: Michael Chirico
 Depends: R (>= 4.0.0)

@@ -215,6 +215,7 @@ translate_package = function(
 
   if (verbose) message('Re-running tools::update_pkg_po() to update .mo files')
   tools::update_pkg_po(dir, package, version, copyright, bugs)
+  return(invisible())
 }
 
 # just here to generate translations. comes from the PLURAL_RANGE_STRINGS csv

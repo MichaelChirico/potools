@@ -79,6 +79,7 @@ This function returns nothing invisibly. As a side effect, a \code{.pot} file is
 \url{https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Internationalization} \cr
 \url{https://cran.r-project.org/doc/manuals/R-admin.html#Internationalization} \cr
 \url{https://developer.r-project.org/Translations30.html} \cr
+\url{https://www.isi-web.org/publications/glossary-of-statistical-terms}\cr
 \url{https://www.gnu.org/software/gettext/} \cr
 \url{https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip}
 }

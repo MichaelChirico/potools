@@ -12,6 +12,8 @@ Unfortunately, to do so has some tedious aspects, namely, learning the gettext s
 
 The core function of `potools`, `translate_package`, is a one-stop-shop for interactively setting your package up for translation and providing those translations, all without ever having to touch a `.po` file yourself.
 
+`potools` is a UTF-8 package -- all `.po` and `.pot` files it produces will be treated as UTF-8.
+
 ### Diagnostics
 
 Moreover, `translate_package` runs some diagnostics that can help make your package more translation-ready (see below).
@@ -63,3 +65,16 @@ For now, please install from GitHub; the easiest way to do so:
 # install.packages("remotes")
 remotes::install_github("MichaelChirico/potools")
 ```
+
+## Tips & Tricks for Translation
+
+### Searchable error messages
+
+One observation about offering translated messages is that non-English messages are harder to google. A few suggestions:
+ 
+     + You can give error messages a unique identifier (e.g. numbering). This may be harder to do for "established" packages since adding identifiers might be a breaking change.
+     + End users can switch to an English locale mid-session by running `Sys.setenv(LANGUAGE = 'en')` -- error messages will be produced in English until they set `LANGUAGE` again.
+     
+### Translating technical terms
+
+Technical terms are par for the course in R packages; showing users similar terms for the same concept might lead to needless confusion. R recommends using the [ISI Multilingual Glossary of Statistical Terms](https://www.isi-web.org/publications/glossary-of-statistical-terms) to help overcome this issue.

@@ -1,6 +1,6 @@
 translate_package = function(
-  dir='.', languages,
-  copyright, bugs, verbose=FALSE
+  dir = '.', languages,
+  copyright, bugs, verbose = FALSE
 ) {
   check_sys_reqs()
 

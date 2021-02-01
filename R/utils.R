@@ -80,6 +80,20 @@ package_r_files = function(dir) {
   return(normalizePath(r_files))
 }
 
+# get src files in a directory. exclude .h files
+list_src_files = function(dir) {
+  src_files = list.files(dir, full.names = TRUE)
+  grep("\\.(?:[ho]|so)|/makevars(?:\\.w?in)?$", src_files, invert = TRUE, value = TRUE, ignore.case = TRUE)
+}
+# get src files in a package
+package_src_files = function(dir) {
+  dir = file.path(dir, 'src')
+  src_files = list_src_files(dir)
+  # somehow on windows I was seeing absolute paths with \ but paths
+  #   from list.files as / -- normalizePath makes it consistent
+  return(normalizePath(src_files))
+}
+
 # patch analogous fix for Bugzilla#18025 here
 `%is_name%` = function(e, f) is.name(e) && e %chin% f
 `%is_base_call%` = function(e, f) {

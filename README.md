@@ -78,3 +78,19 @@ One observation about offering translated messages is that non-English messages 
 ### Translating technical terms
 
 Technical terms are par for the course in R packages; showing users similar terms for the same concept might lead to needless confusion. R recommends using the [ISI Multilingual Glossary of Statistical Terms](https://www.isi-web.org/publications/glossary-of-statistical-terms) to help overcome this issue.
+
+### Picking a domain for diasporic languages
+
+What domain should you use when translating Spanish? There's `es_AR`, `es_BO`, `es_CL`, `es_DO`, `es_HN`, ... do I
+really need to provide a separate file for my Nicaraguan (`es_NI`) users?
+
+No, but you could. Typically, you are best off creating one set of translations under the language's general
+domain (here, `es`). Once translations exist for `es`, users in all of the more specific locales will see the
+messages for `es` whenever they exist. If you really do want to provide more regionally-specific error messages
+(awesome!), you can either (1) create a whole new set of translations for each region or (2) write translations
+_only for the region-specific messages_. The latter is how R handles messages that differ on British/American
+spelling, for example.
+
+Say a user is running in `es_GT` and triggers an error. R will first look for a translation into `es_GT`; if
+none is defined, it will look for a translation into `es`. If none is defined again, it will finally default
+to showing a message in English.

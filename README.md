@@ -92,5 +92,5 @@ _only for the region-specific messages_. The latter is how R handles messages th
 spelling, for example.
 
 Say a user is running in `es_GT` and triggers an error. R will first look for a translation into `es_GT`; if
-none is defined, it will look for a translation into `es`. If none is defined again, it will finally default
-to showing a message in English.
+none is defined, it will look for a translation into `es`. If none is defined again, it will finally fall
+back to the package's default language (i.e., whatever language is written in the source code, usually English).

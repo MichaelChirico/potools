@@ -77,7 +77,7 @@ Spanish translations for \emph{all} Spanish domains. If you want to add more reg
 messaging, you can do so through supplemental \code{.po} files. For example, you can add some
 Argentinian messages to \code{es_AR}; users running R in the \code{es_AR} locale will see messages
 specifically written for \code{es_AR} first; absent that, the \code{es} message will be shown; and
-absent that, the default English message.
+absent that, the default message (i.e., in the language written in the source code, usually English).
 
 Chinese is a slightly different case -- typically, the \code{zh_CN} domain is used to write
 with simplified characters while \code{zh_TW} is used for traditional characters. In principal you

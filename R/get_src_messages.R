@@ -10,7 +10,7 @@ get_src_messages = function(dir = ".", translation_macro = "_") {
   names(src_files) = src_files
 
   out = rbindlist(lapply(src_files, get_file_src_messages, translation_macro), idcol = "file")
-  out[ , "is_repeated" := duplicated(msgid)]
+  out[ , "is_repeat" := duplicated(msgid)]
   out[]
 }
 
@@ -38,7 +38,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
   #     potentially-untranslated char arrays, so we capture this group.
   msg_match = gregexpr(
     sprintf(
-      "(?:^|(?<=[^a-zA-Z_.]))(?<call>:%s)\\s*\\(\\s*(?<trans>%s\\s*\\()?\\s*",
+      "(?:^|(?<=[^a-zA-Z_.]))(?<call>%s)\\s*\\(\\s*(?<trans>%s\\s*\\()?\\s*",
       paste(MESSAGE_CALLS, collapse = "|"),
       translation_macro
     ),

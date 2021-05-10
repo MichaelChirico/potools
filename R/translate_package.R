@@ -1,5 +1,6 @@
 translate_package = function(
   dir = '.', languages,
+  src_translation_macro = "_",
   copyright, bugs, verbose = FALSE
 ) {
   check_sys_reqs()
@@ -38,7 +39,10 @@ translate_package = function(
   r_exprs = parse_r_files(dir)
 
   if (verbose) message('Getting R-level messages...')
-  message_data = get_r_messages(r_exprs)
+  r_message_data = get_r_messages(r_exprs)
+
+  if (verbose) message('Getting src-level messages...')
+  src_message_data = get_src_messages(dir, src_translation_macro)
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')

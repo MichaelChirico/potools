@@ -64,6 +64,25 @@ R understands template reordering, e.g. \code{\%2$s} says "interpret the second 
 After each language is completed, a corresponding \code{.po} file is written to the package's \code{po}
 directory (which is created if it does not yet exist).
 
+\bold{Domains:}
+
+The input to \code{languages} are the locale codes described in \code{\link[base]{Sys.getlocale}}, e.g.
+\code{es} for Spanish, \code{es_AR} for Argentinian Spanish, \code{ro} for Romanian, etc. See that help
+file for some helpful tips about how to tell which locales are currently available on your machine, and
+see the References below for some web resources listing more locales.
+
+Note also the advice given in the R Installation and Administration manual (also cited below) -- if you
+are writing Spanish translations, a typical package should use \code{language = "es"} to generate
+Spanish translations for \emph{all} Spanish domains. If you want to add more regional flair to your
+messaging, you can do so through supplemental \code{.po} files. For example, you can add some
+Argentinian messages to \code{es_AR}; users running R in the \code{es_AR} locale will see messages
+specifically written for \code{es_AR} first; absent that, the \code{es} message will be shown; and
+absent that, the default message (i.e., in the language written in the source code, usually English).
+
+Chinese is a slightly different case -- typically, the \code{zh_CN} domain is used to write
+with simplified characters while \code{zh_TW} is used for traditional characters. In principal you
+could leverage \code{zh_TW} for Taiwanisms and \code{zh_HK} for Hongkieisms.
+
 Currently, translation is limited to the same set of domains as is available for base R: Danish, German,
 English, British English, Spanish, Farsi, French, Italian, Japanese, Korean, Dutch, Polish,
 Brazilian Portugese, Russian, Turkish, Mainland Chinese, and Taiwanese Chinese.
@@ -79,9 +98,10 @@ This function returns nothing invisibly. As a side effect, a \code{.pot} file is
 \url{https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Internationalization} \cr
 \url{https://cran.r-project.org/doc/manuals/R-admin.html#Internationalization} \cr
 \url{https://developer.r-project.org/Translations30.html} \cr
-\url{https://www.isi-web.org/publications/glossary-of-statistical-terms}\cr
+\url{https://www.isi-web.org/publications/glossary-of-statistical-terms} \cr
 \url{https://www.gnu.org/software/gettext/} \cr
-\url{https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip}
+\url{https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip} \cr
+\url{https://saimana.com/list-of-country-locale-code}
 }
 \seealso{
 \code{\link[tools]{xgettext}}, \code{\link[tools]{update_pkg_po}}, \code{\link[tools]{checkPoFile}},

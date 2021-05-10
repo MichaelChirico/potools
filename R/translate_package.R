@@ -70,6 +70,7 @@ translate_package = function(
   exit = check_untranslated_cat(r_exprs, package)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
+  # TODO: understand why this is run here; streamline if possible
   if (verbose) message('Running tools::update_pkg_po()')
   tools::update_pkg_po(dir, package, version, copyright, bugs)
 
@@ -88,6 +89,7 @@ translate_package = function(
     #   fail if both these columns are not yet present.
     message_data[type == 'singular', msgstr := ""]
     message_data[type == 'plural', plural_msgstr := .(list(rep("", metadata$nplurals)))]
+
     lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
@@ -151,6 +153,7 @@ translate_package = function(
       new_idx = seq_len(nrow(message_data))
       message_data[ , fuzzy := 0L]
     }
+
     if (!length(new_idx)) {
       if (verbose) message(domain=NA, gettextf(
         'Translations for %s are up to date! Skipping.', language, domain='R-potools'

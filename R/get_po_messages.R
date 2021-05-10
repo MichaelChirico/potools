@@ -41,14 +41,14 @@ get_po_messages <- function(po_file) {
   if (n_singular != length(msgstr_start)) {
     stop(domain=NA, gettextf(
       "Found %d msgid which differs from %d msgstr; corrupted .po file",
-      n_singular, length(msgstr_start), domain="R-potools"
+      n_singular, length(msgstr_start)
     ))
   }
 
   if ((n_plural == 0L && n_plural_msgstr > 0L) || (n_plural > 0 && n_plural_msgstr %% n_plural != 0L)) {
     stop(domain=NA, gettextf(
       "Found %d msgid_plural, which does not evenly divide %d msgstr[n]; corrupted .po file",
-      n_plural_msgstr, n_plural, domain="R-potools"
+      n_plural_msgstr, n_plural
     ))
   }
   # pre-calculate which lines contain message continuations. Append

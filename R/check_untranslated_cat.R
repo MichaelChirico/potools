@@ -67,7 +67,7 @@ check_untranslated_cat <- function (exprs, package) {
   if (any(n_cat > 0L)) {
     message(domain=NA, gettextf(
       'Found %d untranslated messaging calls passed through cat():',
-      sum(n_cat), domain='R-potools'
+      sum(n_cat)
     ))
     for (ii in seq_along(cat_calls)) {
       file = names(cat_calls)[ii]

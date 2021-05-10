@@ -37,7 +37,7 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
       if (fuzzy == 1L) {
         fuzzy_tag = gettextf(
           "\n **Note: a similar message was previously translated as: **\n%s",
-          msgstr[[jj]], domain='R-potools'
+          msgstr[[jj]]
         )
       } else {
         fuzzy_tag = ""
@@ -60,7 +60,7 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
     if (fuzzy == 1L) {
       fuzzy_tag = gettextf(
         "\n **Note: a similar message was previously translated as: **\n%s",
-        msgstr, domain='R-potools'
+        msgstr
       )
     } else {
       fuzzy_tag = ""
@@ -113,7 +113,7 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
 
   message(domain=NA, gettextf(
     "Input must be of type '%s', but received '%s'. Trying again.",
-    require_type, typeof(out), domain="R-potools"
+    require_type, typeof(out)
   ))
   return(prompt(..., conn=conn, require_type=require_type))
 }
@@ -125,7 +125,7 @@ prompt_with_templates = function(n_target, prompt_msg) {
     if (!nzchar(translation) || (n_fmt <- count_formats(translation)) == n_target) break
     cat(gettextf(
       "\n\n** Oops! You supplied %d templates; but the target message has %d. Retrying... **\n",
-      n_fmt, n_target, domain='R-potools'
+      n_fmt, n_target
     ))
   }
   translation

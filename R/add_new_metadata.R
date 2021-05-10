@@ -2,7 +2,7 @@
 #   stores this metadata in the package environment so it can be reused for the session duration.
 add_new_metadata = function(metadata, language) {
   message(
-    gettextf("'%s' is not a known language. ", language, domain="R-potools"),
+    gettextf("'%s' is not a known language. ", language,),
     domain=NA, appendLF=FALSE
   )
   message("Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>")
@@ -16,7 +16,7 @@ add_new_metadata = function(metadata, language) {
   if (!metadata$plural %chin% PLURAL_RANGE_STRINGS$plural) {
     message(domain=NA, gettextf(
       "Supplied 'plural':\n%s\nDid not match any known 'plural's:\n%s\nUsing generic description of cases instead.",
-      metadata$plural, paste(unique(PLURAL_RANGE_STRINGS$plural), collapse = '\n'), domain="R-potools"
+      metadata$plural, paste(unique(PLURAL_RANGE_STRINGS$plural), collapse = '\n')
     ))
     plural_index = 0:(metadata$nplurals - 1L)
     # not used in this function, so just x <- rbind(...) will only

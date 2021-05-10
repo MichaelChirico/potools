@@ -9,7 +9,7 @@ check_cracked_messages = function(message_data, package) {
   ][ , {
     if (.N > 0L) message(domain=NA, gettextf(
       'Found %d R messaging calls that might be better suited for gettextf for ease of translation:',
-      uniqueN(call), domain='R-potools'
+      uniqueN(call)
       ))
     .SD
   }][ , by = .(file, call), {
@@ -18,7 +18,7 @@ check_cracked_messages = function(message_data, package) {
       call_color(.BY$call),
       file_color(.BY$file),
       build_gettextf_color(build_gettextf_call(.BY$call, package))
-      ))
+    ))
     TRUE
   }][ , if (.N > 0L) prompt('Exit now to repair any of these? [y/N]') else 'n']
   return(tolower(exit))

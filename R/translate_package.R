@@ -26,11 +26,10 @@ translate_package = function(
       message(domain=NA, gettextf(
         "Updating translation template for package '%s' (last updated %s)",
         package,
-        format(file.info(potfile)$atime),
-        domain='R-potools'
+        format(file.info(potfile)$atime)
       ))
     } else {
-      message(domain=NA, gettextf("Starting translations for package '%s'", package, domain='R-potools'))
+      message(domain=NA, gettextf("Starting translations for package '%s'", package))
     }
   }
   if (!update) dir.create(podir, showWarnings = FALSE)
@@ -95,7 +94,7 @@ translate_package = function(
       if (verbose) {
         message(domain=NA, gettextf(
           'Found existing R translations for %s (%s/%s) in %s',
-          language, metadata$full_name_eng, metadata$full_name_native, lang_file, domain='R-potools'
+          language, metadata$full_name_eng, metadata$full_name_native, lang_file
         ))
       }
       old_message_data = get_po_messages(lang_file)
@@ -103,7 +102,7 @@ translate_package = function(
       if (any(idx <- old_message_data$fuzzy == 2L)) {
         message(domain=NA, gettextf(
           'Found %d translations marked as deprecated in %s.',
-          sum(idx), lang_file, domain='R-potools'
+          sum(idx), lang_file
         ))
         message('Typically, this means the corresponding error messages have been refactored.')
         message('Reproducing these messages here for your reference since they might still provide some utility.')
@@ -156,14 +155,14 @@ translate_package = function(
 
     if (!length(new_idx)) {
       if (verbose) message(domain=NA, gettextf(
-        'Translations for %s are up to date! Skipping.', language, domain='R-potools'
+        'Translations for %s are up to date! Skipping.', language
       ))
       next
     }
     if (verbose) {
       message(domain=NA, gettextf(
         'Beginning new translations for %s (%s/%s); found %d untranslated messages',
-        language, metadata$full_name_eng, metadata$full_name_native, length(new_idx), domain='R-potools'
+        language, metadata$full_name_eng, metadata$full_name_native, length(new_idx)
       ))
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
@@ -235,16 +234,16 @@ translate_package = function(
 
 # just here to generate translations. comes from the PLURAL_RANGE_STRINGS csv
 invisible({
-  gettext("independently of n", domain="R-potools")
-  gettext("when n = 1", domain="R-potools")
-  gettext("when n is not 1", domain="R-potools")
-  gettext("when n is 0 or 1", domain="R-potools")
-  gettext("when n is at bigger than 1", domain="R-potools")
-  gettext("when n = 2-4, 22-24, 32-34, ...", domain="R-potools")
-  gettext("when n = 0, 5-21, 25-31, 35-41, ...", domain="R-potools")
-  gettext("when n = 1, 21, 31, 41, ...", domain="R-potools")
-  gettext("when n = 1, 21, 31, 41, ...", domain="R-potools")
-  gettext("when n = 0, 5-20, 25-30, 35-40, ...", domain="R-potools")
+  gettext("independently of n")
+  gettext("when n = 1")
+  gettext("when n is not 1")
+  gettext("when n is 0 or 1")
+  gettext("when n is at bigger than 1")
+  gettext("when n = 2-4, 22-24, 32-34, ...")
+  gettext("when n = 0, 5-21, 25-31, 35-41, ...")
+  gettext("when n = 1, 21, 31, 41, ...")
+  gettext("when n = 1, 21, 31, 41, ...")
+  gettext("when n = 0, 5-20, 25-30, 35-40, ...")
 })
 
 # take from those present in r-devel:

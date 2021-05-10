@@ -3,10 +3,10 @@ get_directory = function(dir) {
   dir = normalizePath(dir, mustWork=FALSE)
 
   if (!file.exists(dir)) {
-    stop(domain=NA, gettextf('%s does not exist', dir, domain='R-potools'))
+    stop(domain=NA, gettextf('%s does not exist', dir))
   }
   if (!file.info(dir)$isdir) {
-    stop(domain=NA, gettextf('%s is not a directory', dir, domain='R-potools'))
+    stop(domain=NA, gettextf('%s is not a directory', dir))
   }
   return(normalizePath(dir))
 }
@@ -15,12 +15,13 @@ get_directory = function(dir) {
 get_desc_data = function(dir) {
   desc_file <- file.path(dir, 'DESCRIPTION')
   if (!file.exists(desc_file)) {
-    stop(domain=NA, gettextf('%s is not a package (missing DESCRIPTION)', dir, domain='R-potools'))
+    stop(domain=NA, gettextf('%s is not a package (missing DESCRIPTION)', dir))
   }
   desc_data <- read.dcf(desc_file, c('Package', 'Version'))
   if (nrow(desc_data) != 1L || anyNA(desc_data)) {
     stop(domain=NA, gettextf(
-      '%s is not a package (missing Package and/or Version field in DESCRIPTION)', dir, domain='R-potools'
+      '%s is not a package (missing Package and/or Version field in DESCRIPTION)',
+      dir
     ))
   }
   return(desc_data[1L, ])
@@ -36,22 +37,20 @@ check_sys_reqs = function() {
     if (.Platform$OS.type == 'windows') {
       platform_msg = gettextf(
         'These tools are available as an Rtools goodie, check %s',
-        RTOOLS_URL, domain='R-potools'
+        RTOOLS_URL
       )
     } else {
       if (Sys.info()['sysname'] == 'Darwin') {
-        platform_msg = gettext(
-          'These GNU tools are commonly available, try installing from brew or apt-get', domain='R-potools'
-        )
+        platform_msg = gettext('These GNU tools are commonly available, try installing from brew or apt-get')
       } else {
         platform_msg = gettext(
-          'These GNU tools are commonly available from the Linux package manager for your system', domain='R-potools'
+          'These GNU tools are commonly available from the Linux package manager for your system'
         )
       }
     }
     stop(domain = NA, gettextf(
       'Missing (or not on PATH) system requirements %s.\n%s',
-      toString(SYSTEM_REQUIREMENTS[is_missing]), platform_msg, domain='R-potools'
+      toString(SYSTEM_REQUIREMENTS[is_missing]), platform_msg
     ))
   }
 }

@@ -8,7 +8,14 @@
 #   version of the strings to translate). Things can be a little wonky,
 #   however, e.g. for how asCall=TRUE/FALSE handles domain=NA and
 #   nested strings
-get_r_messages <- function (exprs) {
+get_r_messages <- function (x) {
+  if (is.list(x) && all(vapply(x, typeof, character(1L)) == "expression")) {
+    exprs <- x
+  } else {
+    # mostly used for convenient debugging right now. assumption
+    #   is that x is a directory so that we can use get_r_messages directly on a folder
+    exprs <- parse_r_files(x)
+  }
   # inherits singular_i, s_data
   find_singular_strings = function(e) {
     # inherits literal_strings

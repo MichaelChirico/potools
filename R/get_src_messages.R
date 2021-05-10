@@ -11,6 +11,8 @@ get_src_messages = function(dir = ".", translation_macro = "_") {
 
   out = rbindlist(lapply(src_files, get_file_src_messages, translation_macro), idcol = "file")
   out[ , "is_repeat" := duplicated(msgid)]
+  # TODO: plural messages in src
+  out[ , "type" := "singular"]
   out[]
 }
 

@@ -46,7 +46,7 @@ translate_package = function(
   message_data = rbind(
     R = r_message_data,
     src = src_message_data,
-    fill = TRUE, idcol = "message_so"
+    fill = TRUE, idcol = "message_source"
   )
 
   if (!nrow(message_data)) {
@@ -99,20 +99,35 @@ translate_package = function(
       }
 
       find_fuzzy_messages(message_data, lang_file)
-      new_idx = message_data[
-        fuzzy == 1L
-        | (type == 'singular' & !nzchar(msgstr))
-        | (type == 'plural' & !vapply(plural_msgstr, function(x) all(nzchar(x)), logical(1L))),
-        which = TRUE
-      ]
     } else {
-      new_idx = seq_len(nrow(message_data))
-      message_data[ , fuzzy := 0L]
+      message_data[message_source == "R", fuzzy := 0L]
     }
+
+    lang_file <- file.path(dir, 'po', sprintf("%s.po", language))
+    if (update && file.exists(lang_file)) {
+      if (verbose) {
+        message(domain=NA, gettextf(
+          'Found existing src translations for %s (%s/%s) in %s',
+          language, metadata$full_name_eng, metadata$full_name_native, lang_file
+        ))
+      }
+
+      find_fuzzy_messages(message_data, lang_file)
+    } else {
+      message_data[message_source == "src", fuzzy := 0L]
+    }
+
+    new_idx = message_data[
+      fuzzy == 1L
+      | (type == 'singular' & !nzchar(msgstr))
+      | (type == 'plural' & !vapply(plural_msgstr, function(x) all(nzchar(x)), logical(1L))),
+      which = TRUE
+    ]
 
     if (!length(new_idx)) {
       if (verbose) message(domain=NA, gettextf(
-        'Translations for %s are up to date! Skipping.', language
+        'Translations for %s are up to date! Skipping.',
+        language
       ))
       next
     }

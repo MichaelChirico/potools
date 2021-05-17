@@ -9,6 +9,16 @@ get_src_messages = function(dir = ".", translation_macro = "_") {
   src_files = package_src_files(dir)
   names(src_files) = src_files
 
+  if (!length(src_files)) {
+    return(data.table(
+      file = character(),
+      call = character(),
+      msgid = character(),
+      line_number = integer(),
+      is_marked_for_translation = logical()
+    ))
+  }
+
   out = rbindlist(lapply(src_files, get_file_src_messages, translation_macro), idcol = "file")
   out[ , "is_repeat" := duplicated(msgid)]
   # TODO: plural messages in src

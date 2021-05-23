@@ -84,12 +84,12 @@ translate_package = function(
     if (is.na(metadata$full_name_eng)) add_new_metadata(metadata, language)
     # overwrite any existing translations written in previous translation.
     #   set blank initially (rather than deleting the column) to allow
-    #   for interrupting the translation -- if unset, write_po_file will
+    #   for interrupting the translation -- if unset, write_po_files will
     #   fail if both these columns are not yet present.
     message_data[type == 'singular', msgstr := ""]
     message_data[type == 'plural', plural_msgstr := .(list(rep("", metadata$nplurals)))]
 
-    lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language))
+    lang_file <- file.path(podir, sprintf("R-%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
         message(domain=NA, gettextf(
@@ -103,7 +103,7 @@ translate_package = function(
       message_data[message_source == "R", fuzzy := 0L]
     }
 
-    lang_file <- file.path(dir, 'po', sprintf("%s.po", language))
+    lang_file <- file.path(podir, sprintf("%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
         message(domain=NA, gettextf(
@@ -148,7 +148,7 @@ translate_package = function(
     #   only one partially-finished language should be written at a time.
     INCOMPLETE = TRUE
     on.exit({
-      if (INCOMPLETE) write_po_file(message_data, lang_file, package, version, author, metadata) # nocov
+      if (INCOMPLETE) write_po_files(message_data, podir, language, package, version, author, metadata) # nocov
       # since add=FALSE, we overwrite the above call; duplicate it here
       unset_prompt_conn()
     })
@@ -193,9 +193,9 @@ translate_package = function(
       }
     }
 
-    # set INCOMPLETE after write_po_file for the event of a process interruption
-    #   between the loop finishing and the write_po_file command executing
-    write_po_file(message_data, lang_file, package, version, author, metadata)
+    # set INCOMPLETE after write_po_files for the event of a process interruption
+    #   between the loop finishing and the write_po_files command executing
+    write_po_files(message_data, podir, language, package, version, author, metadata)
     INCOMPLETE = FALSE
   }
 

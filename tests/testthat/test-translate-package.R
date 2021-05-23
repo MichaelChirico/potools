@@ -152,3 +152,25 @@ test_that('Unknown language flow works correctly', {
     fixed=TRUE
   )
 })
+
+test_that("Packages with src code work correctly", {
+  prompts = restore_package(
+    pkg <- test_package('r_src_c'),
+    tmp_conn = mock_translation('test-translate-package-r_src_c-1.input'),
+    {
+      translate_package(pkg, "zh_CN")
+
+      pkg_files <- list.files(pkg, recursive = TRUE)
+      expect_true("po/R-zh_CN.po" %in% pkg_files)
+      expect_true("po/zh_CN.po" %in% pkg_files)
+
+      # TODO: why no .mo file for zh_CN?
+    }
+  )
+
+  expect_outputs(
+    prompts,
+    c("Rprintf(_(", "warning(_("),
+    fixed = TRUE
+  )
+})

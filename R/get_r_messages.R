@@ -104,6 +104,7 @@ get_r_messages <- function (x) {
   msg[type == 'singular', 'msgid' := escape_string(msgid)]
   msg[type == 'plural', 'plural_msgid' := lapply(plural_msgid, escape_string)]
   msg[ , 'is_repeat' := type == 'singular' & duplicated(msgid)]
+  msg[ , 'is_marked_for_translation' := TRUE]
   msg[]
 }
 

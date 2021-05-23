@@ -70,10 +70,13 @@ translate_package = function(
 
   if (verbose) message('Running message diagnostics...')
 
-  exit = check_cracked_messages(message_data, package)
+  exit = check_cracked_messages(message_data)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
-  exit = check_untranslated_cat(r_exprs, package)
+  exit = check_untranslated_cat(r_exprs)
+  if (exit %chin% c('y', 'yes')) return(invisible())
+
+  exit = check_untranslated_src(message_data)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
   # TODO: understand why this is run here; streamline if possible

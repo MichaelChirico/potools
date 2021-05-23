@@ -1,6 +1,6 @@
 # check a package for calls to cat() that have untranslated strings (i.e.,
 #   aren't passed through gettext or ngettext)
-check_untranslated_cat <- function (exprs, package) {
+check_untranslated_cat <- function (exprs) {
   # inherits call_i, s_data
   find_untranslated_strings = function(e) {
     if (is.call(e) && e[[1L]] %is_base_call% 'cat') {

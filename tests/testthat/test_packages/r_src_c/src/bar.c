@@ -11,10 +11,8 @@ char *stardust(SEXP z);
 
 // include this comment here to test comment skipping works
 static void glam(SEXP x) {
-  Rprintf("an untranslated string\n");
   // test platform-robust format specification as done here
   Rprintf(_("an translated templated string: %"PRId64"\n"), 10000LL);
-  error("an untranslated error");
 }
 
 char *stardust(SEXP z) {

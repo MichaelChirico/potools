@@ -51,7 +51,6 @@ test_that("translate_package works on a simple package", {
     pkg,
     tmp_conn = mock_translation("test-translate-package-r_msg-1.input"),
     {
-      #browser()
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
         c("Beginning new translations", "BEGINNING TRANSLATION", "Re-running tools::update_pkg_po()"),
@@ -81,7 +80,6 @@ test_that("translate_package works on package with 'cracked' messages needing te
     pkg <- test_package("r_non_template"),
     tmp_conn = mock_translation("test-translate-package-r_non_template-1.input"),
     {
-      #browser()
       expect_messages(
         translate_package(pkg, "zh_CN"),
         "Found 1 R messaging calls that might be better suited for gettextf",

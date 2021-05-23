@@ -20,7 +20,6 @@ restore_package <- function(dir, expr, tmp_conn) {
 }
 
 expect_all_match = function(inputs, targets, ..., invert=FALSE) {
-  #browser()
   act <- quasi_label(rlang::enquo(inputs), arg = "inputs")
 
   matched <- vapply(

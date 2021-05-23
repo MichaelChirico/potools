@@ -18,6 +18,8 @@ static void glam(SEXP x) {
 }
 
 char *stardust(SEXP z) {
+  char *msg = "hijklmno";
+  Rprintf(msg);
   return "abcdefg";
 }
 

@@ -1,9 +1,9 @@
+#include <stdio.h>
+#include <inttypes.h>
+
 #include <R.h>
 #include <Rinternals.h>
 #include "po.h"
-
-#include <stdio.h>
-#include <inttypes.h>
 
 static void glam(SEXP x);
 static void ziggy(SEXP y, SEXP z);

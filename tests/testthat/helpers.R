@@ -20,8 +20,6 @@ restore_package <- function(dir, expr, tmp_conn) {
 }
 
 expect_all_match = function(inputs, targets, ..., invert=FALSE) {
-  act <- quasi_label(rlang::enquo(inputs), arg = "inputs")
-
   matched <- vapply(
     targets,
     function(target) length(grep(target, inputs, ..., invert=invert)) > 0L,
@@ -31,7 +29,7 @@ expect_all_match = function(inputs, targets, ..., invert=FALSE) {
   expect(
     all(matched),
     sprintf(
-      "Not all messages found in %s:\n  Observed: %s\n  Wanted: %s\n",
+      "Not all messages found:\n  Observed: %s\n  Wanted: %s\n",
       act$lab,
       toString(sQuote(inputs)),
       toString(sQuote(targets[!matched]))

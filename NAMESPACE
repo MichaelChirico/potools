@@ -2,6 +2,6 @@ importFrom(data.table, data.table, fread, rbindlist, set, setkey, uniqueN, "%chi
 importFrom(data.table, `:=`, .BY, .N, .SD)
 importFrom(data.table, fifelse)
 
-importFrom(utils, globalVariables, tail)
+importFrom(utils, globalVariables, tail, type.convert)
 
 export(translate_package)

@@ -1,6 +1,6 @@
 # check a package for calls to cat() that have untranslated strings (i.e.,
 #   aren't passed through gettext or ngettext)
-check_untranslated_cat <- function (exprs, package) {
+check_untranslated_cat <- function (exprs) {
   # inherits call_i, s_data
   find_untranslated_strings = function(e) {
     if (is.call(e) && e[[1L]] %is_base_call% 'cat') {
@@ -39,7 +39,7 @@ check_untranslated_cat <- function (exprs, package) {
         e = e[!named_idx]
         suggested = sprintf(
           'cat(%s%s)',
-          gettextify(e[-1L], sep, package),
+          gettextify(e[-1L], sep),
           named_arg_str
         )
 
@@ -67,7 +67,7 @@ check_untranslated_cat <- function (exprs, package) {
   if (any(n_cat > 0L)) {
     message(domain=NA, gettextf(
       'Found %d untranslated messaging calls passed through cat():',
-      sum(n_cat), domain='R-potools'
+      sum(n_cat)
     ))
     for (ii in seq_along(cat_calls)) {
       file = names(cat_calls)[ii]

@@ -8,7 +8,14 @@
 #   version of the strings to translate). Things can be a little wonky,
 #   however, e.g. for how asCall=TRUE/FALSE handles domain=NA and
 #   nested strings
-get_r_messages <- function (exprs) {
+get_r_messages <- function (x) {
+  if (is.list(x) && all(vapply(x, typeof, character(1L)) == "expression")) {
+    exprs <- x
+  } else {
+    # mostly used for convenient debugging right now. assumption
+    #   is that x is a directory so that we can use get_r_messages directly on a folder
+    exprs <- parse_r_files(x) # nocov
+  }
   # inherits singular_i, s_data
   find_singular_strings = function(e) {
     # inherits literal_strings
@@ -94,9 +101,10 @@ get_r_messages <- function (exprs) {
       is_repeat = logical()
     ))
   }
-  msg[type == 'singular', msgid := escape_string(msgid)]
-  msg[type == 'plural', plural_msgid := lapply(plural_msgid, escape_string)]
+  msg[type == 'singular', 'msgid' := escape_string(msgid)]
+  msg[type == 'plural', 'plural_msgid' := lapply(plural_msgid, escape_string)]
   msg[ , 'is_repeat' := type == 'singular' & duplicated(msgid)]
+  msg[ , 'is_marked_for_translation' := TRUE]
   msg[]
 }
 

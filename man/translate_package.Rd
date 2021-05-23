@@ -15,12 +15,14 @@ turn built on lower-level \code{gettext} sytem utilities), namely \code{\link[to
 \usage{
 translate_package(
   dir='.', languages,
+  src_translation_macro="_",
   copyright, bugs, verbose=FALSE
 )
 }
 \arguments{
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
   \item{languages}{ Character vector; locale codes to which to translate. See Details. }
+  \item{src_translation_macro}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_}, is shared by R itself & recommended in WRE. }
   \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }

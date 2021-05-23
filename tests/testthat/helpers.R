@@ -19,17 +19,31 @@ restore_package <- function(dir, expr, tmp_conn) {
   invisible(capture.output(expr))
 }
 
-expect_all_match = function(inputs, target, ..., invert=FALSE) {
-  expect_true(all(vapply(inputs, function(input) length(grep(input, target, ..., invert=invert)) > 0L, logical(1L))))
+expect_all_match = function(inputs, targets, ..., invert=FALSE) {
+  matched <- vapply(
+    targets,
+    function(target) length(grep(target, inputs, ..., invert=invert)) > 0L,
+    logical(1L)
+  )
+
+  expect(
+    all(matched),
+    sprintf(
+      "Not all messages found:\n  Observed: %s\n  Wanted: %s\n",
+      toString(sQuote(inputs)),
+      toString(sQuote(targets[!matched]))
+    )
+  )
 }
 
+# TODO: I think this can just be replaced by expect_match and expect_no_match in current testthat dev
 expect_messages = function(expr, msgs, ..., invert=FALSE) {
   observed_messages = capture_messages(expr)
-  expect_all_match(msgs, observed_messages, ..., invert=invert)
+  expect_all_match(observed_messages, msgs, ..., invert=invert)
 }
 
 expect_outputs = function(output, outs, ..., invert=FALSE) {
-  expect_all_match(outs, output, ..., invert=invert)
+  expect_all_match(output, outs, ..., invert=invert)
 }
 
 test_package = function(pkg) test_path(file.path("test_packages", pkg))

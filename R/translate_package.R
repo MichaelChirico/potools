@@ -1,6 +1,7 @@
 translate_package = function(
-  dir='.', languages,
-  copyright, bugs, verbose=FALSE
+  dir = '.', languages,
+  src_translation_macro = "_",
+  copyright, bugs, verbose = FALSE
 ) {
   check_sys_reqs()
 
@@ -16,20 +17,21 @@ translate_package = function(
   package <- desc_data['Package']
   version <- desc_data['Version']
 
-  potfile <- character()
+  r_potfile <- character()
   update = file.exists(podir <- file.path(dir, 'po')) &&
-    length(potfile <- list.files(podir, pattern='^R.*\\.pot$'))
+    length(r_potfile <- list.files(podir, pattern='^R.*\\.pot$'))
 
   if (verbose) {
     if (update) {
+      # is it worthwhile to try and distinguish the creation time of the
+      #  R pot file and the src pot file? probably not...
       message(domain=NA, gettextf(
         "Updating translation template for package '%s' (last updated %s)",
         package,
-        format(file.info(potfile)$atime),
-        domain='R-potools'
+        format(file.info(r_potfile)$atime)
       ))
     } else {
-      message(domain=NA, gettextf("Starting translations for package '%s'", package, domain='R-potools'))
+      message(domain=NA, gettextf("Starting translations for package '%s'", package))
     }
   }
   if (!update) dir.create(podir, showWarnings = FALSE)
@@ -38,7 +40,21 @@ translate_package = function(
   r_exprs = parse_r_files(dir)
 
   if (verbose) message('Getting R-level messages...')
-  message_data = get_r_messages(r_exprs)
+  r_message_data = get_r_messages(r_exprs)
+
+  if (verbose) message('Getting src-level messages...')
+  src_message_data = get_src_messages(dir, src_translation_macro)
+
+  if (nrow(src_message_data) && !file.exists(src_potfile <- file.path(podir, sprintf("%s.pot", package)))) {
+    # otherwise, tools::update_pkg_po() skips creating .mo files for src translations
+    file.create(src_potfile)
+  }
+
+  message_data = rbind(
+    R = r_message_data,
+    src = src_message_data,
+    fill = TRUE, idcol = "message_source"
+  )
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')
@@ -54,12 +70,16 @@ translate_package = function(
 
   if (verbose) message('Running message diagnostics...')
 
-  exit = check_cracked_messages(message_data, package)
+  exit = check_cracked_messages(message_data)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
-  exit = check_untranslated_cat(r_exprs, package)
+  exit = check_untranslated_cat(r_exprs)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
+  exit = check_untranslated_src(message_data)
+  if (exit %chin% c('y', 'yes')) return(invisible())
+
+  # TODO: understand why this is run here; streamline if possible
   if (verbose) message('Running tools::update_pkg_po()')
   tools::update_pkg_po(dir, package, version, copyright, bugs)
 
@@ -71,120 +91,62 @@ translate_package = function(
   for (language in languages) {
     metadata = KNOWN_LANGUAGES[.(language)]
     # if the language is unknown, the right join above won't match rows in KNOWN_LANGUAGES
-    if (is.na(metadata$full_name_eng)) {
-      message(
-        gettextf("'%s' is not a known language. ", language, domain="R-potools"),
-        domain=NA, appendLF=FALSE
-      )
-      message("Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>")
-      metadata[ , full_name_eng := prompt("How would you refer to this language in English?")]
-      metadata[ , full_name_native := prompt("How would you refer to this language in the language itself?")]
-      metadata[ , nplurals := prompt(
-        "How many pluralizations are there for this language [nplurals]?",
-        require_type = "integer"
-      )]
-      metadata[ , plural := prompt("What is the rule for deciding which plural applies as a function of n [plural]?")]
-      if (!metadata$plural %chin% PLURAL_RANGE_STRINGS$plural) {
-        message(domain=NA, gettextf(
-          "Supplied 'plural':\n%s\nDid not match any known 'plural's:\n%s\nUsing generic description of cases instead.",
-          metadata$plural, paste(unique(PLURAL_RANGE_STRINGS$plural), collapse = '\n'), domain="R-potools"
-        ))
-        plural_index = 0:(metadata$nplurals - 1L)
-        # not used in this function, so just x <- rbind(...) will only
-        #   overwrite locally, so we have to unlock the binding
-        unlockBinding("PLURAL_RANGE_STRINGS", asNamespace("potools"))
-        PLURAL_RANGE_STRINGS <<- rbind(
-          PLURAL_RANGE_STRINGS,
-          data.table(
-            plural = metadata$plural,
-            plural_index = plural_index,
-            range = paste0("for n where 'plural' resolves to ", plural_index)
-          )
-        )
-        setkey(PLURAL_RANGE_STRINGS, plural, plural_index)
-        lockBinding("PLURAL_RANGE_STRINGS", asNamespace("potools"))
-      }
-      message("Thanks! Please file an issue on GitHub to get this language recognized permanently")
-    }
+    if (is.na(metadata$full_name_eng)) add_new_metadata(metadata, language)
     # overwrite any existing translations written in previous translation.
     #   set blank initially (rather than deleting the column) to allow
-    #   for interrupting the translation -- if unset, write_po_file will
+    #   for interrupting the translation -- if unset, write_po_files will
     #   fail if both these columns are not yet present.
-    message_data[type == 'singular', msgstr := ""]
-    message_data[type == 'plural', plural_msgstr := .(list(rep("", metadata$nplurals)))]
-    lang_file <- file.path(dir, 'po', sprintf("R-%s.po", language))
+    message_data[type == 'singular', 'msgstr' := ""]
+    message_data[type == 'plural', 'plural_msgstr' := .(list(rep("", metadata$nplurals)))]
+
+    lang_file <- file.path(podir, sprintf("R-%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
         message(domain=NA, gettextf(
-          'Found existing translations for %s (%s/%s) in %s',
-          language, metadata$full_name_eng, metadata$full_name_native, lang_file, domain='R-potools'
+          'Found existing R translations for %s (%s/%s) in %s',
+          language, metadata$full_name_eng, metadata$full_name_native, lang_file
         ))
       }
-      old_message_data = get_po_messages(lang_file)
 
-      if (any(idx <- old_message_data$fuzzy == 2L)) {
-        message(domain=NA, gettextf(
-          'Found %d translations marked as deprecated in %s.',
-          sum(idx), lang_file, domain='R-potools'
-        ))
-        message('Typically, this means the corresponding error messages have been refactored.')
-        message('Reproducing these messages here for your reference since they might still provide some utility.')
-
-        dashes = strrep('-', .9*getOption('width'))
-        old_message_data[idx & type == 'singular', {
-          if (.N > 0L) {
-            message(' ** SINGULAR MESSAGES **')
-            cat(rbind(dashes, msgid, msgstr), sep='\n')
-          }
-        }]
-        old_message_data[idx & type == 'plural', {
-          if (.N > 0L) {
-            message(' ** PLURAL MESSAGES **')
-            cat(do.call(rbind, c(list(dashes), plural_msgid, plural_msgstr)), sep='\n')
-          }
-        }]
-
-        old_message_data = old_message_data[(!idx)]
-      }
-
-      message_data[
-        old_message_data[type == 'singular'],
-        on = c('type', 'msgid'),
-        `:=`(msgstr = i.msgstr, fuzzy = i.fuzzy)
-      ]
-      # can't join on lists :\
-      if (!all(vapply(old_message_data$plural_msgstr, is.null, logical(1L)))) {
-        message_data[ , 'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')]
-        old_message_data[ , 'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')]
-        message_data[
-          old_message_data[type == 'plural'],
-          on = c('type', 'join_id'),
-          `:=`(plural_msgstr = i.plural_msgstr, fuzzy = i.fuzzy)
-        ]
-
-        message_data[ , 'join_id' := NULL]
-        old_message_data[ , 'join_id' := NULL]
-      }
-      new_idx = message_data[
-        fuzzy == 1L |
-          (type == 'singular' & !nzchar(msgstr)) |
-          (type == 'plural' & !vapply(plural_msgstr, function(x) all(nzchar(x)), logical(1L))),
-        which = TRUE
-      ]
+      find_fuzzy_messages(message_data, lang_file)
     } else {
-      new_idx = seq_len(nrow(message_data))
-      message_data[ , fuzzy := 0L]
+      message_data[message_source == "R", 'fuzzy' := 0L]
     }
+
+    lang_file <- file.path(podir, sprintf("%s.po", language))
+    if (update && file.exists(lang_file)) {
+      if (verbose) {
+        message(domain=NA, gettextf(
+          'Found existing src translations for %s (%s/%s) in %s',
+          language, metadata$full_name_eng, metadata$full_name_native, lang_file
+        ))
+      }
+
+      find_fuzzy_messages(message_data, lang_file)
+    } else {
+      message_data[message_source == "src", 'fuzzy' := 0L]
+    }
+
+    new_idx = message_data[
+      is_marked_for_translation & (
+        fuzzy == 1L
+        | (type == 'singular' & !nzchar(msgstr))
+        | (type == 'plural' & !vapply(plural_msgstr, function(x) all(nzchar(x)), logical(1L)))
+      ),
+      which = TRUE
+    ]
+
     if (!length(new_idx)) {
       if (verbose) message(domain=NA, gettextf(
-        'Translations for %s are up to date! Skipping.', language, domain='R-potools'
+        'Translations for %s are up to date! Skipping.',
+        language
       ))
       next
     }
     if (verbose) {
       message(domain=NA, gettextf(
         'Beginning new translations for %s (%s/%s); found %d untranslated messages',
-        language, metadata$full_name_eng, metadata$full_name_native, length(new_idx), domain='R-potools'
+        language, metadata$full_name_eng, metadata$full_name_native, length(new_idx)
       ))
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
@@ -198,7 +160,7 @@ translate_package = function(
     #   only one partially-finished language should be written at a time.
     INCOMPLETE = TRUE
     on.exit({
-      if (INCOMPLETE) write_po_file(message_data, lang_file, package, version, author, metadata) # nocov
+      if (INCOMPLETE) write_po_files(message_data, podir, language, package, version, author, metadata) # nocov
       # since add=FALSE, we overwrite the above call; duplicate it here
       unset_prompt_conn()
     })
@@ -243,9 +205,9 @@ translate_package = function(
       }
     }
 
-    # set INCOMPLETE after write_po_file for the event of a process interruption
-    #   between the loop finishing and the write_po_file command executing
-    write_po_file(message_data, lang_file, package, version, author, metadata)
+    # set INCOMPLETE after write_po_files for the event of a process interruption
+    #   between the loop finishing and the write_po_files command executing
+    write_po_files(message_data, podir, language, package, version, author, metadata)
     INCOMPLETE = FALSE
   }
 
@@ -256,16 +218,16 @@ translate_package = function(
 
 # just here to generate translations. comes from the PLURAL_RANGE_STRINGS csv
 invisible({
-  gettext("independently of n", domain="R-potools")
-  gettext("when n = 1", domain="R-potools")
-  gettext("when n is not 1", domain="R-potools")
-  gettext("when n is 0 or 1", domain="R-potools")
-  gettext("when n is at bigger than 1", domain="R-potools")
-  gettext("when n = 2-4, 22-24, 32-34, ...", domain="R-potools")
-  gettext("when n = 0, 5-21, 25-31, 35-41, ...", domain="R-potools")
-  gettext("when n = 1, 21, 31, 41, ...", domain="R-potools")
-  gettext("when n = 1, 21, 31, 41, ...", domain="R-potools")
-  gettext("when n = 0, 5-20, 25-30, 35-40, ...", domain="R-potools")
+  gettext("independently of n")
+  gettext("when n = 1")
+  gettext("when n is not 1")
+  gettext("when n is 0 or 1")
+  gettext("when n is at bigger than 1")
+  gettext("when n = 2-4, 22-24, 32-34, ...")
+  gettext("when n = 0, 5-21, 25-31, 35-41, ...")
+  gettext("when n = 1, 21, 31, 41, ...")
+  gettext("when n = 1, 21, 31, 41, ...")
+  gettext("when n = 0, 5-20, 25-30, 35-40, ...")
 })
 
 # take from those present in r-devel:

@@ -82,7 +82,7 @@ test_that("translate_package works on package with 'cracked' messages needing te
     {
       expect_messages(
         translate_package(pkg, "zh_CN"),
-        "Found 1 messaging calls that might be better suited for gettextf",
+        "Found 1 R messaging calls that might be better suited for gettextf",
         fixed = TRUE
       )
     }
@@ -120,8 +120,8 @@ test_that("translate_package identifies potential translations in cat() calls", 
   expect_outputs(
     prompts,
     c(
-      'cat(gettext("I warned you!", domain="R-rCatMsg"), fill=TRUE)',
-      'cat(gettext("Oh no you don\'t!", domain="R-rCatMsg"))',
+      'cat(gettext("I warned you!"), fill=TRUE)',
+      'cat(gettext("Oh no you don\'t!"))',
       "Hixxboss"
     ),
     fixed=TRUE
@@ -149,6 +149,99 @@ test_that('Unknown language flow works correctly', {
   expect_outputs(
     prompts,
     c('How would you refer to this language in English?'),
+    fixed=TRUE
+  )
+})
+
+test_that("Packages with src code work correctly", {
+  prompts = restore_package(
+    pkg <- test_package('r_src_c'),
+    tmp_conn = mock_translation('test-translate-package-r_src_c-1.input'),
+    {
+      translate_package(pkg, "zh_CN")
+
+      pkg_files <- list.files(pkg, recursive = TRUE)
+      expect_true("po/R-zh_CN.po" %in% pkg_files)
+      expect_true("po/zh_CN.po" %in% pkg_files)
+      expect_true("po/rSrcMsg.pot" %in% pkg_files)
+      expect(
+        any(grepl("inst/po/.*/rSrcMsg.mo", pkg_files)),
+        "Didn't find rSrcMsg.mo; found %s", toString(pkg_files)
+      )
+    }
+  )
+
+  expect_outputs(
+    prompts,
+    c("Rprintf(_(", "warning(_("),
+    fixed = TRUE
+  )
+})
+
+test_that("Packages with src code & C syntax errors fail gracefully", {
+  restore_package(
+    pkg <- test_package("r_src_err_1"),
+    {
+      expect_error(translate_package(pkg, "zh_CN"), "File terminated before char array completed", fixed = TRUE)
+    }
+  )
+
+  restore_package(
+    pkg <- test_package("r_src_err_2"),
+    {
+      expect_error(translate_package(pkg, "zh_CN"), "File terminated before translation array completed", fixed = TRUE)
+    }
+  )
+
+  restore_package(
+    pkg <- test_package("r_src_err_3"),
+    {
+      expect_error(translate_package(pkg, "zh_CN"), "File terminated before message call completed", fixed = TRUE)
+    }
+  )
+
+  restore_package(
+    pkg <- test_package("r_src_err_4"),
+    {
+      expect_error(translate_package(pkg, "zh_CN"), "Unexpected sequence", fixed = TRUE)
+    }
+  )
+})
+
+test_that("Packages with src code & fuzzy messages work", {
+  prompts = restore_package(
+    pkg <- test_package("r_src_fuzzy"),
+    tmp_conn = mock_translation('test-translate-package-r_src_fuzzy-1.input'),
+    {
+      translate_package(pkg, "zh_CN")
+    }
+  )
+  expect_outputs(
+    prompts,
+    "Note: a similar message was previously translated as",
+    fixed = TRUE
+  )
+})
+
+test_that("Diagnostic for unmarked src translations works", {
+  prompts = restore_package(
+    pkg <- test_package("r_src_untranslated"),
+    tmp_conn = mock_translation("test-translate-package-r_src_untranslated-1.input"),
+    {
+      expect_messages(
+        translate_package(pkg, "zh_CN"),
+        "Found 3 src messaging calls that were not properly marked for translation",
+        fixed = TRUE
+      )
+    }
+  )
+  expect_outputs(
+    prompts,
+    c(
+      'an untranslated string',
+      'an untranslated error',
+      "msg"
+    ),
     fixed=TRUE
   )
 })

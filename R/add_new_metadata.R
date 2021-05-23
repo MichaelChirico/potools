@@ -30,7 +30,7 @@ add_new_metadata = function(metadata, language) {
         range = paste0("for n where 'plural' resolves to ", plural_index)
       )
     )
-    setkeyv(PLURAL_RANGE_STRINGS, "plural", "plural_index")
+    setkeyv(PLURAL_RANGE_STRINGS, c("plural", "plural_index"))
     lockBinding("PLURAL_RANGE_STRINGS", asNamespace("potools"))
   }
   message("Thanks! Please file an issue on GitHub to get this language recognized permanently")

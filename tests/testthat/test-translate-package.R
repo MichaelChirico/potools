@@ -51,7 +51,7 @@ test_that("translate_package works on a simple package", {
     pkg,
     tmp_conn = mock_translation("test-translate-package-r_msg-1.input"),
     {
-      browser()
+      #browser()
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
         c("Beginning new translations", "BEGINNING TRANSLATION", "Re-running tools::update_pkg_po()"),

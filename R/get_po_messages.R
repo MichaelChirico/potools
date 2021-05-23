@@ -4,10 +4,12 @@
 #   these are not recorded by gettext.
 get_po_messages <- function(po_file) {
   po_lines = readLines(po_file, encoding="UTF-8")
+  message_source = if (startsWith(basename(po_file), "R-")) "R" else "src"
   po_length = length(po_lines)
 
   if (po_length == 0L) {
     return(data.table(
+      message_source = character(),
       type = character(),
       fuzzy = integer(),
       msgid = character(),
@@ -58,6 +60,7 @@ get_po_messages <- function(po_file) {
   # TODO: isn't n_msg just length(grep("^msgid ", po_lines))?
   n_msg = n_singular + n_plural
   po_data = data.table(
+    message_source = message_source,
     type = rep(c("singular", "plural"), c(n_singular, n_plural)),
     fuzzy = integer(n_msg),
     msgid = character(n_msg),

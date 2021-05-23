@@ -26,7 +26,7 @@ find_fuzzy_messages <- function(message_data, lang_file) {
     old_message_data = old_message_data[(!idx)]
   }
 
-  msg_src <- if (startsWith(basename(lang_file, "R-"))) "R" else "src"
+  msg_src <- if (startsWith(basename(lang_file), "R-")) "R" else "src"
 
   message_data[
     message_source == msg_src,

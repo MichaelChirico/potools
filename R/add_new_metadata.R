@@ -2,7 +2,7 @@
 #   stores this metadata in the package environment so it can be reused for the session duration.
 add_new_metadata = function(metadata, language) {
   message(
-    gettextf("'%s' is not a known language. ", language,),
+    gettextf("'%s' is not a known language. ", language),
     domain=NA, appendLF=FALSE
   )
   message("Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>")

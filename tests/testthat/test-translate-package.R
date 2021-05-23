@@ -174,3 +174,19 @@ test_that("Packages with src code work correctly", {
     fixed = TRUE
   )
 })
+
+test_that("Packages with src code & C syntax errors fail gracefully", {
+  restore_package(
+    pkg <- test_package("r_src_err_1"),
+    {
+      expect_error(translate_package(pkg, "zh_CN"), "File terminated before char array completed", fixed = TRUE)
+    }
+  )
+
+  restore_package(
+    pkg <- test_package("r_src_err_2"),
+    {
+      expect_error(translate_package(pkg, "zh_CN"), "File terminated before message call completed", fixed = TRUE)
+    }
+  )
+})

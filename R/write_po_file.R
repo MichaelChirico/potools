@@ -13,9 +13,16 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
     metadata$nplurals, metadata$plural
   )
 
-  write_po_file(message_data[message_source == "R"], file.path(po_dir, sprintf("R-%s.po", language)), po_header)
-  # if (any(message_data$message_source ==))
-  write_po_file(message_data[message_source == "src"], file.path(po_dir, sprintf("%s.po", language)), po_header)
+  write_po_file(
+    message_data[message_source == "R"],
+    file.path(po_dir, sprintf("R-%s.po", language)),
+    po_header
+  )
+  write_po_file(
+    message_data[message_source == "src" & is_marked_for_translation],
+    file.path(po_dir, sprintf("%s.po", language)),
+    po_header
+  )
   return(invisible())
 }
 

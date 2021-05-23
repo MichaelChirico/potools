@@ -14,7 +14,7 @@ get_r_messages <- function (x) {
   } else {
     # mostly used for convenient debugging right now. assumption
     #   is that x is a directory so that we can use get_r_messages directly on a folder
-    exprs <- parse_r_files(x)
+    exprs <- parse_r_files(x) # nocov
   }
   # inherits singular_i, s_data
   find_singular_strings = function(e) {

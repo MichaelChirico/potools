@@ -81,10 +81,10 @@ test_that("translate_package works on package with 'cracked' messages needing te
     pkg <- test_package("r_non_template"),
     tmp_conn = mock_translation("test-translate-package-r_non_template-1.input"),
     {
-      browser()
+      #browser()
       expect_messages(
         translate_package(pkg, "zh_CN"),
-        "Found 1 messaging calls that might be better suited for gettextf",
+        "Found 1 R messaging calls that might be better suited for gettextf",
         fixed = TRUE
       )
     }
@@ -122,8 +122,8 @@ test_that("translate_package identifies potential translations in cat() calls", 
   expect_outputs(
     prompts,
     c(
-      'cat(gettext("I warned you!", domain="R-rCatMsg"), fill=TRUE)',
-      'cat(gettext("Oh no you don\'t!", domain="R-rCatMsg"))',
+      'cat(gettext("I warned you!"), fill=TRUE)',
+      'cat(gettext("Oh no you don\'t!"))',
       "Hixxboss"
     ),
     fixed=TRUE

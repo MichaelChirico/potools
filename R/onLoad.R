@@ -2,7 +2,7 @@ globalVariables(
   c(
     'KNOWN_LANGUAGES', 'PLURAL_RANGE_STRINGS',
     'msgid', 'msgstr', 'x.msgstr', 'plural_msgid', 'plural_msgstr', 'x.plural_msgstr',
-    'message_source', 'type', 'fuzzy', 'x.fuzzy', 'is_repeat', '.'
+    'message_source', 'type', 'fuzzy', 'x.fuzzy', 'is_repeat', 'is_marked_for_translation', '.'
   ),
   package = 'potools'
 )

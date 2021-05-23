@@ -164,7 +164,7 @@ test_that("Packages with src code work correctly", {
       expect_true("po/R-zh_CN.po" %in% pkg_files)
       expect_true("po/zh_CN.po" %in% pkg_files)
       expect_true("po/rSrcMsg.pot" %in% pkg_files)
-      expect_true("inst/po/.*/rSrcMsg.mo" %in% pkg_files)
+      expect_true(any(grepl("inst/po/.*/rSrcMsg.mo", pkg_files)))
     }
   )
 

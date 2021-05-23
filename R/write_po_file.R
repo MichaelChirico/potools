@@ -18,7 +18,7 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
   return(invisible())
 }
 
-write_po_file <- function(message_data, po_file, poheader) {
+write_po_file <- function(message_data, po_file, po_header) {
   if (!nrow(message_data)) return(invisible())
 
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
@@ -31,13 +31,13 @@ write_po_file <- function(message_data, po_file, poheader) {
   for (ii in message_data[(!is_repeat), which = TRUE]) {
     message_data[ii, {
       if (type == 'singular') {
-        writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
+        writeLines(con=po_conn, useBytes=TRUE, sprintf(
           '\n\nmsgid "%s"\nmsgstr "%s"', msgid, msgstr
         ))
       } else {
         # stored in list column, we need to [[1]]
         msgstr = plural_msgstr[[1L]]
-        writeLines(con=pofile_conn, useBytes=TRUE, sprintf(
+        writeLines(con=po_conn, useBytes=TRUE, sprintf(
           '\n\nmsgid "%s"\nmsgid_plural "%s"\n%s',
           plural_msgid[[c(1L, 1L)]], plural_msgid[[1:2]],
           paste(sprintf('msgstr[%d] "%s"', seq_along(msgstr)-1L, msgstr), collapse='\n')

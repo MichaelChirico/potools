@@ -10,12 +10,14 @@
 // include this comment here to test comment skipping works
 static void glam(SEXP x) {
   Rprintf("an untranslated string\n");
-  Rprintf(_("an translated templated string: %s\n"), "foo");
+  // test platform-robust format specification as done here
+  Rprintf(_("an translated templated string: %"PRId64"\n"), 10000LL);
   error("an untranslated error");
 }
 
 /* Add a call here to make sure comment skipping works: Rprintf(_("hi")); */
 static void ziggy(SEXP y, SEXP z) {
-  warning(_("a translated warning: %s\n"));
+  // nested parentheses before we reach the end of the call
+  warning(_("a translated warning: %s\n"), stardust(z));
   return;
 }

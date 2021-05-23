@@ -197,3 +197,18 @@ test_that("Packages with src code & C syntax errors fail gracefully", {
     }
   )
 })
+
+test_that("Packages with src code & fuzzy messages work", {
+  prompts = restore_package(
+    pkg <- test_package("r_src_fuzzy"),
+    tmp_conn = mock_translation('test-translate-package-r_src_fuzzy-1.input'),
+    {
+      translate_package(pkg, "zh_CN")
+    }
+  )
+  expect_outputs(
+    prompts,
+    "Note: a similar message was previously translated as",
+    fixed = TRUE
+  )
+})

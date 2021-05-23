@@ -9,14 +9,14 @@ check_untranslated_src <- function (message_data) {
 
   message(domain=NA, gettextf(
     'Found %d src messaging calls that were not properly marked for translation:',
-    nrow(dup_messages)
+    nrow(unmarked_messages)
   ))
   for (ii in seq_len(nrow(unmarked_messages))) {
     unmarked_messages[ii, cat(gettextf(
-      '\nUntranslated call:\n%s\n< File:%s, Line:%d >\n',
-      call_color(call[ii]),
-      file_color(file[ii]),
-      file_color(line_number[ii])
+      '\nUntranslated call:\n%s\n< File:%s, Line:%s >\n',
+      call_color(call),
+      file_color(file),
+      file_color(line_number)
     ))]
   }
 

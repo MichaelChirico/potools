@@ -109,7 +109,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
         # jump past "
         jj = jj + 1L
         # now jump past any whitespace
-        while (jj <= nn && contents_char[jj] %chin% c(" ", "\n", "\t")) { jj = jj + 1L }
+        while (jj <= nn && contents_char[jj] %chin% c(" ", "\n", "\r", "\t")) { jj = jj + 1L }
         if (jj > nn) {
           stop("File terminated before translation array completed")
         }

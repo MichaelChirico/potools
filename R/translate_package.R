@@ -86,8 +86,8 @@ translate_package = function(
     #   set blank initially (rather than deleting the column) to allow
     #   for interrupting the translation -- if unset, write_po_files will
     #   fail if both these columns are not yet present.
-    message_data[type == 'singular', msgstr := ""]
-    message_data[type == 'plural', plural_msgstr := .(list(rep("", metadata$nplurals)))]
+    message_data[type == 'singular', 'msgstr' := ""]
+    message_data[type == 'plural', 'plural_msgstr' := .(list(rep("", metadata$nplurals)))]
 
     lang_file <- file.path(podir, sprintf("R-%s.po", language))
     if (update && file.exists(lang_file)) {
@@ -100,7 +100,7 @@ translate_package = function(
 
       find_fuzzy_messages(message_data, lang_file)
     } else {
-      message_data[message_source == "R", fuzzy := 0L]
+      message_data[message_source == "R", 'fuzzy' := 0L]
     }
 
     lang_file <- file.path(podir, sprintf("%s.po", language))
@@ -114,7 +114,7 @@ translate_package = function(
 
       find_fuzzy_messages(message_data, lang_file)
     } else {
-      message_data[message_source == "src", fuzzy := 0L]
+      message_data[message_source == "src", 'fuzzy' := 0L]
     }
 
     new_idx = message_data[

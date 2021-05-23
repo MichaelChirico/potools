@@ -222,3 +222,26 @@ test_that("Packages with src code & fuzzy messages work", {
     fixed = TRUE
   )
 })
+
+test_that("Diagnostic for unmarked src translations works", {
+  prompts = restore_package(
+    pkg <- test_package("r_src_untranslated"),
+    tmp_conn = mock_translation("test-translate-package-r_src_untranslated-1.input"),
+    {
+      expect_messages(
+        translate_package(pkg, "zh_CN"),
+        "Found 3 src messaging calls that were not properly marked for translation",
+        fixed = TRUE
+      )
+    }
+  )
+  expect_outputs(
+    prompts,
+    c(
+      'an untranslated string',
+      'an untranslated error',
+      "msg"
+    ),
+    fixed=TRUE
+  )
+})

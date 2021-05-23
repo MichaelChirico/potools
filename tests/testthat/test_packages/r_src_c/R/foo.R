@@ -1,1 +1,4 @@
-f <- function(x) x+1
+f <- function(x) {
+  message("a string")
+  x+1
+}

@@ -105,7 +105,7 @@ do_suppress = function(e) {
   !is.null(domain) && !is.name(domain) && is.na(domain)
 }
 
-gettextify = function(e, sep = '', package) {
+gettextify = function(e, sep = '') {
   str_idx = vapply(e, is.character, logical(1L))
 
   if (all(str_idx)) {
@@ -124,8 +124,8 @@ gettextify = function(e, sep = '', package) {
   }
 
   sprintf(
-    '%s("%s"%s, domain="R-%s")',
-    call_nm, fmt, dots, package
+    '%s("%s"%s)',
+    call_nm, fmt, dots
   )
 }
 

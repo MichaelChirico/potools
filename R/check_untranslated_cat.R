@@ -39,7 +39,7 @@ check_untranslated_cat <- function (exprs, package) {
         e = e[!named_idx]
         suggested = sprintf(
           'cat(%s%s)',
-          gettextify(e[-1L], sep, package),
+          gettextify(e[-1L], sep),
           named_arg_str
         )
 

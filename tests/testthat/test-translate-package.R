@@ -81,6 +81,7 @@ test_that("translate_package works on package with 'cracked' messages needing te
     pkg <- test_package("r_non_template"),
     tmp_conn = mock_translation("test-translate-package-r_non_template-1.input"),
     {
+      browser()
       expect_messages(
         translate_package(pkg, "zh_CN"),
         "Found 1 messaging calls that might be better suited for gettextf",

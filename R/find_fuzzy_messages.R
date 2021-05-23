@@ -28,11 +28,10 @@ find_fuzzy_messages <- function(message_data, lang_file) {
 
   msg_src <- if (startsWith(basename(lang_file), "R-")) "R" else "src"
 
+  # filter 'type' here to make sure we can only assign to those rows
   message_data[
-    message_source == msg_src,
-    c("msgstr", "fuzzy") := old_message_data[type == 'singular'][
-      .SD, on = c("type", "msgid"), .(x.msgstr, x.fuzzy)
-    ]
+    message_source == msg_src & type == 'singular',
+    c("msgstr", "fuzzy") := old_message_data[.SD, on = c("type", "msgid"), .(x.msgstr, x.fuzzy)]
   ]
   # can't join on lists :\
   if (!all(vapply(old_message_data$plural_msgstr, is.null, logical(1L)))) {
@@ -45,10 +44,8 @@ find_fuzzy_messages <- function(message_data, lang_file) {
       'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')
     ]
     message_data[
-      message_source == msg_src,
-      c("plural_msgstr", "fuzzy") := old_message_data[type == 'plural'][
-        .SD, on = c('type', 'join_id'), .(x.plural_msgstr, x.fuzzy)
-      ]
+      message_source == msg_src & type == 'plural',
+      c("plural_msgstr", "fuzzy") := old_message_data[.SD, on = c('type', 'join_id'), .(x.plural_msgstr, x.fuzzy)]
     ]
 
     message_data[ , 'join_id' := NULL]

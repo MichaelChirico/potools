@@ -17,16 +17,18 @@ translate_package = function(
   package <- desc_data['Package']
   version <- desc_data['Version']
 
-  potfile <- character()
+  r_potfile <- character()
   update = file.exists(podir <- file.path(dir, 'po')) &&
-    length(potfile <- list.files(podir, pattern='^R.*\\.pot$'))
+    length(r_potfile <- list.files(podir, pattern='^R.*\\.pot$'))
 
   if (verbose) {
     if (update) {
+      # is it worthwhile to try and distinguish the creation time of the
+      #  R pot file and the src pot file? probably not...
       message(domain=NA, gettextf(
         "Updating translation template for package '%s' (last updated %s)",
         package,
-        format(file.info(potfile)$atime)
+        format(file.info(r_potfile)$atime)
       ))
     } else {
       message(domain=NA, gettextf("Starting translations for package '%s'", package))
@@ -42,6 +44,11 @@ translate_package = function(
 
   if (verbose) message('Getting src-level messages...')
   src_message_data = get_src_messages(dir, src_translation_macro)
+
+  if (nrow(src_message_data) && !file.exists(src_potfile <- file.path(podir, sprintf("%s.pot", package)))) {
+    # otherwise, tools::update_pkg_po() skips creating .mo files for src translations
+    file.create(src_potfile)
+  }
 
   message_data = rbind(
     R = r_message_data,

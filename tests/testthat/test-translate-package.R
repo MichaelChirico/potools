@@ -163,8 +163,8 @@ test_that("Packages with src code work correctly", {
       pkg_files <- list.files(pkg, recursive = TRUE)
       expect_true("po/R-zh_CN.po" %in% pkg_files)
       expect_true("po/zh_CN.po" %in% pkg_files)
-
-      # TODO: why no .mo file for zh_CN?
+      expect_true("po/rSrcMsg.pot" %in% pkg_files)
+      expect_true("inst/po/.*/rSrcMsg.mo" %in% pkg_files)
     }
   )
 

@@ -16,95 +16,127 @@ get_r_messages <- function (x) {
     #   is that x is a directory so that we can use get_r_messages directly on a folder
     exprs <- parse_r_files(x) # nocov
   }
-  # inherits singular_i, s_data
-  find_singular_strings = function(e) {
-    # inherits literal_strings
-    find_string_literals = function(e, suppress) {
-      if (is.character(e)) {
-        if(!suppress) literal_strings <<- c(literal_strings, e)
-      } else if (is.call(e)) {
-        # both gettext & gettextf only have one possible string to extract, so separate
-        if (e[[1L]] %is_base_call% c("gettext", "gettextf")) {
-          suppress <- do_suppress(e)
-          if (e[[1L]] %is_base_call% "gettextf") {
-            e <- match.call(gettextf, e)
-            e <- e["fmt"] # just look at fmt arg
-          } else if (e[[1L]] %is_base_call% "gettext" && !is.null(names(e))) {
-            e <- e[names(e) != "domain"] # remove domain arg
-          }
-        } else if (identical(e[[1L]], quote(ngettext)) || identical(e[[1L]], quote(base::ngettext))) return()
-        for(i in seq_along(e)) find_string_literals(e[[i]], suppress)
-      }
-    }
-    if (is.call(e) && e[[1L]] %is_base_call% MSG_FUNS) {
-      suppress = do_suppress(e)
-      if (!is.null(names(e))) {
-        e <- e[!names(e) %chin% c("call.", "immediate.", "domain")]
-      }
-      # keep call name (e[[1L]]); fine to ignore in find_strings2
-      singular_i <<- singular_i + 1L
-      s_data[[singular_i]] <<- character()
-      if (!suppress) names(s_data)[singular_i] <<- deparse1(e)
-      if (e[[1L]] %is_base_call% "gettextf") {
-        e = match.call(gettextf, e)
-        e = e["fmt"]
-      }
-      literal_strings <- character()
-      for (i in seq_along(e)) find_string_literals(e[[i]], suppress)
-      s_data[[singular_i]] <<- trimws(literal_strings)
-    } else if (is.recursive(e)) {
-      for (i in seq_along(e)) find_singular_strings(e[[i]])
-    }
+
+  expr_data <- rbindlist(lapply(exprs, getParseData), idcol = 'file')
+  setkeyv(expr_data, "file")
+  setindexv(expr_data, c("file", "line1", "col1", "line2", "col2"))
+  setindexv(expr_data, c("file", "id"))
+  setindexv(expr_data, c("file", "parent"))
+  setindexv(expr_data, c("token", "text"))
+
+  # on the XML tree, messaging calls look like
+  # <expr>    <- parent of 'msg_call_neighbors'
+  #   <expr>  <- 'msg_call_exprs'
+  #     <SYMBOL_FUNCTION_CALL>stop</SYMBOL_FUNCTION_CALL>
+  #   </expr>
+  #   <OP-LEFT-PAREN>(</OP-LEFT-PAREN>
+  #   <!-- here is an unnamed argument -->
+  #   <expr> ... </expr>
+  #   <OP-COMMA>,</OP-COMMA>
+  #   <!-- the following three are a named argument -->
+  #   <SYMBOL_SUB>domain</SYMBOL_SUB>
+  #   <EQ_SUB>=</SYMBOL_SUB>
+  #   <expr> ... </expr>
+  #   <!-- mix and match those two types indefinitely -->
+  #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
+  # </expr>
+  msg_call_neighbors = get_call_args(expr_data, MSG_FUNS)
+  named_args = get_named_args(msg_call_neighbors, NON_STRING_ARGS)
+  msg_call_neighbors = drop_suppressed_and_named(msg_call_neighbors, named_args)
+
+  singular_strings = data.table(file = character(), parent = integer(), msgid = character())
+  # extracting from gettextf; all other default calls only take strings in ...
+  explicit_args = get_named_args(msg_call_neighbors, "fmt")
+  if (nrow(explicit_args)) {
+    singular_strings = rbind(
+      singular_strings,
+      explicit_args[ , .(file, parent, msgid = arg_value)]
+    )
+    # now that the arguments have been extracted here, drop these expressions
+    msg_call_neighbors = msg_call_neighbors[!explicit_args, on = c('file', 'parent')]
   }
 
-  # inherits plural_i, p_data
-  find_plural_strings = function(e) {
-    if (is.call(e) && e[[1L]] %is_base_call% "ngettext") {
-      e = match.call(ngettext, e)
-      suppress = do_suppress(e)
-      if (!suppress && is.character(e[["msg1"]]) && is.character(e[["msg2"]])) {
-        plural_i <<- plural_i + 1L
-        p_data[[plural_i]] <<- list(e[["msg1"]], e[["msg2"]])
-        names(p_data)[plural_i] <<- deparse1(e)
-      }
-    }
-    else if (is.recursive(e))
-      for (i in seq_along(e)) find_plural_strings(e[[i]])
+  # drop '(', ')', ',', and now-orphaned SYMBOL_SUB/EQ_SUB
+  msg_call_neighbors = msg_call_neighbors[token == 'expr']
+  setnames(msg_call_neighbors, 'parent', 'ancestor')
+
+  while (nrow(msg_call_neighbors) > 0L) {
+    msg_call_neighbors = expr_data[
+      msg_call_neighbors, on = c('file', parent = 'id'),
+      .(file, ancestor = i.ancestor, id = x.id, token = x.token, text = x.text)
+    ]
+    singular_strings = rbind(
+      singular_strings,
+      msg_call_neighbors[token == 'STR_CONST', .(file = file, parent = ancestor, msgid = text)]
+    )
+    msg_call_neighbors = msg_call_neighbors[token == "expr"]
   }
 
-  singular = plural = vector("list", length = length(exprs))
-  names(singular) = names(plural) = names(exprs)
+  plural_call_neighbors = get_call_args(expr_data, "ngettext")
+  named_args = get_named_args(plural_call_neighbors, "domain")
+  plural_call_neighbors = drop_suppressed_and_named(plural_call_neighbors, named_args)
 
-  for (ii in seq_along(exprs)) {
-    singular_i = plural_i = 0L
-    s_data <- p_data <- vector("list")
-    for (e in exprs[[ii]]) {
-      find_singular_strings(e)
-      find_plural_strings(e)
-    }
-
-    singular[[ii]] = unnest_call(s_data, plural=FALSE)
-    plural[[ii]] = unnest_call(p_data, plural=TRUE)
+  plural_strings = data.table(file = character(), parent = integer(), plural_msgid = list())
+  explicit_args = get_named_args(plural_call_neighbors, c("msg1", "msg2"))
+  if (nrow(explicit_args)) {
+    plural_strings = rbind(
+      plural_strings,
+      explicit_args[
+        order(file, parent, arg_name),
+        if (.N == 2L) .(plural_msgid = as.list(arg_value)) else stop(domain = NA, gettextf(
+          "In line %d of %s, found an ngettext() call that explicitly names only one of the msg1/msg2 arguments. Please name both if naming either.",
+          .BY$file, expr_data[.BY, on = c(id = 'parent'), line1[1L]]
+        )),
+        by = .(file, parent)
+      ]
+    )
+    # now that the arguments have been extracted here, drop these expressions
+    plural_call_neighbors = plural_call_neighbors[!explicit_args, on = c('file', 'parent')]
   }
+
+  # no nesting to deal with for ngettext
+  plural_strings = rbind(
+    plural_strings,
+    expr_data[
+      plural_call_neighbors[token == 'expr'],
+      on = c('file', parent = 'id'),
+      .(file, id = x.id, parent = i.parent, token = x.token, text = x.text)
+    ][
+      order(id)
+    ][
+      token == 'STR_CONST',
+      .(plural_msgid = list(text)),
+      by = .(file, parent)
+    ]
+  )
+
   msg = rbind(
-    singular = rbindlist(singular, idcol='file'),
-    plural = rbindlist(plural, idcol='file'),
+    singular = singular_strings,
+    plural = plural_strings,
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
-  if (nrow(msg) == 0L) {
-    return(data.table(
-      type = character(),
-      file = character(),
-      call = character(),
-      msgid = character(),
-      plural_msgid = list(),
-      is_repeat = logical()
-    ))
-  }
+
+  msg_files = unique(msg$file)
+  file_lines = lapply(msg_files, readLines, warn = FALSE)
+  names(file_lines) = msg_files
+
+  msg[
+    expr_data, on = c('file', parent = 'id'),
+    `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
+  ]
+  msg[ , by = c('file', 'line1', 'col1', 'line2', 'col2'),
+    call := build_call(file_lines[[.BY$file]], .BY)
+  ]
+
+  setnames(msg, 'line1', 'line_number')
+  msg[ , c('parent', 'col1', 'line2', 'col2') := NULL]
+
   msg[type == 'singular', 'msgid' := escape_string(msgid)]
   msg[type == 'plural', 'plural_msgid' := lapply(plural_msgid, escape_string)]
-  msg[ , 'is_repeat' := type == 'singular' & duplicated(msgid)]
+  msg[ , 'is_repeat' := FALSE]
+  msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
   msg[ , 'is_marked_for_translation' := TRUE]
+
   msg[]
 }
 
@@ -116,18 +148,56 @@ get_r_messages <- function (x) {
 #     if (any(names(formals(f_args)) == 'domain')) cat(obj, '\n')
 # }
 MSG_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext", "gettextf")
+NON_STRING_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
 
-# be sure to apply encodeString, which converts "\n" to \\n as required when
-#   (potentially) writing this out to .po later
-unnest_call = function(data, plural) {
-  empty = !any(lengths(data))
-  if (empty) return(data.table(NULL))
-  calls = names(data)
-  names(data) = NULL
-  if (plural) return(data.table(call = calls, msgid = "", plural_msgid = data))
-  data.table(
-    call = rep(calls, lengths(data)),
-    msgid = unlist(data),
-    plural_msgid = list()
-  )
+get_call_args = function(expr_data, calls) {
+  msg_call_exprs = expr_data[
+    expr_data[token == "SYMBOL_FUNCTION_CALL" & text %chin% calls],
+    on = c('file', id = 'parent'),
+    .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent)
+  ]
+  msg_call_neighbors = expr_data[
+    msg_call_exprs, on = c('file', parent = 'call_parent_id'),
+    .(file, id = x.id, parent = x.parent, token = x.token, text = x.text)
+  ]
+  msg_call_neighbors
+}
+
+get_named_args = function(calls_data, target_args) {
+  # NB: use this instead of flipping the join order since that will find
+  #   a SYMBOL_SUB for every expr rather than an expr for every SYMBOL_SUB. The
+  #   former might return multiple rows if domain= is followed by more named args.
+  #   important in the current logic because we do drop_suppressed before
+  #   running this again, at which point there will be orphaned SYMBOL_SUB
+  # summary: rolling backwards from the expr id to the corresponding SYMBOL_SUB id
+  named_args = calls_data[token == "expr"][
+    calls_data[token == "SYMBOL_SUB" & text %chin% target_args],
+    on = c('file', 'parent', 'id'), roll = -Inf,
+    .(file, parent, id = x.id, arg_name = i.text)
+  ]
+  named_args[expr_data, on = c('file', id = 'parent'), arg_value := i.text][]
+}
+
+drop_suppressed_and_named = function(calls_data, named_args) {
+  # strip away calls where domain=NA by dropping the common parent's immediate children;
+  #   nested expressions without domain=NA will still be there
+  calls_data = calls_data[
+    # text == "NA" implicitly filtering non-literal arg values since those <expr> nodes will have empty text
+    !named_args[arg_name == "domain" & arg_value == "NA"],
+    on = c('file', 'parent')
+  ]
+  # strip away any other expr associated with named args (note join to id, not parent)
+  calls_data[!named_args, on = c('file', 'id')]
+}
+
+build_call = function(lines, params) {
+  if (params$line1 == params$line2) {
+    return(substring(lines[params$line1], params$col1, params$col2))
+  } else {
+    lines = lines[params$line1:params$line2]
+    lines[1L] = substring(lines[1L], params$col1, nchar(lines[1L]))
+    lines[length(lines)] = substring(lines[length(lines)], 1L, params$col2)
+    # strip internal whitespace across lines in the call
+    return(gsub("\\s+", " ", paste(lines, collapse = " ")))
+  }
 }

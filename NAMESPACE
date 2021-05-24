@@ -1,7 +1,8 @@
-importFrom(data.table, data.table, fread, rbindlist, set, setkeyv, uniqueN, "%chin%")
+importFrom(data.table, data.table, fread, rbindlist, uniqueN, "%chin%")
+importFrom(data.table, set, setindexv, setkeyv, setnames)
 importFrom(data.table, `:=`, .BY, .N, .SD)
 importFrom(data.table, fifelse)
 
-importFrom(utils, globalVariables, tail, type.convert)
+importFrom(utils, getParseData, globalVariables, tail, type.convert)
 
 export(translate_package)

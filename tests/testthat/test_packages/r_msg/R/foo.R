@@ -13,7 +13,7 @@ f3 <- function(x) {
 
 f4 <- function(x) {
   stop(domain=NA, gettextf(
-    "Avg failures: %.02f; N failures: %d; failure: %s",
+    fmt = "Avg failures: %.02f; N failures: %d; failure: %s",
     mean(x), length(x), deparse1(substitute(x))
   ))
 }

@@ -100,10 +100,6 @@ package_src_files = function(dir) {
   if (!is.call(e) || length(e) != 3L) return(FALSE)
   return(e[[1L]] %is_name% "::" && e[[2L]] %is_name% "base" && e[[3L]] %is_name% f)
 }
-do_suppress = function(e) {
-  domain = e[['domain']]
-  !is.null(domain) && !is.name(domain) && is.na(domain)
-}
 
 gettextify = function(e, sep = '') {
   str_idx = vapply(e, is.character, logical(1L))

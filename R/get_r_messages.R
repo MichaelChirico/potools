@@ -83,7 +83,7 @@ get_r_messages <- function (x) {
       plural_strings,
       explicit_args[
         order(file, parent, arg_name),
-        if (.N == 2L) .(plural_msgid = as.list(arg_value)) else stop(domain = NA, gettextf(
+        if (.N == 2L) .(plural_msgid = list(arg_value)) else stop(domain = NA, gettextf(
           "In line %d of %s, found an ngettext() call that explicitly names only one of the msg1/msg2 arguments. Please name both if naming either.",
           .BY$file, expr_data[.BY, on = c(id = 'parent'), line1[1L]]
         )),

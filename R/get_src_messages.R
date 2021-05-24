@@ -127,6 +127,9 @@ get_file_src_messages = function(file, translation_macro = "_") {
           ii = skip_white(contents_char, kk)
         } else if (contents_char[jj] == '"') {
           ii = jj
+        } else if (contents_char[jj] == "\\" && jj < nn && contents_char[jj+1L] == "\n") {
+          # line continuation, e.g. as seen in src/library/stats/src/optimize.c:686 as of r80365
+          ii = skip_white(contents_char, jj + 2L)
         } else {
           stop('Unexpected sequence -- a char array not followed by whitespace then any of [,)"] or a macro')
         }

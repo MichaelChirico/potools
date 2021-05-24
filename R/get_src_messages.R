@@ -106,10 +106,8 @@ get_file_src_messages = function(file, translation_macro = "_") {
         }
         # add this completed array to our string
         string = paste0(string, substr(contents, ii+1L, jj-1L))
-        # jump past "
-        jj = jj + 1L
-        # now jump past any whitespace
-        while (jj <= nn && contents_char[jj] %chin% c(" ", "\n", "\r", "\t")) { jj = jj + 1L }
+        # jump past " and any subsequent whitespace
+        jj = skip_white(contents_char, jj + 1L)
         if (jj > nn) {
           stop("File terminated before translation array completed")
         }
@@ -126,7 +124,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
           kk = jj + 1L
           while (grepl(C_IDENTIFIER_REST, contents_char[kk])) { kk = kk + 1L }
           string = paste0(string, "<", substr(contents, jj, kk-1L), ">")
-          ii = kk
+          ii = skip_white(contents_char, kk)
         } else if (contents_char[jj] == '"') {
           ii = jj
         } else {
@@ -182,6 +180,13 @@ preprocess = function(contents) {
     ii = ii + 1L
   }
   return(contents)
+}
+
+skip_white = function(chars, from_idx) {
+  jj = from_idx
+  nn = length(chars)
+  while (jj <= nn && chars[jj] %chin% c(" ", "\n", "\r", "\t")) { jj = jj + 1L }
+  return(jj)
 }
 
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}

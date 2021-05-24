@@ -41,12 +41,12 @@ get_r_messages <- function (x) {
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
   msg_call_neighbors = get_call_args(expr_data, MSG_FUNS)
-  named_args = get_named_args(msg_call_neighbors, NON_STRING_ARGS)
+  named_args = get_named_args(msg_call_neighbors, expr_data, NON_STRING_ARGS)
   msg_call_neighbors = drop_suppressed_and_named(msg_call_neighbors, named_args)
 
   singular_strings = data.table(file = character(), parent = integer(), msgid = character())
   # extracting from gettextf; all other default calls only take strings in ...
-  explicit_args = get_named_args(msg_call_neighbors, "fmt")
+  explicit_args = get_named_args(msg_call_neighbors, expr_data, "fmt")
   if (nrow(explicit_args)) {
     singular_strings = rbind(
       singular_strings,
@@ -73,11 +73,11 @@ get_r_messages <- function (x) {
   }
 
   plural_call_neighbors = get_call_args(expr_data, "ngettext")
-  named_args = get_named_args(plural_call_neighbors, "domain")
+  named_args = get_named_args(plural_call_neighbors, expr_data, "domain")
   plural_call_neighbors = drop_suppressed_and_named(plural_call_neighbors, named_args)
 
   plural_strings = data.table(file = character(), parent = integer(), plural_msgid = list())
-  explicit_args = get_named_args(plural_call_neighbors, c("msg1", "msg2"))
+  explicit_args = get_named_args(plural_call_neighbors, expr_data, c("msg1", "msg2"))
   if (nrow(explicit_args)) {
     plural_strings = rbind(
       plural_strings,
@@ -115,6 +115,19 @@ get_r_messages <- function (x) {
     plural = plural_strings,
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
+
+  if (!nrow(msg)) {
+    return(data.table(
+      type = character(),
+      file = character(),
+      msgid = character(),
+      plural_msgid = list(),
+      line_number = integer(),
+      call = character(),
+      is_repeat = logical(),
+      is_marked_for_translation = logical()
+    ))
+  }
 
   msg_files = unique(msg$file)
   file_lines = lapply(msg_files, readLines, warn = FALSE)
@@ -163,7 +176,7 @@ get_call_args = function(expr_data, calls) {
   msg_call_neighbors
 }
 
-get_named_args = function(calls_data, target_args) {
+get_named_args = function(calls_data, expr_data, target_args) {
   # NB: use this instead of flipping the join order since that will find
   #   a SYMBOL_SUB for every expr rather than an expr for every SYMBOL_SUB. The
   #   former might return multiple rows if domain= is followed by more named args.

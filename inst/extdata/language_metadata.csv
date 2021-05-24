@@ -9,6 +9,7 @@ es,Spanish,Español,2,(n!=1)
 fa,Farsi,فارسی,1,0
 fr,French,Français,2,(n>1)
 hi,Hindi,हिन्दी,2,(n!=1)
+id,Indonesian,Bahasa Indonesia,1,0
 it,Italian,Italiano,2,(n!=1)
 ja,Japanese,日本語,1,0
 ko,Korean,한국어,1,0

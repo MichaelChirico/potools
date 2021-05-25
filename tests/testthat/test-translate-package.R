@@ -24,6 +24,12 @@ test_that("translate_package handles empty packages", {
       expect_message(translate_package(pkg, verbose=TRUE), "No messages to translate", fixed=TRUE)
     }
   )
+
+  # a package with no R directory (e.g. a data package)
+  restore_package(
+    pkg <- test_package("r_data_pkg"),
+    expect_message(translate_package(pkg, verbose=TRUE), "No messages to translate", fixed=TRUE)
+  )
 })
 
 test_that("translate_package works on a simple package", {

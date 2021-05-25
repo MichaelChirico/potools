@@ -1,4 +1,5 @@
 a <- function(x) {
+  # make sure to skip the immediate. argument when reporting
 	warning("I warned you!", immediate. = TRUE)
 	x+1
 }

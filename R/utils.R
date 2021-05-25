@@ -81,8 +81,15 @@ package_r_files = function(dir) {
 
 # get src files in a directory. exclude .h files
 list_src_files = function(dir) {
-  src_files = list.files(dir, full.names = TRUE)
-  grep("\\.(?:[ho]|so)|/makevars(?:\\.w?in)?$", src_files, invert = TRUE, value = TRUE, ignore.case = TRUE)
+  # recursive to include subdirectories, e.g. as found in R-devel/src/library/{grDevices,utils}
+  src_files = list.files(dir, full.names = TRUE, recursive = TRUE)
+  # might be better to choose an inclusive list (e.g. *.c, *.cpp) rather than exclusive?
+  # exclusions: *.h, *.o, *.d, *.so, Makedeps*, Makefile*, Makevars*
+  grep(
+    "\\.(?:[hod]|so)$|/make(?:deps|file|vars)(?:\\.w?in)?$",
+    src_files,
+    invert = TRUE, value = TRUE, ignore.case = TRUE
+  )
 }
 # get src files in a package
 package_src_files = function(dir) {

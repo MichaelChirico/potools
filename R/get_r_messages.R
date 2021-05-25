@@ -18,6 +18,9 @@ get_r_messages <- function (x) {
   }
 
   expr_data <- rbindlist(lapply(exprs, getParseData), idcol = 'file')
+  # R-free package (e.g. a data package) fails, #56
+  if (!nrow(expr_data)) return(r_message_schema())
+
   setkeyv(expr_data, "file")
   setindexv(expr_data, c("file", "line1", "col1", "line2", "col2"))
   setindexv(expr_data, c("file", "id"))
@@ -136,18 +139,7 @@ get_r_messages <- function (x) {
     idcol = 'type', fill = TRUE, use.names = TRUE
   )
 
-  if (!nrow(msg)) {
-    return(data.table(
-      type = character(),
-      file = character(),
-      msgid = character(),
-      plural_msgid = list(),
-      line_number = integer(),
-      call = character(),
-      is_repeat = logical(),
-      is_marked_for_translation = logical()
-    ))
-  }
+  if (!nrow(msg)) return(r_message_schema())
 
   msg_files = unique(msg$file)
   file_lines = lapply(msg_files, readLines, warn = FALSE)
@@ -244,3 +236,15 @@ adjust_tabs = function(l) {
   }
   l
 }
+
+# the schema for empty edge cases
+r_message_schema = function() data.table(
+  type = character(),
+  file = character(),
+  msgid = character(),
+  plural_msgid = list(),
+  line_number = integer(),
+  call = character(),
+  is_repeat = logical(),
+  is_marked_for_translation = logical()
+)

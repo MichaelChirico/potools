@@ -37,12 +37,7 @@ check_cracked_messages = function(message_data) {
 # count the number of ... arguments by excluding named arguments; uses a match.call()
 #   and a get() to the function definition, which is relatively expensive, so done carefully/sparingly.
 count_dots = function(call) {
-  fname = vapply(
-    call,
-    # get_r_messages should ensure that one of these two conditions will return a scalar
-    function(x) if (is.name(x[[1L]])) as.character(x[[1L]]) else as.character(x[[1L]][[3L]]),
-    character(1L)
-  )
+  fname = vapply(call, function(x) as.character(x[[1L]]), character(1L))
   DT = data.table(call, fname)
   DT[ , n_args := 0L]
   DT[!fname %chin% c("gettext", "gettextf") & lengths(call) > 2L, by = fname, n_args := {

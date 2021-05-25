@@ -85,7 +85,7 @@ test_that("translate_package works on package with 'cracked' messages needing te
     {
       expect_messages(
         translate_package(pkg, "zh_CN"),
-        "Found 1 R messaging calls that might be better suited for gettextf",
+        "Found 2 R messaging calls that might be better suited for gettextf",
         fixed = TRUE
       )
     }

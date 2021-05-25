@@ -24,7 +24,7 @@ check_cracked_messages = function(message_data) {
       '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
       call_color(call),
       file_color(file),
-      build_gettextf_color(build_gettextf_call(call_expr))
+      build_gettextf_color(build_gettextf_call(call_expr[[1L]]))
     ))]
   }
 

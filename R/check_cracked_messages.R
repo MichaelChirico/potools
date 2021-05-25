@@ -2,11 +2,12 @@
 #   translation as calls like gettextf("a%db%d", i, j)
 check_cracked_messages = function(message_data) {
 
-  dup_messages = unique(
-    # check for , as a crude filter to avoid parsing too many calls
-    message_data[!is_repeat & message_source == "R" & type == 'singular' & grepl(",", call, fixed = TRUE)],
+  # check for , as a crude filter to avoid parsing too many calls
+  dup_messages = message_data[
+    !is_repeat & message_source == "R" & type == 'singular' & grepl(",", call, fixed = TRUE),
+    .(lines = toString(unique(line_number))),
     by=c('file', 'call')
-  )
+  ]
   if (!nrow(dup_messages)) return('n')
 
   dup_messages[ , call_expr := lapply(call, str2lang)]
@@ -21,9 +22,10 @@ check_cracked_messages = function(message_data) {
 
   for (ii in seq_len(nrow(dup_messages))) {
     dup_messages[ii, cat(gettextf(
-      '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
+      '\nMulti-string call:\n%s\n< File:%s, Line(s):%s >\nPotential replacement with gettextf():\n%s\n',
       call_color(call),
       file_color(file),
+      file_color(lines),
       build_gettextf_color(build_gettextf_call(call_expr[[1L]]))
     ))]
   }

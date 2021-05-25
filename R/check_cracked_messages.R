@@ -12,6 +12,8 @@ check_cracked_messages = function(message_data) {
   dup_messages[ , call_expr := lapply(call, str2lang)]
   dup_messages = dup_messages[count_dots(call_expr) > 1L]
 
+  if (!nrow(dup_messages)) return('n')
+
   message(domain=NA, gettextf(
     'Found %d R messaging calls that might be better suited for gettextf for ease of translation:',
     nrow(dup_messages)
@@ -22,7 +24,7 @@ check_cracked_messages = function(message_data) {
       '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
       call_color(call),
       file_color(file),
-      build_gettextf_color(build_gettextf_call(call))
+      build_gettextf_color(build_gettextf_call(call_expr))
     ))]
   }
 

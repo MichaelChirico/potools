@@ -20,5 +20,5 @@ d <- function(x) {
 }
 
 e <- function(x) {
-  stop("You failed", length(x), " times.")
+  stop("You failed ", length(x), " times.")
 }

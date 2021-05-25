@@ -39,7 +39,10 @@ test_that("translate_package works on a simple package", {
 
       pkg_files <- list.files(pkg, recursive=TRUE)
 
-      expect_true("po/R-rMsg.pot" %in% pkg_files)
+      pot_file <- "po/R-rMsg.pot"
+      expect_true(pot_file %in% pkg_files)
+      # testing gettextf's ... arguments are skipped
+      expect_all_match(readLines(file.path(pkg, pot_file)), "don't translate me", invert=TRUE, fixed=TRUE)
       # Windows doesn't produce the en@quot translations at all
       if (.Platform$OS.type != "windows") {
         expect_true(any(grepl("inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", pkg_files)))

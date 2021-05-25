@@ -3,7 +3,7 @@
 check_cracked_messages = function(message_data) {
 
   dup_messages = message_data[
-    message_source == "R" & type == 'singular',
+    !is_repeat & message_source == "R" & type == 'singular',
     if (.N > 1L) TRUE,
     by=c('file', 'call')
   ]
@@ -17,9 +17,9 @@ check_cracked_messages = function(message_data) {
   for (ii in seq_len(nrow(dup_messages))) {
     dup_messages[ii, cat(gettextf(
       '\nMulti-string call:\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
-      call_color(call[ii]),
-      file_color(file[ii]),
-      build_gettextf_color(build_gettextf_call(call[ii]))
+      call_color(call),
+      file_color(file),
+      build_gettextf_color(build_gettextf_call(call))
     ))]
   }
 

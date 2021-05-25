@@ -1,5 +1,5 @@
 importFrom(data.table, data.table, fread, rbindlist, uniqueN, "%chin%")
-importFrom(data.table, set, setindexv, setkeyv, setnames)
+importFrom(data.table, set, setindexv, setkeyv, setnames, setorderv)
 importFrom(data.table, `:=`, .BY, .N, .SD)
 importFrom(data.table, fifelse)
 

@@ -183,10 +183,9 @@ get_call_args = function(expr_data, calls) {
     on = c('file', id = 'parent'),
     .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent)
   ]
-  msg_call_expr_children = expr_data[
-    msg_call_exprs,
-    on = c('file', parent = 'call_expr_id'),
-    .(file, parent = x.parent, token = x.token)
+  msg_call_neighbors = expr_data[
+    msg_call_exprs, on = c('file', parent = 'call_parent_id'),
+    .(file, id = x.id, parent = x.parent, token = x.token, text = x.text)
   ]
   msg_call_neighbors
 }

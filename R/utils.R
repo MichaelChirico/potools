@@ -65,7 +65,7 @@ parse_r_files = function(dir) {
 }
 
 # get R files in a directory
-list_r_files = function(dir) list.files(dir, full.names = TRUE, pattern = "(?i)\\.r")
+list_r_files = function(dir) list.files(dir, full.names = TRUE, pattern = "(?i)\\.r$")
 # get R files in a package
 package_r_files = function(dir) {
   dir = file.path(dir, 'R')

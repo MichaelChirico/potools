@@ -44,6 +44,7 @@ get_r_messages <- function (x) {
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
   msg_call_neighbors = get_call_args(expr_data, MSG_FUNS)
+  if (!'token' %chin% names(msg_call_neighbors)) browser()
   named_args = get_named_args(msg_call_neighbors, expr_data, NON_STRING_ARGS)
   msg_call_neighbors = drop_suppressed_and_named(msg_call_neighbors, named_args)
 
@@ -183,21 +184,24 @@ get_call_args = function(expr_data, calls) {
     on = c('file', id = 'parent'),
     .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent)
   ]
-  msg_call_expr_children = expr_data[
-    msg_call_exprs,
-    on = c('file', parent = 'call_expr_id'),
-    .(file, parent = x.parent, token = x.token)
-  ]
-  # filter out calls like l$stop("x"), keep calls like base::stop("x")
-  msg_call_expr_children = msg_call_expr_children[
-    , by = parent,
-    if (.N == 1L || 'NS_GET' %chin% token) .SD
-  ]
-  msg_call_exprs = msg_call_exprs[
-    msg_call_expr_children,
-    on = c('file', call_expr_id = 'parent'),
-    .(file, call_id, call_expr_id, call_parent_id)
-  ]
+  # if not, just skip to a join to get the right schema & return
+  if (nrow(msg_call_exprs)) {
+    msg_call_expr_children = expr_data[
+      msg_call_exprs,
+      on = c('file', parent = 'call_expr_id'),
+      .(file, parent = x.parent, token = x.token)
+    ]
+    # filter out calls like l$stop("x"), keep calls like base::stop("x")
+    msg_call_expr_children = msg_call_expr_children[
+      , by = parent,
+      if (.N == 1L || 'NS_GET' %chin% token) .SD
+    ]
+    msg_call_exprs = msg_call_exprs[
+      msg_call_expr_children,
+      on = c('file', call_expr_id = 'parent'),
+      .(file, call_id, call_expr_id, call_parent_id)
+    ]
+  }
   msg_call_neighbors = expr_data[
     msg_call_exprs, on = c('file', parent = 'call_parent_id'),
     .(file, id = x.id, parent = x.parent, token = x.token, text = x.text)

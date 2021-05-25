@@ -11,8 +11,8 @@ char *stardust(SEXP z);
 
 // include this comment here to test comment skipping works
 static void glam(SEXP x) {
-  // test platform-robust format specification as done here
-  Rprintf(_("an translated templated string: %"PRId64"\n"), 10000LL);
+  // test platform-robust format specification as done here; add spacing on either side for #44
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
 }
 
 char *stardust(SEXP z) {
@@ -21,7 +21,8 @@ char *stardust(SEXP z) {
 
 /* Add a call here to make sure comment skipping works: Rprintf(_("hi")); */
 static void ziggy(SEXP y, SEXP z) {
-  // nested parentheses before we reach the end of the call
-  warning(_("a translated warning: %s\n"), stardust(z));
+  // nested parentheses before we reach the end of the call; use the line-continuation \ for #44
+  warning(_("a translated "\
+"warning: %s\n"), stardust(z));
   return;
 }

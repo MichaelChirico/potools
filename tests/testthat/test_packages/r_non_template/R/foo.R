@@ -1,5 +1,5 @@
 a <- function(x) {
-	warning("I warned you!")
+	warning("I warned you!", immediate. = TRUE)
 	x+1
 }
 
@@ -20,5 +20,9 @@ d <- function(x) {
 }
 
 e <- function(x) {
+  # do recommend gettextf here: "Argument missing: %s" is better. #51
+  warning("Argument missing: ", x)
+  # don't recommend gettextf here: single call
+  warning(strrep("abcdefg", 10L), call. = FALSE)
   stop("You failed ", length(x), " times.")
 }

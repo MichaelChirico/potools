@@ -44,7 +44,6 @@ get_r_messages <- function (x) {
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
   msg_call_neighbors = get_call_args(expr_data, MSG_FUNS)
-  if (!'token' %chin% names(msg_call_neighbors)) browser()
   named_args = get_named_args(msg_call_neighbors, expr_data, NON_STRING_ARGS)
   msg_call_neighbors = drop_suppressed_and_named(msg_call_neighbors, named_args)
 

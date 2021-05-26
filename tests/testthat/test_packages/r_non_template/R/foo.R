@@ -22,7 +22,10 @@ d <- function(x) {
 
 e <- function(x) {
   # do recommend gettextf here: "Argument missing: %s" is better. #51
-  warning("Argument missing: ", x)
+  warning(#also don't fail due to intervening comments, #59
+    "Argument missing: ", # see #59; kept comment tight above to test numbering exactly
+    x
+  )
   # don't recommend gettextf here: single call
   warning(strrep("abcdefg", 10L), call. = FALSE)
   stop("You failed ", length(x), " times.")

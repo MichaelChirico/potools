@@ -76,7 +76,7 @@ check_untranslated_cat <- function (exprs) {
            '\n%s\n< File:%s >\nPotential replacement with gettextf():\n%s\n',
            call_color(call$call_text),
            file_color(file),
-           build_gettextf_color(call$suggested)
+           build_gettextf_color(encodeString(call$suggested))
          ))
       }
     }

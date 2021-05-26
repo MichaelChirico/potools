@@ -83,13 +83,10 @@ package_r_files = function(dir) {
 list_src_files = function(dir) {
   # recursive to include subdirectories, e.g. as found in R-devel/src/library/{grDevices,utils}
   src_files = list.files(dir, full.names = TRUE, recursive = TRUE)
-  # might be better to choose an inclusive list (e.g. *.c, *.cpp) rather than exclusive?
-  # exclusions: *.h, *.o, *.d, *.so, Makedeps*, Makefile*, Makevars*
-  grep(
-    "\\.(?:[hod]|so)$|/make(?:deps|file|vars)(?:\\.w?in)?$",
-    src_files,
-    invert = TRUE, value = TRUE, ignore.case = TRUE
-  )
+  # tried to be inclusive at first, but stringi broke my resolve -- src/ includes
+  #   .zip, .txt, .html, .pl, ... broke my conviction we have any hope of making anything
+  #   but an allow list succeed here.
+  grep("\\.(c|cc|cpp)", src_files, value = TRUE, ignore.case = TRUE)
 }
 # get src files in a package
 package_src_files = function(dir) {

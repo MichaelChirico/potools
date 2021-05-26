@@ -10,7 +10,7 @@ check_cracked_messages = function(message_data) {
   ]
   if (!nrow(dup_messages)) return('n')
 
-  dup_messages[ , call_expr := lapply(call, str2lang)]
+  dup_messages[ , 'call_expr' := lapply(call, str2lang)]
   dup_messages = dup_messages[count_dots(call_expr) > 1L]
 
   if (!nrow(dup_messages)) return('n')
@@ -44,8 +44,8 @@ count_dots = function(call) {
     character(1L)
   )
   DT = data.table(call, fname)
-  DT[ , n_args := 0L]
-  DT[!fname %chin% c("gettext", "gettextf") & lengths(call) > 2L, by = fname, n_args := {
+  DT[ , 'n_args' := 0L]
+  DT[!fname %chin% c("gettext", "gettextf") & lengths(call) > 2L, by = fname, 'n_args' := {
     definition = get(.BY$fname)
     vapply(
       call,

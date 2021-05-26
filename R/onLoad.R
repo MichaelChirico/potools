@@ -2,7 +2,13 @@ globalVariables(
   c(
     'KNOWN_LANGUAGES', 'PLURAL_RANGE_STRINGS',
     'msgid', 'msgstr', 'x.msgstr', 'plural_msgid', 'plural_msgstr', 'x.plural_msgstr',
-    'message_source', 'type', 'fuzzy', 'x.fuzzy', 'is_repeat', 'is_marked_for_translation', '.'
+    'message_source', 'type', 'line_number', 'fuzzy', 'x.fuzzy',
+    'is_repeat', 'is_marked_for_translation',
+    'id', 'x.id', 'i.id', 'line1', 'i.line1', 'i.col1', 'i.line2', 'i.col2',
+    'text', 'x.text', 'i.text', 'x.token', 'token',
+    'parent', 'x.parent', 'i.parent', 'ancestor', 'i.ancestor',
+    'call_expr', 'call_id', 'call_expr_id', 'call_parent_id', 'arg_name', 'arg_value', 'lines',
+    '.'
   ),
   package = 'potools'
 )

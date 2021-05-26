@@ -145,12 +145,22 @@ get_r_messages <- function (x) {
   file_lines = lapply(msg_files, readLines, warn = FALSE)
   names(file_lines) = msg_files
 
+  # need to strip comments for build_call, see #59.
+  # NB: at the R level, each COMMENT token is restricted to a single line
+  comments = expr_data[token == "COMMENT"]
+  setkeyv(comments, c("file", "line1"))
+
   msg[
     expr_data, on = c('file', parent = 'id'),
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
   msg[ , by = c('file', 'line1', 'col1', 'line2', 'col2'),
-    call := build_call(file_lines[[.BY$file]], .BY)
+    call := build_call(
+      file_lines[[.BY$file]],
+      # match any comments between line1 & line2
+      comments[.(.BY$file, .BY$line1:.BY$line2), .SD, nomatch=NULL],
+      params = .BY
+    )
   ]
 
   setnames(msg, 'line1', 'line_number')
@@ -235,16 +245,34 @@ drop_suppressed_and_named = function(calls_data, named_args) {
   calls_data[!named_args, on = c('file', 'id')]
 }
 
-build_call = function(lines, params) {
+build_call = function(lines, comments, params) {
   if (params$line1 == params$line2) {
-    return(substring(adjust_tabs(lines[params$line1]), params$col1, params$col2))
+    return(substr(adjust_tabs(lines[params$line1]), params$col1, params$col2))
   } else {
     lines = lines[params$line1:params$line2]
-    # eschew providing last=nchar(lines[1L]) because we'd need to recalculate it after adjust_tabs()
+
+    # substring not substr here so we can eschew providing
+    #   last=nchar(lines[1L]) because we'd need to recalculate it after adjust_tabs()
     lines[1L] = substring(adjust_tabs(lines[1L]), params$col1)
     lines[length(lines)] = substring(adjust_tabs(lines[length(lines)]), 1L, params$col2)
+
+    # strip comments, _after_ getting the tab-adjusted column #s
+    for (ii in seq_len(nrow(comments))) {
+      # we've already subset lines, so line numbers have to be re-mapped
+      adj_line_idx = comments$line1[ii] - params$line1 + 1L
+      # column number has to be re-mapped relative to col1 as well, but only on line1 itself
+      col_adj = if (adj_line_idx == 1L) params$col1 else 1L
+      lines[adj_line_idx] = substr(
+        lines[adj_line_idx],
+        1L,
+        comments$col1[ii] - col_adj
+      )
+    }
+
     # strip internal whitespace across lines in the call
-    return(gsub("\\s+", " ", paste(lines, collapse = " ")))
+    #   NB: eventually, this will need to be smarter about multi-line STR_CONST...
+    #       for now, just wave hands around those....
+    return(paste(trimws(lines), collapse = " "))
   }
 }
 

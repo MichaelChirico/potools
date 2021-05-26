@@ -130,7 +130,7 @@ test_that("translate_package identifies potential translations in cat() calls", 
     prompts,
     c(
       'cat(gettext("I warned you!"), fill=TRUE)',
-      'cat(gettext("Oh no you don\'t!"))',
+      'cat(gettext("Oh no you\\ndon\'t!"))',
       "Hixxboss"
     ),
     fixed=TRUE

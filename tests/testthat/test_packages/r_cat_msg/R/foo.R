@@ -4,7 +4,8 @@ function(x) {
 }
 
 function(x) {
-  cat("Oh no", "you don't!")
+  # check that the newline is shown as "\n" (i.e., not a line return), #57
+  cat("Oh no", "you\ndon't!")
   sep = ""
   cat("Miss me", "with", "this", sep=sep)
 }

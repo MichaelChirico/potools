@@ -1,23 +1,7 @@
-# Extended/adapted/combined version of tools::{x,xn}gettext. Mainly:
-#   (1) We want the results of both asCall=TRUE and asCall=FALSE together
-#   (2) We want to keep the caller (e.g. stop(), message(), etc.) as well
-#   (3) Take the parse trees as input, rather than calculating locally,
-#       since this is re-used elsewhere in translate_package
-# To pair the results, instead of the asCall=TRUE approach, use deparse()
-#   of any messaging input (to be shown to user later as an "in-context"
-#   version of the strings to translate). Things can be a little wonky,
-#   however, e.g. for how asCall=TRUE/FALSE handles domain=NA and
-#   nested strings
-get_r_messages <- function (x) {
-  if (is.list(x) && all(vapply(x, typeof, character(1L)) == "expression")) {
-    exprs <- x
-  } else {
-    # mostly used for convenient debugging right now. assumption
-    #   is that x is a directory so that we can use get_r_messages directly on a folder
-    exprs <- parse_r_files(x) # nocov
-  }
-
-  expr_data <- rbindlist(lapply(exprs, getParseData), idcol = 'file')
+# Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
+#   as R objects, do so from the parse data given by utils::getParseData().
+get_r_messages <- function (dir) {
+  expr_data <- rbindlist(lapply(parse_r_files(dir), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
 
@@ -29,7 +13,7 @@ get_r_messages <- function (x) {
 
   # on the XML tree, messaging calls look like
   # <expr>    <- parent of 'msg_call_neighbors'
-  #   <expr>  <- 'msg_call_exprs'
+  #   <expr>  <- 'msg_call_exprs'; might also be a more complicated expression here e.g. for base::stop()
   #     <SYMBOL_FUNCTION_CALL>stop</SYMBOL_FUNCTION_CALL>
   #   </expr>
   #   <OP-LEFT-PAREN>(</OP-LEFT-PAREN>
@@ -51,15 +35,23 @@ get_r_messages <- function (x) {
   msg_call_neighbors = msg_call_neighbors[token == 'expr']
   setnames(msg_call_neighbors, 'parent', 'ancestor')
 
-  singular_strings = data.table(file = character(), parent = integer(), msgid = character())
+  singular_strings = data.table(
+    file = character(),
+    parent = integer(),
+    fname = character(),
+    msgid = character()
+  )
   while (nrow(msg_call_neighbors) > 0L) {
     msg_call_neighbors = expr_data[
       msg_call_neighbors, on = c('file', parent = 'id'),
-      .(file, ancestor = i.ancestor, id = x.id, token = x.token, text = x.text)
+      .(file, ancestor = i.ancestor, fname = i.fname, id = x.id, token = x.token, text = x.text)
     ]
     singular_strings = rbind(
       singular_strings,
-      msg_call_neighbors[token == 'STR_CONST', .(file = file, parent = ancestor, msgid = text)]
+      msg_call_neighbors[
+        token == 'STR_CONST',
+        .(file = file, parent = ancestor, fname = fname, msgid = text)
+      ]
     )
     msg_call_neighbors = msg_call_neighbors[token == "expr"]
   }
@@ -70,7 +62,7 @@ get_r_messages <- function (x) {
   if (nrow(explicit_args)) {
     singular_strings = rbind(
       singular_strings,
-      explicit_args[ , .(file, parent, msgid = arg_value)]
+      explicit_args[ , .(file, parent, fname = 'gettextf', msgid = arg_value)]
     )
     # now that the arguments have been extracted here, drop these expressions
     gettextf_call_neighbors = gettextf_call_neighbors[!explicit_args, on = c('file', 'parent')]
@@ -82,7 +74,7 @@ get_r_messages <- function (x) {
     expr_data[
       gettextf_call_neighbors[token == 'expr'],
       on = c('file', parent = 'id'),
-      .(file, id = x.id, parent = i.parent, token = x.token, text = x.text)
+      .(file, id = x.id, parent = i.parent, fname = 'gettextf', token = x.token, text = x.text)
     ][
       order(id)
     ][
@@ -91,7 +83,7 @@ get_r_messages <- function (x) {
       #   the second argument is literal, used e.g. when "hey '%s'" will be repeated
       #   with different '%s' values, hence text[1L] to get the first string.
       .(msgid = text[1L]),
-      by = .(file, parent)
+      by = .(file, parent, fname)
     ]
   )
 
@@ -99,7 +91,11 @@ get_r_messages <- function (x) {
   named_args = get_named_args(plural_call_neighbors, expr_data, "domain")
   plural_call_neighbors = drop_suppressed_and_named(plural_call_neighbors, named_args)
 
-  plural_strings = data.table(file = character(), parent = integer(), plural_msgid = list())
+  plural_strings = data.table(
+    file = character(),
+    parent = integer(),
+    plural_msgid = list()
+  )
   explicit_args = get_named_args(plural_call_neighbors, expr_data, c("msg1", "msg2"))
   if (nrow(explicit_args)) {
     plural_strings = rbind(
@@ -172,7 +168,9 @@ get_r_messages <- function (x) {
   msg[type == 'plural', 'plural_msgid' := lapply(plural_msgid, escape_string)]
   msg[ , 'is_repeat' := FALSE]
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
-  msg[ , 'is_marked_for_translation' := TRUE]
+
+  msg[ , 'is_marked_for_translation' := fname != 'cat']
+  msg[ , 'fname' := NULL]
 
   msg[]
 }
@@ -184,14 +182,19 @@ get_r_messages <- function (x) {
 #     if (is.null(f_args <- args(f))) next
 #     if (any(names(formals(f_args)) == 'domain')) cat(obj, '\n')
 # }
-MSG_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext")
-NON_STRING_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
+# TODO: this is quickly cracking... a better API matching function to its arguments
+#   may be warranted.
+MSG_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext", "cat")
+NON_STRING_ARGS = c(
+  "domain", "call.", "appendLF", "immediate.", "noBreaks.",
+  "file", "sep", "fill", "labels", "append"
+)
 
 get_call_args = function(expr_data, calls) {
   msg_call_exprs = expr_data[
     expr_data[token == "SYMBOL_FUNCTION_CALL" & text %chin% calls],
     on = c('file', id = 'parent'),
-    .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent)
+    .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent, fname = i.text)
   ]
   # if not, just skip to a join to get the right schema & return
   if (nrow(msg_call_exprs)) {
@@ -203,17 +206,18 @@ get_call_args = function(expr_data, calls) {
     # filter out calls like l$stop("x"), keep calls like base::stop("x")
     msg_call_expr_children = msg_call_expr_children[
       , by = parent,
-      if (.N == 1L || 'NS_GET' %chin% token) .SD
+      # filter .SD here to ensure one row per file/parent, otherwise we get duplicates below
+      if (.N == 1L || 'NS_GET' %chin% token) .SD[token == 'SYMBOL_FUNCTION_CALL']
     ]
     msg_call_exprs = msg_call_exprs[
       msg_call_expr_children,
       on = c('file', call_expr_id = 'parent'),
-      .(file, call_id, call_expr_id, call_parent_id)
+      .(file, call_id, call_expr_id, call_parent_id, fname)
     ]
   }
   msg_call_neighbors = expr_data[
     msg_call_exprs, on = c('file', parent = 'call_parent_id'),
-    .(file, id = x.id, parent = x.parent, token = x.token, text = x.text)
+    .(file, id = x.id, parent = x.parent, token = x.token, text = x.text, fname)
   ]
   msg_call_neighbors
 }

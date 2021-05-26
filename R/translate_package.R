@@ -36,11 +36,8 @@ translate_package = function(
   }
   if (!update) dir.create(podir, showWarnings = FALSE)
 
-  if (verbose) message('Parsing R files...')
-  r_exprs = parse_r_files(dir)
-
   if (verbose) message('Getting R-level messages...')
-  r_message_data = get_r_messages(r_exprs)
+  r_message_data = get_r_messages(dir)
 
   if (verbose) message('Getting src-level messages...')
   src_message_data = get_src_messages(dir, src_translation_macro)
@@ -73,7 +70,7 @@ translate_package = function(
   exit = check_cracked_messages(message_data)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
-  exit = check_untranslated_cat(r_exprs)
+  exit = check_untranslated_cat(message_data)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
   exit = check_untranslated_src(message_data)

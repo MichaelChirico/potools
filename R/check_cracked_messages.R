@@ -4,7 +4,11 @@ check_cracked_messages = function(message_data) {
 
   # check for , as a crude filter to avoid parsing too many calls
   dup_messages = message_data[
-    !is_repeat & message_source == "R" & type == 'singular' & grepl(",", call, fixed = TRUE),
+    !is_repeat
+    & is_marked_for_translation
+    & message_source == "R"
+    & type == 'singular'
+    & grepl(",", call, fixed = TRUE),
     .(lines = toString(unique(line_number))),
     by=c('file', 'call')
   ]

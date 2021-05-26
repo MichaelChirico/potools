@@ -27,8 +27,8 @@ get_r_messages <- function (dir) {
   #   <!-- mix and match those two types indefinitely -->
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
-  msg_call_neighbors = get_call_args(expr_data, MSG_FUNS)
-  named_args = get_named_args(msg_call_neighbors, expr_data, NON_STRING_ARGS)
+  msg_call_neighbors = get_call_args(expr_data, c(DOMAIN_DOTS_FUNS, 'cat'))
+  named_args = get_named_args(msg_call_neighbors, expr_data, NON_DOTS_ARGS)
   msg_call_neighbors = drop_suppressed_and_named(msg_call_neighbors, named_args)
 
   # drop '(', ')', ',', and now-orphaned SYMBOL_SUB/EQ_SUB
@@ -169,7 +169,8 @@ get_r_messages <- function (dir) {
   msg[ , 'is_repeat' := FALSE]
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  msg[ , 'is_marked_for_translation' := fname != 'cat']
+  msg[type == 'plural', 'is_marged_for_translation' := TRUE]
+  msg[type == 'singular', 'is_marked_for_translation' := fname %chin% c(DOMAIN_DOTS, 'gettextf')]
   msg[ , 'fname' := NULL]
 
   msg[]
@@ -184,8 +185,8 @@ get_r_messages <- function (dir) {
 # }
 # TODO: this is quickly cracking... a better API matching function to its arguments
 #   may be warranted.
-MSG_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext", "cat")
-NON_STRING_ARGS = c(
+DOMAIN_DOTS_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext")
+NON_DOTS_ARGS = c(
   "domain", "call.", "appendLF", "immediate.", "noBreaks.",
   "file", "sep", "fill", "labels", "append"
 )

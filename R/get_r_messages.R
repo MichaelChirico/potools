@@ -170,7 +170,7 @@ get_r_messages <- function (dir) {
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
   msg[type == 'plural', 'is_marged_for_translation' := TRUE]
-  msg[type == 'singular', 'is_marked_for_translation' := fname %chin% c(DOMAIN_DOTS, 'gettextf')]
+  msg[type == 'singular', 'is_marked_for_translation' := fname %chin% c(DOMAIN_DOTS_FUNS, 'gettextf')]
   msg[ , 'fname' := NULL]
 
   msg[]

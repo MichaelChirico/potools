@@ -27,34 +27,11 @@ get_r_messages <- function (dir) {
   #   <!-- mix and match those two types indefinitely -->
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
-  msg_call_neighbors = get_call_args(expr_data, c(DOMAIN_DOTS_FUNS, 'cat'))
-  named_args = get_named_args(msg_call_neighbors, expr_data, NON_DOTS_ARGS)
-  msg_call_neighbors = drop_suppressed_and_named(msg_call_neighbors, named_args)
-
-  # drop '(', ')', ',', and now-orphaned SYMBOL_SUB/EQ_SUB
-  msg_call_neighbors = msg_call_neighbors[token == 'expr']
-  setnames(msg_call_neighbors, 'parent', 'ancestor')
-
-  singular_strings = data.table(
-    file = character(),
-    parent = integer(),
-    fname = character(),
-    msgid = character()
+  singular_strings = rbind(
+    get_dots_strings(expr_data, DOMAIN_DOTS_FUNS, NON_DOTS_ARGS),
+    # treat gettextf separately since it takes a named argument, and we ignore ...
+    get_named_arg_strings(expr_data, 'gettextf', 'fmt')
   )
-  while (nrow(msg_call_neighbors) > 0L) {
-    msg_call_neighbors = expr_data[
-      msg_call_neighbors, on = c('file', parent = 'id'),
-      .(file, ancestor = i.ancestor, fname = i.fname, id = x.id, token = x.token, text = x.text)
-    ]
-    singular_strings = rbind(
-      singular_strings,
-      msg_call_neighbors[
-        token == 'STR_CONST',
-        .(file = file, parent = ancestor, fname = fname, msgid = text)
-      ]
-    )
-    msg_call_neighbors = msg_call_neighbors[token == "expr"]
-  }
 
   # treat gettextf separately since it takes a named argument, and we ignore ...
   gettextf_call_neighbors = get_call_args(expr_data, "gettextf")
@@ -186,10 +163,76 @@ get_r_messages <- function (dir) {
 # TODO: this is quickly cracking... a better API matching function to its arguments
 #   may be warranted.
 DOMAIN_DOTS_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext")
-NON_DOTS_ARGS = c(
-  "domain", "call.", "appendLF", "immediate.", "noBreaks.",
-  "file", "sep", "fill", "labels", "append"
-)
+NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
+CAT_ARGS = c("file", "sep", "fill", "labels", "append")
+
+# for functions (e.g. DOMAIN_DOTS_FUNS) where we extract strings from ... arguments
+get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
+  call_neighbors = get_call_args(expr_data, funs)
+  named_args = get_named_args(call_neighbors, expr_data, arg_names)
+  call_neighbors = drop_suppressed_and_named(call_neighbors, named_args)
+
+  # drop '(', ')', ',', and now-orphaned SYMBOL_SUB/EQ_SUB
+  call_neighbors = call_neighbors[token == 'expr']
+  setnames(call_neighbors, 'parent', 'ancestor')
+
+  strings = string_schema()
+  while (nrow(call_neighbors) > 0L) {
+    call_neighbors = expr_data[
+      call_neighbors, on = c('file', parent = 'id'),
+      .(file, ancestor = i.ancestor, fname = i.fname, id = x.id, token = x.token, text = x.text)
+    ]
+    strings = rbind(
+      strings,
+      call_neighbors[
+        token == 'STR_CONST',
+        .(file = file, parent = ancestor, fname = fname, msgid = text)
+      ]
+    )
+    # much cleaner to do this tiny check a small number (e.g. nesting level of 10-15) times
+    #   repetitively rather than make a whole separate branch for the once-and-done case
+    if (!recursive) break
+    call_neighbors = call_neighbors[token == "expr"]
+  }
+  return(strings)
+}
+
+# for functions (e.g. ngettext, gettextf) where we extract strings from named arguments
+get_named_arg_strings = function(expr_data, funs, arg_names) {
+  call_neighbors = get_call_args(expr_data, funs)
+
+  explicit_args = get_named_args(call_neighbors, expr_data, arg_names)
+
+  strings = string_schema()
+  if (nrow(explicit_args)) {
+    strings = rbind(
+      strings,
+      explicit_args[ , .(file, parent, fname, msgid = arg_value)]
+    )
+    # now that the arguments have been extracted here, drop these expressions
+    call_neighbors = call_neighbors[!explicit_args, on = c('file', 'parent')]
+  }
+
+  # now pull out only the arguments that defined implicitly
+  strings = rbind(
+    strings,
+    expr_data[
+      call_neighbors[token == 'expr'],
+      on = c('file', parent = 'id'),
+      .(file, id = x.id, parent = i.parent, fname = i.fname, token = x.token, text = x.text)
+    ][
+      order(id)
+    ][
+      token == 'STR_CONST',
+      # some calls like gettextf("hey '%s'", "you") to get templating even though
+      #   the second argument is literal, used e.g. when "hey '%s'" will be repeated
+      #   with different '%s' values, hence get the first length(arg_names) args
+      .(msgid = text[seq_along(arg_names)]),
+      by = .(file, parent, fname)
+    ]
+  )
+  return(strings)
+}
 
 get_call_args = function(expr_data, calls) {
   msg_call_exprs = expr_data[
@@ -233,7 +276,7 @@ get_named_args = function(calls_data, expr_data, target_args) {
   named_args = calls_data[token == "expr"][
     calls_data[token == "SYMBOL_SUB" & text %chin% target_args],
     on = c('file', 'parent', 'id'), roll = -Inf,
-    .(file, parent, id = x.id, arg_name = i.text)
+    .(file, parent, id = x.id, fname = x.fname, arg_name = i.text)
   ]
   named_args[expr_data, on = c('file', id = 'parent'), arg_value := i.text][]
 }
@@ -287,6 +330,14 @@ adjust_tabs = function(l) {
   }
   l
 }
+
+string_schema = function() data.table(
+  file = character(),
+  parent = integer(),
+  fname = character(),
+  msgid = character(),
+  plural_msgid = list()
+)
 
 # the schema for empty edge cases
 r_message_schema = function() data.table(

@@ -2,7 +2,10 @@
 #   aren't passed through gettext or ngettext)
 check_untranslated_cat <- function (message_data) {
   # not iron-clad but it's a good first pass
-  cat_calls = unique(message_data[grepl("cat(", call, fixed = TRUE)], by = 'call')
+  cat_calls = unique(
+    message_data[message_source == "R" & type == "singular" & grepl("cat(", call, fixed = TRUE)],
+    by = 'call'
+  )
   if (!nrow(cat_calls)) return('n')
 
   cat_calls[ , 'call_expr' := lapply(call, str2lang)]

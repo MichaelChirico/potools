@@ -138,15 +138,15 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
     if (plural) {
       new_strings = explicit_args[
         order(file, parent),
-        by = .(file, parent),
+        by = .(file, parent, fname),
         {
           if (.N == length(arg_names)) {
             .(plural_msgid = list(arg_value))
           } else {
-            stop(domain = NA, gettextf(
-              "In line %d of %s, found a call to %s that doesn't name its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
+            stop(domain = NA, call. = FALSE, gettextf(
+              "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
               # funs[1L] is very lazy. should name the function actually responsible...
-              .BY$file, expr_data[.BY, on = c(id = 'parent'), line1[1L]], funs[1L], toString(arg_names)
+              expr_data[.BY, on = c(id = 'parent'), line1[1L]], .BY$file, .BY$fname, toString(arg_names)
             ))
           }
         }
@@ -159,9 +159,11 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
           if (.N == length(arg_names)) {
             .(msgid = arg_value)
           } else {
-            stop(domain = NA, gettextf(
-              "In line %d of %s, found a call to %s that doesn't name its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
-              .BY$file, expr_data[.BY, on = c(id = 'parent'), line1[1L]], .BY$fname, toString(arg_names)
+            # TODO: this is currently uncoverable, since only gettextf uses this branch
+            #   and that only uses one named argument. Revisit...
+            stop(domain = NA, call. = FALSE, gettextf(
+              "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
+              expr_data[.BY, on = c(id = 'parent'), line1[1L]], .BY$file, .BY$fname, toString(arg_names)
             ))
           }
         }

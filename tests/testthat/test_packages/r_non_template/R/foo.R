@@ -17,6 +17,9 @@ c <- function(x) {
 # add some duplication of the messages to stress test logic
 #   on handling duplicates; part of #49
 d <- function(x) {
+  # coverage: check_untranslated_cat skips this because of the second argument.
+  #   this lone cat in the package passes all but the last filter.
+  cat("a message", gettext("but this one's translated"))
   stop("I warned you!")
 }
 

@@ -30,7 +30,8 @@ get_r_messages <- function (dir) {
   singular_strings = rbind(
     get_dots_strings(expr_data, DOMAIN_DOTS_FUNS, NON_DOTS_ARGS),
     # treat gettextf separately since it takes a named argument, and we ignore ...
-    get_named_arg_strings(expr_data, 'gettextf', 'fmt')
+    get_named_arg_strings(expr_data, 'gettextf', 'fmt'),
+    get_dots_strings(expr_data, 'cat', c("file", "sep", "fill", "labels", "append"), recursive = FALSE)
   )
 
   plural_strings = get_named_arg_strings(expr_data, 'ngettext', c('msg1', 'msg2'), plural = TRUE)
@@ -89,11 +90,8 @@ get_r_messages <- function (dir) {
 #     if (is.null(f_args <- args(f))) next
 #     if (any(names(formals(f_args)) == 'domain')) cat(obj, '\n')
 # }
-# TODO: this is quickly cracking... a better API matching function to its arguments
-#   may be warranted.
 DOMAIN_DOTS_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext")
 NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
-CAT_ARGS = c("file", "sep", "fill", "labels", "append")
 
 # for functions (e.g. DOMAIN_DOTS_FUNS) where we extract strings from ... arguments
 get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
@@ -192,7 +190,6 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
       .(plural_msgid = list(text[seq_along(arg_names)]))
     ]
   } else {
-  if (plural) {
     new_strings = new_strings[
       order(id),
       by = .(file, parent, fname),

@@ -33,83 +33,12 @@ get_r_messages <- function (dir) {
     get_named_arg_strings(expr_data, 'gettextf', 'fmt')
   )
 
-  # treat gettextf separately since it takes a named argument, and we ignore ...
-  gettextf_call_neighbors = get_call_args(expr_data, "gettextf")
-  explicit_args = get_named_args(gettextf_call_neighbors, expr_data, "fmt")
-  if (nrow(explicit_args)) {
-    singular_strings = rbind(
-      singular_strings,
-      explicit_args[ , .(file, parent, fname = 'gettextf', msgid = arg_value)]
-    )
-    # now that the arguments have been extracted here, drop these expressions
-    gettextf_call_neighbors = gettextf_call_neighbors[!explicit_args, on = c('file', 'parent')]
-  }
-
-  # now pull out only the first argument in the implicit args case
-  singular_strings = rbind(
-    singular_strings,
-    expr_data[
-      gettextf_call_neighbors[token == 'expr'],
-      on = c('file', parent = 'id'),
-      .(file, id = x.id, parent = i.parent, fname = 'gettextf', token = x.token, text = x.text)
-    ][
-      order(id)
-    ][
-      token == 'STR_CONST',
-      # some calls like gettextf("hey '%s'", "you") to get templating even though
-      #   the second argument is literal, used e.g. when "hey '%s'" will be repeated
-      #   with different '%s' values, hence text[1L] to get the first string.
-      .(msgid = text[1L]),
-      by = .(file, parent, fname)
-    ]
-  )
-
-  plural_call_neighbors = get_call_args(expr_data, "ngettext")
-  named_args = get_named_args(plural_call_neighbors, expr_data, "domain")
-  plural_call_neighbors = drop_suppressed_and_named(plural_call_neighbors, named_args)
-
-  plural_strings = data.table(
-    file = character(),
-    parent = integer(),
-    plural_msgid = list()
-  )
-  explicit_args = get_named_args(plural_call_neighbors, expr_data, c("msg1", "msg2"))
-  if (nrow(explicit_args)) {
-    plural_strings = rbind(
-      plural_strings,
-      explicit_args[
-        order(file, parent, arg_name),
-        if (.N == 2L) .(plural_msgid = list(arg_value)) else stop(domain = NA, gettextf(
-          "In line %d of %s, found an ngettext() call that explicitly names only one of the msg1/msg2 arguments. Please name both if naming either.",
-          .BY$file, expr_data[.BY, on = c(id = 'parent'), line1[1L]]
-        )),
-        by = .(file, parent)
-      ]
-    )
-    # now that the arguments have been extracted here, drop these expressions
-    plural_call_neighbors = plural_call_neighbors[!explicit_args, on = c('file', 'parent')]
-  }
-
-  # no nesting to deal with for ngettext; just extract the two STR_CONST
-  plural_strings = rbind(
-    plural_strings,
-    expr_data[
-      plural_call_neighbors[token == 'expr'],
-      on = c('file', parent = 'id'),
-      .(file, id = x.id, parent = i.parent, token = x.token, text = x.text)
-    ][
-      order(id)
-    ][
-      token == 'STR_CONST',
-      .(plural_msgid = list(text)),
-      by = .(file, parent)
-    ]
-  )
+  plural_call_neighbors = get_named_arg_strings(expr_data, 'ngettext', c('msg1', 'msg2'), plural = TRUE)
 
   msg = rbind(
     singular = singular_strings,
     plural = plural_strings,
-    idcol = 'type', fill = TRUE, use.names = TRUE
+    idcol = 'type'
   )
 
   if (!nrow(msg)) return(r_message_schema())
@@ -187,7 +116,8 @@ get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
       call_neighbors[
         token == 'STR_CONST',
         .(file = file, parent = ancestor, fname = fname, msgid = text)
-      ]
+      ],
+      fill = TRUE
     )
     # much cleaner to do this tiny check a small number (e.g. nesting level of 10-15) times
     #   repetitively rather than make a whole separate branch for the once-and-done case
@@ -198,8 +128,10 @@ get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
 }
 
 # for functions (e.g. ngettext, gettextf) where we extract strings from named arguments
-get_named_arg_strings = function(expr_data, funs, arg_names) {
+get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
   call_neighbors = get_call_args(expr_data, funs)
+  named_args = get_named_args(call_neighbors, expr_data, "domain")
+  call_neighbors = drop_suppressed_and_named(call_neighbors, named_args)
 
   explicit_args = get_named_args(call_neighbors, expr_data, arg_names)
 
@@ -207,13 +139,33 @@ get_named_arg_strings = function(expr_data, funs, arg_names) {
   if (nrow(explicit_args)) {
     strings = rbind(
       strings,
-      explicit_args[ , .(file, parent, fname, msgid = arg_value)]
+      explicit_args[
+        order(file, parent),
+        by = .(file, parent)
+        {
+          if (.N == length(arg_names)) {
+            if (plural) {
+              .(plural_msgid = list(arg_value))
+            } else {
+              .(msgid = arg_value)
+            }
+          } else {
+            stop(domain = NA, gettextf(
+              "In line %d of %s, found a call to %s that doesn't name its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
+              # funs[1L] is very lazy. should name the function actually responsible...
+              .BY$file, expr_data[.BY, on = c(id = 'parent'), line1[1L]], funs[1L], toString(arg_names)
+            ))
+          }
+        }
+      ],
+      fill = TRUE
     )
     # now that the arguments have been extracted here, drop these expressions
     call_neighbors = call_neighbors[!explicit_args, on = c('file', 'parent')]
   }
 
-  # now pull out only the arguments that defined implicitly
+  # now pull out only the arguments that are defined implicitly
+  new_strings =
   strings = rbind(
     strings,
     expr_data[
@@ -227,9 +179,17 @@ get_named_arg_strings = function(expr_data, funs, arg_names) {
       # some calls like gettextf("hey '%s'", "you") to get templating even though
       #   the second argument is literal, used e.g. when "hey '%s'" will be repeated
       #   with different '%s' values, hence get the first length(arg_names) args
-      .(msgid = text[seq_along(arg_names)]),
+      {
+        text = text[seq_along(arg_names)]
+        if (plural) {
+          .(plural_msgid = list(text))
+        } else {
+          .(msgid = text)
+        }
+      },
       by = .(file, parent, fname)
-    ]
+    ],
+    fill = TRUE
   )
   return(strings)
 }

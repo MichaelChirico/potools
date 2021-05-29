@@ -254,3 +254,14 @@ test_that("Diagnostic for unmarked src translations works", {
     fixed=TRUE
   )
 })
+
+test_that("Partially named messaging arguments are an error", {
+  restore_package(
+    pkg <- test_package("plural_semi_named"),
+    expect_error(
+      translate_package(pkg),
+      "found a call to ngettext that names only some of its messaging arguments",
+      fixed = TRUE
+    )
+  )
+})

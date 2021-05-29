@@ -33,7 +33,7 @@ get_r_messages <- function (dir) {
     get_named_arg_strings(expr_data, 'gettextf', 'fmt')
   )
 
-  plural_call_neighbors = get_named_arg_strings(expr_data, 'ngettext', c('msg1', 'msg2'), plural = TRUE)
+  plural_strings = get_named_arg_strings(expr_data, 'ngettext', c('msg1', 'msg2'), plural = TRUE)
 
   msg = rbind(
     singular = singular_strings,
@@ -75,7 +75,7 @@ get_r_messages <- function (dir) {
   msg[ , 'is_repeat' := FALSE]
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  msg[type == 'plural', 'is_marged_for_translation' := TRUE]
+  msg[type == 'plural', 'is_marked_for_translation' := TRUE]
   msg[type == 'singular', 'is_marked_for_translation' := fname %chin% c(DOMAIN_DOTS_FUNS, 'gettextf')]
   msg[ , 'fname' := NULL]
 
@@ -137,18 +137,13 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
 
   strings = string_schema()
   if (nrow(explicit_args)) {
-    strings = rbind(
-      strings,
-      explicit_args[
+    if (plural) {
+      new_strings = explicit_args[
         order(file, parent),
-        by = .(file, parent)
+        by = .(file, parent),
         {
           if (.N == length(arg_names)) {
-            if (plural) {
-              .(plural_msgid = list(arg_value))
-            } else {
-              .(msgid = arg_value)
-            }
+            .(plural_msgid = list(arg_value))
           } else {
             stop(domain = NA, gettextf(
               "In line %d of %s, found a call to %s that doesn't name its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
@@ -157,40 +152,54 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
             ))
           }
         }
-      ],
-      fill = TRUE
-    )
+      ]
+    } else {
+      new_strings = explicit_args[
+        order(file, parent),
+        by = .(file, parent, fname),
+        {
+          if (.N == length(arg_names)) {
+            .(msgid = arg_value)
+          } else {
+            stop(domain = NA, gettextf(
+              "In line %d of %s, found a call to %s that doesn't name its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
+              .BY$file, expr_data[.BY, on = c(id = 'parent'), line1[1L]], .BY$fname, toString(arg_names)
+            ))
+          }
+        }
+      ]
+    }
+    strings = rbind(strings, new_strings, fill = TRUE)
     # now that the arguments have been extracted here, drop these expressions
     call_neighbors = call_neighbors[!explicit_args, on = c('file', 'parent')]
   }
 
   # now pull out only the arguments that are defined implicitly
-  new_strings =
-  strings = rbind(
-    strings,
-    expr_data[
-      call_neighbors[token == 'expr'],
-      on = c('file', parent = 'id'),
-      .(file, id = x.id, parent = i.parent, fname = i.fname, token = x.token, text = x.text)
-    ][
-      order(id)
-    ][
-      token == 'STR_CONST',
+  new_strings = expr_data[
+    call_neighbors[token == 'expr'],
+    on = c('file', parent = 'id'),
+    .(file, id = x.id, parent = i.parent, fname = i.fname, token = x.token, text = x.text)
+  ][
+    token == 'STR_CONST'
+  ]
+  if (plural) {
+    new_strings = new_strings[
+      order(id),
+      by = .(file, parent, fname),
       # some calls like gettextf("hey '%s'", "you") to get templating even though
       #   the second argument is literal, used e.g. when "hey '%s'" will be repeated
       #   with different '%s' values, hence get the first length(arg_names) args
-      {
-        text = text[seq_along(arg_names)]
-        if (plural) {
-          .(plural_msgid = list(text))
-        } else {
-          .(msgid = text)
-        }
-      },
-      by = .(file, parent, fname)
-    ],
-    fill = TRUE
-  )
+      .(plural_msgid = list(text[seq_along(arg_names)]))
+    ]
+  } else {
+  if (plural) {
+    new_strings = new_strings[
+      order(id),
+      by = .(file, parent, fname),
+      .(msgid = text[seq_along(arg_names)])
+    ]
+  }
+  strings = rbind(strings, new_strings, fill = TRUE)
   return(strings)
 }
 

@@ -86,6 +86,8 @@ list_src_files = function(dir) {
   # tried to be inclusive at first, but stringi broke my resolve -- src/ includes
   #   .zip, .txt, .html, .pl, ... broke my conviction we have any hope of making anything
   #   but an allow list succeed here.
+  # NB: tools::update_pkg_po() is only looking for files in
+  #   src/*.{c,cc,cpp,m,mm} and src/windows/*.{c,cc,cpp,m,mm}
   grep("\\.(c|cc|cpp)", src_files, value = TRUE, ignore.case = TRUE)
 }
 # get src files in a package

@@ -4,7 +4,7 @@
 #   strings from cat during get_r_messages() and just marking those as
 #   !is_marked_for_translation at that point.
 check_untranslated_src <- function (message_data) {
-  unmarked_messages = message_data[type == "src" & !is_marked_for_translation]
+  unmarked_messages = message_data[message_source == "src" & !is_marked_for_translation]
   if (!nrow(unmarked_messages)) return('n')
 
   message(domain=NA, gettextf(

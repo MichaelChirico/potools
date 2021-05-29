@@ -14,6 +14,9 @@ check_untranslated_cat <- function (message_data) {
   ]
   if (!nrow(cat_calls)) return('n')
 
+  cat_calls = cat_calls[vapply(call_expr, no_translated_subcall, logical(1L))]
+  if (!nrow(cat_calls)) return('n')
+
   # some of these will return "" which we can filter
   for (ii in seq_len(nrow(cat_calls))) {
     set(cat_calls, ii, "suggested_call", build_suggested_cat_call(cat_calls$call_expr[[ii]]))
@@ -73,4 +76,12 @@ build_suggested_cat_call = function(e) {
     gettextify(e[!named_idx][-1L], sep),
     named_arg_str
   )
+}
+
+# check if an expression has any translated sub-call, e.g.
+#   cat(gettext("Done."), "\n"). See #66 for more details.
+no_translated_subcall <- function(e) {
+  if (!is.call(e)) return(TRUE)
+  if (is.name(e[[1L]]) && e[[1L]] %chin% c("gettext", "gettextf", "ngettext")) return(FALSE)
+  return(all(vapply(e[-1L], no_translated_subcall, logical(1L))))
 }

@@ -9,6 +9,7 @@ f2 <- function(x) {
 
 f3 <- function(x) {
   gettext("Hi there")
+  stop("Oh no you don't!")
 }
 
 f4 <- function(x) {

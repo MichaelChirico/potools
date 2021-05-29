@@ -72,7 +72,9 @@ get_r_messages <- function (dir) {
   setorderv(msg, c("type", "file", "line_number"), c(-1L, 1L, 1L))
 
   msg[type == 'singular', 'msgid' := escape_string(msgid)]
-  msg[type == 'plural', 'plural_msgid' := lapply(plural_msgid, escape_string)]
+  msg[type == 'plural', 'msgid_plural' := lapply(msgid_plural, escape_string)]
+
+  # keep duplicates & define this field, in case duplicates are also part of diagnostic checks
   msg[ , 'is_repeat' := FALSE]
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
@@ -141,7 +143,7 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
         by = .(file, parent, fname),
         {
           if (.N == length(arg_names)) {
-            .(plural_msgid = list(arg_value))
+            .(msgid_plural = list(arg_value))
           } else {
             stop(domain = NA, call. = FALSE, gettextf(
               "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
@@ -189,7 +191,7 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
       # some calls like gettextf("hey '%s'", "you") to get templating even though
       #   the second argument is literal, used e.g. when "hey '%s'" will be repeated
       #   with different '%s' values, hence get the first length(arg_names) args
-      .(plural_msgid = list(text[seq_along(arg_names)]))
+      .(msgid_plural = list(text[seq_along(arg_names)]))
     ]
   } else {
     new_strings = new_strings[
@@ -304,7 +306,7 @@ string_schema = function() data.table(
   parent = integer(),
   fname = character(),
   msgid = character(),
-  plural_msgid = list()
+  msgid_plural = list()
 )
 
 # the schema for empty edge cases
@@ -312,7 +314,7 @@ r_message_schema = function() data.table(
   type = character(),
   file = character(),
   msgid = character(),
-  plural_msgid = list(),
+  msgid_plural = list(),
   line_number = integer(),
   call = character(),
   is_repeat = logical(),

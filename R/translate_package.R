@@ -94,7 +94,7 @@ translate_package = function(
     #   for interrupting the translation -- if unset, write_po_files will
     #   fail if both these columns are not yet present.
     message_data[type == 'singular', 'msgstr' := ""]
-    message_data[type == 'plural', 'plural_msgstr' := .(list(rep("", metadata$nplurals)))]
+    message_data[type == 'plural', 'msgstr_plural' := .(list(rep("", metadata$nplurals)))]
 
     lang_file <- file.path(podir, sprintf("R-%s.po", language))
     if (update && file.exists(lang_file)) {
@@ -128,7 +128,7 @@ translate_package = function(
       is_marked_for_translation & (
         fuzzy == 1L
         | (type == 'singular' & !nzchar(msgstr))
-        | (type == 'plural' & !vapply(plural_msgstr, function(x) all(nzchar(x)), logical(1L)))
+        | (type == 'plural' & !vapply(msgstr_plural, function(x) all(nzchar(x)), logical(1L)))
       ),
       which = TRUE
     ]
@@ -179,15 +179,15 @@ translate_package = function(
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation = read_translation(
-          message_data$plural_msgid[[ii]][1L],
+          message_data$msgid_plural[[ii]][1L],
           'plural',
           message_data$file[ii],
           message_data$call[ii],
           message_data$fuzzy[ii],
-          message_data$plural_msgstr[[ii]],
+          message_data$msgstr_plural[[ii]],
           metadata
         )
-        set(message_data, ii, 'plural_msgstr', list(translation))
+        set(message_data, ii, 'msgstr_plural', list(translation))
       } else if (!message_data$is_repeat[ii]) {
         translation = read_translation(
           message_data$msgid[ii],

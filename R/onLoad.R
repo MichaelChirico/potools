@@ -1,7 +1,7 @@
 globalVariables(
   c(
     'KNOWN_LANGUAGES', 'PLURAL_RANGE_STRINGS',
-    'msgid', 'msgstr', 'x.msgstr', 'plural_msgid', 'plural_msgstr', 'x.plural_msgstr',
+    'msgid', 'msgstr', 'x.msgstr', 'msgid_plural', 'msgstr_plural', 'x.msgstr_plural',
     'message_source', 'type', 'line_number', 'fuzzy', 'x.fuzzy',
     'is_repeat', 'is_marked_for_translation',
     'id', 'x.id', 'i.id', 'line1', 'i.line1', 'i.col1', 'i.line2', 'i.col2',

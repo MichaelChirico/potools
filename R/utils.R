@@ -158,7 +158,7 @@ SPRINTF_TEMPLATE_REGEX = paste0(
     "[%]|", # % separately to reduce false positives -- it can't be used with other specials
     "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
     "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
-    "[aAdifeEgGosxX]", # there are more available at the C level...
+    "[aAcdeEfgGiopsuxX]", # taken from https://en.wikipedia.org/wiki/Printf_format_string#Type_field
   ")"
 )
 ENCODED_STRING_REGEX = "[\\][\\ntrvabf]"

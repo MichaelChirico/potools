@@ -12,15 +12,28 @@ run_msgmerge = function(po_file, pot_file) {
   return(invisible())
 }
 
-run_msgfmt = function(dir) {
+run_msgfmt = function(dir, package) {
   browser()
   inst_dir <- file.path(dir, "inst", "po")
-  mo_dir <- file.path(inst_dir, languages, "LC_MESSAGES")
-  dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
-  r_mo_file <- file.path(mo_dir, sprintf("R-%s.mo", package))
-  if (system(sprintf("msgfmt -c --statistics -o %s %s", shQuote(r_mo_file), shQuote(po_file))) != 0L) {
-    warning(domain = NA, gettextf("running msgfmt on %s failed", basename(po_file)), immediate. = TRUE)
+  lang_regex <- "^(R-)?([a-zA-Z_]+)\\.po$"
+
+  po_files <- list.files(file.path(dir, "po"), pattern = "\\.po$")
+  languages <- gsub(lang_regex, "\\2", po_files)
+  mo_files <- gsub(lang_regex, sprintf("\\1%s.mo", package), po_files)
+
+  for (ii in seq_along(po_files)) {
+    mo_dir <- file.path(inst_dir, languages[ii], "LC_MESSAGES")
+    dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
+
+    po_file <- file.path(dir, "po", po_files[ii])
+    mo_file <- file.path(mo_dir, mo_files[ii])
+    if (system(sprintf("msgfmt -c --statistics -o %s %s", shQuote(mo_file), shQuote(po_file))) != 0L) {
+      warning(domain = NA, gettextf("running msgfmt on %s failed", basename(po_file)), immediate. = TRUE)
+    }
   }
+
+  r_mo_file <- file.path(mo_dir, sprintf("R-%s.mo", package))
+
 
   # on UTF-8 machines we install the en@quot messages too
   # TODO: streamline this -- en_quote is definitely doing some redundant stuff

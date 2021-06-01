@@ -6,6 +6,14 @@ get_r_messages <- function (dir) {
   if (!nrow(expr_data)) return(r_message_schema())
 
   setkeyv(expr_data, "file")
+  # strip quotation marks now rather than deal with that at write time.
+  #   TODO:
+  # handle raw strings separately, lest we catch a string like "abc)--" that _looks_
+  #   like a raw string on the RHS but actually is not one. also do them first since
+  #   the RHS of a non-raw string is also matched in a raw string, but not vice versa
+  expr_data[token == 'STR_CONST', text := gsub('^[rR]["\'][-]*[\\[({]|[\\])}][-]*["\']$', '', text, perl = TRUE)]
+  expr_data[token == 'STR_CONST', text := gsub('^["\']|["\']$', '', text)]
+
   setindexv(expr_data, c("file", "line1", "col1", "line2", "col2"))
   setindexv(expr_data, c("file", "id"))
   setindexv(expr_data, c("file", "parent"))

@@ -82,7 +82,11 @@ write_po_file <- function(message_data, po_file, po_header, template = FALSE) {
       } else {
         msgid_plural = vapply(
           msgstr_plural[!singular_idx],
-          function(msgstr) paste(sprintf('msgstr[%d] "%s"', seq_along(msgstr)-1L, msgstr), collapse='\n'),
+          function(msgstr) paste(
+            # TODO: should encodeString() be done directly at translation time?
+            sprintf('msgstr[%d] "%s"', seq_along(msgstr)-1L, encodeString(msgstr)),
+            collapse='\n'
+          ),
           character(1L)
         )
       }

@@ -1,16 +1,31 @@
 # output R and/or src .po file(s) from a message data.table
+# TODO: API here is a mess. don't have the heart to refactor right now though.
 write_po_files <- function(message_data, po_dir, language, package, version, author, metadata, template = FALSE) {
   timestamp <- format(Sys.time(), tz = 'UTC')
 
+  if (template) {
+    po_revision_date <- 'YEAR-MO-DA HO:MI+ZONE'
+    author <- 'FULL NAME <EMAIL@ADDRESS>'
+    lang_team <- 'LANGUAGE <LL@li.org>'
+    lang_name <- ''
+    plural_forms <- ''
+  } else {
+    po_revision_date <- timestamp
+    lang_name <- lang_team <- metadata$full_name_eng
+    plural_forms <- sprintf(
+      '"Plural-Forms: nplurals=%d; plural=%s;\\n"\n',
+      metadata$nplurals, metadata$plural
+    )
+  }
   po_header <- sprintf(
     PO_HEADER_TEMPLATE,
     package, version,
     timestamp,
-    timestamp,
+    po_revision_date,
     author,
-    metadata$full_name_eng,
-    metadata$full_name_eng,
-    metadata$nplurals, metadata$plural
+    lang_team,
+    lang_name,
+    plural_forms
   )
 
   r_file <- if (template) sprintf("R-%s.pot", package) else sprintf("R-%s.po", language)
@@ -20,7 +35,7 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
     po_header,
     template = template
   )
-  src_file <- if (template) sprintf("%s.pot", package) else sprintf("R-%s.po", language)
+  src_file <- if (template) sprintf("%s.pot", package) else sprintf("%s.po", language)
   write_po_file(
     message_data[message_source == "src" & is_marked_for_translation],
     file.path(po_dir, src_file),
@@ -30,9 +45,14 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
   return(invisible())
 }
 
-# a small wrapper, basically to hide the decoy language='' & send template=TRUE
-write_pot_files <- function(message_data, po_dir, package, version, author, metadata) {
-  write_po_files(message_data, po_dir, '', package, version, author, metadata, template = TRUE)
+# a small wrapper
+write_pot_files <- function(message_data, po_dir, package, version) {
+  write_po_files(
+    message_data, po_dir,
+    package = package,
+    version = version,
+    template = TRUE
+  )
 }
 
 write_po_file <- function(message_data, po_file, po_header, template = FALSE) {
@@ -92,5 +112,4 @@ msgstr ""
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=UTF-8\\n"
 "Content-Transfer-Encoding: 8bit\\n"
-"Plural-Forms: nplurals=%d; plural=%s;\\n"
-'
+%s'

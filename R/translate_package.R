@@ -73,7 +73,7 @@ translate_package = function(
   if (exit %chin% c('y', 'yes')) return(invisible())
 
   if (verbose) message('Generating .pot files')
-  write_pot_files(message_data, po_dir, package, version, author, metadata)
+  write_pot_files(message_data, po_dir, package, version, metadata)
 
   if (missing(languages)) {
     if (verbose) message('No languages provided; finishing')
@@ -206,10 +206,8 @@ translate_package = function(
   }
 
   if (verbose) message('"Installing" translations with msgfmt')
-  # TODO: eliminate tools::update_pkg_po() here
   # TODO: reinstate source marker tags, at least for src .pot file & maybe for R .pot file too?
-  run_msgfmt()
-  tools::update_pkg_po(dir, package, version, copyright, bugs)
+  run_msgfmt(dir)
   return(invisible())
 }
 

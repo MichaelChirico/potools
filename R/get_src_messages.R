@@ -167,7 +167,18 @@ preprocess = function(contents) {
   ii = 1L
   nn = length(contents)
   while (ii < nn - 1L) {
-    if (contents[ii] == "/") {
+    # skip quotes to avoid skipping "comments" inside char arrays, e.g. for URLs http://...
+    if (contents[ii] == '"') {
+      ii = ii + 1L
+      while (ii < nn - 1L) {
+        switch(
+          contents[ii],
+          '"' = break,
+          "\\" = { ii = ii + 2L },
+          { ii = ii + 1L }
+        )
+      }
+    } else if (contents[ii] == "/") {
       jj = 0L
       if (contents[ii + 1L] == "/") {
         jj = ii + 2L

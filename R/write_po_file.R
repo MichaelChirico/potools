@@ -9,13 +9,16 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
     lang_team <- 'LANGUAGE <LL@li.org>'
     lang_name <- ''
     plural_forms <- ''
+    charset <- "CHARSET"
   } else {
     po_revision_date <- timestamp
-    lang_name <- lang_team <- metadata$full_name_eng
+    lang_team <- metadata$full_name_eng
+    lang_name <- sprintf("\nLanguage: %s\\n", lang_team)
     plural_forms <- sprintf(
       '"Plural-Forms: nplurals=%d; plural=%s;\\n"\n',
       metadata$nplurals, metadata$plural
     )
+    charset <- "UTF-8"
   }
   po_header <- sprintf(
     PO_HEADER_TEMPLATE,
@@ -25,6 +28,7 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
     author,
     lang_team,
     lang_name,
+    charset,
     plural_forms
   )
 
@@ -91,7 +95,7 @@ write_po_file <- function(message_data, po_file, po_header, template = FALSE) {
         )
       }
       out_lines[!singular_idx] = sprintf(
-        '\n\nmsgid "%s"\nmsgid_plural "%s"\n%s',
+        '\nmsgid "%s"\nmsgid_plural "%s"\n%s',
         msgid1, msgid2, msgid_plural
       )
     }
@@ -111,9 +115,8 @@ msgstr ""
 "POT-Creation-Date: %s\\n"
 "PO-Revision-Date: %s\\n"
 "Last-Translator: %s\\n"
-"Language-Team: %s\\n"
-"Language: %s\\n"
+"Language-Team: %s\\n"%s
 "MIME-Version: 1.0\\n"
-"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Type: text/plain; charset=%s\\n"
 "Content-Transfer-Encoding: 8bit\\n"
 %s'

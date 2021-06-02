@@ -12,6 +12,7 @@ get_r_messages <- function (dir) {
   #   the RHS of a non-raw string is also matched in a raw string, but not vice versa
   expr_data[token == 'STR_CONST', text := gsub('^[rR]["\'][-]*[\\[({]|[\\])}][-]*["\']$', '', text, perl = TRUE)]
   expr_data[token == 'STR_CONST', text := gsub('^["\']|["\']$', '', text)]
+  expr_data[token == 'STR_CONST', text := trimws(text)]
 
   setindexv(expr_data, c("file", "line1", "col1", "line2", "col2"))
   setindexv(expr_data, c("file", "id"))

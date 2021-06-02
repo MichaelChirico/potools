@@ -4,7 +4,7 @@ run_msgmerge = function(po_file, pot_file) {
     warning(domain = NA, gettextf("Running msgmerge on '%s' failed.", po_file))
   }
 
-  res <- checkPoFile(po_file, strictPlural = TRUE)
+  res <- tools::checkPoFile(po_file, strictPlural = TRUE)
   if (nrow(res)) {
     warning(domain = NA, gettextf("tools::checkPoFile() found some issues in %s", po_file))
     print(res)
@@ -38,20 +38,22 @@ update_mo_files = function(dir, package, verbose) {
     )
   }
 
-  # on UTF-8 machines we install the en@quot messages too
-  # TODO: streamline this -- en_quote is definitely doing some redundant stuff
-  if (l10n_info()[["UTF-8"]]) {
-    pot_files <- list.files(file.path(dir, "po"), pattern = "\\.pot$", full.names = TRUE)
-    mo_dir <- file.path(inst_dir, "en@quot", "LC_MESSAGES")
-    dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
-    for (pot_file in pot_files) {
-      po_file <- tempfile()
-      tools:::en_quote(pot_file, po_file)
-      run_msgfmt(
-        po_file = po_file,
-        mo_file = file.path(inst_dir, gsub("\\.pot$", ".mo", basename(pot_file))),
-        verbose = verbose
-      )
-    }
+  return(invisible())
+}
+
+update_en_quot_mo_files <- function(dir, verbose) {
+  pot_files <- list.files(file.path(dir, "po"), pattern = "\\.pot$", full.names = TRUE)
+  mo_dir <- file.path(dir, "inst", "po", "en@quot", "LC_MESSAGES")
+  dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
+  for (pot_file in pot_files) {
+    po_file <- tempfile()
+    tools:::en_quote(pot_file, po_file)
+    run_msgfmt(
+      po_file = po_file,
+      mo_file = file.path(mo_dir, gsub("\\.pot$", ".mo", basename(pot_file))),
+      verbose = verbose
+    )
+    unlink(po_file)
   }
+  return(invisible())
 }

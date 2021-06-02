@@ -7,7 +7,6 @@ get_r_messages <- function (dir) {
 
   setkeyv(expr_data, "file")
   # strip quotation marks now rather than deal with that at write time.
-  #   TODO:
   # handle raw strings separately, lest we catch a string like "abc)--" that _looks_
   #   like a raw string on the RHS but actually is not one. also do them first since
   #   the RHS of a non-raw string is also matched in a raw string, but not vice versa

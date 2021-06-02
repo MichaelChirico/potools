@@ -72,8 +72,16 @@ translate_package = function(
   exit = check_untranslated_src(message_data)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
-  if (verbose) message('Generating .pot files')
+  if (verbose) message('Generating .pot files...')
   write_pot_files(message_data, po_dir, package, version)
+
+  if (l10n_info()[["UTF-8"]]) {
+    # on UTF-8 machines we install the en@quot messages too
+    # TODO: streamline this -- en_quote is definitely doing some redundant stuff
+    message('Generating en@quot translations')
+    update_en_quot_mo_files(dir, verbose)
+  }
+
 
   if (missing(languages)) {
     if (verbose) message('No languages provided; finishing')

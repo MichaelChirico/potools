@@ -81,9 +81,6 @@ get_file_src_messages = function(file, translation_macro = "_") {
   get_call_message = function(msg_i) {
     ii = msg_start[msg_i]
 
-    # TODO: handle case where the format macro terminates the array (e.g. data.table/src/init.c:305)
-    #    error(_("... %"PRId64"!=%"PRId64), (int64_t)NA_INT64_LL, (int64_t)DtoLL(NA_INT64_D));
-    #                                   ^ end of array from implicit concat with PRId64 macro
     string = character(1L)
     # regex landed us after ( in untranslated calls and after (_( in translated ones
     stack_size = if (is_translated[msg_i]) 2L else 1L
@@ -130,6 +127,12 @@ get_file_src_messages = function(file, translation_macro = "_") {
           while (grepl(C_IDENTIFIER_REST, contents_char[kk])) { kk = kk + 1L }
           string = paste0(string, "<", substr(contents, jj, kk-1L), ">")
           ii = skip_white(contents_char, kk)
+          # e.g. error(_("... %"PRId64"!=%"PRId64), ...);
+          if (contents_char[ii] == ")") {
+            stack_size = stack_size - 1L
+            jj = ii + 1L
+            break
+          }
         } else if (contents_char[jj] == '"') {
           ii = jj
         } else if (contents_char[jj] == "\\" && jj < nn && contents_char[jj+1L] %chin% c("\n", "\r")) {

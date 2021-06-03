@@ -8,11 +8,18 @@ get_r_messages <- function (dir) {
   setkeyv(expr_data, "file")
   # strip quotation marks now rather than deal with that at write time.
   # handle raw strings separately, lest we catch a string like "abc)--" that _looks_
-  #   like a raw string on the RHS but actually is not one. also do them first since
-  #   the RHS of a non-raw string is also matched in a raw string, but not vice versa
-  expr_data[token == 'STR_CONST', text := gsub('^[rR]["\'][-]*[\\[({]|[\\])}][-]*["\']$', '', text, perl = TRUE)]
-  expr_data[token == 'STR_CONST', text := gsub('^["\']|["\']$', '', text)]
-  expr_data[token == 'STR_CONST', text := trimws(text)]
+  #   like a raw string on the RHS but actually is not one. also consider a real
+  #   pain like r'("abc")' and 'r"(abc)"' -- whatever we do, if we strip away one first,
+  #   then the other, we'll end up with the wrong strings.
+  #   TODO: add tests for these edge cases
+  expr_data[token == 'STR_CONST', text := trimws(gsub(
+    # See ?Quotes for the rules governing string constants. this regex has two parts:
+    #   the first for raw strings, the second for "normal" strings. regex considers there
+    #   to be two capture groups, hence the need for \\1\\2. the two parts are mutually
+    #   exclusive, so only one group is ever matched, the other is always empty.
+    '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
+    '\\1\\2', text, perl = TRUE
+  ))]
 
   setindexv(expr_data, c("file", "line1", "col1", "line2", "col2"))
   setindexv(expr_data, c("file", "id"))
@@ -50,6 +57,11 @@ get_r_messages <- function (dir) {
     idcol = 'type'
   )
 
+  # drop empty strings. we could do this earlier but it's messier.
+  #   TODO: can we just strip these STR_CONST from expr_data with no
+  #         other repercussions?
+  msg = msg[type == 'plural' | nzchar(msgid)]
+
   if (!nrow(msg)) return(r_message_schema())
 
   msg_files = unique(msg$file)
@@ -65,6 +77,7 @@ get_r_messages <- function (dir) {
     expr_data, on = c('file', parent = 'id'),
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
+  # TODO: use the STR_CONST's line1/col1 to correctly order the strings within an expression
   msg[ , by = c('file', 'line1', 'col1', 'line2', 'col2'),
     call := build_call(
       file_lines[[.BY$file]],
@@ -74,16 +87,34 @@ get_r_messages <- function (dir) {
     )
   ]
 
+  # Remove duplicates introduced by unsuppressed warning() (etc) calls like
+  #   warning(sprintf(ngettext(n, "a", "b")))
+  # TODO: hacky, but gets the job done. improve by suppressing earlier. the complication is,
+  #   we need get_dots_strings to do drop_suppress_and_named() for ngettext()
+  #   _at any level of nesting_ which means a recursive search. ugh. maybe this is best after all.
+  # NB: an anti-join approach like singular_strings[!plural_strings] would also potentially strip
+  #   any duplicates like ngettext(n, "a", "b") and also warning("a", "b"). which I think
+  #   is an xgettext error anyway...
+  msg = msg[
+    type == 'plural'
+    | !grepl("ngettext", call, fixed = TRUE)
+    | !msgid %chin% unlist(plural_strings$msgid_plural)
+  ]
+
   setnames(msg, 'line1', 'line_number')
-  msg[ , c('parent', 'col1', 'line2', 'col2') := NULL]
+  msg[ , c('parent', 'line2', 'col2') := NULL]
   # descending type so that "singular" comes before "plural"
-  setorderv(msg, c("type", "file", "line_number"), c(-1L, 1L, 1L))
+  setorderv(msg, c("type", "file", "line_number", "col1"), c(-1L, 1L, 1L, 1L))
+  # kept col1 to get order within lines; can drop now
+  msg[ , col1 := NULL]
 
   msg[type == 'singular', 'msgid' := escape_string(msgid)]
   msg[type == 'plural', 'msgid_plural' := lapply(msgid_plural, escape_string)]
 
   # keep duplicates & define this field, in case duplicates are also part of diagnostic checks
   msg[ , 'is_repeat' := FALSE]
+  # TODO: skip empty strings, check why this isn't counted as duplicated:
+  #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
   msg[type == 'plural', 'is_marked_for_translation' := TRUE]
@@ -227,7 +258,7 @@ get_call_args = function(expr_data, calls) {
     ]
     # filter out calls like l$stop("x"), keep calls like base::stop("x")
     msg_call_expr_children = msg_call_expr_children[
-      , by = parent,
+      , by = .(file, parent),
       # filter .SD here to ensure one row per file/parent, otherwise we get duplicates below
       if (.N == 1L || 'NS_GET' %chin% token) .SD[token == 'SYMBOL_FUNCTION_CALL']
     ]

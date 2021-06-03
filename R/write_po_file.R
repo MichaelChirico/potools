@@ -73,7 +73,7 @@ write_po_file <- function(message_data, po_file, po_header, template = FALSE) {
     out_lines = character(.N)
     singular_idx = type == 'singular'
     out_lines[singular_idx] = sprintf(
-      '\n\nmsgid "%s"\nmsgstr "%s"',
+      '\nmsgid "%s"\nmsgstr "%s"',
       msgid[singular_idx],
       if (template) "" else msgstr[singular_idx]
     )

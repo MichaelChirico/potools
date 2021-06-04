@@ -34,7 +34,7 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
 
   r_file <- if (template) sprintf("R-%s.pot", package) else sprintf("R-%s.po", language)
   write_po_file(
-    message_data[message_source == "R"],
+    message_data[message_source == "R" & is_marked_for_translation],
     file.path(po_dir, r_file),
     po_header,
     template = template

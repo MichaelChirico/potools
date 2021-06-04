@@ -50,6 +50,9 @@ get_r_messages <- function (dir) {
   )
 
   plural_strings = get_named_arg_strings(expr_data, 'ngettext', c('msg1', 'msg2'), plural = TRUE)
+  # for plural strings, the ordering within lines doesn't really matter since there's only one .pot entry,
+  #   so just use the parent's location to get the line number
+  plural_strings[ , id := parent]
 
   msg = rbind(
     singular = singular_strings,
@@ -77,7 +80,6 @@ get_r_messages <- function (dir) {
     expr_data, on = c('file', parent = 'id'),
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
-  # TODO: use the STR_CONST's line1/col1 to correctly order the strings within an expression
   msg[ , by = c('file', 'line1', 'col1', 'line2', 'col2'),
     call := build_call(
       file_lines[[.BY$file]],
@@ -101,12 +103,19 @@ get_r_messages <- function (dir) {
     | !msgid %chin% unlist(plural_strings$msgid_plural)
   ]
 
-  setnames(msg, 'line1', 'line_number')
-  msg[ , c('parent', 'line2', 'col2') := NULL]
-  # descending type so that "singular" comes before "plural"
-  setorderv(msg, c("type", "file", "line_number", "col1"), c(-1L, 1L, 1L, 1L))
-  # kept col1 to get order within lines; can drop now
-  msg[ , col1 := NULL]
+  # these are the parent's stats
+  msg[ , c('parent', 'line1', 'line2', 'col1', 'col2') := NULL]
+
+  # now add the child's stats to order within the file
+  msg[
+    expr_data, on = c('file', 'id'),
+    `:=`(line_number = i.line1, column_number = i.col1)
+  ]
+
+  # descending 'type' so that "singular" comes before "plural"
+  setorderv(msg, c("type", "file", "line_number", "column_number"), c(-1L, 1L, 1L, 1L))
+  # kept id, column_number to get order within lines; can drop now
+  msg[ , c('id', 'column_number') := NULL]
 
   msg[type == 'singular', 'msgid' := escape_string(msgid)]
   msg[type == 'plural', 'msgid_plural' := lapply(msgid_plural, escape_string)]
@@ -154,7 +163,7 @@ get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
       strings,
       call_neighbors[
         token == 'STR_CONST',
-        .(file = file, parent = ancestor, fname = fname, msgid = text)
+        .(file, parent = ancestor, id, fname, msgid = text)
       ],
       fill = TRUE
     )
@@ -236,7 +245,7 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
     new_strings = new_strings[
       order(id),
       by = .(file, parent, fname),
-      .(msgid = text[seq_along(arg_names)])
+      .(id = id[seq_along(arg_names)], msgid = text[seq_along(arg_names)])
     ]
   }
   strings = rbind(strings, new_strings, fill = TRUE)
@@ -342,7 +351,10 @@ adjust_tabs = function(l) {
 
 string_schema = function() data.table(
   file = character(),
+  # needed to build the call
   parent = integer(),
+  # needed to order the strings correctly within the call
+  id = integer(),
   fname = character(),
   msgid = character(),
   msgid_plural = list()

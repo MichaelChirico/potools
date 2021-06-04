@@ -7,19 +7,7 @@ get_r_messages <- function (dir) {
 
   setkeyv(expr_data, "file")
   # strip quotation marks now rather than deal with that at write time.
-  # handle raw strings separately, lest we catch a string like "abc)--" that _looks_
-  #   like a raw string on the RHS but actually is not one. also consider a real
-  #   pain like r'("abc")' and 'r"(abc)"' -- whatever we do, if we strip away one first,
-  #   then the other, we'll end up with the wrong strings.
-  #   TODO: add tests for these edge cases
-  expr_data[token == 'STR_CONST', text := trimws(gsub(
-    # See ?Quotes for the rules governing string constants. this regex has two parts:
-    #   the first for raw strings, the second for "normal" strings. regex considers there
-    #   to be two capture groups, hence the need for \\1\\2. the two parts are mutually
-    #   exclusive, so only one group is ever matched, the other is always empty.
-    '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
-    '\\1\\2', text, perl = TRUE
-  ))]
+  expr_data[token == 'STR_CONST', text := clean_text(text)]
 
   setindexv(expr_data, c("file", "line1", "col1", "line2", "col2"))
   setindexv(expr_data, c("file", "id"))
@@ -347,6 +335,33 @@ adjust_tabs = function(l) {
     l = sub("\t", strrep(" ", 9L-(idx %% 8L)), l, fixed = TRUE)
   }
   l
+}
+
+# the text column in getParseData() needs some tidying:
+#  1. the actual quotes are kept, e.g. text='"a string"'
+#  2. "unescape" strings (e.g. "\\n" --> \n) so that trimws() works. note that
+#     later we "re-apply" encodeString() so this feels redundant; it's really for 3.
+#  3. trimws()
+clean_text = function(x) {
+  # See ?Quotes for the rules governing string constants. this regex has two parts:
+  #   the first for raw strings, the second for "normal" strings. regex considers there
+  #   to be two capture groups, hence the need for \\1\\2. the two parts are mutually
+  #   exclusive, so only one group is ever matched, the other is always empty.
+  # Handle raw strings separately, lest we catch a string like "abc)--" that _looks_
+  #   like a raw string on the RHS but actually is not one. also consider a real
+  #   pain like r'("abc")' and 'r"(abc)"' -- whatever we do, if we strip away one first,
+  #   then the other, we'll end up with the wrong strings.
+  #   TODO: add tests for these edge cases
+  x = gsub(
+    '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
+    '\\1\\2', x, perl = TRUE
+  )
+  # there may be others, these are the main ones...
+  #   lookback since actual escaped \\n shoudln't be replaced. perl escaping sure is ugly.
+  x = gsub("(?<![\\\\])[\\\\]n", "\n", x, perl = TRUE)
+  x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
+  x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
+  return(trimws(x))
 }
 
 string_schema = function() data.table(

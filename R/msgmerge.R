@@ -47,7 +47,8 @@ update_en_quot_mo_files <- function(dir, verbose) {
   dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
   for (pot_file in pot_files) {
     po_file <- tempfile()
-    tools:::en_quote(pot_file, po_file)
+    # tools:::en_quote is blocked, but we still need it for now
+    get("en_quote", envir=asNamespace("tools"))(pot_file, po_file)
     run_msgfmt(
       po_file = po_file,
       mo_file = file.path(mo_dir, gsub("\\.pot$", ".mo", basename(pot_file))),

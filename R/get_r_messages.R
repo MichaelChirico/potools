@@ -353,7 +353,7 @@ clean_text = function(x) {
     '\\1\\2', x, perl = TRUE
   )
   # there may be others, these are the main ones...
-  #   lookback since actual escaped \\n shoudln't be replaced. perl escaping sure is ugly.
+  #   lookback since actual escaped \\n shouldn't be replaced. perl escaping sure is ugly.
   x = gsub("(?<![\\\\])[\\\\]n", "\n", x, perl = TRUE)
   x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
   x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)

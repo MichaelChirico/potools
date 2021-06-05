@@ -34,6 +34,8 @@ get_r_messages <- function (dir) {
     get_dots_strings(expr_data, DOMAIN_DOTS_FUNS, NON_DOTS_ARGS),
     # treat gettextf separately since it takes a named argument, and we ignore ...
     get_named_arg_strings(expr_data, 'gettextf', 'fmt'),
+    # TODO: drop recursive=FALSE option now that exclude= is available? main purpose of recursive=
+    #   was to block cat(gettextf(...)) usage right?
     get_dots_strings(expr_data, 'cat', c("file", "sep", "fill", "labels", "append"), recursive = FALSE)
   )
 
@@ -132,13 +134,21 @@ DOMAIN_DOTS_FUNS = c("warning", "stop", "message", "packageStartupMessage", "get
 NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
 
 # for functions (e.g. DOMAIN_DOTS_FUNS) where we extract strings from ... arguments
-get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
+get_dots_strings = function(expr_data, funs, arg_names, exclude = c('gettext', 'gettextf'), recursive = TRUE) {
   call_neighbors = get_call_args(expr_data, funs)
   named_args = get_named_args(call_neighbors, expr_data, arg_names)
   call_neighbors = drop_suppressed_and_named(call_neighbors, named_args)
 
+  # as we search the AST "below" call_neighbors, drop whichever of the excluded expr parents we find.
+  #   practically speaking, this is how we disassociate "hi" from stop() in stop(gettext("hi"))
+  exclude_parents = expr_data[
+    expr_data[token == 'SYMBOL_FUNCTION_CALL' & text %chin% exclude, .(file, parent)],
+    on = c('file', id = 'parent'),
+    .(file, id = x.parent)
+  ]
+
   # drop '(', ')', ',', and now-orphaned SYMBOL_SUB/EQ_SUB
-  call_neighbors = call_neighbors[token == 'expr']
+  call_neighbors = call_neighbors[token == 'expr'][!exclude_parents, on = c('file', 'id')]
   setnames(call_neighbors, 'parent', 'ancestor')
 
   strings = string_schema()
@@ -158,7 +168,7 @@ get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
     # much cleaner to do this tiny check a small number (e.g. nesting level of 10-15) times
     #   repetitively rather than make a whole separate branch for the once-and-done case
     if (!recursive) break
-    call_neighbors = call_neighbors[token == "expr"]
+    call_neighbors = call_neighbors[token == "expr"][!exclude_parents, on = c('file', 'id')]
   }
   return(strings)
 }
@@ -361,6 +371,8 @@ clean_text = function(x) {
   x = gsub("(?<![\\\\])[\\\\]n", "\n", x, perl = TRUE)
   x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
   x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
+  x = gsub('\\"', '"', x, fixed = TRUE)
+  x = gsub('\\\\', '\\', x, fixed = TRUE)
   return(trimws(x))
 }
 

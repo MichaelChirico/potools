@@ -269,8 +269,8 @@ test_that("Partially named messaging arguments are an error", {
 
 test_that("Various edge cases in retrieving/outputting messages in R files are handled", {
   restore_package(
-    pkg <- test_package("r_msg_unusual"),
-    tmp_conn = mock_translation("test-translate-package-r_msg_unusual-1.input"),
+    pkg <- test_package("unusual_msg"),
+    tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
       translate_package(pkg)
 

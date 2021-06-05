@@ -1,5 +1,9 @@
 # output R and/or src .po file(s) from a message data.table
 # TODO: API here is a mess. don't have the heart to refactor right now though.
+# TODO: respect xgettext --width= default? per gettext/gettext-tools/src/write-catalog.c,
+#   the default is PAGE_WIDTH which is defined in gettext/gettext-tools/configure.ac as 79, which
+#   matches what tools::update_pkg_po() produces for R-devel/src/library/base/po/R.pot, e.g.
+#   note that xgettext is not run for R-*.pot files, so this width is not respected.
 write_po_files <- function(message_data, po_dir, language, package, version, author, metadata, template = FALSE) {
   timestamp <- format(Sys.time(), tz = 'UTC')
 

@@ -1,6 +1,7 @@
 # split off from tools::update_pkg_po() to only run the msgmerge & checkPoFile steps
 run_msgmerge = function(po_file, pot_file) {
   if (system(sprintf("msgmerge --update %s %s", po_file, shQuote(pot_file))) != 0L) {
+    # nocov these warnings? i don't know how to trigger them as of this writing.
     warning(domain = NA, gettextf("Running msgmerge on '%s' failed.", po_file))
   }
 

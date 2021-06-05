@@ -191,7 +191,7 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
         by = .(file, parent, fname),
         {
           if (.N == length(arg_names)) {
-            .(msgid = arg_value)
+            .(id, msgid = arg_value)
           } else {
             # TODO: this is currently uncoverable, since only gettextf uses this branch
             #   and that only uses one named argument. Revisit...

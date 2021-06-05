@@ -61,6 +61,7 @@ test_that("translate_package works on a simple package", {
     pkg,
     tmp_conn = mock_translation("test-translate-package-r_msg-1.input"),
     {
+      debugonce(translate_package)
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
         c("Beginning new translations", "BEGINNING TRANSLATION", '"Installing" translations with msgfmt'),
@@ -105,7 +106,6 @@ test_that("translate_package works on package with outdated (fuzzy) translations
     pkg <- test_package("r_fuzzy"),
     tmp_conn = mock_translation("test-translate-package-r_fuzzy-1.input"),
     {
-      # debugonce(translate_package)
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
         c("translations marked as deprecated", "SINGULAR MESSAGES", "PLURAL MESSAGES"),

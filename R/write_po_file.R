@@ -17,7 +17,7 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
   } else {
     po_revision_date <- timestamp
     lang_team <- metadata$full_name_eng
-    lang_name <- sprintf("\nLanguage: %s\\n", lang_team)
+    lang_name <- sprintf('\n"Language: %s\\n"', lang_team)
     plural_forms <- sprintf(
       '"Plural-Forms: nplurals=%d; plural=%s;\\n"\n',
       metadata$nplurals, metadata$plural

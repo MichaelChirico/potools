@@ -105,6 +105,7 @@ test_that("translate_package works on package with outdated (fuzzy) translations
     pkg <- test_package("r_fuzzy"),
     tmp_conn = mock_translation("test-translate-package-r_fuzzy-1.input"),
     {
+      # debugonce(translate_package)
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
         c("translations marked as deprecated", "SINGULAR MESSAGES", "PLURAL MESSAGES"),

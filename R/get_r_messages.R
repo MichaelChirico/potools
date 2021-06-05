@@ -356,6 +356,7 @@ clean_text = function(x) {
   #   lookback since actual escaped \\n shouldn't be replaced. perl escaping sure is ugly.
   x = gsub("(?<![\\\\])[\\\\]n", "\n", x, perl = TRUE)
   x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
+  # maybe stop() instead? \r is blocked by gettext...
   x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
   x = gsub('\\"', '"', x, fixed = TRUE)
   x = gsub('\\\\', '\\', x, fixed = TRUE)

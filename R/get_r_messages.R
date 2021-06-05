@@ -79,20 +79,6 @@ get_r_messages <- function (dir) {
     )
   ]
 
-  # Remove duplicates introduced by unsuppressed warning() (etc) calls like
-  #   warning(sprintf(ngettext(n, "a", "b")))
-  # TODO: hacky, but gets the job done. improve by suppressing earlier. the complication is,
-  #   we need get_dots_strings to do drop_suppress_and_named() for ngettext()
-  #   _at any level of nesting_ which means a recursive search. ugh. maybe this is best after all.
-  # NB: an anti-join approach like singular_strings[!plural_strings] would also potentially strip
-  #   any duplicates like ngettext(n, "a", "b") and also warning("a", "b"). which I think
-  #   is an xgettext error anyway...
-  msg = msg[
-    type == 'plural'
-    | !grepl("ngettext", call, fixed = TRUE)
-    | !msgid %chin% unlist(plural_strings$msgid_plural)
-  ]
-
   # these are the parent's stats
   msg[ , c('parent', 'line1', 'line2', 'col1', 'col2') := NULL]
 
@@ -134,7 +120,7 @@ DOMAIN_DOTS_FUNS = c("warning", "stop", "message", "packageStartupMessage", "get
 NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
 
 # for functions (e.g. DOMAIN_DOTS_FUNS) where we extract strings from ... arguments
-get_dots_strings = function(expr_data, funs, arg_names, exclude = c('gettext', 'gettextf'), recursive = TRUE) {
+get_dots_strings = function(expr_data, funs, arg_names, exclude = c('gettext', 'gettextf', 'ngettext'), recursive = TRUE) {
   call_neighbors = get_call_args(expr_data, funs)
   named_args = get_named_args(call_neighbors, expr_data, arg_names)
   call_neighbors = drop_suppressed_and_named(call_neighbors, named_args)

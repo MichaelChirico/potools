@@ -12,7 +12,7 @@
 #   note that xgettext is not run for R-*.pot files, so this width is not respected.
 #   See also https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121
 # TODO: experiment with allowing source_location in R-*.pot? files. See #41.
-write_po_files <- function(message_data, po_dir, language, package, version, author, bugs, metadata, template = FALSE) {
+write_po_files <- function(message_data, po_dir, params, template = FALSE) {
   timestamp <- format(Sys.time(), tz = 'UTC')
 
   # drop untranslated strings, collapse duplicates, drop unneeded data.
@@ -32,8 +32,8 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
     plural_expr <- 'EXPRESSION'
     charset <- "CHARSET"
 
-    r_file <- sprintf("R-%s.pot", package)
-    src_file <- sprintf("%s.pot", package)
+    r_file <- sprintf("R-%s.pot", params$package)
+    src_file <- sprintf("%s.pot", params$package)
 
     po_data[type == "plural", 'msgid_plural_str' := vapply(msgid_plural, paste, character(1L), collapse="|||")]
     po_data = po_data[,
@@ -47,14 +47,14 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
     ]
   } else {
     po_revision_date <- timestamp
-    lang_team <- metadata$full_name_eng
+    lang_team <- params$full_name_eng
     lang_name <- lang_team
-    nplurals <- metadata$nplurals
-    plural_expr <- metadata$plural
+    nplurals <- params$nplurals
+    plural_expr <- params$plural
     charset <- "UTF-8"
 
-    r_file <- sprintf("R-%s.po", language)
-    src_file <- sprintf("%s.po", language)
+    r_file <- sprintf("R-%s.po", params$language)
+    src_file <- sprintf("%s.po", params$language)
 
     po_data[
       type == "plural",
@@ -82,7 +82,7 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
 
   po_header <- sprintf(
     PO_HEADER_TEMPLATE,
-    package, bugs, version,
+    params$package, params$bugs, params$version,
     timestamp,
     po_revision_date,
     author,

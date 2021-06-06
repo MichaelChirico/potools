@@ -73,7 +73,8 @@ translate_package = function(
   if (exit %chin% c('y', 'yes')) return(invisible())
 
   if (verbose) message('Generating .pot files...')
-  write_pot_files(message_data, po_dir, package, version, bugs)
+  po_params = list(package = package, version = version, copyright = copyright, bugs = bugs)
+  write_pot_files(message_data, po_dir, po_params)
 
   if (l10n_info()[["UTF-8"]]) {
     # on UTF-8 machines we install the en@quot messages too
@@ -92,6 +93,9 @@ translate_package = function(
     metadata = KNOWN_LANGUAGES[.(language)]
     # if the language is unknown, the right join above won't match rows in KNOWN_LANGUAGES
     if (is.na(metadata$full_name_eng)) add_new_metadata(metadata, language)
+    po_params$language = language
+    po_params[c('full_name_eng', 'nplurals', 'plural')] = metadata[c('full_name_eng', 'nplurals', 'plural')]
+
     # overwrite any existing translations written in previous translation.
     #   set blank initially (rather than deleting the column) to allow
     #   for interrupting the translation -- if unset, write_po_files will
@@ -155,14 +159,14 @@ translate_package = function(
 
     author = prompt('Thanks! Who should be credited with these translations?')
     email = prompt('And what is their email?')
-    author = sprintf("%s <%s>", author, email)
+    po_params$author = sprintf("%s <%s>", author, email)
 
     # on.exit this to allow ESC to quit mid-translation. the intent is for the
     #   on.exit command to be overwritten on each iteration over languages --
     #   only one partially-finished language should be written at a time.
     INCOMPLETE = TRUE
     on.exit({
-      if (INCOMPLETE) write_po_files(message_data, po_dir, language, package, version, author, bugs, metadata) # nocov
+      if (INCOMPLETE) write_po_files(message_data, po_dir, po_params) # nocov
       # since add=FALSE, we overwrite the above call; duplicate it here
       unset_prompt_conn()
     })
@@ -209,7 +213,7 @@ translate_package = function(
 
     # set INCOMPLETE after write_po_files for the event of a process interruption
     #   between the loop finishing and the write_po_files command executing
-    write_po_files(message_data, po_dir, language, package, version, author, bugs, metadata)
+    write_po_files(message_data, po_dir, po_params)
     INCOMPLETE = FALSE
   }
 

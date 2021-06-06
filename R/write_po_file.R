@@ -5,7 +5,6 @@
 #   default by xgettext, etc (unless --no-location is set, or if --add-location=never).
 # note also that the gettext manual says we shouldn't write these ourselves... for now i'm
 #   going to go ahead and try to anyway until it breaks something :)
-# TODO: API here is a mess. don't have the heart to refactor right now though.
 # TODO: respect xgettext --width= default? per gettext/gettext-tools/src/write-catalog.c,
 #   the default is PAGE_WIDTH which is defined in gettext/gettext-tools/configure.ac as 79, which
 #   matches what tools::update_pkg_po() produces for R-devel/src/library/base/po/R.pot, e.g.
@@ -13,8 +12,6 @@
 #   See also https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121
 # TODO: experiment with allowing source_location in R-*.pot? files. See #41.
 write_po_files <- function(message_data, po_dir, params, template = FALSE) {
-  timestamp <- format(Sys.time(), tz = 'UTC')
-
   # drop untranslated strings, collapse duplicates, drop unneeded data.
   #   for now, treating R & src separately so they can be treated differently; eventually this should
   #   be removed, or at least controlled by an option.
@@ -24,14 +21,6 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
   po_data = message_data[(is_marked_for_translation)]
 
   if (template) {
-    po_revision_date <- 'YEAR-MO-DA HO:MI+ZONE'
-    author <- 'FULL NAME <EMAIL@ADDRESS>'
-    lang_team <- 'LANGUAGE <LL@li.org>'
-    lang_name <- ''
-    nplurals <- 'INTEGER'
-    plural_expr <- 'EXPRESSION'
-    charset <- "CHARSET"
-
     r_file <- sprintf("R-%s.pot", params$package)
     src_file <- sprintf("%s.pot", params$package)
 
@@ -46,13 +35,6 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
       )
     ]
   } else {
-    po_revision_date <- timestamp
-    lang_team <- params$full_name_eng
-    lang_name <- lang_team
-    nplurals <- params$nplurals
-    plural_expr <- params$plural
-    charset <- "UTF-8"
-
     r_file <- sprintf("R-%s.po", params$language)
     src_file <- sprintf("%s.po", params$language)
 
@@ -80,38 +62,30 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
 
   po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
 
-  po_header <- sprintf(
-    PO_HEADER_TEMPLATE,
-    params$package, params$bugs, params$version,
-    timestamp,
-    po_revision_date,
-    author,
-    lang_team,
-    lang_name,
-    charset,
-    nplurals, plural_expr
-  )
-
+  params$template = template
   write_po_file(
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
-    po_header
+    params
   )
   write_po_file(
     po_data[message_source == "src"],
     file.path(po_dir, src_file),
-    po_header
+    params
   )
   return(invisible())
 }
 
-write_po_file <- function(message_data, po_file, po_header) {
+write_po_file <- function(message_data, po_file, params, template) {
   if (!nrow(message_data)) return(invisible())
 
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
   #   https://stackoverflow.com/q/10675360
   po_conn = file(po_file, "wb")
   on.exit(close(po_conn))
+
+  params$has_plural = any(message_data$type == "plural")
+  po_header = build_po_header(params, template)
 
   writeLines(con=po_conn, useBytes=TRUE, po_header)
 
@@ -149,6 +123,52 @@ write_po_file <- function(message_data, po_file, po_header) {
   }]
 }
 
+build_po_header = function(params, template) {
+
+  params$bugs <- if (is.null(params$bugs)) {
+    sprintf("\nReport-Msgid-Bugs-To: %s\\n", params$bugs)
+  } else {
+    ''
+  }
+
+  if (params$template) {
+    params$po_revision_date <- 'YEAR-MO-DA HO:MI+ZONE'
+    params$author <- 'FULL NAME <EMAIL@ADDRESS>'
+    params$lang_team <- 'LANGUAGE <LL@li.org>'
+    params$lang_name <- ''
+    params$nplurals <- 'INTEGER'
+    params$plural <- 'EXPRESSION'
+    params$charset <- "CHARSET"
+    params$plural_forms <- if (params$has_plural) {
+      '\n"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"'
+    } else {
+      ''
+    }
+  } else {
+    params$po_revision_date <- format(Sys.time(), tz = 'UTC')
+    params$lang_team <- params$lang_team <- params$full_name_eng
+    params$charset <- "UTF-8"
+    params$plural_forms <- if (params$has_plural) {
+      with(params, sprintf('\n"Plural-Forms: nplurals=%d; plural=%s;\\n"', nplural, plural))
+    } else {
+      ''
+    }
+  }
+
+  with(params, sprintf(
+    PO_HEADER_TEMPLATE,
+    package, version,
+    bugs,
+    timestamp,
+    po_revision_date,
+    author,
+    lang_team,
+    lang_name,
+    charset,
+    plural_forms
+  ))
+}
+
 # balance here: keeping newlines in the string to facilitate writing,
 #   but need to escape the in-string newlines or they'll be written
 #   as newlines (not literal \n). encodeString is "soft-applied" here.
@@ -156,8 +176,7 @@ write_po_file <- function(message_data, po_file, po_header) {
 #   instead of building it up from sprintf
 PO_HEADER_TEMPLATE = 'msgid ""
 msgstr ""
-"Project-Id-Version: %s %s\\n"
-"Report-Msgid-Bugs-To: %s\\n"
+"Project-Id-Version: %s %s\\n"%s
 "POT-Creation-Date: %s\\n"
 "PO-Revision-Date: %s\\n"
 "Last-Translator: %s\\n"
@@ -165,9 +184,7 @@ msgstr ""
 "Language: %s\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=%s\\n"
-"Content-Transfer-Encoding: 8bit\\n"
-"Plural-Forms: nplurals=%s; plural=%s;\\n"
-'
+"Content-Transfer-Encoding: 8bit\\n%s'
 
 make_src_location <- function(files, lines) {
   # NB: technically basename() is incorrect since relative paths are made, but I'm not

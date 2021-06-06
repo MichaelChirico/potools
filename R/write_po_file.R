@@ -39,9 +39,9 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
       by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
       .(
         source_location = if (.BY$message_source == "R") "" else make_src_location(file, line_number),
-        c_fmt_tag = fifelse(grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), "#, c-format\n", ""),
-        msgstr = '',
-        msgstr_plural = list('', '')
+        c_fmt_tag = if (grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid)) "#, c-format\n" else "",
+        msgstr = if (.BY$type == 'singular') '' else NA_character_,
+        msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL)
       )
     ]
   } else {
@@ -68,17 +68,18 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
       by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
       .(
         source_location = if (.BY$message_source == "R") "" else make_src_location(file, line_number),
-        c_fmt_tag = fifelse(grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), "#, c-format\n", ""),
+        c_fmt_tag = if (grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid)) "#, c-format\n" else "",
         msgstr = msgstr[1L],
         # [1] should be a no-op here
         msgstr_plural = msgstr_plural_str[1L]
       )
     ]
     # only do in non-template branch b/c we can't define a dummy msgstr_plural that splits to list('', '')
-    po_data[type == "plural", 'msgstr_plural' := strsplit(msgstr_plural, "|||", fixed = TRUE)]
+    # don't filter to type=='plural' here -- causes a type conflict with the str elsewhere. we need a full plonk.
+    po_data[ , 'msgstr_plural' := strsplit(msgstr_plural, "|||", fixed = TRUE)]
   }
 
-  po_data[type == "plural", 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
+  po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
 
   po_header <- sprintf(
     PO_HEADER_TEMPLATE,
@@ -130,8 +131,8 @@ write_po_file <- function(message_data, po_file, po_header) {
     singular_idx = type == 'singular'
     out_lines[singular_idx] = sprintf(
       '\n%s%smsgid "%s"\nmsgstr "%s"',
-      source_location,
-      c_fmt_tag,
+      source_location[singular_idx],
+      c_fmt_tag[singular_idx],
       msgid[singular_idx],
       msgstr[singular_idx]
     )
@@ -150,7 +151,8 @@ write_po_file <- function(message_data, po_file, po_header) {
       )
       out_lines[!singular_idx] = sprintf(
         '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s',
-        source_location, c_fmt_tag, msgid1, msgid2, msgid_plural
+        source_location[!singular_idx], c_fmt_tag[!singular_idx],
+        msgid1, msgid2, msgid_plural
       )
     }
 

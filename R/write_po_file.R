@@ -124,7 +124,7 @@ write_po_file <- function(message_data, po_file, params, template) {
 }
 
 build_po_header = function(params, template) {
-
+  params$timestamp <- format(Sys.time(), tz = 'UTC')
   params$bugs <- if (is.null(params$bugs)) {
     sprintf("\nReport-Msgid-Bugs-To: %s\\n", params$bugs)
   } else {
@@ -132,12 +132,17 @@ build_po_header = function(params, template) {
   }
 
   if (params$template) {
+    if (is.null(params$copyright)) {
+      params$copyright_template <- NO_COPYRIGHT_TEMPLATE
+      params$copyright <- ''
+    } else {
+      params$copyright_template <- with(params, sprintf(COPYRIGHT_TEMPLATE, copyright, package))
+      params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
+    }
     params$po_revision_date <- 'YEAR-MO-DA HO:MI+ZONE'
     params$author <- 'FULL NAME <EMAIL@ADDRESS>'
     params$lang_team <- 'LANGUAGE <LL@li.org>'
     params$lang_name <- ''
-    params$nplurals <- 'INTEGER'
-    params$plural <- 'EXPRESSION'
     params$charset <- "CHARSET"
     params$plural_forms <- if (params$has_plural) {
       '\n"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"'
@@ -145,7 +150,14 @@ build_po_header = function(params, template) {
       ''
     }
   } else {
-    params$po_revision_date <- format(Sys.time(), tz = 'UTC')
+    # TODO(#76): don't do this
+    params$copyright_template <- NO_COPYRIGHT_TEMPLATE
+    if (is.null(params$copyright)) {
+      params$copyright <- ''
+    } else {
+      params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
+    }
+    params$po_revision_date <- params$timestamp
     params$lang_team <- params$lang_team <- params$full_name_eng
     params$charset <- "UTF-8"
     params$plural_forms <- if (params$has_plural) {
@@ -157,6 +169,7 @@ build_po_header = function(params, template) {
 
   with(params, sprintf(
     PO_HEADER_TEMPLATE,
+    copyright_template,
     package, version,
     bugs,
     timestamp,
@@ -164,24 +177,40 @@ build_po_header = function(params, template) {
     author,
     lang_team,
     lang_name,
+    copyright,
     charset,
     plural_forms
   ))
 }
 
+# see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c
+COPYRIGHT_TEMPLATE = 'SOME DESCRIPTIVE TITLE.
+Copyright (C) YEAR %s
+This file is distributed under the same license as the %s package.
+FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+'
+NO_COPYRIGHT_TEMPLATE = 'SOME DESCRIPTIVE TITLE.
+This file is put in the public domain.
+FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+'
+
 # balance here: keeping newlines in the string to facilitate writing,
 #   but need to escape the in-string newlines or they'll be written
 #   as newlines (not literal \n). encodeString is "soft-applied" here.
-#   might be better to tread this as a DCF and write it from a list
+#   might be better to treat this as a DCF and write it from a list
 #   instead of building it up from sprintf
-PO_HEADER_TEMPLATE = 'msgid ""
+PO_HEADER_TEMPLATE = '%smsgid ""
 msgstr ""
 "Project-Id-Version: %s %s\\n"%s
 "POT-Creation-Date: %s\\n"
 "PO-Revision-Date: %s\\n"
 "Last-Translator: %s\\n"
 "Language-Team: %s\\n"
-"Language: %s\\n"
+"Language: %s\\n"%s
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=%s\\n"
 "Content-Transfer-Encoding: 8bit\\n%s'

@@ -12,7 +12,7 @@
 #   note that xgettext is not run for R-*.pot files, so this width is not respected.
 #   See also https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121
 # TODO: experiment with allowing source_location in R-*.pot? files. See #41.
-write_po_files <- function(message_data, po_dir, language, package, version, author, metadata, template = FALSE) {
+write_po_files <- function(message_data, po_dir, language, package, version, author, bugs, metadata, template = FALSE) {
   timestamp <- format(Sys.time(), tz = 'UTC')
 
   # drop untranslated strings, collapse duplicates, drop unneeded data.
@@ -28,7 +28,8 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
     author <- 'FULL NAME <EMAIL@ADDRESS>'
     lang_team <- 'LANGUAGE <LL@li.org>'
     lang_name <- ''
-    plural_forms <- ''
+    nplurals <- 'INTEGER'
+    plural_expr <- 'EXPRESSION'
     charset <- "CHARSET"
 
     r_file <- sprintf("R-%s.pot", package)
@@ -47,11 +48,9 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
   } else {
     po_revision_date <- timestamp
     lang_team <- metadata$full_name_eng
-    lang_name <- sprintf('\n"Language: %s\\n"', lang_team)
-    plural_forms <- sprintf(
-      '"Plural-Forms: nplurals=%d; plural=%s;\\n"\n',
-      metadata$nplurals, metadata$plural
-    )
+    lang_name <- lang_team
+    nplurals <- metadata$nplurals
+    plural_expr <- metadata$plural
     charset <- "UTF-8"
 
     r_file <- sprintf("R-%s.po", language)
@@ -83,14 +82,14 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
 
   po_header <- sprintf(
     PO_HEADER_TEMPLATE,
-    package, version,
+    package, bugs, version,
     timestamp,
     po_revision_date,
     author,
     lang_team,
     lang_name,
     charset,
-    plural_forms
+    nplurals, plural_expr
   )
 
   write_po_file(
@@ -107,11 +106,12 @@ write_po_files <- function(message_data, po_dir, language, package, version, aut
 }
 
 # a small wrapper
-write_pot_files <- function(message_data, po_dir, package, version) {
+write_pot_files <- function(message_data, po_dir, package, version, bugs) {
   write_po_files(
     message_data, po_dir,
     package = package,
     version = version,
+    bugs = bugs,
     template = TRUE
   )
 }
@@ -168,14 +168,17 @@ write_po_file <- function(message_data, po_file, po_header) {
 PO_HEADER_TEMPLATE = 'msgid ""
 msgstr ""
 "Project-Id-Version: %s %s\\n"
+"Report-Msgid-Bugs-To: %s\\n"
 "POT-Creation-Date: %s\\n"
 "PO-Revision-Date: %s\\n"
 "Last-Translator: %s\\n"
-"Language-Team: %s\\n"%s
+"Language-Team: %s\\n"
+"Language: %s\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=%s\\n"
 "Content-Transfer-Encoding: 8bit\\n"
-%s'
+"Plural-Forms: nplurals=%s; plural=%s;\\n"
+'
 
 make_src_location <- function(files, lines) {
   # NB: technically basename() is incorrect since relative paths are made, but I'm not

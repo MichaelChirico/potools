@@ -73,7 +73,7 @@ translate_package = function(
   if (exit %chin% c('y', 'yes')) return(invisible())
 
   if (verbose) message('Generating .pot files...')
-  write_pot_files(message_data, po_dir, package, version)
+  write_pot_files(message_data, po_dir, package, version, bugs)
 
   if (l10n_info()[["UTF-8"]]) {
     # on UTF-8 machines we install the en@quot messages too
@@ -162,7 +162,7 @@ translate_package = function(
     #   only one partially-finished language should be written at a time.
     INCOMPLETE = TRUE
     on.exit({
-      if (INCOMPLETE) write_po_files(message_data, po_dir, language, package, version, author, metadata) # nocov
+      if (INCOMPLETE) write_po_files(message_data, po_dir, language, package, version, author, bugs, metadata) # nocov
       # since add=FALSE, we overwrite the above call; duplicate it here
       unset_prompt_conn()
     })
@@ -209,7 +209,7 @@ translate_package = function(
 
     # set INCOMPLETE after write_po_files for the event of a process interruption
     #   between the loop finishing and the write_po_files command executing
-    write_po_files(message_data, po_dir, language, package, version, author, metadata)
+    write_po_files(message_data, po_dir, language, package, version, author, bugs, metadata)
     INCOMPLETE = FALSE
   }
 

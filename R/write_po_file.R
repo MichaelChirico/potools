@@ -105,17 +105,6 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
   return(invisible())
 }
 
-# a small wrapper
-write_pot_files <- function(message_data, po_dir, package, version, bugs) {
-  write_po_files(
-    message_data, po_dir,
-    package = package,
-    version = version,
-    bugs = bugs,
-    template = TRUE
-  )
-}
-
 write_po_file <- function(message_data, po_file, po_header) {
   if (!nrow(message_data)) return(invisible())
 

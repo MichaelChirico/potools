@@ -74,7 +74,7 @@ translate_package = function(
 
   if (verbose) message('Generating .pot files...')
   po_params = list(package = package, version = version, copyright = copyright, bugs = bugs)
-  write_pot_files(message_data, po_dir, po_params)
+  write_po_file(message_data, po_dir, po_params, template = TRUE)
 
   if (l10n_info()[["UTF-8"]]) {
     # on UTF-8 machines we install the en@quot messages too

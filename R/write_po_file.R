@@ -76,7 +76,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
   return(invisible())
 }
 
-write_po_file <- function(message_data, po_file, params, template) {
+write_po_file <- function(message_data, po_file, params) {
   if (!nrow(message_data)) return(invisible())
 
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
@@ -85,7 +85,7 @@ write_po_file <- function(message_data, po_file, params, template) {
   on.exit(close(po_conn))
 
   params$has_plural = any(message_data$type == "plural")
-  po_header = build_po_header(params, template)
+  po_header = build_po_header(params)
 
   writeLines(con=po_conn, useBytes=TRUE, po_header)
 
@@ -123,12 +123,12 @@ write_po_file <- function(message_data, po_file, params, template) {
   }]
 }
 
-build_po_header = function(params, template) {
+build_po_header = function(params) {
   params$timestamp <- format(Sys.time(), tz = 'UTC')
   params$bugs <- if (is.null(params$bugs)) {
-    sprintf("\nReport-Msgid-Bugs-To: %s\\n", params$bugs)
-  } else {
     ''
+  } else {
+    sprintf("\nReport-Msgid-Bugs-To: %s\\n", params$bugs)
   }
 
   if (params$template) {

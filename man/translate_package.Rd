@@ -35,25 +35,7 @@ translate_package(
 Phase one is setup -- \code{dir} is checked for existing translations (toggling between "update" and
 "new" modes), and R files are parsed and combed for user-facing messages.
 
-Phase two is for diagnostics -- examining the usage of user-facing messages in your package and
-suggesting more translation-friendly approaches as appropriate. Specifically, the following
-diagnostics are performed:
-
-\enumerate{
-  \item Searching for "cracked messages". Error messages built like
-    \code{stop("You gave ", n, " arguments, but ", m, " are needed.")} are in general
-    hard for translators -- the correct translation may be in a totally different order
-    (e.g., this is often the case for Japanese). It is preferable instead to use
-    \code{\link[base]{gettextf}} to build a templated message like
-    \code{stop(gettextf("You gave \%d arguments but \%d are needed.", n, m))}. Translators are then
-    free to rearrange the template to put the numeric pattern where it fits most naturally in
-    the target language.
-  \item Searching for untranslated user-facing messages. Only strings passed through \code{base}
-    functions with a \code{domain} argument is eligible for translation (see \code{\link[tools]{xgettext}}).
-    However, it is not uncommon for some output may be shown to the end user via \code{\link[base]{cat}}.
-    To translate such messages, it must first be passed to \code{\link[base]{gettext}} or
-    \code{\link[base]{gettextf}}.
-}
+Phase two is for diagnostics; see the Diagnostics section below.
 
 Phase three is translation. All of the messages found in phase one are iterated over -- the user
 is shown a message in English and prompted for the translation in the target language. This process is repeated
@@ -88,6 +70,8 @@ The message data table has the following schema:
   \item \code{is_repeat}, \code{logical}, whether the \code{msgid} is a duplicate within this \code{message_source}
   \item \code{is_marked_for_translation}, \code{logical}, whether the string is marked for translation (e.g., in R, all character literals supplied to a \code{...} argument in \code{\link{stop}} are so marked)
 }
+
+See \code{\link{check_cracked_messages}}, \code{\link{check_untranslated_cat}}, and \code{\link{check_untranslated_src}} for examples of diagnostics.
 
 \bold{Domains:}
 

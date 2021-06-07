@@ -1,6 +1,7 @@
 # check a package for calls to cat() that have untranslated strings (i.e.,
 #   aren't passed through gettext or ngettext)
 check_untranslated_cat <- function (message_data) {
+  if (!is.data.table(message_data)) message_data = as.data.table(message_data)
   # not iron-clad but it's a good first pass
   cat_calls = unique(
     message_data[message_source == "R" & type == "singular" & grepl("cat(", call, fixed = TRUE)],

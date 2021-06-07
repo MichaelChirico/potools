@@ -71,12 +71,14 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
   write_po_file(
     po_data[message_source == "src"],
     file.path(po_dir, src_file),
-    params
+    params,
+    width = 79L
   )
   return(invisible())
 }
 
-write_po_file <- function(message_data, po_file, params) {
+# TODO: use uniform width on R & src. Keeping inconsistency for Bugzilla#18121
+write_po_file <- function(message_data, po_file, params, width=Inf) {
   if (!nrow(message_data)) return(invisible())
 
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
@@ -93,11 +95,11 @@ write_po_file <- function(message_data, po_file, params) {
     out_lines = character(.N)
     singular_idx = type == 'singular'
     out_lines[singular_idx] = sprintf(
-      '\n%s%smsgid "%s"\nmsgstr "%s"',
+      '\n%s%s%s\n%s',
       source_location[singular_idx],
       c_fmt_tag[singular_idx],
-      msgid[singular_idx],
-      msgstr[singular_idx]
+      wrap_msg('msgid', msgid[singular_idx], width),
+      wrap_msg('msgstr', msgstr[singular_idx], width)
     )
     if (!all(singular_idx)) {
       msgid_plural = msgid_plural[!singular_idx]
@@ -184,6 +186,50 @@ build_po_header = function(params) {
     charset,
     plural_forms
   ))
+}
+
+wrap_msg = function(key, value, width) {
+  out <- character(length(value))
+  wrap_idx <- nchar(value) + nchar(key) + 3L > width
+  out[!wrap_idx] = sprintf('%s "%s"', key, value[!wrap_idx])
+  out[wrap_idx] = sprintf('%s ""\n%s', key, wrap_strings(value[wrap_idx], width))
+  out
+}
+
+# strwrap gets oh-so-close. but the xgettext behavior splits at more characters (e.g. [.]);
+#   so we roll our own
+wrap_strings = function(str, width) {
+  # valid splits for xgettext found by experimentation (couldn't find where in the source this is defined).
+  #   write _("abcdefghijklm${CHAR}nopqrtstuvwxyz") for these ASCII $CHARs:
+  #   rawToChar(as.raw(c(32:33, 35:47, 58:64, 91, 93:96, 123:126)))
+  #   then run the following to find which lines were split at the character before 'n':
+  #   xgettext --keyword=_ --width=20 $TMPFILE -o /dev/stdout | grep -F '"n' -B 1
+  # more experimentation shows
+  #   - a preference to put formatting % on the next line too
+  #   - pick the lattermost line splitter when they come consecutively
+  # TODO: it looks like xgettext prefers to _always_ break at a newline?
+  boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|.(?=%)', str, perl = TRUE)
+  out = character(length(str))
+  for (ii in seq_along(str)) {
+    # if (grepl("which is outside range of the length", str[ii], fixed=TRUE)) browser()
+    # supplement with the total string width for the case that the last word breaks the width
+    boundary = c(boundaries[[ii]], nchar(str[ii]))
+    # no places to split this string, so don't. xgettext also seems not to.
+    if (boundary[1L] < 0L) { out[ii] = str[ii]; next}
+    lines = character()
+    # 0 not 1 makes the arithmetic nicer below
+    start_idx = 0L
+    # 2 accounts for two " (added below)
+    while (any(wide_idx <- boundary > width - 2L)) {
+      split_idx = which(wide_idx)[1L] - 1L
+      lines = c(lines, substr(str[ii], start_idx + 1L, start_idx + boundary[split_idx]))
+      start_idx = start_idx + boundary[split_idx]
+      boundary = tail(boundary, -split_idx) - boundary[split_idx]
+    }
+    if (start_idx < nchar(str[ii])) lines = c(lines, substr(str[ii], start_idx + 1L, nchar(str[ii])))
+    out[ii] = paste0('"', lines, '"', collapse = "\n")
+  }
+  out
 }
 
 # see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c

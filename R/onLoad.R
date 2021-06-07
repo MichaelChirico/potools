@@ -8,7 +8,7 @@ globalVariables(
     'text', 'x.text', 'i.text', 'x.token', 'token', 'fname', 'x.fname', 'i.fname',
     'parent', 'x.parent', 'i.parent', 'ancestor', 'i.ancestor',
     'call_expr', 'call_id', 'call_expr_id', 'call_parent_id', 'arg_name', 'arg_value', 'lines',
-    'suggested_call',
+    'source_location', 'c_fmt_tag', 'msgid_plural_str', 'msgstr_plural_str', 'suggested_call',
     '.'
   ),
   package = 'potools'

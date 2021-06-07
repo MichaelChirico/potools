@@ -7,7 +7,7 @@ Check for untranslated messages emitted by cat
 Diagnose the R messages in a package to discover the presence of messages emitted by \code{\link{cat}} which haven't been translated (i.e., passed through \code{\link{gettext}}, \code{\link{gettextf}}, or \code{\link{ngettext}}).
 }
 \usage{
-check_cracked_messages(message_data)
+check_untranslated_cat(message_data)
 }
 \arguments{
   \item{message_data}{ A \code{data.table}, or object convertible to one. }

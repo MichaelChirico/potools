@@ -61,8 +61,7 @@ The message data table has the following schema:
 
 \enumerate{
   \item \code{message_source}, \code{character}, either \code{"R"} or \code{"src"}, saying whether the string was found in the R or the src folder of the package
-  \item \code{type}, \code{character}, either \code{"singular"} or \code{"plural"}; \code{"plural
-  } means the string came from \code{\link{ngettext}} and can be pluralized
+  \item \code{type}, \code{character}, either \code{"singular"} or \code{"plural"}; \code{"plural"} means the string came from \code{\link{ngettext}} and can be pluralized
   \item \code{file}, \code{character}, the file where the string was found
   \item \code{msgid}, \code{character}, the string (character literal or \code{char} array as found in the source); missing for all \code{type == "plural"} strings
   \item \code{msgid_plural}, \code{list(character, character)}, the strings (character literals or \code{char} arrays as found in the source); the first applies in English for \code{n=1} (see \code{ngettext}), while the second applies for \code{n!=1}; missing for all \code{type == "singular"} strings

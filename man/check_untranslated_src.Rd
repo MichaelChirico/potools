@@ -7,7 +7,7 @@ Check for cracked messages in C/C++ sources
 Diagnose the C/C++ messages in a package to discover untranslated messages
 }
 \usage{
-check_cracked_messages(message_data)
+check_untranslated_src(message_data)
 }
 \arguments{
   \item{message_data}{ A \code{data.table}, or object convertible to one. }

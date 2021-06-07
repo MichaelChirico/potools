@@ -94,7 +94,7 @@ translate_package = function(
     # if the language is unknown, the right join above won't match rows in KNOWN_LANGUAGES
     if (is.na(metadata$full_name_eng)) add_new_metadata(metadata, language)
     po_params$language = language
-    po_params[c('full_name_eng', 'nplurals', 'plural')] = metadata[c('full_name_eng', 'nplurals', 'plural')]
+    po_params[c('full_name_eng', 'nplurals', 'plural')] = metadata[ , c('full_name_eng', 'nplurals', 'plural')]
 
     # overwrite any existing translations written in previous translation.
     #   set blank initially (rather than deleting the column) to allow

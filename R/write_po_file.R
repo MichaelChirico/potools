@@ -139,6 +139,7 @@ build_po_header = function(params) {
       params$copyright_template <- with(params, sprintf(COPYRIGHT_TEMPLATE, copyright, package))
       params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
     }
+    params$fuzzy_header <- "#, fuzzy\n"
     params$po_revision_date <- 'YEAR-MO-DA HO:MI+ZONE'
     params$author <- 'FULL NAME <EMAIL@ADDRESS>'
     params$lang_team <- 'LANGUAGE <LL@li.org>'
@@ -157,11 +158,13 @@ build_po_header = function(params) {
     } else {
       params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
     }
+    # get a warning from msgfmt: PO file header fuzzy; older versions of msgfmt will give an error on this
+    params$fuzzy_header <- ''
     params$po_revision_date <- params$timestamp
-    params$lang_team <- params$lang_team <- params$full_name_eng
+    params$lang_name <- params$lang_team <- params$full_name_eng
     params$charset <- "UTF-8"
     params$plural_forms <- if (params$has_plural) {
-      with(params, sprintf('\n"Plural-Forms: nplurals=%d; plural=%s;\\n"', nplural, plural))
+      with(params, sprintf('\n"Plural-Forms: nplurals=%s; plural=%s;\\n"', nplurals, plural))
     } else {
       ''
     }
@@ -169,7 +172,7 @@ build_po_header = function(params) {
 
   with(params, sprintf(
     PO_HEADER_TEMPLATE,
-    copyright_template,
+    copyright_template, fuzzy_header,
     package, version,
     bugs,
     timestamp,
@@ -184,18 +187,16 @@ build_po_header = function(params) {
 }
 
 # see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c
-COPYRIGHT_TEMPLATE = 'SOME DESCRIPTIVE TITLE.
-Copyright (C) YEAR %s
-This file is distributed under the same license as the %s package.
-FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+COPYRIGHT_TEMPLATE = '# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR %s
+# This file is distributed under the same license as the %s package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 '
-NO_COPYRIGHT_TEMPLATE = 'SOME DESCRIPTIVE TITLE.
-This file is put in the public domain.
-FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+NO_COPYRIGHT_TEMPLATE = '# SOME DESCRIPTIVE TITLE.
+# This file is put in the public domain.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 '
 
 # balance here: keeping newlines in the string to facilitate writing,
@@ -203,7 +204,7 @@ FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #   as newlines (not literal \n). encodeString is "soft-applied" here.
 #   might be better to treat this as a DCF and write it from a list
 #   instead of building it up from sprintf
-PO_HEADER_TEMPLATE = '%smsgid ""
+PO_HEADER_TEMPLATE = '%s%smsgid ""
 msgstr ""
 "Project-Id-Version: %s %s\\n"%s
 "POT-Creation-Date: %s\\n"
@@ -213,7 +214,7 @@ msgstr ""
 "Language: %s\\n"%s
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=%s\\n"
-"Content-Transfer-Encoding: 8bit\\n%s'
+"Content-Transfer-Encoding: 8bit\\n"%s'
 
 make_src_location <- function(files, lines) {
   # NB: technically basename() is incorrect since relative paths are made, but I'm not

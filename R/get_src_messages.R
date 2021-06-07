@@ -127,6 +127,12 @@ get_file_src_messages = function(file, translation_macro = "_") {
           while (grepl(C_IDENTIFIER_REST, contents_char[kk])) { kk = kk + 1L }
           string = paste0(string, "<", substr(contents, jj, kk-1L), ">")
           ii = skip_white(contents_char, kk)
+          # e.g. error(_("... %"PRId64"!=%"PRId64), ...);
+          if (contents_char[ii] == ")") {
+            stack_size = stack_size - 1L
+            jj = ii + 1L
+            break
+          }
         } else if (contents_char[jj] == '"') {
           ii = jj
         } else if (contents_char[jj] == "\\" && jj < nn && contents_char[jj+1L] %chin% c("\n", "\r")) {
@@ -167,7 +173,18 @@ preprocess = function(contents) {
   ii = 1L
   nn = length(contents)
   while (ii < nn - 1L) {
-    if (contents[ii] == "/") {
+    # skip quotes to avoid skipping "comments" inside char arrays, e.g. for URLs http://...
+    if (contents[ii] == '"') {
+      ii = ii + 1L
+      while (ii < nn - 1L) {
+        switch(
+          contents[ii],
+          '"' = break,
+          "\\" = { ii = ii + 2L },
+          { ii = ii + 1L }
+        )
+      }
+    } else if (contents[ii] == "/") {
       jj = 0L
       if (contents[ii + 1L] == "/") {
         jj = ii + 2L

@@ -16,7 +16,8 @@ static void glam(SEXP x) {
 }
 
 char *stardust(SEXP z) {
-  return "abcdefg";
+  // test that '//' inside a char array isn't mistaken for a comment by preprocess()
+  return "abcdefg and a URL: http://github.com";
 }
 
 /* Add a call here to make sure comment skipping works: Rprintf(_("hi")); */

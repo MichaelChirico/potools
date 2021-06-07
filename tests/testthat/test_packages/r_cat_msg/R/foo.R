@@ -16,6 +16,8 @@ function(x) {
 }
 
 function(x) {
-  cat(gettextf("shouldn't be translated")) # <cat is unmarked: gettextf is done
-  cat("This costs", x, "dollars") # (4)
+  cat(gettextf("shouldn't be translated"))  # <cat is unmarked: gettextf is done
+  cat(gettext("me neither"), "\n")          # <cat is unmarked: gettext is done. #66>
+  cat(foo(bar(ngettext(5, "a", "b"))), "c") # <cat is unmarked: as above, with further nesting>
+  cat("This costs", x, "dollars")           # (4)
 }

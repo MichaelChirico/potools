@@ -66,7 +66,10 @@ translate_package = function(
 
   for (diagnostic in diagnostics) {
     diagnostic <- match.fun(diagnostic)
-    if (diagnostic(message_data) %chin% c('y', 'yes')) return(invisible())
+    result <- diagnostic(message_data)
+    if (!nrow(result)) next
+    show_diagnostic_results(result, diagnostic)
+    if (tolower(prompt('Exit now to repair any of these? [y/N]')) %chin% c('y', 'yes')) return(invisible())
   }
 
   if (verbose) message('Generating .pot files...')

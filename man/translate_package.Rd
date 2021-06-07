@@ -65,6 +65,7 @@ The message data table has the following schema:
   \item \code{file}, \code{character}, the file where the string was found
   \item \code{msgid}, \code{character}, the string (character literal or \code{char} array as found in the source); missing for all \code{type == "plural"} strings
   \item \code{msgid_plural}, \code{list(character, character)}, the strings (character literals or \code{char} arrays as found in the source); the first applies in English for \code{n=1} (see \code{ngettext}), while the second applies for \code{n!=1}; missing for all \code{type == "singular"} strings
+  \item \code{call}, \code{character}, the full call containing the string that was found
   \item \code{line_number}, \code{integer}, the line in \code{file} where the string was found
   \item \code{is_repeat}, \code{logical}, whether the \code{msgid} is a duplicate within this \code{message_source}
   \item \code{is_marked_for_translation}, \code{logical}, whether the string is marked for translation (e.g., in R, all character literals supplied to a \code{...} argument in \code{\link{stop}} are so marked)

@@ -19,7 +19,7 @@ find_fuzzy_messages <- function(message_data, lang_file) {
     old_message_data[idx & type == 'plural', {
       if (.N > 0L) {
         message(' ** PLURAL MESSAGES **')
-        cat(do.call(rbind, c(list(dashes), plural_msgid, plural_msgstr)), sep='\n')
+        cat(do.call(rbind, c(list(dashes), msgid_plural, msgstr_plural)), sep='\n')
       }
     }]
 
@@ -34,18 +34,18 @@ find_fuzzy_messages <- function(message_data, lang_file) {
     c("msgstr", "fuzzy") := old_message_data[.SD, on = c("type", "msgid"), .(x.msgstr, x.fuzzy)]
   ]
   # can't join on lists :\
-  if (!all(vapply(old_message_data$plural_msgstr, is.null, logical(1L)))) {
+  if (!all(vapply(old_message_data$msgstr_plural, is.null, logical(1L)))) {
     message_data[
       message_source == msg_src,
-      'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')
+      'join_id' := vapply(msgid_plural, paste, character(1L), collapse='|||')
     ]
     old_message_data[
       message_source == msg_src,
-      'join_id' := vapply(plural_msgid, paste, character(1L), collapse='|||')
+      'join_id' := vapply(msgid_plural, paste, character(1L), collapse='|||')
     ]
     message_data[
       message_source == msg_src & type == 'plural',
-      c("plural_msgstr", "fuzzy") := old_message_data[.SD, on = c('type', 'join_id'), .(x.plural_msgstr, x.fuzzy)]
+      c("msgstr_plural", "fuzzy") := old_message_data[.SD, on = c('type', 'join_id'), .(x.msgstr_plural, x.fuzzy)]
     ]
 
     message_data[ , 'join_id' := NULL]

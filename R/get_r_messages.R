@@ -6,6 +6,9 @@ get_r_messages <- function (dir) {
   if (!nrow(expr_data)) return(r_message_schema())
 
   setkeyv(expr_data, "file")
+  # strip quotation marks now rather than deal with that at write time.
+  expr_data[token == 'STR_CONST', text := clean_text(text)]
+
   setindexv(expr_data, c("file", "line1", "col1", "line2", "col2"))
   setindexv(expr_data, c("file", "id"))
   setindexv(expr_data, c("file", "parent"))
@@ -31,16 +34,26 @@ get_r_messages <- function (dir) {
     get_dots_strings(expr_data, DOMAIN_DOTS_FUNS, NON_DOTS_ARGS),
     # treat gettextf separately since it takes a named argument, and we ignore ...
     get_named_arg_strings(expr_data, 'gettextf', 'fmt'),
+    # TODO: drop recursive=FALSE option now that exclude= is available? main purpose of recursive=
+    #   was to block cat(gettextf(...)) usage right?
     get_dots_strings(expr_data, 'cat', c("file", "sep", "fill", "labels", "append"), recursive = FALSE)
   )
 
   plural_strings = get_named_arg_strings(expr_data, 'ngettext', c('msg1', 'msg2'), plural = TRUE)
+  # for plural strings, the ordering within lines doesn't really matter since there's only one .pot entry,
+  #   so just use the parent's location to get the line number
+  plural_strings[ , id := parent]
 
   msg = rbind(
     singular = singular_strings,
     plural = plural_strings,
     idcol = 'type'
   )
+
+  # drop empty strings. we could do this earlier but it's messier.
+  #   TODO: can we just strip these STR_CONST from expr_data with no
+  #         other repercussions?
+  msg = msg[type == 'plural' | nzchar(msgid)]
 
   if (!nrow(msg)) return(r_message_schema())
 
@@ -66,14 +79,27 @@ get_r_messages <- function (dir) {
     )
   ]
 
-  setnames(msg, 'line1', 'line_number')
-  msg[ , c('parent', 'col1', 'line2', 'col2') := NULL]
-  # descending type so that "singular" comes before "plural"
-  setorderv(msg, c("type", "file", "line_number"), c(-1L, 1L, 1L))
+  # these are the parent's stats
+  msg[ , c('parent', 'line1', 'line2', 'col1', 'col2') := NULL]
+
+  # now add the child's stats to order within the file
+  msg[
+    expr_data, on = c('file', 'id'),
+    `:=`(line_number = i.line1, column_number = i.col1)
+  ]
+
+  # descending 'type' so that "singular" comes before "plural"
+  setorderv(msg, c("type", "file", "line_number", "column_number"), c(-1L, 1L, 1L, 1L))
+  # kept id, column_number to get order within lines; can drop now
+  msg[ , c('id', 'column_number') := NULL]
 
   msg[type == 'singular', 'msgid' := escape_string(msgid)]
-  msg[type == 'plural', 'plural_msgid' := lapply(plural_msgid, escape_string)]
+  msg[type == 'plural', 'msgid_plural' := lapply(msgid_plural, escape_string)]
+
+  # keep duplicates & define this field, in case duplicates are also part of diagnostic checks
   msg[ , 'is_repeat' := FALSE]
+  # TODO: skip empty strings, check why this isn't counted as duplicated:
+  #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
   msg[type == 'plural', 'is_marked_for_translation' := TRUE]
@@ -94,13 +120,21 @@ DOMAIN_DOTS_FUNS = c("warning", "stop", "message", "packageStartupMessage", "get
 NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
 
 # for functions (e.g. DOMAIN_DOTS_FUNS) where we extract strings from ... arguments
-get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
+get_dots_strings = function(expr_data, funs, arg_names, exclude = c('gettext', 'gettextf', 'ngettext'), recursive = TRUE) {
   call_neighbors = get_call_args(expr_data, funs)
   named_args = get_named_args(call_neighbors, expr_data, arg_names)
   call_neighbors = drop_suppressed_and_named(call_neighbors, named_args)
 
+  # as we search the AST "below" call_neighbors, drop whichever of the excluded expr parents we find.
+  #   practically speaking, this is how we disassociate "hi" from stop() in stop(gettext("hi"))
+  exclude_parents = expr_data[
+    expr_data[token == 'SYMBOL_FUNCTION_CALL' & text %chin% exclude, .(file, parent)],
+    on = c('file', id = 'parent'),
+    .(file, id = x.parent)
+  ]
+
   # drop '(', ')', ',', and now-orphaned SYMBOL_SUB/EQ_SUB
-  call_neighbors = call_neighbors[token == 'expr']
+  call_neighbors = call_neighbors[token == 'expr'][!exclude_parents, on = c('file', 'id')]
   setnames(call_neighbors, 'parent', 'ancestor')
 
   strings = string_schema()
@@ -113,14 +147,14 @@ get_dots_strings = function(expr_data, funs, arg_names, recursive = TRUE) {
       strings,
       call_neighbors[
         token == 'STR_CONST',
-        .(file = file, parent = ancestor, fname = fname, msgid = text)
+        .(file, parent = ancestor, id, fname, msgid = text)
       ],
       fill = TRUE
     )
     # much cleaner to do this tiny check a small number (e.g. nesting level of 10-15) times
     #   repetitively rather than make a whole separate branch for the once-and-done case
     if (!recursive) break
-    call_neighbors = call_neighbors[token == "expr"]
+    call_neighbors = call_neighbors[token == "expr"][!exclude_parents, on = c('file', 'id')]
   }
   return(strings)
 }
@@ -141,7 +175,7 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
         by = .(file, parent, fname),
         {
           if (.N == length(arg_names)) {
-            .(plural_msgid = list(arg_value))
+            .(msgid_plural = list(arg_value))
           } else {
             stop(domain = NA, call. = FALSE, gettextf(
               "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
@@ -157,7 +191,7 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
         by = .(file, parent, fname),
         {
           if (.N == length(arg_names)) {
-            .(msgid = arg_value)
+            .(id, msgid = arg_value)
           } else {
             # TODO: this is currently uncoverable, since only gettextf uses this branch
             #   and that only uses one named argument. Revisit...
@@ -189,13 +223,13 @@ get_named_arg_strings = function(expr_data, funs, arg_names, plural = FALSE) {
       # some calls like gettextf("hey '%s'", "you") to get templating even though
       #   the second argument is literal, used e.g. when "hey '%s'" will be repeated
       #   with different '%s' values, hence get the first length(arg_names) args
-      .(plural_msgid = list(text[seq_along(arg_names)]))
+      .(msgid_plural = list(text[seq_along(arg_names)]))
     ]
   } else {
     new_strings = new_strings[
       order(id),
       by = .(file, parent, fname),
-      .(msgid = text[seq_along(arg_names)])
+      .(id = id[seq_along(arg_names)], msgid = text[seq_along(arg_names)])
     ]
   }
   strings = rbind(strings, new_strings, fill = TRUE)
@@ -217,7 +251,7 @@ get_call_args = function(expr_data, calls) {
     ]
     # filter out calls like l$stop("x"), keep calls like base::stop("x")
     msg_call_expr_children = msg_call_expr_children[
-      , by = parent,
+      , by = .(file, parent),
       # filter .SD here to ensure one row per file/parent, otherwise we get duplicates below
       if (.N == 1L || 'NS_GET' %chin% token) .SD[token == 'SYMBOL_FUNCTION_CALL']
     ]
@@ -299,12 +333,45 @@ adjust_tabs = function(l) {
   l
 }
 
+# the text column in getParseData() needs some tidying:
+#  1. the actual quotes are kept, e.g. text='"a string"'
+#  2. "unescape" strings (e.g. "\\n" --> \n) so that trimws() works. note that
+#     later we "re-apply" encodeString() so this feels redundant; it's really for 3.
+#  3. trimws()
+clean_text = function(x) {
+  # See ?Quotes for the rules governing string constants. this regex has two parts:
+  #   the first for raw strings, the second for "normal" strings. regex considers there
+  #   to be two capture groups, hence the need for \\1\\2. the two parts are mutually
+  #   exclusive, so only one group is ever matched, the other is always empty.
+  # Handle raw strings separately, lest we catch a string like "abc)--" that _looks_
+  #   like a raw string on the RHS but actually is not one. also consider a real
+  #   pain like r'("abc")' and 'r"(abc)"' -- whatever we do, if we strip away one first,
+  #   then the other, we'll end up with the wrong strings.
+  #   TODO: add tests for these edge cases
+  x = gsub(
+    '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
+    '\\1\\2', x, perl = TRUE
+  )
+  # there may be others, these are the main ones...
+  #   lookback since actual escaped \\n shouldn't be replaced. perl escaping sure is ugly.
+  x = gsub("(?<![\\\\])[\\\\]n", "\n", x, perl = TRUE)
+  x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
+  # maybe stop() instead? \r is blocked by gettext...
+  x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
+  x = gsub('\\"', '"', x, fixed = TRUE)
+  x = gsub('\\\\', '\\', x, fixed = TRUE)
+  return(trimws(x))
+}
+
 string_schema = function() data.table(
   file = character(),
+  # needed to build the call
   parent = integer(),
+  # needed to order the strings correctly within the call
+  id = integer(),
   fname = character(),
   msgid = character(),
-  plural_msgid = list()
+  msgid_plural = list()
 )
 
 # the schema for empty edge cases
@@ -312,7 +379,7 @@ r_message_schema = function() data.table(
   type = character(),
   file = character(),
   msgid = character(),
-  plural_msgid = list(),
+  msgid_plural = list(),
   line_number = integer(),
   call = character(),
   is_repeat = logical(),

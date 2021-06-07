@@ -39,7 +39,7 @@ test_that("translate_package works on a simple package", {
     {
       expect_messages(
         translate_package(pkg, verbose=TRUE),
-        c("Running tools::update_pkg_po", "No languages provided"),
+        c("Generating .pot files", "No languages provided"),
         fixed = TRUE
       )
 
@@ -49,9 +49,10 @@ test_that("translate_package works on a simple package", {
       expect_true(pot_file %in% pkg_files)
       # testing gettextf's ... arguments are skipped
       expect_all_match(readLines(file.path(pkg, pot_file)), "don't translate me", invert=TRUE, fixed=TRUE)
+
       # Windows doesn't produce the en@quot translations at all
       if (.Platform$OS.type != "windows") {
-        expect_true(any(grepl("inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", pkg_files)))
+        expect_match(pkg_files, "inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", all = FALSE)
       }
     }
   )
@@ -62,7 +63,7 @@ test_that("translate_package works on a simple package", {
     {
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
-        c("Beginning new translations", "BEGINNING TRANSLATION", "Re-running tools::update_pkg_po()"),
+        c("Beginning new translations", "BEGINNING TRANSLATION", '"Installing" translations with msgfmt'),
         fixed = TRUE
       )
 
@@ -70,14 +71,14 @@ test_that("translate_package works on a simple package", {
 
       expect_true("po/R-zh_CN.po" %in% pkg_files)
       # . here is LC_MESSAGES; not sure how platform-robust that is
-      expect_true(any(grepl("inst/po/zh_CN/.*/R-rMsg.mo", pkg_files)))
+      expect_match(pkg_files, "inst/po/zh_CN/.*/R-rMsg.mo", all = FALSE)
 
       zh_translations <- readLines(file.path(pkg, "po/R-zh_CN.po"), encoding='UTF-8')
 
-      expect_true(any(grepl("Last-Translator.*test-user.*test-user@github.com", zh_translations)))
-      expect_true(any(grepl("早上好", zh_translations)))
+      expect_match(zh_translations, "Last-Translator.*test-user.*test-user@github.com", all = FALSE)
+      expect_match(zh_translations, "早上好", all = FALSE)
       # plural message
-      expect_true(any(grepl("该起床了", zh_translations)))
+      expect_match(zh_translations, "该起床了", all = FALSE)
     }
   )
   expect_outputs(prompts, c("^---^", "^^"), fixed=TRUE)
@@ -263,5 +264,43 @@ test_that("Partially named messaging arguments are an error", {
       "found a call to ngettext that names only some of its messaging arguments",
       fixed = TRUE
     )
+  )
+})
+
+test_that("Various edge cases in retrieving/outputting messages in R files are handled", {
+  restore_package(
+    pkg <- test_package("unusual_msg"),
+    tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
+    {
+      translate_package(pkg)
+
+      pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
+
+      # raw strings edge cases
+      expect_all_match(
+        pot_lines,
+        c('msgid "\'abc\'"', 'msgid "\\"def\\""', 'msgid "R(\'abc\')"', 'msgid "r(\\"def\\")"', 'msgid "ghi"'),
+        fixed = TRUE
+      )
+
+      # skip empty strings
+      expect_all_match(paste(pot_lines, collapse = "\n"), 'msgid ""\nmsgstr ""\n\n', fixed = TRUE, invert = TRUE)
+
+      # don't collapse strings in similar node positions across files
+      expect_all_match(pot_lines, c('msgid "copy one"', 'msgid "copy two"'))
+
+      # ordering within the file
+      expect_true(which(pot_lines == 'msgid "first"') < which(pot_lines == 'msgid "second"'))
+      expect_true(which(pot_lines == 'msgid "second"') < which(pot_lines == 'msgid "third"'))
+      expect_true(which(pot_lines == 'msgid "third"') < which(pot_lines == 'msgid "fourth"'))
+
+      # escaping/unescaping
+      expect_all_match(
+        pot_lines,
+        c('msgid "\\\\n vs \\n is OK"', 'msgid "\\\\t vs \\t is OK"',
+          'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\"quotes\\" are OK"'),
+        fixed = TRUE
+      )
+    }
   )
 })

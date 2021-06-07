@@ -86,6 +86,8 @@ list_src_files = function(dir) {
   # tried to be inclusive at first, but stringi broke my resolve -- src/ includes
   #   .zip, .txt, .html, .pl, ... broke my conviction we have any hope of making anything
   #   but an allow list succeed here.
+  # NB: tools::update_pkg_po() is only looking for files in
+  #   src/*.{c,cc,cpp,m,mm} and src/windows/*.{c,cc,cpp,m,mm}
   grep("\\.(c|cc|cpp)", src_files, value = TRUE, ignore.case = TRUE)
 }
 # get src files in a package
@@ -158,7 +160,8 @@ SPRINTF_TEMPLATE_REGEX = paste0(
     "[%]|", # % separately to reduce false positives -- it can't be used with other specials
     "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
     "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
-    "[aAdifeEgGosxX]", # there are more available at the C level...
+    "[aAcdeEfgGiopsuxX]|", # taken from https://en.wikipedia.org/wiki/Printf_format_string#Type_field
+    "<[a-zA-Z0-9_]+>", # macro-based formatters in C, e.g. %<PRId64>
   ")"
 )
 ENCODED_STRING_REGEX = "[\\][\\ntrvabf]"

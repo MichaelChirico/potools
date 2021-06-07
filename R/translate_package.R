@@ -1,7 +1,7 @@
 translate_package = function(
   dir = '.', languages,
   src_translation_macro = "_",
-  copyright, bugs, verbose = FALSE
+  copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
   check_sys_reqs()
 
@@ -17,9 +17,10 @@ translate_package = function(
   package <- desc_data['Package']
   version <- desc_data['Version']
 
-  r_potfile <- character()
-  update = file.exists(podir <- file.path(dir, 'po')) &&
-    length(r_potfile <- list.files(podir, pattern='^R.*\\.pot$'))
+  po_dir <- file.path(dir, 'po')
+  r_potfile <- file.path(po_dir, sprintf("R-%s.pot", package))
+  src_potfile <- file.path(po_dir, sprintf("%s.pot", package))
+  update = file.exists(po_dir) && (file.exists(r_potfile) || file.exists(src_potfile))
 
   if (verbose) {
     if (update) {
@@ -34,18 +35,13 @@ translate_package = function(
       message(domain=NA, gettextf("Starting translations for package '%s'", package))
     }
   }
-  if (!update) dir.create(podir, showWarnings = FALSE)
+  if (!update) dir.create(po_dir, showWarnings = FALSE)
 
   if (verbose) message('Getting R-level messages...')
   r_message_data = get_r_messages(dir)
 
   if (verbose) message('Getting src-level messages...')
   src_message_data = get_src_messages(dir, src_translation_macro)
-
-  if (nrow(src_message_data) && !file.exists(src_potfile <- file.path(podir, sprintf("%s.pot", package)))) {
-    # otherwise, tools::update_pkg_po() skips creating .mo files for src translations
-    file.create(src_potfile)
-  }
 
   message_data = rbind(
     R = r_message_data,
@@ -76,9 +72,17 @@ translate_package = function(
   exit = check_untranslated_src(message_data)
   if (exit %chin% c('y', 'yes')) return(invisible())
 
-  # TODO: understand why this is run here; streamline if possible
-  if (verbose) message('Running tools::update_pkg_po()')
-  tools::update_pkg_po(dir, package, version, copyright, bugs)
+  if (verbose) message('Generating .pot files...')
+  po_params = list(package = package, version = version, copyright = copyright, bugs = bugs)
+  write_po_files(message_data, po_dir, po_params, template = TRUE)
+
+  if (l10n_info()[["UTF-8"]]) {
+    # on UTF-8 machines we install the en@quot messages too
+    # TODO: streamline this -- en_quote is definitely doing some redundant stuff
+    message('Generating en@quot translations')
+    update_en_quot_mo_files(dir, verbose)
+  }
+
 
   if (missing(languages)) {
     if (verbose) message('No languages provided; finishing')
@@ -89,35 +93,40 @@ translate_package = function(
     metadata = KNOWN_LANGUAGES[.(language)]
     # if the language is unknown, the right join above won't match rows in KNOWN_LANGUAGES
     if (is.na(metadata$full_name_eng)) add_new_metadata(metadata, language)
+    po_params$language = language
+    po_params[c('full_name_eng', 'nplurals', 'plural')] = metadata[ , c('full_name_eng', 'nplurals', 'plural')]
+
     # overwrite any existing translations written in previous translation.
     #   set blank initially (rather than deleting the column) to allow
     #   for interrupting the translation -- if unset, write_po_files will
     #   fail if both these columns are not yet present.
     message_data[type == 'singular', 'msgstr' := ""]
-    message_data[type == 'plural', 'plural_msgstr' := .(list(rep("", metadata$nplurals)))]
+    message_data[type == 'plural', 'msgstr_plural' := .(list(rep("", metadata$nplurals)))]
 
-    lang_file <- file.path(podir, sprintf("R-%s.po", language))
+    lang_file <- file.path(po_dir, sprintf("R-%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
         message(domain=NA, gettextf(
-          'Found existing R translations for %s (%s/%s) in %s',
+          'Found existing R translations for %s (%s/%s) in %s. Running msgmerge...',
           language, metadata$full_name_eng, metadata$full_name_native, lang_file
         ))
       }
+      run_msgmerge(lang_file, r_potfile)
 
       find_fuzzy_messages(message_data, lang_file)
     } else {
       message_data[message_source == "R", 'fuzzy' := 0L]
     }
 
-    lang_file <- file.path(podir, sprintf("%s.po", language))
+    lang_file <- file.path(po_dir, sprintf("%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
         message(domain=NA, gettextf(
-          'Found existing src translations for %s (%s/%s) in %s',
+          'Found existing src translations for %s (%s/%s) in %s. Running msgmerge...',
           language, metadata$full_name_eng, metadata$full_name_native, lang_file
         ))
       }
+      run_msgmerge(lang_file, src_potfile)
 
       find_fuzzy_messages(message_data, lang_file)
     } else {
@@ -128,7 +137,7 @@ translate_package = function(
       is_marked_for_translation & (
         fuzzy == 1L
         | (type == 'singular' & !nzchar(msgstr))
-        | (type == 'plural' & !vapply(plural_msgstr, function(x) all(nzchar(x)), logical(1L)))
+        | (type == 'plural' & !vapply(msgstr_plural, function(x) all(nzchar(x)), logical(1L)))
       ),
       which = TRUE
     ]
@@ -150,14 +159,14 @@ translate_package = function(
 
     author = prompt('Thanks! Who should be credited with these translations?')
     email = prompt('And what is their email?')
-    author = sprintf("%s <%s>", author, email)
+    po_params$author = sprintf("%s <%s>", author, email)
 
     # on.exit this to allow ESC to quit mid-translation. the intent is for the
     #   on.exit command to be overwritten on each iteration over languages --
     #   only one partially-finished language should be written at a time.
     INCOMPLETE = TRUE
     on.exit({
-      if (INCOMPLETE) write_po_files(message_data, podir, language, package, version, author, metadata) # nocov
+      if (INCOMPLETE) write_po_files(message_data, po_dir, po_params) # nocov
       # since add=FALSE, we overwrite the above call; duplicate it here
       unset_prompt_conn()
     })
@@ -179,15 +188,15 @@ translate_package = function(
     for (ii in new_idx) {
       if (message_data$type[ii] == 'plural') {
         translation = read_translation(
-          message_data$plural_msgid[[ii]][1L],
+          message_data$msgid_plural[[ii]][1L],
           'plural',
           message_data$file[ii],
           message_data$call[ii],
           message_data$fuzzy[ii],
-          message_data$plural_msgstr[[ii]],
+          message_data$msgstr_plural[[ii]],
           metadata
         )
-        set(message_data, ii, 'plural_msgstr', list(translation))
+        set(message_data, ii, 'msgstr_plural', list(translation))
       } else if (!message_data$is_repeat[ii]) {
         translation = read_translation(
           message_data$msgid[ii],
@@ -204,12 +213,13 @@ translate_package = function(
 
     # set INCOMPLETE after write_po_files for the event of a process interruption
     #   between the loop finishing and the write_po_files command executing
-    write_po_files(message_data, podir, language, package, version, author, metadata)
+    write_po_files(message_data, po_dir, po_params)
     INCOMPLETE = FALSE
   }
 
-  if (verbose) message('Re-running tools::update_pkg_po() to update .mo files')
-  tools::update_pkg_po(dir, package, version, copyright, bugs)
+  if (verbose) message('"Installing" translations with msgfmt')
+  # TODO: reinstate source marker tags, at least for src .pot file & maybe for R .pot file too?
+  update_mo_files(dir, package, verbose = verbose)
   return(invisible())
 }
 

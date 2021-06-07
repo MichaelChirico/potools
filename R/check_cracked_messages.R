@@ -1,6 +1,7 @@
 # check for calls like stop("a", i, "b", j) that are better suited for
 #   translation as calls like gettextf("a%db%d", i, j)
 check_cracked_messages = function(message_data) {
+  if (!is.data.table(message_data)) message_data = as.data.table(message_data)
 
   # check for , as a crude filter to avoid parsing too many calls
   dup_messages = message_data[

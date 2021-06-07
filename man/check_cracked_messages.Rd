@@ -1,33 +1,16 @@
-\name{translate_package}
-\alias{translate_package}
+\name{check_cracked_messages}
+\alias{check_cracked_messages}
 \title{
-Interactively provide translations for a package's messages
+Check for cracked messages more suitable for templating
 }
 \description{
-This function handles the "grunt work" of building and updating translation libraries.
-In addition to providing a friendly interface for supplying translations, some internal
-logic is built to help make your package more translation-friendly.
-
-To do so, it builds on low-level helpers from the \code{tools} package (which are in
-turn built on lower-level \code{gettext} sytem utilities), namely \code{\link[tools]{xgettext}},
-\code{\link[tools]{xngettext}}, and \code{\link[tools]{update_pkg_po}}. See Details.
+Diagnose the R messages in a package to discover the presence of messages better served for translation by templating.
 }
 \usage{
-translate_package(
-  dir='.', languages,
-  diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
-  src_translation_macro="_",
-  copyright, bugs, verbose=FALSE
-)
+check_cracked_messages(message_data)
 }
 \arguments{
-  \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
-  \item{languages}{ Character vector; locale codes to which to translate. See Details. }
-  \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details.}
-  \item{src_translation_macro}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_}, is shared by R itself & recommended in WRE. }
-  \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
-  \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
-  \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
+  \item{message_data}{ A \code{data.table}, or object convertible to one. }
 }
 \details{
 \code{translate_package} goes through roughly three "phases" of translation.
@@ -67,27 +50,6 @@ R understands template reordering, e.g. \code{\%2$s} says "interpret the second 
 
 After each language is completed, a corresponding \code{.po} file is written to the package's \code{po}
 directory (which is created if it does not yet exist).
-
-\bold{Diagnostics:}
-
-A diagnostic is a function which takes as input a \code{data.table} summarizing the translatable strings in
-a package, evaluates whether these messages are "healthy" in some sense, and summarizes "unhealthy" strings
-to the user before prompting them whether to quit so the issues can be fixed before translation (in particular,
-the function should return \code{'y'} or \code{'yes'} in order to halt progress).
-
-The message data table has the following schema:
-
-\enumerate{
-  \item \code{message_source}, \code{character}, either \code{"R"} or \code{"src"}, saying whether the string was found in the R or the src folder of the package
-  \item \code{type}, \code{character}, either \code{"singular"} or \code{"plural"}; \code{"plural
-  } means the string came from \code{\link{ngettext}} and can be pluralized
-  \item \code{file}, \code{character}, the file where the string was found
-  \item \code{msgid}, \code{character}, the string (character literal or \code{char} array as found in the source); missing for all \code{type == "plural"} strings
-  \item \code{msgid_plural}, \code{list(character, character)}, the strings (character literals or \code{char} arrays as found in the source); the first applies in English for \code{n=1} (see \code{ngettext}), while the second applies for \code{n!=1}; missing for all \code{type == "singular"} strings
-  \item \code{line_number}, \code{integer}, the line in \code{file} where the string was found
-  \item \code{is_repeat}, \code{logical}, whether the \code{msgid} is a duplicate within this \code{message_source}
-  \item \code{is_marked_for_translation}, \code{logical}, whether the string is marked for translation (e.g., in R, all character literals supplied to a \code{...} argument in \code{\link{stop}} are so marked)
-}
 
 \bold{Domains:}
 

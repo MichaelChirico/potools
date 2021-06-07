@@ -1,4 +1,5 @@
 importFrom(data.table, data.table, fread, rbindlist, uniqueN, "%chin%")
+importFrom(data.table, is.data.table, as.data.table)
 importFrom(data.table, set, setindexv, setkeyv, setnames, setorderv)
 importFrom(data.table, `:=`, .BY, .N, .SD)
 importFrom(data.table, fifelse)
@@ -6,3 +7,5 @@ importFrom(data.table, fifelse)
 importFrom(utils, getParseData, globalVariables, tail, type.convert)
 
 export(translate_package)
+
+export(check_cracked_messages, check_untranslated_cat, check_untranslated_src)

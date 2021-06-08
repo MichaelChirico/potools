@@ -15,6 +15,7 @@ turn built on lower-level \code{gettext} sytem utilities), namely \code{\link[to
 \usage{
 translate_package(
   dir='.', languages,
+  diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   src_translation_macro="_",
   copyright, bugs, verbose=FALSE
 )
@@ -22,6 +23,7 @@ translate_package(
 \arguments{
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
   \item{languages}{ Character vector; locale codes to which to translate. See Details. }
+  \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details.}
   \item{src_translation_macro}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_}, is shared by R itself & recommended in WRE. }
   \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
@@ -33,25 +35,8 @@ translate_package(
 Phase one is setup -- \code{dir} is checked for existing translations (toggling between "update" and
 "new" modes), and R files are parsed and combed for user-facing messages.
 
-Phase two is for diagnostics -- examining the usage of user-facing messages in your package and
-suggesting more translation-friendly approaches as appropriate. Specifically, the following
-diagnostics are performed:
-
-\enumerate{
-  \item Searching for "cracked messages". Error messages built like
-    \code{stop("You gave ", n, " arguments, but ", m, " are needed.")} are in general
-    hard for translators -- the correct translation may be in a totally different order
-    (e.g., this is often the case for Japanese). It is preferable instead to use
-    \code{\link[base]{gettextf}} to build a templated message like
-    \code{stop(gettextf("You gave \%d arguments but \%d are needed.", n, m))}. Translators are then
-    free to rearrange the template to put the numeric pattern where it fits most naturally in
-    the target language.
-  \item Searching for untranslated user-facing messages. Only strings passed through \code{base}
-    functions with a \code{domain} argument is eligible for translation (see \code{\link[tools]{xgettext}}).
-    However, it is not uncommon for some output may be shown to the end user via \code{\link[base]{cat}}.
-    To translate such messages, it must first be passed to \code{\link[base]{gettext}} or
-    \code{\link[base]{gettextf}}.
-}
+Phase two is for diagnostics; see the Diagnostics section below. Any diagnostic detecting "unhealthy" messages
+will result in a yes/no prompt to exit translation to address the issues before continuing.
 
 Phase three is translation. All of the messages found in phase one are iterated over -- the user
 is shown a message in English and prompted for the translation in the target language. This process is repeated
@@ -65,6 +50,39 @@ R understands template reordering, e.g. \code{\%2$s} says "interpret the second 
 
 After each language is completed, a corresponding \code{.po} file is written to the package's \code{po}
 directory (which is created if it does not yet exist).
+
+\bold{Diagnostics:}
+
+A diagnostic is a function which takes as input a \code{data.table} summarizing the translatable strings in
+a package, evaluates whether these messages are "healthy" in some sense, and produces a digest of "unhealthy"
+strings and (optionally) suggested replacements.
+
+The diagnostic function must have an attribute named \code{diagnostic_tag} that describes what the diagnostic does; it is reproduced in the format \code{Found {nrow(result)} {diagnostic_tag}:}. For example, \code{\link{check_untranslated_cat}} has \code{diagnostic_tag = "untranslated messaging calls passed through cat()"}.
+
+The input message data table has the following schema:
+
+\enumerate{
+  \item \code{message_source}, \code{character}, either \code{"R"} or \code{"src"}, saying whether the string was found in the R or the src folder of the package
+  \item \code{type}, \code{character}, either \code{"singular"} or \code{"plural"}; \code{"plural"} means the string came from \code{\link{ngettext}} and can be pluralized
+  \item \code{file}, \code{character}, the file where the string was found
+  \item \code{msgid}, \code{character}, the string (character literal or \code{char} array as found in the source); missing for all \code{type == "plural"} strings
+  \item \code{msgid_plural}, \code{list(character, character)}, the strings (character literals or \code{char} arrays as found in the source); the first applies in English for \code{n=1} (see \code{ngettext}), while the second applies for \code{n!=1}; missing for all \code{type == "singular"} strings
+  \item \code{call}, \code{character}, the full call containing the string that was found
+  \item \code{line_number}, \code{integer}, the line in \code{file} where the string was found
+  \item \code{is_repeat}, \code{logical}, whether the \code{msgid} is a duplicate within this \code{message_source}
+  \item \code{is_marked_for_translation}, \code{logical}, whether the string is marked for translation (e.g., in R, all character literals supplied to a \code{...} argument in \code{\link{stop}} are so marked)
+}
+
+The output diagnostic result has the following schema:
+
+\enumerate{
+  \item \code{call}, \code{character}, the call identified as problematic
+  \item \code{file}, \code{character}, the file where \code{call} was found
+  \item \code{line_number}, \code{integer}, the line in \code{file} where \code{call} was found
+  \item \code{replacement}, \code{character}, \emph{optional}, a suggested fix to make the call "healthy"
+}
+
+See \code{\link{check_cracked_messages}}, \code{\link{check_untranslated_cat}}, and \code{\link{check_untranslated_src}} for examples of diagnostics.
 
 \bold{Domains:}
 

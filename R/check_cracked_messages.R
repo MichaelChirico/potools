@@ -1,6 +1,7 @@
 # check for calls like stop("a", i, "b", j) that are better suited for
 #   translation as calls like gettextf("a%db%d", i, j)
 check_cracked_messages = function(message_data) {
+  if (!is.data.table(message_data)) message_data = as.data.table(message_data)
 
   # check for , as a crude filter to avoid parsing too many calls
   dup_messages = message_data[
@@ -9,33 +10,33 @@ check_cracked_messages = function(message_data) {
     & message_source == "R"
     & type == 'singular'
     & grepl(",", call, fixed = TRUE),
-    .(lines = toString(unique(line_number))),
+    # line_number is sorted; use head() for 0-length edge case
+    .(line_number = head(line_number, 1L)),
     by=c('file', 'call')
   ]
-  if (!nrow(dup_messages)) return('n')
+  if (!nrow(dup_messages)) return(diagnostic_schema())
 
   dup_messages[ , 'call_expr' := lapply(call, str2lang)]
   dup_messages = dup_messages[count_dots(call_expr) > 1L]
-
-  if (!nrow(dup_messages)) return('n')
-
-  message(domain=NA, gettextf(
-    'Found %d R messaging calls that might be better suited for gettextf for ease of translation:',
-    nrow(dup_messages)
-  ))
+  if (!nrow(dup_messages)) return(diagnostic_schema())
 
   for (ii in seq_len(nrow(dup_messages))) {
-    dup_messages[ii, cat(gettextf(
-      '\nMulti-string call:\n%s\n< File:%s, Line(s):%s >\nPotential replacement with gettextf():\n%s\n',
-      call_color(call),
-      file_color(file),
-      file_color(lines),
-      build_gettextf_color(build_gettextf_call(call_expr[[1L]]))
-    ))]
+    set(dup_messages, ii, "replacement", build_gettextf_call(dup_messages$call_expr[[ii]]))
   }
 
-  exit = prompt('Exit now to repair any of these? [y/N]')
-  return(tolower(exit))
+  return(dup_messages[ , .(call, file, line_number, replacement)])
+}
+attr(check_cracked_messages, "diagnostic_tag") =
+  "R messaging calls that might be better suited for gettextf for ease of translation"
+
+# take a call like stop("a", i, "b", j) and suggest
+#   stop(domain=NA, gettextf("a%sb%s", i, j))
+build_gettextf_call = function(e) {
+  sprintf(
+    '%s(domain=NA, %s)',
+    as.character(e[[1L]]),
+    gettextify(e[-1L])
+  )
 }
 
 # count the number of ... arguments by excluding named arguments; uses a match.call()

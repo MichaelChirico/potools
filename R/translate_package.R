@@ -1,5 +1,6 @@
 translate_package = function(
   dir = '.', languages,
+  diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   src_translation_macro = "_",
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
@@ -63,14 +64,13 @@ translate_package = function(
 
   if (verbose) message('Running message diagnostics...')
 
-  exit = check_cracked_messages(message_data)
-  if (exit %chin% c('y', 'yes')) return(invisible())
-
-  exit = check_untranslated_cat(message_data)
-  if (exit %chin% c('y', 'yes')) return(invisible())
-
-  exit = check_untranslated_src(message_data)
-  if (exit %chin% c('y', 'yes')) return(invisible())
+  for (diagnostic in diagnostics) {
+    diagnostic <- match.fun(diagnostic)
+    result <- diagnostic(message_data)
+    if (!nrow(result)) next
+    show_diagnostic_results(result, diagnostic)
+    if (tolower(prompt('Exit now to repair any of these? [y/N]')) %chin% c('y', 'yes')) return(invisible())
+  }
 
   if (verbose) message('Generating .pot files...')
   po_params = list(package = package, version = version, copyright = copyright, bugs = bugs)

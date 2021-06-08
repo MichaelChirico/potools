@@ -1,11 +1,13 @@
 # check a package for character arrays in messaging functions that
 #   haven't been passed through the translation macro
-# TODO: this is very close to check_untranslated_cat -- the major difference is that
-#   check_untranslated_cat offers a suggested translated alternative. Is it possible
-#   to merge the logic for these two diagnostics?
+# TODO: make this a function factory & incorporate src_translation_macro?
 check_untranslated_src <- function (message_data) {
+  browser()
   if (!is.data.table(message_data)) message_data = as.data.table(message_data)
 
-  return(message_data[message_source == "src" & !is_marked_for_translation])
+  return(message_data[
+    message_source == "src" & !is_marked_for_translation,
+    .(call, file, line_number, replacement = NA_character_)
+  ])
 }
 attr(check_untranslated_src, "diagnostic_tag") <- "src messaging calls that were not properly marked for translation"

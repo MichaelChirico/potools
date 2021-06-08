@@ -10,33 +10,29 @@ check_cracked_messages = function(message_data) {
     & message_source == "R"
     & type == 'singular'
     & grepl(",", call, fixed = TRUE),
-    .(lines = toString(unique(line_number))),
+    .(line_number = min(line_number)),
     by=c('file', 'call')
   ]
-  if (!nrow(dup_messages)) return('n')
+  if (!nrow(dup_messages)) return(diagnostic_schema())
 
   dup_messages[ , 'call_expr' := lapply(call, str2lang)]
-  dup_messages = dup_messages[count_dots(call_expr) > 1L]
 
-  if (!nrow(dup_messages)) return('n')
+  return(dup_messages[
+    count_dots(call_expr) > 1L,
+    .(call, file, line_number, replacement = build_gettextf_call(call_expr[[1L]]))
+  ])
+}
+attr(check_cracked_messages, "diagnostic_tag") =
+  "R messaging calls that might be better suited for gettextf for ease of translation"
 
-  message(domain=NA, gettextf(
-    'Found %d R messaging calls that might be better suited for gettextf for ease of translation:',
-    nrow(dup_messages)
-  ))
-
-  for (ii in seq_len(nrow(dup_messages))) {
-    dup_messages[ii, cat(gettextf(
-      '\nMulti-string call:\n%s\n< File:%s, Line(s):%s >\nPotential replacement with gettextf():\n%s\n',
-      call_color(call),
-      file_color(file),
-      file_color(lines),
-      build_gettextf_color(build_gettextf_call(call_expr[[1L]]))
-    ))]
-  }
-
-  exit = prompt('Exit now to repair any of these? [y/N]')
-  return(tolower(exit))
+# take a call like stop("a", i, "b", j) and suggest
+#   stop(domain=NA, gettextf("a%sb%s", i, j))
+build_gettextf_call = function(e) {
+  sprintf(
+    '%s(domain=NA, %s)',
+    as.character(e[[1L]]),
+    gettextify(e[-1L])
+  )
 }
 
 # count the number of ... arguments by excluding named arguments; uses a match.call()

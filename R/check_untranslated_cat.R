@@ -7,40 +7,28 @@ check_untranslated_cat <- function (message_data) {
     message_data[message_source == "R" & type == "singular" & grepl("cat(", call, fixed = TRUE)],
     by = 'call'
   )
-  if (!nrow(cat_calls)) return('n')
+  if (!nrow(cat_calls)) return(diagnostic_schema())
 
   cat_calls[ , 'call_expr' := lapply(call, str2lang)]
   cat_calls = cat_calls[
     vapply(call_expr, function(x) x[[1L]] %is_base_call% 'cat', logical(1L))
   ]
-  if (!nrow(cat_calls)) return('n')
+  if (!nrow(cat_calls)) return(diagnostic_schema())
 
   cat_calls = cat_calls[vapply(call_expr, no_translated_subcall, logical(1L))]
-  if (!nrow(cat_calls)) return('n')
+  if (!nrow(cat_calls)) return(diagnostic_schema())
 
   # some of these will return "" which we can filter
   for (ii in seq_len(nrow(cat_calls))) {
-    set(cat_calls, ii, "suggested_call", build_suggested_cat_call(cat_calls$call_expr[[ii]]))
+    set(cat_calls, ii, "replacement", build_suggested_cat_call(cat_calls$call_expr[[ii]]))
   }
-  cat_calls = cat_calls[nzchar(suggested_call)]
-  if (!nrow(cat_calls)) return('n')
 
-  message(domain=NA, gettextf(
-    'Found %d untranslated messaging calls passed through cat():',
-    nrow(cat_calls)
-  ))
-
-  for (ii in seq_len(nrow(cat_calls))) {
-    cat_calls[ii, cat(gettextf(
-      '\n%s\n< File:%s, Line:%s >\nPotential replacement with gettextf():\n%s\n',
-      call_color(call),
-      file_color(file),
-      file_color(line_number),
-      build_gettextf_color(encodeString(suggested_call))
-    ))]
-  }
-  return(prompt('Exit now to repair any of these? [y/N]'))
+  return(cat_calls[
+    nzchar(replacement),
+    .(call, file, line_number, replacement)
+  ])
 }
+attr(check_untranslated_cat, "diagnostic_tag", "untranslated messaging calls passed through cat()")
 
 build_suggested_cat_call = function(e) {
   if (is.null(names(e))) {
@@ -72,11 +60,11 @@ build_suggested_cat_call = function(e) {
       )
     }
   }
-  sprintf(
+  encodeString(sprintf(
     'cat(%s%s)',
     gettextify(e[!named_idx][-1L], sep),
     named_arg_str
-  )
+  ))
 }
 
 # check if an expression has any translated sub-call, e.g.

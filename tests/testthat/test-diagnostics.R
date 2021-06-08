@@ -25,6 +25,9 @@ test_that("check_cracked_messages works", {
       )
     )
   )
+
+  # input that can be converted to data.table is OK
+  expect_equal(check_cracked_messages(as.data.frame(message_data)), check_cracked_messages(message_data))
 })
 
 test_that("check_untranslated_cat works", {
@@ -49,6 +52,9 @@ test_that("check_untranslated_cat works", {
       replacement = c('cat(gettext("hello"))', 'cat(gettext("farewell sir"))')
     )
   )
+
+  # input that can be converted to data.table is OK
+  expect_equal(check_untranslated_cat(as.data.frame(message_data)), check_untranslated_cat(message_data))
 })
 
 test_that("check_untranslated_src works", {
@@ -73,4 +79,8 @@ test_that("check_untranslated_src works", {
       replacement = NA_character_
     )
   )
+
+  # input that can be converted to data.table is OK
+  expect_equal(check_untranslated_src(as.data.frame(message_data)), check_untranslated_src(message_data))
 })
+

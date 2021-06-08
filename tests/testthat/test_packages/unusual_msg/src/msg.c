@@ -19,5 +19,8 @@ void hello_world(SEXP x) {
     "01234567890123456789.01234567890123456789"
     "01234567890123456789.01234567890123456789"
   ));
+  // An array as a variable is passed, see #83
+  char * msg = "an error occurred";
+  error(_(msg));
   return;
 }

@@ -50,11 +50,6 @@ get_r_messages <- function (dir) {
     idcol = 'type'
   )
 
-  # drop empty strings. we could do this earlier but it's messier.
-  #   TODO: can we just strip these STR_CONST from expr_data with no
-  #         other repercussions?
-  msg = msg[type == 'plural' | nzchar(msgid)]
-
   if (!nrow(msg)) return(r_message_schema())
 
   msg_files = unique(msg$file)

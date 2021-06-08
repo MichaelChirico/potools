@@ -81,7 +81,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
   get_call_message = function(msg_i) {
     ii = msg_start[msg_i]
 
-    string = character(1L)
+    string = ""
     # regex landed us after ( in untranslated calls and after (_( in translated ones
     stack_size = if (is_translated[msg_i]) 2L else 1L
     if (contents_char[ii] == '"') {

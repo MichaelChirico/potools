@@ -2,7 +2,6 @@
 #   haven't been passed through the translation macro
 # TODO: make this a function factory & incorporate src_translation_macro?
 check_untranslated_src <- function (message_data) {
-  browser()
   if (!is.data.table(message_data)) message_data = as.data.table(message_data)
 
   return(message_data[

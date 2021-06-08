@@ -28,7 +28,7 @@ check_untranslated_cat <- function (message_data) {
     .(call, file, line_number, replacement)
   ])
 }
-attr(check_untranslated_cat, "diagnostic_tag", "untranslated messaging calls passed through cat()")
+attr(check_untranslated_cat, "diagnostic_tag") = "untranslated messaging calls passed through cat()"
 
 build_suggested_cat_call = function(e) {
   if (is.null(names(e))) {

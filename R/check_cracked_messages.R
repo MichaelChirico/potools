@@ -10,17 +10,21 @@ check_cracked_messages = function(message_data) {
     & message_source == "R"
     & type == 'singular'
     & grepl(",", call, fixed = TRUE),
-    .(line_number = min(line_number)),
+    # line_number is sorted; use head() for 0-length edge case
+    .(line_number = head(line_number, 1L)),
     by=c('file', 'call')
   ]
   if (!nrow(dup_messages)) return(diagnostic_schema())
 
   dup_messages[ , 'call_expr' := lapply(call, str2lang)]
+  dup_messages = dup_messages[count_dots(call_expr) > 1L]
+  if (!nrow(dup_messages)) return(diagnostic_schema())
 
-  return(dup_messages[
-    count_dots(call_expr) > 1L,
-    .(call, file, line_number, replacement = build_gettextf_call(call_expr[[1L]]))
-  ])
+  for (ii in seq_len(nrow(dup_messages))) {
+    set(dup_messages, ii, "replacement", build_gettextf_call(dup_messages$call_expr[[ii]]))
+  }
+
+  return(dup_messages[ , .(call, file, line_number, replacement)])
 }
 attr(check_cracked_messages, "diagnostic_tag") =
   "R messaging calls that might be better suited for gettextf for ease of translation"

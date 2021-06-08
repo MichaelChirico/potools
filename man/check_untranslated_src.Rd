@@ -18,7 +18,7 @@ This diagnostic looks for literal \code{char} arrays passed to messaging functio
 
 }
 \value{
-If no issues are detected, or there are no src messages (\code{message_source == "src"}) in the package, \code{'n'} is returned; otherwise, the user is prompted to respond yes or no for whether to interrupt execution of \code{translate_package} to address the issues.
+A \code{data.table} with columns \code{call}, \code{file}, \code{line_number}, and \code{replacement} summarizing the results. \code{replacement} is \code{NA} at this time, i.e., no replacement is provided.
 }
 \seealso{
 \code{\link{translate_package}}, \code{\link{update_pkg_po}}

@@ -35,7 +35,8 @@ translate_package(
 Phase one is setup -- \code{dir} is checked for existing translations (toggling between "update" and
 "new" modes), and R files are parsed and combed for user-facing messages.
 
-Phase two is for diagnostics; see the Diagnostics section below.
+Phase two is for diagnostics; see the Diagnostics section below. Any diagnostic detecting "unhealthy" messages
+will result in a yes/no prompt to exit translation to address the issues before continuing.
 
 Phase three is translation. All of the messages found in phase one are iterated over -- the user
 is shown a message in English and prompted for the translation in the target language. This process is repeated
@@ -53,11 +54,12 @@ directory (which is created if it does not yet exist).
 \bold{Diagnostics:}
 
 A diagnostic is a function which takes as input a \code{data.table} summarizing the translatable strings in
-a package, evaluates whether these messages are "healthy" in some sense, and summarizes "unhealthy" strings
-to the user before prompting them whether to quit so the issues can be fixed before translation (in particular,
-the function should return \code{'y'} or \code{'yes'} in order to halt progress).
+a package, evaluates whether these messages are "healthy" in some sense, and produces a digest of "unhealthy"
+strings and (optionally) suggested replacements.
 
-The message data table has the following schema:
+The diagnostic function must have an attribute named \code{diagnostic_tag} that describes what the diagnostic does; it is reproduced in the format \code{Found {nrow(result)} {diagnostic_tag}:}. For example, \code{\link{check_untranslated_cat}} has \code{diagnostic_tag = "untranslated messaging calls passed through cat()"}.
+
+The input message data table has the following schema:
 
 \enumerate{
   \item \code{message_source}, \code{character}, either \code{"R"} or \code{"src"}, saying whether the string was found in the R or the src folder of the package
@@ -69,6 +71,15 @@ The message data table has the following schema:
   \item \code{line_number}, \code{integer}, the line in \code{file} where the string was found
   \item \code{is_repeat}, \code{logical}, whether the \code{msgid} is a duplicate within this \code{message_source}
   \item \code{is_marked_for_translation}, \code{logical}, whether the string is marked for translation (e.g., in R, all character literals supplied to a \code{...} argument in \code{\link{stop}} are so marked)
+}
+
+The output diagnostic result has the following schema:
+
+\enumerate{
+  \item \code{call}, \code{character}, the call identified as problematic
+  \item \code{file}, \code{character}, the file where \code{call} was found
+  \item \code{line_number}, \code{integer}, the line in \code{file} where \code{call} was found
+  \item \code{replacement}, \code{character}, \emph{optional}, a suggested fix to make the call "healthy"
 }
 
 See \code{\link{check_cracked_messages}}, \code{\link{check_untranslated_cat}}, and \code{\link{check_untranslated_src}} for examples of diagnostics.

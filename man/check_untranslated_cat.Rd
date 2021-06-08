@@ -22,7 +22,7 @@ NB: not all \code{cat} calls are included -- in particular, no \code{cat} call s
 
 }
 \value{
-If no issues are detected, or there are no R messages (\code{message_source == "R"}) in the package, \code{'n'} is returned; otherwise, the user is prompted to respond yes or no for whether to interrupt execution of \code{translate_package} to address the issues.
+A \code{data.table} with columns \code{call}, \code{file}, \code{line_number}, and \code{replacement} summarizing the results.
 }
 \seealso{
 \code{\link{translate_package}}, \code{\link{update_pkg_po}}

@@ -37,9 +37,9 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
       )
     ]
     if (use_base_rules) {
-      po_data[message_source == 'src' & grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), 'c_fmt_tag' := "#, c-format\n"]
+      po_data[message_source == 'src' & grepl(SPRINTF_TEMPLATE_REGEX, msgid), 'c_fmt_tag' := "#, c-format\n"]
     } else {
-      po_data[grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), 'c_fmt_tag' := "#, c-format\n"]
+      po_data[grepl(SPRINTF_TEMPLATE_REGEX, msgid), 'c_fmt_tag' := "#, c-format\n"]
     }
   } else {
     r_file <- sprintf("R-%s.po", params$language)
@@ -63,9 +63,9 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
       )
     ]
     if (use_base_rules) {
-      po_data[message_source == 'src' & grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), 'c_fmt_tag' := "#, c-format\n"]
+      po_data[message_source == 'src' & grepl(SPRINTF_TEMPLATE_REGEX, msgid), 'c_fmt_tag' := "#, c-format\n"]
     } else {
-      po_data[grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), 'c_fmt_tag' := "#, c-format\n"]
+      po_data[grepl(SPRINTF_TEMPLATE_REGEX, msgid), 'c_fmt_tag' := "#, c-format\n"]
     }
     # only do in non-template branch b/c we can't define a dummy msgstr_plural that splits to list('', '')
     # don't filter to type=='plural' here -- causes a type conflict with the str elsewhere. we need a full plonk.
@@ -107,7 +107,7 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
 
   if (use_base_rules) {
     plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
-    msgstr_fmt <- 'msgstr[%d]   "%s"'
+    msgstr_fmt <- 'msgstr[%d]    "%s"'
   } else {
     plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d] "%s"'

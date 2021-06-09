@@ -27,6 +27,6 @@ falta grande
 cualquier mensaje
 eso es un %<PRId64> pared grande sobre %<PRIu64>
 /* esto es lo que parece un comment en C */
-// esto es lo que parece un comment en C
+// esto es lo que parece un comment en C %s
 01234567890123456789.01234567890123456789
 un string traducida con plantilla: %<PRId64>\n

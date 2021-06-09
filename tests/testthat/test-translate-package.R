@@ -353,7 +353,10 @@ test_that("use_base_rules produces the correct differences", {
       # )
 
       # MSG.c comes before msg.c (sort/collate order)
-      expect_match(paste(src_pot_lines, collapse='\n'), 'MSGs\\.c.*msg\\.c')
+      expect_all_match(
+        paste(src_pot_lines, collapse='\n'),
+        c('MSGs\\.c.*msg\\.c', '#, c-format')
+      )
     }
   )
 })

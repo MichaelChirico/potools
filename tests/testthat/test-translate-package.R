@@ -307,7 +307,8 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       # whitespace trimming in C
       expect_all_match(
         src_pot_files,
-        c('looks like */ "', 'looks like %s "')
+        c('looks like */ "', 'looks like %s "'),
+        fixed = TRUE
       )
     }
   )
@@ -326,7 +327,7 @@ test_that("use_base_rules produces the correct differences", {
       expect_all_match(
         r_pot_lines,
         # third is testing plural string padding
-        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular"'),
+        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular "'),
         fixed = TRUE
       )
       expect_all_match(
@@ -353,7 +354,7 @@ test_that("use_base_rules produces the correct differences", {
         c("SOME DESCRIPTIVE TITLE", "Language: [\\]n", "nplurals=INTEGER"),
         fixed = TRUE, invert = TRUE
       )
-      expect_all_match(r_pot_lines, 'msgid        "small fail"', fixed = TRUE)
+      expect_all_match(r_pot_lines, 'msgid        "small fail\\n"', fixed = TRUE)
       # TODO(#89): activate this test
       # expect_all_match(
       #   src_pot_lines,

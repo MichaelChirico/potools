@@ -18,11 +18,13 @@ f2 <- function(x) {
 f3 <- function(x) {
   # nested functions are excluded/not double-counted
   warning(gettext("Hi there"))
-  message(gettextf("good %s", "grief"))
+  # trimws() is done here
+  message(gettextf("good %s ", "grief"))
+  # trimws() is not done here
   stop(sprintf(ngettext(
     10,
-    "singular",
-    "plural"
+    "singular ",
+    "plural "
   )))
 }
 

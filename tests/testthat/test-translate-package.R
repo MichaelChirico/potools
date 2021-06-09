@@ -148,6 +148,7 @@ test_that('Unknown language flow works correctly', {
     pkg <- test_package('r_msg'),
     tmp_conn = mock_translation('test-translate-package-r_msg-2.input'),
     {
+      debug(potools:::run_msgfmt)
       expect_messages(
         translate_package(pkg, 'ar_SY'),
         # TODO: why isn't "Did not match any known 'plural's" matching?
@@ -273,43 +274,52 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
     {
       translate_package(pkg, diagnostics = NULL)
 
-      pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
+      r_pot_files <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
+      src_pot_files <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
-      # raw strings edge cases
+      # (1) raw strings edge cases
+      # (2) whitespace trimming behavior (trim for R singular, don't for R plural)
       expect_all_match(
-        pot_lines,
-        c('msgid "\'abc\'"', 'msgid "\\"def\\""', 'msgid "R(\'abc\')"', 'msgid "r(\\"def\\")"', 'msgid "ghi"'),
+        r_pot_files,
+        c('msgid "\'abc\'"', 'msgid "\\"def\\""', 'msgid "R(\'abc\')"', 'msgid "r(\\"def\\")"', 'msgid "ghi"',
+          'good %s', 'msgid "singular "'),
         fixed = TRUE
       )
 
       # skip empty strings
-      expect_all_match(paste(pot_lines, collapse = "\n"), 'msgid ""\nmsgstr ""\n\n', fixed = TRUE, invert = TRUE)
+      expect_all_match(paste(r_pot_files, collapse = "\n"), 'msgid ""\nmsgstr ""\n\n', fixed = TRUE, invert = TRUE)
 
       # don't collapse strings in similar node positions across files
-      expect_all_match(pot_lines, c('msgid "copy one"', 'msgid "copy two"'))
+      expect_all_match(r_pot_files, c('msgid "copy one"', 'msgid "copy two"'))
 
       # ordering within the file
-      expect_true(which(pot_lines == 'msgid "first"') < which(pot_lines == 'msgid "second"'))
-      expect_true(which(pot_lines == 'msgid "second"') < which(pot_lines == 'msgid "third"'))
-      expect_true(which(pot_lines == 'msgid "third"') < which(pot_lines == 'msgid "fourth"'))
+      expect_true(which(r_pot_files == 'msgid "first"') < which(r_pot_files == 'msgid "second"'))
+      expect_true(which(r_pot_files == 'msgid "second"') < which(r_pot_files == 'msgid "third"'))
+      expect_true(which(r_pot_files == 'msgid "third"') < which(r_pot_files == 'msgid "fourth"'))
 
       # escaping/unescaping
       expect_all_match(
-        pot_lines,
+        r_pot_files,
         c('msgid "\\\\n vs \\n is OK"', 'msgid "\\\\t vs \\t is OK"',
           'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\"quotes\\" are OK"'),
+        fixed = TRUE
+      )
+
+      # whitespace trimming in C
+      expect_all_match(
+        src_pot_files,
+        c('looks like */ "', 'looks like %s "'),
         fixed = TRUE
       )
     }
   )
 })
 
-test_that("use_base_rules produces the correct differences", {
+test_that("use_base_rules=FALSE produces our preferred behavior", {
   restore_package(
     pkg <- test_package("unusual_msg"),
     tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
-      #debug(potools:::run_msgfmt)
       translate_package(pkg, "es", diagnostics = NULL)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
@@ -317,7 +327,7 @@ test_that("use_base_rules produces the correct differences", {
       expect_all_match(
         r_pot_lines,
         # third is testing plural string padding
-        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular"'),
+        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular "'),
         fixed = TRUE
       )
       expect_all_match(
@@ -329,7 +339,7 @@ test_that("use_base_rules produces the correct differences", {
   )
 })
 
-test_that("use_base_rules produces the correct differences", {
+test_that("use_base_rules=TRUE produces base-aligned behavior", {
   restore_package(
     pkg <- test_package("unusual_msg"),
     tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
@@ -344,7 +354,7 @@ test_that("use_base_rules produces the correct differences", {
         c("SOME DESCRIPTIVE TITLE", "Language: [\\]n", "nplurals=INTEGER"),
         fixed = TRUE, invert = TRUE
       )
-      expect_all_match(r_pot_lines, 'msgid        "small fail"', fixed = TRUE)
+      expect_all_match(r_pot_lines, 'msgid        "small fail "', fixed = TRUE)
       # TODO(#89): activate this test
       # expect_all_match(
       #   src_pot_lines,

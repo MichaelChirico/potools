@@ -9,7 +9,7 @@ b <- function(x) {
 
 c <- function(x) {
   cat(sprintf(
-    ngettext(length(x), "SOMEWHAT EPIC FAIL\n", "MAJORLY EPIC FAIL\n")
+    ngettext(length(x), "SOMEWHAT EPIC FAIL", "MAJORLY EPIC FAIL")
   ))
   # coverage test: only cat() call in this package, and it gets skipped because of file=
   cat("hello", file = tempfile())

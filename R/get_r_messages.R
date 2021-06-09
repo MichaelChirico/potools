@@ -89,7 +89,7 @@ get_r_messages <- function (dir) {
   # kept id, column_number to get order within lines; can drop now
   msg[ , c('id', 'column_number') := NULL]
 
-  msg[type == 'singular', 'msgid' := escape_string(msgid)]
+  msg[type == 'singular', 'msgid' := escape_string(trimws(msgid))]
   msg[type == 'plural', 'msgid_plural' := lapply(msgid_plural, escape_string)]
 
   # keep duplicates & define this field, in case duplicates are also part of diagnostic checks
@@ -332,8 +332,7 @@ adjust_tabs = function(l) {
 # the text column in getParseData() needs some tidying:
 #  1. the actual quotes are kept, e.g. text='"a string"'
 #  2. "unescape" strings (e.g. "\\n" --> \n) so that trimws() works. note that
-#     later we "re-apply" encodeString() so this feels redundant; it's really for 3.
-#  3. trimws()
+#     later we "re-apply" encodeString() so this feels redundant, but necessary for trimws()
 clean_text = function(x) {
   # See ?Quotes for the rules governing string constants. this regex has two parts:
   #   the first for raw strings, the second for "normal" strings. regex considers there
@@ -356,7 +355,7 @@ clean_text = function(x) {
   x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
   x = gsub('\\"', '"', x, fixed = TRUE)
   x = gsub('\\\\', '\\', x, fixed = TRUE)
-  return(trimws(x))
+  return(x)
 }
 
 string_schema = function() data.table(

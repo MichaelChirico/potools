@@ -236,7 +236,6 @@ wrap_strings = function(str, width) {
   boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|.(?=%)', str, perl = TRUE)
   out = character(length(str))
   for (ii in seq_along(str)) {
-    # if (grepl("which is outside range of the length", str[ii], fixed=TRUE)) browser()
     # supplement with the total string width for the case that the last word breaks the width
     boundary = c(boundaries[[ii]], nchar(str[ii]))
     # no places to split this string, so don't. xgettext also seems not to.

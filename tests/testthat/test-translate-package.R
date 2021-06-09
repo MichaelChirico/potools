@@ -148,7 +148,6 @@ test_that('Unknown language flow works correctly', {
     pkg <- test_package('r_msg'),
     tmp_conn = mock_translation('test-translate-package-r_msg-2.input'),
     {
-      debug(potools:::run_msgfmt)
       expect_messages(
         translate_package(pkg, 'ar_SY'),
         # TODO: why isn't "Did not match any known 'plural's" matching?
@@ -326,8 +325,8 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
 
       expect_all_match(
         r_pot_lines,
-        # third is testing plural string padding
-        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular "'),
+        # third is testing plural string padding; fourth is for source tagging
+        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular "', '#: foo.R'),
         fixed = TRUE
       )
       expect_all_match(
@@ -350,22 +349,17 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
 
       expect_all_match(
         r_pot_lines,
-        # third is testing plural string padding
-        c("SOME DESCRIPTIVE TITLE", "Language: [\\]n", "nplurals=INTEGER"),
+        c("SOME DESCRIPTIVE TITLE", "Language: [\\]n", "nplurals=INTEGER", '#: '),
         fixed = TRUE, invert = TRUE
       )
       expect_all_match(r_pot_lines, 'msgid        "small fail "', fixed = TRUE)
-      # TODO(#89): activate this test
-      # expect_all_match(
-      #   src_pot_lines,
-      #   # testing no strwrap for many duplicate locations
-      #   "(bar\\.c:[0-9]+ ){10}"
-      # )
 
-      # MSG.c comes before msg.c (sort/collate order)
+      # (1) MSG.c comes before msg.c (sort/collate order)
+      # (2) c-format tags are produced
+      # (3) msgid with many duplicates wraps the source markers at width=79
       expect_all_match(
         paste(src_pot_lines, collapse='\n'),
-        c('MSGs\\.c.*msg\\.c', '#, c-format')
+        c('MSGs\\.c.*msg\\.c', '#, c-format', '#: msg\\.c:.*#: msg\\.c')
       )
     }
   )

@@ -78,7 +78,8 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   write_po_file(
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
-    params
+    params,
+    align_plural = use_base_rules
   )
   write_po_file(
     po_data[message_source == "src"],
@@ -89,7 +90,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   return(invisible())
 }
 
-write_po_file <- function(message_data, po_file, params, width=Inf) {
+write_po_file <- function(message_data, po_file, params, width=Inf, align_plural = FALSE) {
   if (!nrow(message_data)) return(invisible())
 
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
@@ -102,6 +103,13 @@ write_po_file <- function(message_data, po_file, params, width=Inf) {
 
   writeLines(con=po_conn, useBytes=TRUE, po_header)
 
+  if (align_plural) {
+    plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
+    msgstr_fmt <- 'msgstr[%d]   "%s"'
+  } else {
+    plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
+    msgstr_fmt <- 'msgstr[%d] "%s"'
+  }
   message_data[ , {
     out_lines = character(.N)
     singular_idx = type == 'singular'
@@ -120,13 +128,13 @@ write_po_file <- function(message_data, po_file, params, width=Inf) {
         msgstr_plural[!singular_idx],
         function(msgstr) paste(
           # TODO: should encodeString() be done directly at translation time?
-          sprintf('msgstr[%d] "%s"', seq_along(msgstr)-1L, encodeString(msgstr)),
+          sprintf(msgstr_fmt, seq_along(msgstr)-1L, encodeString(msgstr)),
           collapse='\n'
         ),
         character(1L)
       )
       out_lines[!singular_idx] = sprintf(
-        '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s',
+        plural_fmt,
         source_location[!singular_idx], c_fmt_tag[!singular_idx],
         msgid1, msgid2, msgid_plural
       )

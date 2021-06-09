@@ -171,7 +171,7 @@ build_po_header = function(params, use_base_rules = FALSE) {
     params$lang_team <- 'LANGUAGE <LL@li.org>'
     params$lang_name <- if (use_base_rules) '' else '\n"Language: \\n"'
     params$charset <- "CHARSET"
-    params$plural_forms <- if (!use_base_rules && params$params$has_plural) {
+    params$plural_forms <- if (!use_base_rules && params$has_plural) {
       '\n"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"'
     } else {
       ''

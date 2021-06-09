@@ -148,6 +148,7 @@ test_that('Unknown language flow works correctly', {
     pkg <- test_package('r_msg'),
     tmp_conn = mock_translation('test-translate-package-r_msg-2.input'),
     {
+      debug(potools:::run_msgfmt)
       expect_messages(
         translate_package(pkg, 'ar_SY'),
         # TODO: why isn't "Did not match any known 'plural's" matching?
@@ -314,12 +315,11 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
   )
 })
 
-test_that("use_base_rules produces the correct differences", {
+test_that("use_base_rules=FALSE produces our preferred behavior", {
   restore_package(
     pkg <- test_package("unusual_msg"),
     tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
-      #debug(potools:::run_msgfmt)
       translate_package(pkg, "es", diagnostics = NULL)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
@@ -339,7 +339,7 @@ test_that("use_base_rules produces the correct differences", {
   )
 })
 
-test_that("use_base_rules produces the correct differences", {
+test_that("use_base_rules=TRUE produces base-aligned behavior", {
   restore_package(
     pkg <- test_package("unusual_msg"),
     tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
@@ -354,7 +354,7 @@ test_that("use_base_rules produces the correct differences", {
         c("SOME DESCRIPTIVE TITLE", "Language: [\\]n", "nplurals=INTEGER"),
         fixed = TRUE, invert = TRUE
       )
-      expect_all_match(r_pot_lines, 'msgid        "small fail\\n"', fixed = TRUE)
+      expect_all_match(r_pot_lines, 'msgid        "small fail "', fixed = TRUE)
       # TODO(#89): activate this test
       # expect_all_match(
       #   src_pot_lines,

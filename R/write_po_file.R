@@ -30,7 +30,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     po_data = po_data[,
       by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
       .(
-        source_location = if (.BY$message_source == "R") "" else make_src_location(file, line_number),
+        source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
         c_fmt_tag = "",
         msgstr = if (.BY$type == 'singular') '' else NA_character_,
         msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL)
@@ -55,7 +55,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     po_data = po_data[,
       by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
       .(
-        source_location = if (.BY$message_source == "R") "" else make_src_location(file, line_number),
+        source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
         c_fmt_tag = "",
         msgstr = msgstr[1L],
         # [1] should be a no-op here
@@ -286,8 +286,12 @@ msgstr ""
 "Content-Type: text/plain; charset=%s\\n"
 "Content-Transfer-Encoding: 8bit\\n"%s'
 
-make_src_location <- function(files, lines) {
-  # NB: technically basename() is incorrect since relative paths are made, but I'm not
+make_src_location <- function(files, lines, message_source, use_base_rules) {
+  if (use_base_rules && message_source == "R") return("")
+  # TODO(#107): technically basename() is incorrect since relative paths are made, but I'm not
   #   sure how the top-level path is decided for this. must be fixed to handle base.
-  paste0("#: ", paste(sprintf("%s:%d", basename(files), lines), collapse = " "), "\n")
+  s <- paste(sprintf("%s:%d", basename(files), lines), collapse = " ")
+  # branch above implies use_base_rules => message_source == "src"
+  # 76 = 79 - nchar("#: ")
+  paste0("#: ", if (use_base_rules) strwrap(s, width=76) else s, "\n", collapse="")
 }

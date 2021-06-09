@@ -342,6 +342,9 @@ test_that("use_base_rules produces the correct differences", {
       #   # testing no strwrap for many duplicate locations
       #   "(bar\\.c:[0-9]+ ){10}"
       # )
+
+      # MSG.c comes before msg.c (sort/collate order)
+      expect_match(paste(src_pot_lines, collapse='\n'), 'MSG\\.c.*msg\\.c')
     }
   )
 })

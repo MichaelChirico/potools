@@ -79,18 +79,20 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
     params,
-    align_plural = use_base_rules
+    use_base_rules = use_base_rules
   )
+  # assign here to prevent lazyeval issue
+  width = if (use_base_rules) 79L else Inf
   write_po_file(
     po_data[message_source == "src"],
     file.path(po_dir, src_file),
     params,
-    width = if (use_base_rules) 79L else Inf
+    width = width,
   )
   return(invisible())
 }
 
-write_po_file <- function(message_data, po_file, params, width=Inf, align_plural = FALSE) {
+write_po_file <- function(message_data, po_file, params, width = Inf, use_base_rules = FALSE) {
   if (!nrow(message_data)) return(invisible())
 
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
@@ -99,11 +101,11 @@ write_po_file <- function(message_data, po_file, params, width=Inf, align_plural
   on.exit(close(po_conn))
 
   params$has_plural = any(message_data$type == "plural")
-  po_header = build_po_header(params)
+  po_header = build_po_header(params, use_base_rules)
 
   writeLines(con=po_conn, useBytes=TRUE, po_header)
 
-  if (align_plural) {
+  if (use_base_rules) {
     plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d]   "%s"'
   } else {
@@ -144,29 +146,32 @@ write_po_file <- function(message_data, po_file, params, width=Inf, align_plural
   }]
 }
 
-build_po_header = function(params) {
+build_po_header = function(params, use_base_rules = FALSE) {
   params$timestamp <- format(Sys.time(), tz = 'UTC')
-  params$bugs <- if (is.null(params$bugs)) {
-    ''
+  if (is.null(params$bugs)) {
+    params$bugs <- ''
   } else {
-    sprintf("\nReport-Msgid-Bugs-To: %s\\n", params$bugs)
+    params$bugs <- sprintf("\nReport-Msgid-Bugs-To: %s\\n", params$bugs)
   }
 
   if (params$template) {
-    if (is.null(params$copyright)) {
+    if (use_base_rules) {
+      params$copyright_template <- params$copyright <- params$fuzzy_header <- ''
+    } else if (is.null(params$copyright)) {
       params$copyright_template <- NO_COPYRIGHT_TEMPLATE
       params$copyright <- ''
+      params$fuzzy_header <- "#, fuzzy\n"
     } else {
       params$copyright_template <- with(params, sprintf(COPYRIGHT_TEMPLATE, copyright, package))
       params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
+      params$fuzzy_header <- "#, fuzzy\n"
     }
-    params$fuzzy_header <- "#, fuzzy\n"
     params$po_revision_date <- 'YEAR-MO-DA HO:MI+ZONE'
     params$author <- 'FULL NAME <EMAIL@ADDRESS>'
     params$lang_team <- 'LANGUAGE <LL@li.org>'
-    params$lang_name <- ''
+    params$lang_name <- if (use_base_rules) '' else '\n"Language: \\n"'
     params$charset <- "CHARSET"
-    params$plural_forms <- if (params$has_plural) {
+    params$plural_forms <- if (!use_base_rules && params$params$has_plural) {
       '\n"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"'
     } else {
       ''
@@ -182,7 +187,8 @@ build_po_header = function(params) {
     # get a warning from msgfmt: PO file header fuzzy; older versions of msgfmt will give an error on this
     params$fuzzy_header <- ''
     params$po_revision_date <- params$timestamp
-    params$lang_name <- params$lang_team <- params$full_name_eng
+    params$lang_team <- params$full_name_eng
+    params$lang_name <- if (use_base_rules) '' else sprintf('\n"Language: %s\\n"', params$lang_team)
     params$charset <- "UTF-8"
     params$plural_forms <- if (params$has_plural) {
       with(params, sprintf('\n"Plural-Forms: nplurals=%s; plural=%s;\\n"', nplurals, plural))
@@ -275,8 +281,7 @@ msgstr ""
 "POT-Creation-Date: %s\\n"
 "PO-Revision-Date: %s\\n"
 "Last-Translator: %s\\n"
-"Language-Team: %s\\n"
-"Language: %s\\n"%s
+"Language-Team: %s\\n"%s%s
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=%s\\n"
 "Content-Transfer-Encoding: 8bit\\n"%s'

@@ -2,6 +2,7 @@ translate_package = function(
   dir = '.', languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   src_translation_macro = "_",
+  use_base_rules = FALSE,
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
   check_sys_reqs()
@@ -74,7 +75,7 @@ translate_package = function(
 
   if (verbose) message('Generating .pot files...')
   po_params = list(package = package, version = version, copyright = copyright, bugs = bugs)
-  write_po_files(message_data, po_dir, po_params, template = TRUE)
+  write_po_files(message_data, po_dir, po_params, template = TRUE, use_base_rules = use_base_rules)
 
   if (l10n_info()[["UTF-8"]]) {
     # on UTF-8 machines we install the en@quot messages too
@@ -166,7 +167,7 @@ translate_package = function(
     #   only one partially-finished language should be written at a time.
     INCOMPLETE = TRUE
     on.exit({
-      if (INCOMPLETE) write_po_files(message_data, po_dir, po_params) # nocov
+      if (INCOMPLETE) write_po_files(message_data, po_dir, po_params, use_base_rules = use_base_rules) # nocov
       # since add=FALSE, we overwrite the above call; duplicate it here
       unset_prompt_conn()
     })
@@ -213,7 +214,7 @@ translate_package = function(
 
     # set INCOMPLETE after write_po_files for the event of a process interruption
     #   between the loop finishing and the write_po_files command executing
-    write_po_files(message_data, po_dir, po_params)
+    write_po_files(message_data, po_dir, po_params, use_base_rules = use_base_rules)
     INCOMPLETE = FALSE
   }
 

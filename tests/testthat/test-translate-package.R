@@ -304,3 +304,44 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
     }
   )
 })
+
+test_that("use_base_rules produces the correct differences", {
+  restore_package(
+    pkg <- test_package("unusual_msg"),
+    {
+      translate_package(pkg, diagnostics = NULL)
+      r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
+      src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
+
+      expect_all_match(
+        r_pot_lines,
+        # third is testing plural string padding
+        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular"'),
+        fixed = TRUE
+      )
+      expect_all_match(
+        src_pot_lines,
+        # testing no strwrap for many duplicate locations
+        "(msg\\.c:[0-9]+ ){10}"
+      )
+
+      translate_package(pkg, use_base_rules = TRUE, diagnostics = NULL)
+      r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
+      src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
+
+      expect_all_match(
+        r_pot_lines,
+        # third is testing plural string padding
+        c("SOME DESCRIPTIVE TITLE", "Language: [\\]n", "nplurals=INTEGER"),
+        fixed = TRUE, invert = TRUE
+      )
+      expect_all_match(r_pot_lines, 'msgid        "small fail"', fixed = TRUE)
+      # TODO(#89): activate this test
+      # expect_all_match(
+      #   src_pot_lines,
+      #   # testing no strwrap for many duplicate locations
+      #   "(bar\\.c:[0-9]+ ){10}"
+      # )
+    }
+  )
+})

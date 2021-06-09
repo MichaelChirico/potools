@@ -2,6 +2,7 @@ translate_package = function(
   dir = '.', languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   src_translation_macro = "_",
+  use_base_rules = FALSE,
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
   check_sys_reqs()

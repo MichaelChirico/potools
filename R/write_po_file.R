@@ -11,7 +11,7 @@
 #   note that xgettext is not run for R-*.pot files, so this width is not respected.
 #   See also https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121
 # TODO: experiment with allowing source_location in R-*.pot? files. See #41.
-write_po_files <- function(message_data, po_dir, params, template = FALSE) {
+write_po_files <- function(message_data, po_dir, params, template = FALSE, use_base_rules = FALSE) {
   # drop untranslated strings, collapse duplicates, drop unneeded data.
   #   for now, treating R & src separately so they can be treated differently; eventually this should
   #   be removed, or at least controlled by an option.
@@ -31,11 +31,16 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
       by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
       .(
         source_location = if (.BY$message_source == "R") "" else make_src_location(file, line_number),
-        c_fmt_tag = if (grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid)) "#, c-format\n" else "",
+        c_fmt_tag = "",
         msgstr = if (.BY$type == 'singular') '' else NA_character_,
         msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL)
       )
     ]
+    if (use_base_rules) {
+      po_data[message_source == 'src' & grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), 'c_fmt_tag' := "#, c-format\n"]
+    } else {
+      po_data[grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), 'c_fmt_tag' := "#, c-format\n"]
+    }
   } else {
     r_file <- sprintf("R-%s.po", params$language)
     src_file <- sprintf("%s.po", params$language)
@@ -51,12 +56,17 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
       by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
       .(
         source_location = if (.BY$message_source == "R") "" else make_src_location(file, line_number),
-        c_fmt_tag = if (grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid)) "#, c-format\n" else "",
+        c_fmt_tag = "",
         msgstr = msgstr[1L],
         # [1] should be a no-op here
         msgstr_plural = msgstr_plural_str[1L]
       )
     ]
+    if (use_base_rules) {
+      po_data[message_source == 'src' & grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), 'c_fmt_tag' := "#, c-format\n"]
+    } else {
+      po_data[grepl(SPRINTF_TEMPLATE_REGEX, .BY$msgid), 'c_fmt_tag' := "#, c-format\n"]
+    }
     # only do in non-template branch b/c we can't define a dummy msgstr_plural that splits to list('', '')
     # don't filter to type=='plural' here -- causes a type conflict with the str elsewhere. we need a full plonk.
     po_data[ , 'msgstr_plural' := strsplit(msgstr_plural, "|||", fixed = TRUE)]
@@ -74,12 +84,11 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE) {
     po_data[message_source == "src"],
     file.path(po_dir, src_file),
     params,
-    width = 79L
+    width = if (use_base_rules) 79L else Inf
   )
   return(invisible())
 }
 
-# TODO: use uniform width on R & src. Keeping inconsistency for Bugzilla#18121
 write_po_file <- function(message_data, po_file, params, width=Inf) {
   if (!nrow(message_data)) return(invisible())
 

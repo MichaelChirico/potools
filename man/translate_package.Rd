@@ -16,7 +16,8 @@ turn built on lower-level \code{gettext} sytem utilities), namely \code{\link[to
 translate_package(
   dir='.', languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
-  src_translation_macro="_",
+  src_translation_macro = "_",
+  use_base_rules = FALSE,
   copyright, bugs, verbose=FALSE
 )
 }
@@ -25,6 +26,7 @@ translate_package(
   \item{languages}{ Character vector; locale codes to which to translate. See Details. }
   \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details.}
   \item{src_translation_macro}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_}, is shared by R itself & recommended in WRE. }
+  \item{use_base_rules}{ Logical, default \code{FALSE}. Should internal behavior match base behavior as strictly as possible? See Details. }
   \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
@@ -50,6 +52,8 @@ R understands template reordering, e.g. \code{\%2$s} says "interpret the second 
 
 After each language is completed, a corresponding \code{.po} file is written to the package's \code{po}
 directory (which is created if it does not yet exist).
+
+There are some discrepancies in the default behavior of \code{translate_package} and the translation workflow used to generate the \code{.po}/\code{.pot} files for R itself (mainly, the suite of functions from \code{tools}, \code{\link[tools]{update_pkg_po}}, \code{\link[tools]{xgettext2pot}}, \code{\link[tools]{xgettext}}, and \code{\link[tools]{xngettext}}). They should only be superficial (e.g., whitespace or comments), but nevertheless may represent a barrier to smoothly submitting patchings to R Core. To make the process of translating base R and the default packages (\code{tools}, \code{utils}, \code{stats}, etc.) as smooth as possible, set the \code{use_base_rules} argument to \code{TRUE} and your resulting \code{.po}/\code{.pot}/\code{.mo} file will match base's.
 
 \bold{Diagnostics:}
 

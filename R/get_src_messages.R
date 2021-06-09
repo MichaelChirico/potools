@@ -24,6 +24,10 @@ get_src_messages = function(dir = ".", translation_macro = "_") {
   msg = rbindlist(lapply(src_files, get_file_src_messages, translation_macro), idcol = "file")
   # TODO(#40): plural messages in src
   msg[ , "type" := "singular"]
+
+  # TODO: R side also uses column_number to sort, but it's ~basically~ not relevant for C... yet
+  setorderv(msg, c("type", "file", "line_number"), c(-1L, 1L, 1L))
+
   msg[type == "singular", "is_repeat" := duplicated(msgid)]
   msg[]
 }

@@ -270,9 +270,8 @@ test_that("Partially named messaging arguments are an error", {
 test_that("Various edge cases in retrieving/outputting messages in R files are handled", {
   restore_package(
     pkg <- test_package("unusual_msg"),
-    tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
-      translate_package(pkg)
+      translate_package(pkg, diagnostics = NULL)
 
       pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
 
@@ -308,8 +307,10 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
 test_that("use_base_rules produces the correct differences", {
   restore_package(
     pkg <- test_package("unusual_msg"),
+    tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
-      translate_package(pkg, diagnostics = NULL)
+      #debug(potools:::run_msgfmt)
+      translate_package(pkg, "es", diagnostics = NULL)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
@@ -324,8 +325,16 @@ test_that("use_base_rules produces the correct differences", {
         # testing no strwrap for many duplicate locations
         "(msg\\.c:[0-9]+ ){10}"
       )
+    }
+  )
+})
 
-      translate_package(pkg, use_base_rules = TRUE, diagnostics = NULL)
+test_that("use_base_rules produces the correct differences", {
+  restore_package(
+    pkg <- test_package("unusual_msg"),
+    tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
+    {
+      translate_package(pkg, "es", use_base_rules = TRUE, diagnostics = NULL)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
@@ -342,6 +351,9 @@ test_that("use_base_rules produces the correct differences", {
       #   # testing no strwrap for many duplicate locations
       #   "(bar\\.c:[0-9]+ ){10}"
       # )
+
+      # MSG.c comes before msg.c (sort/collate order)
+      expect_match(paste(src_pot_lines, collapse='\n'), 'MSGs\\.c.*msg\\.c')
     }
   )
 })

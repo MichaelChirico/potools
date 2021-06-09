@@ -188,7 +188,8 @@ build_po_header = function(params, use_base_rules = FALSE) {
     params$fuzzy_header <- ''
     params$po_revision_date <- params$timestamp
     params$lang_team <- params$full_name_eng
-    params$lang_name <- if (use_base_rules) '' else sprintf('\n"Language: %s\\n"', params$lang_team)
+    # must write Language: in the .po file
+    params$lang_name <- sprintf('\n"Language: %s\\n"', params$lang_team)
     params$charset <- "UTF-8"
     params$plural_forms <- if (params$has_plural) {
       with(params, sprintf('\n"Plural-Forms: nplurals=%s; plural=%s;\\n"', nplurals, plural))
@@ -236,7 +237,6 @@ wrap_strings = function(str, width) {
   boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|.(?=%)', str, perl = TRUE)
   out = character(length(str))
   for (ii in seq_along(str)) {
-    # if (grepl("which is outside range of the length", str[ii], fixed=TRUE)) browser()
     # supplement with the total string width for the case that the last word breaks the width
     boundary = c(boundaries[[ii]], nchar(str[ii]))
     # no places to split this string, so don't. xgettext also seems not to.

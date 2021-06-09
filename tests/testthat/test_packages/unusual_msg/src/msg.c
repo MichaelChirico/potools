@@ -38,5 +38,6 @@ void hello_world(SEXP x) {
   Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
   Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
   Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+
   return;
 }

@@ -83,7 +83,8 @@ get_r_messages <- function (dir) {
     `:=`(line_number = i.line1, column_number = i.col1)
   ]
 
-  # descending 'type' so that "singular" comes before "plural"
+  # descending 'type' so that "singular" comes before "plural".
+  # NB: forder uses C order for file, which happens to match the base behavior to set LC_COLLATE=C
   setorderv(msg, c("type", "file", "line_number", "column_number"), c(-1L, 1L, 1L, 1L))
   # kept id, column_number to get order within lines; can drop now
   msg[ , c('id', 'column_number') := NULL]

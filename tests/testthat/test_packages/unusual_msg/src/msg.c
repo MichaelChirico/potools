@@ -26,5 +26,18 @@ void hello_world(SEXP x) {
   char * msg = "an error occurred";
   error(_(msg));
 
+  // repeat a bunch of times to test the strwrap behavior of file markers
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+  Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
+
   return;
 }

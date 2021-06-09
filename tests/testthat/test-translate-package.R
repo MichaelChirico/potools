@@ -319,6 +319,7 @@ test_that("use_base_rules produces the correct differences", {
         c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular"'),
         fixed = TRUE
       )
+      browser()
       expect_all_match(
         src_pot_lines,
         # testing no strwrap for many duplicate locations

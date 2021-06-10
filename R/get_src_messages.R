@@ -49,45 +49,60 @@ get_file_src_messages = function(file, translation_macro = "_") {
   # since we otherwise would try and find _(msg). Note that the latter array would
   #   be easier to skip because the " would have to be escaped, but we may as well skip
   #   this anyway.
-  quote_idx <- gregexpr('(?:^|(?<!\\\\))"', contents, perl=TRUE)[[1L]]
+  quote_idx <- gregexpr('"', contents, fixed = TRUE)[[1L]]
+  # messy (impossible?) to write a regex for an unescaped quote directly --
+  #   it should be " preceded by an even (0, 2, 4, ...) number of backslashes
+  #   (for an odd number, the pairs become escaped backslashes, the leftover escapes the ").
+  #   instead, find all quotes, then mod out the escaped ones with this _relatively_ tame regex:
+  escape_quote_idx <- gregexpr('[^\\](?:[\\][\\]){0,}[\\]"', contents)[[1L]]
+  quote_idx <- setdiff(quote_idx, escape_quote_idx + attr(escape_quote_idx, "match.length") - 1L)
   if (length(quote_idx) %% 2L != 0L) {
     stop(domain=NA, gettextf(
       'Found an odd number (%d) of unscaped double quotes (") in %s; parsing error.'
     ))
   }
-  array_boundaries <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
-  setnames(array_boundaries, c('start', 'end'))
-  setkeyv(array_boundaries, names(array_boundaries))
+  arrays <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
+  setnames(arrays, c('start', 'end'))
+  setkeyv(arrays, names(arrays))
 
-  # first find all translated arrays
-  translations = data.table(
-    # as.integer to strip attr (don't need match.length)
-    start =  as.integer(
-      gregexpr(sprintf("(?:^|(?<!%s))%s\\(", C_IDENTIFIER_1, translation_macro), contents, perl = TRUE)[[1L]]
-    )
+  # first find all calls
+  call_idx = gregexpr(sprintf("%s\\(", C_IDENTIFIER_REGEX), contents)[[1L]]
+  calls = data.table(
+    call_start = as.integer(call_idx),
+    start = as.integer(call_idx) + attr(call_idx, "match.length") - 1L,
+    fname = substring(contents, call_idx, call_idx + attr(call_idx, "match.length") - 2L)
   )
-  # start with this to mod out false positives with foverlaps
-  translations[ , "end" := start]
-
-  translations[ , "spurious" := foverlaps(translations, array_boundaries, which = TRUE)$yid]
+  calls[ , "end" := start]
+  calls[ , "spurious" := foverlaps(calls, arrays, which = TRUE)$yid]
   # mod out any that happen to be inside a char array
-  translations = translations[is.na(spurious)]
-  translations[ , "spurious" := NULL]
+  calls = calls[is.na(spurious)]
+  calls[ , "spurious" := NULL]
 
-  translations[ , "end" := -1L + vapply(
-    start + macro_width,
+  # slightly wasteful (a 10-times nested call will be skipped over many times), but oh well...
+  #   the largest file in R-devel (src/library/grDevices/src/devPS.c) has O(4K) calls in it. not terrible.
+  #   this step runs in about .75 seconds on that file which is :\
+  # more efficient ideas:
+  #   (1) iterate over calls. whenever stack_size increases, start recording that call too, then update
+  #       all of the calls at once in this table
+  #   (2) restrict focus to known calls; problem is that this approach will inevitably miss translated arrays.
+  calls[ , "end" := -1L + vapply(
+    start,
     skip_parens,
     integer(1L),
     contents_char,
-    array_boundaries
+    arrays
   )]
-  setkeyv(translations, names(translations))
+  setkeyv(calls, names(calls))
 
   # a bit hard to keep track of what names mean what here.
-  #   start,end --> translation_start,translation_end
-  #   i.start,i.end --> array_start, array_end
-  translation_arrays = foverlaps(array_boundaries, translations)
+  #   start,end --> calls$start,calls$end
+  #   i.start,i.end --> arrays$start, arrays$end
+  call_arrays = foverlaps(arrays, translations)
 
+
+    translation_idx = calls[ , fname == translation_macro]
+
+  translations = calls[(translation_idx)]
   # includes all arrays, even e.g. '#include "grid.h"', so not necessarily all relevant
   untranslated_idx = translation_arrays[ , is.na(start)]
   untranslated_arrays = translation_arrays[untranslated_idx]
@@ -113,21 +128,10 @@ get_file_src_messages = function(file, translation_macro = "_") {
     msgid := i.msgid
   ]
 
-  msgid = get_translated_arrays(contents_char, translated_array_idx)
-
-  # regex breakdown:
-  #   (?:^|(?<=[^a-zA-Z_.])) : going for \\b but that doesn't work exactly;
-  #     we want to be sure the matched function isn't part of a larger identifier
-  #     (e.g. matching xRprintf or terror instead of Rprintf or error, resp.)
-  #   (?<call>:%s)\\s*\\(\\s* : %s is a |-separated list of matching calls, e.g.
-  #     Rprintf|error|warning; the identifier can be followed by whitespace, but
-  #     we make sure to include the "(" which assures we're at a call to the function.
-  #     Terminal \\s* assures that the match "lands" just when the char array should
-  #     appear, if it's there.
-  #   (?<trans>%s\\s*\\()?\\s* : %s is the translation_macro, _ by recommendation in WRE;
-  #     this assures we capture arrays which are already marked for translation
-  #     correctly. Presence/absence of this is crucial for informing the user about
-  #     potentially-untranslated char arrays, so we capture this group.
+  call_idx = gregexpr(sprintf("%s\\(", C_IDENTIFIER_REGEX), contents)
+  calls = data.table(
+    start = as.integer()
+  )
   msg_match = gregexpr(
     sprintf(
       "(?:^|(?<=[^a-zA-Z_.]))(?<call>%s)\\s*\\(\\s*(?<trans>%s\\s*\\()?\\s*",

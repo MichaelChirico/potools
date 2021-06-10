@@ -41,6 +41,45 @@ get_file_src_messages = function(file, translation_macro = "_") {
 
   newlines_loc = c(0L, as.integer(gregexpr("\n", contents, fixed = TRUE)[[1L]]))
 
+  # need to strip out arrays from matching translation arrays, e.g. if we have
+  #   Rprintf(_("a really annoying _(msg) nested _(\"array\")"));
+  # since we otherwise would try and find _(msg). Note that the latter array would
+  #   be easier to skip because the " would have to be escaped, but we may as well skip
+  #   this anyway.
+  quote_idx <- gregexpr('(?:^|(?<!\\\\))"', contents, perl=TRUE)[[1L]]
+  if (length(quote_idx) %% 2L != 0L) {
+    stop(domain=NA, gettextf(
+      'Found an odd number (%d) of unscaped double quotes (") in %s; parsing error.'
+    ))
+  }
+  array_boundaries <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
+  setnames(array_boundaries, c('start', 'end'))
+  setkeyv(array_boundaries, names(array_boundaries))
+
+  # first find all translated arrays
+  translated_arrays = data.table(
+    start =  gregexpr(sprintf("(?:^|(?<!%s))%s\\(", C_IDENTIFIER_1, translation_macro), contents, perl = TRUE)[[1L]]
+  )
+  # start with this to mod out false positives with foverlaps
+  translated_arrays[ , "end" := start]
+
+  translated_arrays[ , "spurious" = foverlaps(translated_arrays, array_boundaries, which = TRUE)]
+  translated_arrays = translated_arrays[is.na(spurious$yid)]
+
+
+  translated_array_end_idx <- vapply(
+    translated_array_start_idx + 1L,
+    skip_parens,
+    contents_char,
+    integer(1L)
+  )
+
+  # mod out any that happen to be inside a char array
+  translated_array_idx <-
+
+
+  msgid = get_translated_arrays(contents_char, translated_array_idx)
+
   # regex breakdown:
   #   (?:^|(?<=[^a-zA-Z_.])) : going for \\b but that doesn't work exactly;
   #     we want to be sure the matched function isn't part of a larger identifier
@@ -113,7 +152,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
         # add this completed array to our string
         string = paste0(string, substr(contents, ii+1L, jj-1L))
         # jump past " and any subsequent whitespace
-        jj = skip_white(contents_char, jj + 1L)
+        jj = skip_white(jj + 1L, contents_char)
         if (jj > nn) {
           stop("File terminated before translation array completed")
         }
@@ -130,7 +169,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
           kk = jj + 1L
           while (grepl(C_IDENTIFIER_REST, contents_char[kk])) { kk = kk + 1L }
           string = paste0(string, "<", substr(contents, jj, kk-1L), ">")
-          ii = skip_white(contents_char, kk)
+          ii = skip_white(kk, contents_char)
           # e.g. error(_("... %"PRId64"!=%"PRId64), ...);
           if (contents_char[ii] == ")") {
             stack_size = stack_size - 1L
@@ -141,7 +180,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
           ii = jj
         } else if (contents_char[jj] == "\\" && jj < nn && contents_char[jj+1L] %chin% c("\n", "\r")) {
           # line continuation, e.g. as seen in src/library/stats/src/optimize.c:686 as of r80365.
-          ii = skip_white(contents_char, jj + 2L)
+          ii = skip_white(jj + 2L, contents_char)
         } else {
           stop('Unexpected sequence -- a char array not followed by whitespace then any of [,)"] or a macro')
         }
@@ -208,11 +247,107 @@ preprocess = function(contents) {
   return(contents)
 }
 
-skip_white = function(chars, from_idx) {
-  jj = from_idx
+skip_white = function(jj, chars) {
   nn = length(chars)
   while (jj <= nn && chars[jj] %chin% c(" ", "\n", "\r", "\t")) { jj = jj + 1L }
+  if (jj > nn) stop("Reached end of file while trying to skip whitespace")
   return(jj)
+}
+
+skip_parens = function(jj, chars, array_boundaries) {
+  if (chars[jj] != "(")
+    stop(domain=NA, gettextf("Expected to start from '(', but chars[%d]='%s'", jj, chars[jj]))
+
+  nn = length(chars)
+  stack_size = 1L
+  jj = jj + 1L
+  while (jj <= nn && stack_size > 0L) {
+    switch(
+      chars[jj],
+      ')' = { stack_size = stack_size - 1L; jj = jj + 1L },
+      '"' = { jj = array_boundaries[.(jj), end] + 1L }
+      { jj = jj + 1L }
+    )
+  }
+}
+
+get_translated_arrays = function(msg_start, contents_char, contents) {
+  nn = length(contents_char)
+
+  ii = skip_white(msg_start + 1L, contents_char)
+
+  string = ""
+  stack_size = 1L
+  if (contents_char[ii] == '"') {
+    # each iteration of this repeat adds on another char array. recall that in C
+    #   "a string " "another " "string"
+    #   automatically concatenates to "a string another string" (as a way to facilitate
+    #   char arrays spanning several lines). keep accumulating these until the end of
+    #   the translation macro, i.e., )
+    repeat {
+      jj = ii + 1L
+      # jj starts on the character after the initial "; iterate along until we find the
+      #   next _unescaped_ " (which is where jj is when we terminate)
+      while (jj <= nn) {
+        switch(
+          contents_char[jj],
+          '"' = break,
+          '\\' = { jj = jj + 2L },
+          { jj = jj + 1L }
+        )
+      }
+      if (jj > nn) {
+        stop("File terminated before char array completed")
+      }
+      # add this completed array to our string
+      string = paste0(string, substr(contents, ii+1L, jj-1L))
+      # jump past " and any subsequent whitespace
+      jj = skip_white(jj + 1L, contents_char)
+      if (jj > nn) {
+        stop("File terminated before translation array completed")
+      }
+      if (contents_char[jj] == ")") {
+        stack_size = stack_size - 1L
+        jj = jj + 1L
+        break
+        # could be macro-designated format string like "Item %d of lower (%"PRId64") is greater..."
+        #   which needs to come out like "Item %d of lower (%<PRId64>) is greater..." in the .pot
+      } else if (grepl(C_IDENTIFIER_1, contents_char[jj])) {
+        kk = jj + 1L
+        while (grepl(C_IDENTIFIER_REST, contents_char[kk])) { kk = kk + 1L }
+        string = paste0(string, "<", substr(contents, jj, kk-1L), ">")
+        ii = skip_white(kk, contents_char)
+        # e.g. error(_("... %"PRId64"!=%"PRId64), ...);
+        if (contents_char[ii] == ")") {
+          stack_size = stack_size - 1L
+          jj = ii + 1L
+          break
+        }
+      } else if (contents_char[jj] == '"') {
+        ii = jj
+      } else if (contents_char[jj] == "\\" && jj < nn && contents_char[jj+1L] %chin% c("\n", "\r")) {
+        # line continuation, e.g. as seen in src/library/stats/src/optimize.c:686 as of r80365.
+        ii = skip_white(jj + 2L, contents_char)
+      } else {
+        stop('Unexpected sequence -- a char array not followed by whitespace then any of [)"] or a macro')
+      }
+    }
+  } else {
+    jj = ii
+  }
+  while (jj <= nn && stack_size > 0L) {
+    if (contents_char[jj] == "(") {
+      stack_size = stack_size + 1L
+    } else if (contents_char[jj] == ")") {
+      stack_size = stack_size - 1L
+    }
+    jj = jj + 1L
+  }
+  if (jj > nn) {
+    stop("File terminated before message call completed")
+  }
+
+  string
 }
 
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}

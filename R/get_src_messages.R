@@ -151,23 +151,10 @@ get_file_src_messages = function(file, translation_macro = "_") {
   ]
 
   # drop calls associated with a translation
+  # TODO: also drop unknown call names (start with MESSAGE_CALLS)
   call_arrays = call_arrays[!translations, on = 'call_start']
 
-  if (nrow(call_arrays)) browser()
-
-  call_idx = gregexpr(sprintf("%s\\(", C_IDENTIFIER_REGEX), contents)
-  calls = data.table(
-    start = as.integer()
-  )
-  msg_match = gregexpr(
-    sprintf(
-      "(?:^|(?<=[^a-zA-Z_.]))(?<call>%s)\\s*\\(\\s*(?<trans>%s\\s*\\()?\\s*",
-      paste(MESSAGE_CALLS, collapse = "|"),
-      translation_macro
-    ),
-    contents,
-    perl = TRUE
-  )[[1L]]
+  if (nrow(call_arrays)) browser() else return()
 
   # no matches in the file; return empty
   if (length(msg_match) == 1L && msg_match[1L] == -1L) {
@@ -177,96 +164,6 @@ get_file_src_messages = function(file, translation_macro = "_") {
       line_number = integer(),
       is_marked_for_translation = logical()
     ))
-  }
-
-  msg_start = as.integer(msg_match) + attr(msg_match, "match.length")
-  # more verbosely, "is marked for translation"
-  is_translated = attr(msg_match, "capture.length")[ , "trans"] > 0L
-  # find which line each message starts on
-  msg_line = findInterval(msg_match, newlines_loc)
-
-  # inherits msg_match, msg_start, is_translated, contents, contents_char, nn
-  nn = length(contents_char)
-  get_call_message = function(msg_i) {
-    ii = msg_start[msg_i]
-
-    string = ""
-    # regex landed us after ( in untranslated calls and after (_( in translated ones
-    stack_size = if (is_translated[msg_i]) 2L else 1L
-    if (contents_char[ii] == '"') {
-      # each iteration of this repeat adds on another char array. recall that in C
-      #   "a string " "another " "string"
-      #   automatically concatenates to "a string another string" (as a way to facilitate
-      #   char arrays spanning several lines). keep accumulating these until the end of
-      #   the function argument, i.e., hitting a ',' (multi-argument call)
-      #   or a ')' (single-argument call)
-      repeat {
-        jj = ii + 1L
-        # jj starts on the character after the initial "; iterate along until we find the
-        #   next _unescaped_ " (which is where jj is when we terminate)
-        while (jj <= nn) {
-          switch(
-            contents_char[jj],
-            '"' = break,
-            '\\' = { jj = jj + 2L },
-            { jj = jj + 1L }
-          )
-        }
-        if (jj > nn) {
-          stop("File terminated before char array completed")
-        }
-        # add this completed array to our string
-        string = paste0(string, substr(contents, ii+1L, jj-1L))
-        # jump past " and any subsequent whitespace
-        jj = skip_white(jj + 1L, contents_char)
-        if (jj > nn) {
-          stop("File terminated before translation array completed")
-        }
-        if (contents_char[jj] == ")") {
-          stack_size = stack_size - 1L
-          jj = jj + 1L
-          break
-        } else if (contents_char[jj] == ",") {
-          jj = jj + 1L
-          break
-          # could be macro-designated format string like "Item %d of lower (%"PRId64") is greater..."
-          #   which needs to come out like "Item %d of lower (%<PRId64>) is greater..." in the .pot
-        } else if (grepl(C_IDENTIFIER_1, contents_char[jj])) {
-          kk = jj + 1L
-          while (grepl(C_IDENTIFIER_REST, contents_char[kk])) { kk = kk + 1L }
-          string = paste0(string, "<", substr(contents, jj, kk-1L), ">")
-          ii = skip_white(kk, contents_char)
-          # e.g. error(_("... %"PRId64"!=%"PRId64), ...);
-          if (contents_char[ii] == ")") {
-            stack_size = stack_size - 1L
-            jj = ii + 1L
-            break
-          }
-        } else if (contents_char[jj] == '"') {
-          ii = jj
-        } else if (contents_char[jj] == "\\" && jj < nn && contents_char[jj+1L] %chin% c("\n", "\r")) {
-          # line continuation, e.g. as seen in src/library/stats/src/optimize.c:686 as of r80365.
-          ii = skip_white(jj + 2L, contents_char)
-        } else {
-          stop('Unexpected sequence -- a char array not followed by whitespace then any of [,)"] or a macro')
-        }
-      }
-    } else {
-      jj = ii
-    }
-    while (jj <= nn && stack_size > 0L) {
-      if (contents_char[jj] == "(") {
-        stack_size = stack_size + 1L
-      } else if (contents_char[jj] == ")") {
-        stack_size = stack_size - 1L
-      }
-      jj = jj + 1L
-    }
-    if (jj > nn) {
-      stop("File terminated before message call completed")
-    }
-
-    return(list(call = substr(contents, msg_match[msg_i], jj), msgid = string))
   }
 
   src_messages = rbindlist(lapply(seq_along(msg_match), get_call_message))

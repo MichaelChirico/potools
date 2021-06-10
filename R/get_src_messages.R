@@ -41,6 +41,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
 
   newlines_loc = c(0L, as.integer(gregexpr("\n", contents, fixed = TRUE)[[1L]]))
 
+  browser()
   # need to strip out arrays from matching translation arrays, e.g. if we have
   #   Rprintf(_("a really annoying _(msg) nested _(\"array\")"));
   # since we otherwise would try and find _(msg). Note that the latter array would
@@ -57,26 +58,43 @@ get_file_src_messages = function(file, translation_macro = "_") {
   setkeyv(array_boundaries, names(array_boundaries))
 
   # first find all translated arrays
-  translated_arrays = data.table(
+  translations = data.table(
     start =  gregexpr(sprintf("(?:^|(?<!%s))%s\\(", C_IDENTIFIER_1, translation_macro), contents, perl = TRUE)[[1L]]
   )
   # start with this to mod out false positives with foverlaps
-  translated_arrays[ , "end" := start]
+  translations[ , "end" := start]
 
-  translated_arrays[ , "spurious" = foverlaps(translated_arrays, array_boundaries, which = TRUE)]
-  translated_arrays = translated_arrays[is.na(spurious$yid)]
-
-
-  translated_array_end_idx <- vapply(
-    translated_array_start_idx + 1L,
-    skip_parens,
-    contents_char,
-    integer(1L)
-  )
-
+  translations[ , "spurious" := foverlaps(translations, array_boundaries, which = TRUE)$yid]
   # mod out any that happen to be inside a char array
-  translated_array_idx <-
+  translations = translations[is.na(spurious)]
+  translations[ , "spurious" := NULL]
 
+  translations[ , "end" := -1L + vapply(
+    start + nchar(translation_macro),
+    skip_parens,
+    integer(1L),
+    contents_char,
+    array_boundaries
+  )]
+  setkeyv(translations, names(translations))
+
+  translation_arrays = foverlaps(array_boundaries, translations)
+
+  # includes all arrays, even e.g. '#include "grid.h"', so not necessarily all relevant
+  untranslated_idx = translation_arrays[ , is.na(start)]
+  untranslated_arrays = translation_arrays[untranslated_idx]
+  untranslated_arrays[ , c("start", "end") := NULL]
+  setnames(untranslated_arrays, c("start", "end"))
+
+  translation_arrays = translation_arrays[!untranslated_idx]
+  singular_array_idx = translation_arrays[ , start + 1 + nchar(translation_macro) == i.start & i.end + 1 == end]
+  translations[
+    translation_arrays[singular_array_idx],
+    on = c('start', 'end'),
+    msgid := substring(contents, i.start + 1L, i.end - 1L)
+  ]
+
+  translation_arrays = translation_arrays[!(singular_array_idx)]
 
   msgid = get_translated_arrays(contents_char, translated_array_idx)
 
@@ -265,10 +283,11 @@ skip_parens = function(jj, chars, array_boundaries) {
     switch(
       chars[jj],
       ')' = { stack_size = stack_size - 1L; jj = jj + 1L },
-      '"' = { jj = array_boundaries[.(jj), end] + 1L }
+      '"' = { jj = array_boundaries[.(jj), end] + 1L },
       { jj = jj + 1L }
     )
   }
+  jj
 }
 
 get_translated_arrays = function(msg_start, contents_char, contents) {

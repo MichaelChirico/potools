@@ -43,7 +43,6 @@ get_file_src_messages = function(file, translation_macro = "_") {
 
   newlines_loc = c(0L, as.integer(gregexpr("\n", contents, fixed = TRUE)[[1L]]))
 
-  browser()
   # need to strip out arrays from matching translation arrays, e.g. if we have
   #   Rprintf(_("a really annoying _(msg) nested _(\"array\")"));
   # since we otherwise would try and find _(msg). Note that the latter array would
@@ -55,36 +54,47 @@ get_file_src_messages = function(file, translation_macro = "_") {
   #   (for an odd number, the pairs become escaped backslashes, the leftover escapes the ").
   #   instead, find all quotes, then mod out the escaped ones with this _relatively_ tame regex:
   escape_quote_idx <- gregexpr('[^\\](?:[\\][\\]){0,}[\\]"', contents)[[1L]]
-  quote_idx <- setdiff(quote_idx, escape_quote_idx + attr(escape_quote_idx, "match.length") - 1L)
+  # also remove literal char elements '"'
+  quote_char_idx <- gregexpr("'\"'", contents, fixed = TRUE)[[1L]]
+  quote_idx <- setdiff(
+    quote_idx,
+    c(
+      escape_quote_idx + attr(escape_quote_idx, "match.length") - 1L,
+      quote_char_idx + attr(quote_char_idx, "match.length") - 2L
+    )
+  )
   if (length(quote_idx) %% 2L != 0L) {
     stop(domain=NA, gettextf(
       'Found an odd number (%d) of unscaped double quotes (") in %s; parsing error.'
     ))
   }
   arrays <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
-  setnames(arrays, c('start', 'end'))
+  setnames(arrays, c('array_start', 'array_end'))
   setkeyv(arrays, names(arrays))
 
   # first find all calls.
   call_idx = gregexpr(sprintf("%s\\s*\\(", C_IDENTIFIER_REGEX), contents)[[1L]]
   calls = data.table(
     call_start = as.integer(call_idx),
-    start = as.integer(call_idx) + attr(call_idx, "match.length") - 1L,
+    paren_start = as.integer(call_idx) + attr(call_idx, "match.length") - 1L,
     fname = trimws(substring(contents, call_idx, call_idx + attr(call_idx, "match.length") - 2L), "right")
   )
   # remove common false positives for efficiency
   calls = calls[!fname %chin% c(
     "if", "while", "for", "switch", "return",
     "PROTECT", "UNPROTECT", "free", "malloc", "Calloc",
-    "TYPEOF", "sizeof", "INHERITS", "type2char", "copyMostAttrib", "LENGTH", "length", "strlen",
+    "TYPEOF", "sizeof", "INHERITS", "type2char", "LENGTH", "length", "xlength", "strlen",
+    "copyMostAttrib", "getAttrib", "setAttrib", "R_compute_identical",
     "SET_STRING_ELT", "STRING_ELT", "CHAR", "SET_VECTOR_ELT", "VECTOR_ELT", "SEXPPTR_RO", "STRING_PTR",
-    "LOGICAL", "INTEGER", "REAL", "COMPLEX", "CAR", "CDR", "CADR", "checkArity"
+    "LOGICAL", "INTEGER", "REAL", "COMPLEX", "CAR", "CDR", "CADR", "checkArity",
+    "isFactor", "isLogical", "isInteger", "isReal", "isString", "isS4", "isNull"
   )]
-  calls[ , "end" := start]
-  calls[ , "spurious" := foverlaps(calls, arrays, which = TRUE)$yid]
+  calls[ , "paren_end" := paren_start]
+
+  calls[ , "non_spurious" := is.na(foverlaps(calls, arrays, by.x = c('paren_start', 'paren_end'), which = TRUE)$yid)]
   # mod out any that happen to be inside a char array
-  calls = calls[is.na(spurious)]
-  calls[ , "spurious" := NULL]
+  calls = calls[(non_spurious)]
+  calls[ , "non_spurious" := NULL]
 
   # slightly wasteful (a 10-times nested call will be skipped over many times), but oh well...
   #   the largest file in R-devel (src/library/grDevices/src/devPS.c) has O(4K) calls in it. not terrible.
@@ -94,49 +104,56 @@ get_file_src_messages = function(file, translation_macro = "_") {
   #       all of the calls at once in this table
   #   (2) restrict focus to known calls; problem is that this approach will inevitably miss translated arrays
   #   (3) gregexpr("[()]", contents) to pre-fetch all the parens rather than checking characters individually
+  #       * could be used to make a rudimentary AST? associate each ( / ) pair with ascendants/descendants?
   #   (4) implement a C parser/AST builder :|
   #   (5) write this (or the whole function?) in C
-  calls[ , "end" := -1L + vapply(
-    start,
+  calls[ , "paren_end" := -1L + vapply(
+    paren_start,
     skip_parens,
     integer(1L),
     contents_char,
     arrays
   )]
-  setkeyv(calls, c('start', 'end'))
-
-  # a bit hard to keep track of what names mean what here.
-  #   start,end --> calls$start,calls$end
-  #   i.start,i.end --> arrays$start, arrays$end
-  call_arrays = foverlaps(arrays, calls)
+  setkeyv(calls, c('paren_start', 'paren_end'))
 
   translation_idx = calls[ , fname == translation_macro]
+  translations = calls[(translation_idx), .(paren_start, paren_end)]
 
-  translations = calls[(translation_idx)]
-  # includes all arrays, even e.g. '#include "grid.h"', so not necessarily all relevant
-  untranslated_idx = translation_arrays[ , is.na(start)]
-  untranslated_arrays = translation_arrays[untranslated_idx]
-  untranslated_arrays[ , c("start", "end") := NULL]
-  setnames(untranslated_arrays, c("start", "end"))
+  # nomatch=NULL: drop arrays appearing outside _any_ call (for now?)
+  call_arrays = foverlaps(arrays, calls, by.x = c('array_start', 'array_end'), nomatch=NULL)
 
-  # simple case: translation is just _("..."), done.
-  translation_arrays = translation_arrays[!untranslated_idx]
-  singular_array_idx = translation_arrays[ , start + 1 + macro_width == i.start & i.end + 1 == end]
+  calls = calls[(!translation_idx)]
+
+  # associate each translation
+  singular_array_idx = call_arrays[ , paren_start == array_start - 1L & paren_end == array_end + 1]
+  translation_array_idx = call_arrays[ , fname == translation_macro]
   translations[
-    translation_arrays[singular_array_idx],
-    on = c('start', 'end'),
-    msgid := substring(contents, i.start + 1L, i.end - 1L)
+    call_arrays[translation_array_idx & singular_array_idx],
+    on = c('paren_start', 'paren_end'),
+    msgid := substring(contents, array_start + 1L, array_end - 1L)
   ]
 
   translations[
-    translation_arrays[
-      !(singular_array_idx),
-      .(msgid = build_msgid(.BY$start + 1 + macro_width, .BY$end - 1L, i.start, i.end, contents)),
-      by= .(start, end)
+    call_arrays[
+      translation_array_idx & !singular_array_idx,
+      .(msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents)),
+      by= .(paren_start, paren_end)
     ],
-    on = c('start', 'end'),
+    on = c('paren_start', 'paren_end'),
     msgid := i.msgid
   ]
+
+  call_arrays = call_arrays[(!translation_array_idx)]
+  translations[
+    call_arrays,
+    on = .(paren_start > paren_start, paren_end < paren_end),
+    c('call', 'call_start') := .(substring(contents, i.call_start, i.paren_end), i.call_start)
+  ]
+
+  # drop calls associated with a translation
+  call_arrays = call_arrays[!translations, on = 'call_start']
+
+  if (nrow(call_arrays)) browser()
 
   call_idx = gregexpr(sprintf("%s\\(", C_IDENTIFIER_REGEX), contents)
   calls = data.table(
@@ -313,8 +330,9 @@ skip_parens = function(jj, chars, array_boundaries) {
   while (jj <= nn && stack_size > 0L) {
     switch(
       chars[jj],
+      '(' = { stack_size = stack_size + 1L; jj = jj + 1L },
       ')' = { stack_size = stack_size - 1L; jj = jj + 1L },
-      '"' = { jj = array_boundaries[.(jj), end] + 1L },
+      '"' = { jj = array_boundaries[.(jj), array_end] + 1L },
       { jj = jj + 1L }
     )
   }
@@ -325,8 +343,8 @@ build_msgid = function(left, right, starts, ends, contents) {
   # we have one or several macros between `_(` and `)`, between which is "grout".
   #   NB: we could have _("array ending with formatter: %"PRId64). I'm not sure it's possible
   #   for an array to start with a macro, but leave the logic to check here anyway
-  grout_left = c(left, ends + 1L)
-  grout_right = c(starts - 1L, right)
+  grout_left = c(left + 1L, ends + 1L)
+  grout_right = c(starts - 1L, right - 1L)
 
   # drop the first & last if there's no whitespace between `_(` and `"` or `"` and `)`
   valid_idx = grout_left < grout_right

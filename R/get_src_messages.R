@@ -65,13 +65,21 @@ get_file_src_messages = function(file, translation_macro = "_") {
   setnames(arrays, c('start', 'end'))
   setkeyv(arrays, names(arrays))
 
-  # first find all calls
-  call_idx = gregexpr(sprintf("%s\\(", C_IDENTIFIER_REGEX), contents)[[1L]]
+  # first find all calls.
+  call_idx = gregexpr(sprintf("%s\\s*\\(", C_IDENTIFIER_REGEX), contents)[[1L]]
   calls = data.table(
     call_start = as.integer(call_idx),
     start = as.integer(call_idx) + attr(call_idx, "match.length") - 1L,
-    fname = substring(contents, call_idx, call_idx + attr(call_idx, "match.length") - 2L)
+    fname = trimws(substring(contents, call_idx, call_idx + attr(call_idx, "match.length") - 2L), "right")
   )
+  # remove common false positives for efficiency
+  calls = calls[!fname %chin% c(
+    "if", "while", "for", "switch", "return",
+    "PROTECT", "UNPROTECT", "free", "malloc", "Calloc",
+    "TYPEOF", "sizeof", "INHERITS", "type2char", "copyMostAttrib", "LENGTH", "length", "strlen",
+    "SET_STRING_ELT", "STRING_ELT", "CHAR", "SET_VECTOR_ELT", "VECTOR_ELT", "SEXPPTR_RO", "STRING_PTR",
+    "LOGICAL", "INTEGER", "REAL", "COMPLEX", "CAR", "CDR", "CADR", "checkArity"
+  )]
   calls[ , "end" := start]
   calls[ , "spurious" := foverlaps(calls, arrays, which = TRUE)$yid]
   # mod out any that happen to be inside a char array
@@ -84,7 +92,10 @@ get_file_src_messages = function(file, translation_macro = "_") {
   # more efficient ideas:
   #   (1) iterate over calls. whenever stack_size increases, start recording that call too, then update
   #       all of the calls at once in this table
-  #   (2) restrict focus to known calls; problem is that this approach will inevitably miss translated arrays.
+  #   (2) restrict focus to known calls; problem is that this approach will inevitably miss translated arrays
+  #   (3) gregexpr("[()]", contents) to pre-fetch all the parens rather than checking characters individually
+  #   (4) implement a C parser/AST builder :|
+  #   (5) write this (or the whole function?) in C
   calls[ , "end" := -1L + vapply(
     start,
     skip_parens,
@@ -92,15 +103,14 @@ get_file_src_messages = function(file, translation_macro = "_") {
     contents_char,
     arrays
   )]
-  setkeyv(calls, names(calls))
+  setkeyv(calls, c('start', 'end'))
 
   # a bit hard to keep track of what names mean what here.
   #   start,end --> calls$start,calls$end
   #   i.start,i.end --> arrays$start, arrays$end
-  call_arrays = foverlaps(arrays, translations)
+  call_arrays = foverlaps(arrays, calls)
 
-
-    translation_idx = calls[ , fname == translation_macro]
+  translation_idx = calls[ , fname == translation_macro]
 
   translations = calls[(translation_idx)]
   # includes all arrays, even e.g. '#include "grid.h"', so not necessarily all relevant

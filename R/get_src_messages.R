@@ -33,6 +33,8 @@ get_src_messages = function(dir = ".", translation_macro = "_") {
 }
 
 get_file_src_messages = function(file, translation_macro = "_") {
+  macro_width = nchar(translation_macro)
+
   contents = readChar(file, file.size(file))
   # as a vector of single characters
   contents_char = preprocess(strsplit(contents, NULL)[[1L]])
@@ -59,7 +61,10 @@ get_file_src_messages = function(file, translation_macro = "_") {
 
   # first find all translated arrays
   translations = data.table(
-    start =  gregexpr(sprintf("(?:^|(?<!%s))%s\\(", C_IDENTIFIER_1, translation_macro), contents, perl = TRUE)[[1L]]
+    # as.integer to strip attr (don't need match.length)
+    start =  as.integer(
+      gregexpr(sprintf("(?:^|(?<!%s))%s\\(", C_IDENTIFIER_1, translation_macro), contents, perl = TRUE)[[1L]]
+    )
   )
   # start with this to mod out false positives with foverlaps
   translations[ , "end" := start]
@@ -70,7 +75,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
   translations[ , "spurious" := NULL]
 
   translations[ , "end" := -1L + vapply(
-    start + nchar(translation_macro),
+    start + macro_width,
     skip_parens,
     integer(1L),
     contents_char,
@@ -78,6 +83,9 @@ get_file_src_messages = function(file, translation_macro = "_") {
   )]
   setkeyv(translations, names(translations))
 
+  # a bit hard to keep track of what names mean what here.
+  #   start,end --> translation_start,translation_end
+  #   i.start,i.end --> array_start, array_end
   translation_arrays = foverlaps(array_boundaries, translations)
 
   # includes all arrays, even e.g. '#include "grid.h"', so not necessarily all relevant
@@ -86,15 +94,24 @@ get_file_src_messages = function(file, translation_macro = "_") {
   untranslated_arrays[ , c("start", "end") := NULL]
   setnames(untranslated_arrays, c("start", "end"))
 
+  # simple case: translation is just _("..."), done.
   translation_arrays = translation_arrays[!untranslated_idx]
-  singular_array_idx = translation_arrays[ , start + 1 + nchar(translation_macro) == i.start & i.end + 1 == end]
+  singular_array_idx = translation_arrays[ , start + 1 + macro_width == i.start & i.end + 1 == end]
   translations[
     translation_arrays[singular_array_idx],
     on = c('start', 'end'),
     msgid := substring(contents, i.start + 1L, i.end - 1L)
   ]
 
-  translation_arrays = translation_arrays[!(singular_array_idx)]
+  translations[
+    translation_arrays[
+      !(singular_array_idx),
+      .(msgid = build_msgid(.BY$start + 1 + macro_width, .BY$end - 1L, i.start, i.end, contents)),
+      by= .(start, end)
+    ],
+    on = c('start', 'end'),
+    msgid := i.msgid
+  ]
 
   msgid = get_translated_arrays(contents_char, translated_array_idx)
 
@@ -290,83 +307,31 @@ skip_parens = function(jj, chars, array_boundaries) {
   jj
 }
 
-get_translated_arrays = function(msg_start, contents_char, contents) {
-  nn = length(contents_char)
+build_msgid = function(left, right, starts, ends, contents) {
+  # we have one or several macros between `_(` and `)`, between which is "grout".
+  #   NB: we could have _("array ending with formatter: %"PRId64). I'm not sure it's possible
+  #   for an array to start with a macro, but leave the logic to check here anyway
+  grout_left = c(left, ends + 1L)
+  grout_right = c(starts - 1L, right)
 
-  ii = skip_white(msg_start + 1L, contents_char)
+  # drop the first & last if there's no whitespace between `_(` and `"` or `"` and `)`
+  valid_idx = grout_left < grout_right
+  grout = character(length(starts) + 1L)
+  grout[valid_idx] = substring(contents, grout_left[valid_idx], grout_right[valid_idx])
 
-  string = ""
-  stack_size = 1L
-  if (contents_char[ii] == '"') {
-    # each iteration of this repeat adds on another char array. recall that in C
-    #   "a string " "another " "string"
-    #   automatically concatenates to "a string another string" (as a way to facilitate
-    #   char arrays spanning several lines). keep accumulating these until the end of
-    #   the translation macro, i.e., )
-    repeat {
-      jj = ii + 1L
-      # jj starts on the character after the initial "; iterate along until we find the
-      #   next _unescaped_ " (which is where jj is when we terminate)
-      while (jj <= nn) {
-        switch(
-          contents_char[jj],
-          '"' = break,
-          '\\' = { jj = jj + 2L },
-          { jj = jj + 1L }
-        )
-      }
-      if (jj > nn) {
-        stop("File terminated before char array completed")
-      }
-      # add this completed array to our string
-      string = paste0(string, substr(contents, ii+1L, jj-1L))
-      # jump past " and any subsequent whitespace
-      jj = skip_white(jj + 1L, contents_char)
-      if (jj > nn) {
-        stop("File terminated before translation array completed")
-      }
-      if (contents_char[jj] == ")") {
-        stack_size = stack_size - 1L
-        jj = jj + 1L
-        break
-        # could be macro-designated format string like "Item %d of lower (%"PRId64") is greater..."
-        #   which needs to come out like "Item %d of lower (%<PRId64>) is greater..." in the .pot
-      } else if (grepl(C_IDENTIFIER_1, contents_char[jj])) {
-        kk = jj + 1L
-        while (grepl(C_IDENTIFIER_REST, contents_char[kk])) { kk = kk + 1L }
-        string = paste0(string, "<", substr(contents, jj, kk-1L), ">")
-        ii = skip_white(kk, contents_char)
-        # e.g. error(_("... %"PRId64"!=%"PRId64), ...);
-        if (contents_char[ii] == ")") {
-          stack_size = stack_size - 1L
-          jj = ii + 1L
-          break
-        }
-      } else if (contents_char[jj] == '"') {
-        ii = jj
-      } else if (contents_char[jj] == "\\" && jj < nn && contents_char[jj+1L] %chin% c("\n", "\r")) {
-        # line continuation, e.g. as seen in src/library/stats/src/optimize.c:686 as of r80365.
-        ii = skip_white(jj + 2L, contents_char)
-      } else {
-        stop('Unexpected sequence -- a char array not followed by whitespace then any of [)"] or a macro')
-      }
-    }
-  } else {
-    jj = ii
-  }
-  while (jj <= nn && stack_size > 0L) {
-    if (contents_char[jj] == "(") {
-      stack_size = stack_size + 1L
-    } else if (contents_char[jj] == ")") {
-      stack_size = stack_size - 1L
-    }
-    jj = jj + 1L
-  }
-  if (jj > nn) {
-    stop("File terminated before message call completed")
-  }
+  # drop spurious whitespace
+  grout = gsub("[ \n\r\t]", "", grout)
 
-  string
+  # pad macros (e.g. "a formatter with %"PRId64" becomes" --> "a formatter with %<PRId64> becomes")
+  macro_idx = nzchar(grout)
+  grout[macro_idx] = paste0("<", grout[macro_idx], ">")
+
+  msgid = character(2L * length(starts) + 1L)
+  msgid[1L + 2L * seq_along(grout)] = grout
+  msgid[2L + 2L * seq_along(starts)] = substring(contents, starts+1L, ends-1L)
+
+  # combine
+  paste(msgid, collapse = "")
 }
 
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}

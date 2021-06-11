@@ -246,13 +246,6 @@ preprocess = function(contents) {
   return(contents)
 }
 
-skip_white = function(jj, chars) {
-  nn = length(chars)
-  while (jj <= nn && chars[jj] %chin% c(" ", "\n", "\r", "\t")) { jj = jj + 1L }
-  if (jj > nn) stop("Reached end of file while trying to skip whitespace")
-  return(jj)
-}
-
 skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
   nn = length(chars)
   stack_size = 1L

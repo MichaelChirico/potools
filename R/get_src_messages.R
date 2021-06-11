@@ -294,7 +294,7 @@ build_msgid = function(left, right, starts, ends, contents) {
 
   # pad macros (e.g. "a formatter with %"PRId64" becomes" --> "a formatter with %<PRId64> becomes")
   macro_idx = nzchar(grout)
-  grout[macro_idx] = paste0("<", grout[macro_idx], ">")
+  grout[macro_idx] = paste0("<", trimws(grout[macro_idx]), ">")
 
   msgid = character(2L * length(starts) + 1L)
   msgid[1L + 2L * seq_along(grout)] = grout

@@ -64,9 +64,9 @@ get_file_src_messages = function(file, translation_macro = "_") {
     )
   )
   if (length(quote_idx) %% 2L != 0L) {
-    stop(domain=NA, gettextf(
-      'Found an odd number (%d) of unscaped double quotes (") in %s; parsing error.',
-      length(quote_idx)
+    stop(domain=NA, call. = FALSE, gettextf(
+      'Parsing error: found an odd number (%d) of unscaped double quotes (") in %s.',
+      length(quote_idx), file
     ))
   }
   arrays <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
@@ -113,7 +113,9 @@ get_file_src_messages = function(file, translation_macro = "_") {
     skip_parens,
     integer(1L),
     contents_char,
-    arrays
+    arrays,
+    file,
+    newlines_loc
   )]
   setkeyv(calls, c('paren_start', 'paren_end'))
 
@@ -241,13 +243,10 @@ skip_white = function(jj, chars) {
   return(jj)
 }
 
-skip_parens = function(jj, chars, array_boundaries) {
-  if (chars[jj] != "(")
-    stop(domain=NA, gettextf("Expected to start from '(', but chars[%d]='%s'", jj, chars[jj]))
-
+skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
   nn = length(chars)
   stack_size = 1L
-  jj = jj + 1L
+  jj = ii + 1L
   while (jj <= nn && stack_size > 0L) {
     switch(
       chars[jj],
@@ -257,6 +256,12 @@ skip_parens = function(jj, chars, array_boundaries) {
       { jj = jj + 1L }
     )
   }
+  # file & newlines_loc both only needed for this error region which is a bit awkward
+  if (jj > nn) stop(domain = NA, call. = FALSE, gettextf(
+    "Parsing error: unmatched parentheses in %s starting from line %d",
+    file, findInterval(ii, newlines_loc)
+  ))
+
   jj
 }
 

@@ -10,8 +10,15 @@ translate_package = function(
   stopifnot(
     'Only one package at a time' = length(dir) == 1L,
     "'dir' must be a character" = is.character(dir),
-    "'languages' must be a character vector" = missing(languages) || is.character(languages)
+    "'languages' must be a character vector" = missing(languages) || is.character(languages),
+    "'diagnostics' should be empty, a function, or list of functions" =
+      is.null(diagnostics)
+      || is.function(diagnostics)
+      || (is.list(diagnostics) && all(vapply(diagnostics, is.function, logical(1L))))
   )
+
+  # en-list singleton diagnostic for convenience
+  if (is.function(diagnostics)) diagnostics = list(diagnostics)
 
   dir = get_directory(dir)
 
@@ -137,7 +144,7 @@ translate_package = function(
     new_idx = message_data[
       is_marked_for_translation & (
         fuzzy == 1L
-        | (type == 'singular' & !nzchar(msgstr) & nzchar(msgid))
+        | (type == 'singular' & !nzchar(msgstr) & nzchar(msgid, keepNA = TRUE))
         | (type == 'plural' & !vapply(msgstr_plural, function(x) all(nzchar(x)), logical(1L)))
       ),
       which = TRUE

@@ -19,6 +19,7 @@ static void glam(SEXP x) {
 
 char *stardust(SEXP z) {
   char *msg = "hijklmno";
+  // not clear whether this should be marked as needing translation...
   Rprintf(msg);
   return "abcdefg";
 }

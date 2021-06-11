@@ -192,28 +192,21 @@ test_that("Packages with src code & C syntax errors fail gracefully", {
   restore_package(
     pkg <- test_package("r_src_err_1"),
     {
-      expect_error(translate_package(pkg, "zh_CN"), "File terminated before char array completed", fixed = TRUE)
+      expect_error(translate_package(pkg, "zh_CN"), "Parsing error: found an odd number (3)", fixed = TRUE)
     }
   )
 
   restore_package(
     pkg <- test_package("r_src_err_2"),
     {
-      expect_error(translate_package(pkg, "zh_CN"), "File terminated before translation array completed", fixed = TRUE)
+      expect_error(translate_package(pkg, "zh_CN"), "Parsing error: unmatched parentheses", fixed = TRUE)
     }
   )
 
   restore_package(
     pkg <- test_package("r_src_err_3"),
     {
-      expect_error(translate_package(pkg, "zh_CN"), "File terminated before message call completed", fixed = TRUE)
-    }
-  )
-
-  restore_package(
-    pkg <- test_package("r_src_err_4"),
-    {
-      expect_error(translate_package(pkg, "zh_CN"), "Unexpected sequence", fixed = TRUE)
+      expect_error(translate_package(pkg, "zh_CN"), "Parsing error: unmatched parentheses", fixed = TRUE)
     }
   )
 })
@@ -239,8 +232,8 @@ test_that("Diagnostic for unmarked src translations works", {
     tmp_conn = mock_translation("test-translate-package-r_src_untranslated-1.input"),
     {
       expect_messages(
-        translate_package(pkg, "zh_CN"),
-        "Found 3 src messaging calls that were not properly marked for translation",
+        translate_package(pkg, "zh_CN", diagnostics = check_untranslated_src),
+        "Found 2 src messaging calls that were not properly marked for translation",
         fixed = TRUE
       )
     }
@@ -249,8 +242,7 @@ test_that("Diagnostic for unmarked src translations works", {
     prompts,
     c(
       'an untranslated string',
-      'an untranslated error',
-      "msg"
+      'an untranslated error'
     ),
     fixed=TRUE
   )

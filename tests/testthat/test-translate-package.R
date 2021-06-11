@@ -232,8 +232,8 @@ test_that("Diagnostic for unmarked src translations works", {
     tmp_conn = mock_translation("test-translate-package-r_src_untranslated-1.input"),
     {
       expect_messages(
-        translate_package(pkg, "zh_CN"),
-        "Found 3 src messaging calls that were not properly marked for translation",
+        translate_package(pkg, "zh_CN", diagnostics = check_untranslated_src),
+        "Found 2 src messaging calls that were not properly marked for translation",
         fixed = TRUE
       )
     }
@@ -242,8 +242,7 @@ test_that("Diagnostic for unmarked src translations works", {
     prompts,
     c(
       'an untranslated string',
-      'an untranslated error',
-      "msg"
+      'an untranslated error'
     ),
     fixed=TRUE
   )

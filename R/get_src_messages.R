@@ -155,6 +155,16 @@ get_file_src_messages = function(file, translation_macro = "_") {
     c('call', 'call_start') := .(safe_substring(contents, i.call_start, i.paren_end), i.call_start)
   ]
 
+  # find cases like error(_(msg)); (i.e., arrays passed as variables instead of literals)
+  translations[
+    is.na(msgid),
+    c('call', 'call_start') := calls[
+      .SD,
+      on = .(paren_start < paren_start, paren_end > paren_end),
+      .(safe_substring(contents, x.call_start, x.paren_end), x.call_start)
+    ]
+  ]
+
   # drop calls associated with a translation
   call_arrays = call_arrays[!translations, on = 'call_start']
   call_arrays = call_arrays[fname %chin% MESSAGE_CALLS]

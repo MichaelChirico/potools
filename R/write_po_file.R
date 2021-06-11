@@ -20,7 +20,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   #   * split(,by='message_source,type') but missing levels (e.g., src.plural) need to be handled separately
   # also drop empty strings. these are kept until now in case they are needed for diagnostics, but can't be
   #   written to the .po/.pot files (msgid "" is reserved for the metadata header). Related: #83.
-  po_data = message_data[is_marked_for_translation & (type == "plural" | nzchar(msgid))]
+  po_data = message_data[is_marked_for_translation & (type == "plural" | nzchar(msgid, keepNA = TRUE))]
 
   if (template) {
     r_file <- sprintf("R-%s.pot", params$package)

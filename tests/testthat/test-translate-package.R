@@ -209,13 +209,6 @@ test_that("Packages with src code & C syntax errors fail gracefully", {
       expect_error(translate_package(pkg, "zh_CN"), "Parsing error: unmatched parentheses", fixed = TRUE)
     }
   )
-
-  restore_package(
-    pkg <- test_package("r_src_err_4"),
-    {
-      expect_error(translate_package(pkg, "zh_CN"), "Unexpected sequence", fixed = TRUE)
-    }
-  )
 })
 
 test_that("Packages with src code & fuzzy messages work", {

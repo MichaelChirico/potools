@@ -200,3 +200,9 @@ get_special_tags = function(s, specials) {
   }
   paste(out, collapse="")
 }
+
+# substring often gets run on 0-row j, which errors substring; just exit in that case
+safe_substring = function(text, first, last) {
+  if (!length(first)) return(character())
+  substring(text, first, last)
+}

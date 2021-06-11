@@ -54,19 +54,20 @@ get_file_src_messages = function(file, translation_macro = "_") {
   #   (for an odd number, the pairs become escaped backslashes, the leftover escapes the ").
   #   instead, find all quotes, then mod out the escaped ones with this much simpler regex:
   escape_quote_idx <- gregexpr('[\\]+"', contents)[[1L]]
-  escape_quote_idx <- escape_quote_idx[attr(escape_quote_idx, "match.length") %% 2L == 0L]
+  valid_escape_quote_idx <- attr(escape_quote_idx, "match.length") %% 2L == 0L
   # also remove literal char elements '"'
   quote_char_idx <- gregexpr("'\"'", contents, fixed = TRUE)[[1L]]
   quote_idx <- setdiff(
     quote_idx,
     c(
-      escape_quote_idx + attr(escape_quote_idx, "match.length") - 1L,
+      escape_quote_idx[valid_escape_quote_idx] + attr(escape_quote_idx, "match.length")[valid_escape_quote_idx] - 1L,
       quote_char_idx + attr(quote_char_idx, "match.length") - 2L
     )
   )
   if (length(quote_idx) %% 2L != 0L) {
     stop(domain=NA, gettextf(
-      'Found an odd number (%d) of unscaped double quotes (") in %s; parsing error.'
+      'Found an odd number (%d) of unscaped double quotes (") in %s; parsing error.',
+      length(quote_idx)
     ))
   }
   arrays <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
@@ -78,7 +79,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
   calls = data.table(
     call_start = as.integer(call_idx),
     paren_start = as.integer(call_idx) + attr(call_idx, "match.length") - 1L,
-    fname = trimws(substring(contents, call_idx, call_idx + attr(call_idx, "match.length") - 2L), "right")
+    fname = trimws(safe_substring(contents, call_idx, call_idx + attr(call_idx, "match.length") - 2L), "right")
   )
   # remove common false positives for efficiency
   calls = calls[!fname %chin% c(
@@ -133,7 +134,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
   translations[
     call_arrays[translation_array_idx & singular_array_idx],
     on = c('paren_start', 'paren_end'),
-    msgid := substring(contents, array_start + 1L, array_end - 1L)
+    msgid := safe_substring(contents, array_start + 1L, array_end - 1L)
   ]
 
   translations[
@@ -150,31 +151,34 @@ get_file_src_messages = function(file, translation_macro = "_") {
   translations[
     call_arrays,
     on = .(paren_start > paren_start, paren_end < paren_end),
-    c('call', 'call_start') := .(substring(contents, i.call_start, i.paren_end), i.call_start)
+    c('call', 'call_start') := .(safe_substring(contents, i.call_start, i.paren_end), i.call_start)
   ]
 
   # drop calls associated with a translation
   call_arrays = call_arrays[!translations, on = 'call_start']
   call_arrays = call_arrays[fname %chin% MESSAGE_CALLS]
 
-  if (nrow(call_arrays)) {
-    # TODO: handle calls with multiple distinct arrays
-    call_arrays = call_arrays[,
+  # TODO: handle calls with multiple distinct arrays
+  singular_array_idx = call_arrays[ , paren_start == array_start - 1L & paren_end == array_end + 1]
+  call_arrays = rbind(
+    call_arrays[
+      (singular_array_idx),
+      .(
+        call_start, paren_start, paren_end,
+        msgid = safe_substring(contents, array_start + 1L, array_end - 1L),
+        call = safe_substring(contents, call_start, paren_end)
+      )
+    ],
+    call_arrays[
+      (!singular_array_idx),
       .(
         msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents),
-        call = substring(contents, .BY$call_start, .BY$paren_end),
-        is_marked_for_translation = FALSE
+        call = safe_substring(contents, .BY$call_start, .BY$paren_end)
       ),
       by = .(call_start, paren_start, paren_end)
     ]
-  } else {
-    call_arrays = data.table(
-      msgid = character(),
-      call = character(),
-      call_start = integer(),
-      is_marked_for_translation = logical()
-    )
-  }
+  )
+  call_arrays[ , "is_marked_for_translation" := FALSE]
 
   src_messages = rbind(
     translations[ , .(msgid, call, call_start, is_marked_for_translation)],
@@ -193,32 +197,38 @@ preprocess = function(contents) {
   ii = 1L
   nn = length(contents)
   while (ii < nn - 1L) {
-    # skip quotes to avoid skipping "comments" inside char arrays, e.g. for URLs http://...
-    if (contents[ii] == '"') {
-      ii = ii + 1L
-      while (ii < nn - 1L) {
-        switch(
-          contents[ii],
-          '"' = break,
-          "\\" = { ii = ii + 2L },
-          { ii = ii + 1L }
-        )
+    switch(
+      contents[ii],
+      # skip quotes to avoid skipping "comments" inside char arrays, e.g. for URLs http://...
+      '"' = {
+        ii = ii + 1L
+        while (ii < nn - 1L) {
+          switch(
+            contents[ii],
+            '"' = break,
+            "\\" = { ii = ii + 2L },
+            { ii = ii + 1L }
+          )
+        }
+      },
+      # " as a char ('"') also presents an issue for char array detection
+      "'" = { ii = ii + 2L },
+      "/" = {
+        jj = 0L
+        if (contents[ii + 1L] == "/") {
+          jj = ii + 2L
+          while (jj <= nn && contents[jj] != "\n") { jj = jj + 1L }
+          contents[ii:(jj - 1L)] = " "
+          ii = jj
+        } else if (contents[ii + 1L] == "*") {
+          jj = ii + 2L
+          while (jj <= nn - 1L && (contents[jj] != "*" || contents[jj + 1L] != "/")) { jj = jj + 1L }
+          idx = ii:(jj + 1L)
+          contents[idx] = fifelse(contents[idx] == "\n", "\n", " ")
+          ii = jj + 1L
+        }
       }
-    } else if (contents[ii] == "/") {
-      jj = 0L
-      if (contents[ii + 1L] == "/") {
-        jj = ii + 2L
-        while (jj <= nn && contents[jj] != "\n") { jj = jj + 1L }
-        contents[ii:(jj - 1L)] = " "
-        ii = jj
-      } else if (contents[ii + 1L] == "*") {
-        jj = ii + 2L
-        while (jj <= nn - 1L && (contents[jj] != "*" || contents[jj + 1L] != "/")) { jj = jj + 1L }
-        idx = ii:(jj + 1L)
-        contents[idx] = fifelse(contents[idx] == "\n", "\n", " ")
-        ii = jj + 1L
-      }
-    }
+    )
     ii = ii + 1L
   }
   return(contents)
@@ -251,7 +261,6 @@ skip_parens = function(jj, chars, array_boundaries) {
 }
 
 build_msgid = function(left, right, starts, ends, contents) {
-  if (!length(left)) return(character())
   # we have one or several macros between `_(` and `)`, between which is "grout".
   #   NB: we could have _("array ending with formatter: %"PRId64). I'm not sure it's possible
   #   for an array to start with a macro, but leave the logic to check here anyway
@@ -261,7 +270,7 @@ build_msgid = function(left, right, starts, ends, contents) {
   # drop the first & last if there's no whitespace between `_(` and `"` or `"` and `)`
   valid_idx = grout_left < grout_right
   grout = character(length(starts) + 1L)
-  grout[valid_idx] = substring(contents, grout_left[valid_idx], grout_right[valid_idx])
+  grout[valid_idx] = safe_substring(contents, grout_left[valid_idx], grout_right[valid_idx])
 
   # drop spurious whitespace. first drop line continuations (\), then also strip arguments.
   #   I think this assumes translated arrays only occur at one argument in the call...
@@ -274,7 +283,7 @@ build_msgid = function(left, right, starts, ends, contents) {
 
   msgid = character(2L * length(starts) + 1L)
   msgid[1L + 2L * seq_along(grout)] = grout
-  msgid[2L + 2L * seq_along(starts)] = substring(contents, starts+1L, ends-1L)
+  msgid[2L + 2L * seq_along(starts)] = safe_substring(contents, starts+1L, ends-1L)
 
   # combine
   paste(msgid, collapse = "")

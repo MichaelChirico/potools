@@ -82,12 +82,12 @@ get_file_src_messages = function(file, translation_macro = "_") {
   # remove common false positives for efficiency
   calls = calls[!fname %chin% c(
     "if", "while", "for", "switch", "return",
-    "PROTECT", "UNPROTECT", "free", "malloc", "Calloc",
+    "PROTECT", "UNPROTECT", "free", "malloc", "Calloc", "memcpy",
     "TYPEOF", "sizeof", "INHERITS", "type2char", "LENGTH", "length", "xlength", "strlen",
     "copyMostAttrib", "getAttrib", "setAttrib", "R_compute_identical",
     "SET_STRING_ELT", "STRING_ELT", "CHAR", "SET_VECTOR_ELT", "VECTOR_ELT", "SEXPPTR_RO", "STRING_PTR",
-    "LOGICAL", "INTEGER", "REAL", "COMPLEX", "CAR", "CDR", "CADR", "checkArity",
-    "isFactor", "isLogical", "isInteger", "isReal", "isString", "isS4", "isNull"
+    "RAW", "LOGICAL", "INTEGER", "REAL", "COMPLEX", "CAR", "CDR", "CADR", "checkArity",
+    "isFactor", "isLogical", "isInteger", "isReal", "isString", "isS4", "isNull", "ISNAN"
   )]
   calls[ , "paren_end" := paren_start]
 
@@ -147,28 +147,29 @@ get_file_src_messages = function(file, translation_macro = "_") {
   translations[
     call_arrays,
     on = .(paren_start > paren_start, paren_end < paren_end),
-    c('call', 'call_start') := .(substring(contents, i.call_start, i.paren_end), i.call_start)
+    c('call', 'call_start', 'fname') := .(substring(contents, i.call_start, i.paren_end), i.call_start, i.fname)
   ]
 
   # drop calls associated with a translation
-  # TODO: also drop unknown call names (start with MESSAGE_CALLS)
   call_arrays = call_arrays[!translations, on = 'call_start']
+  call_arrays = call_arrays[fname %chin% MESSAGE_CALLS]
 
-  if (nrow(call_arrays)) browser() else return()
+  # TODO: handle calls with multiple distinct arrays
+  call_arrays = call_arrays[,
+    .(
+      msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents),
+      call = substring(contents, .BY$call_start, .BY$paren_end)
+    ),
+    by = .(call_start, paren_start, paren_end)
+  ]
 
-  # no matches in the file; return empty
-  if (length(msg_match) == 1L && msg_match[1L] == -1L) {
-    return(data.table(
-      call = character(),
-      msgid = character(),
-      line_number = integer(),
-      is_marked_for_translation = logical()
-    ))
-  }
+  src_messages = rbind(
+    translations[ , .(msgid, call, call_start, is_marked_for_translation = TRUE)],
+    call_arrays[ , .(msgid, call, call_start, is_marked_for_translation = FALSE)]
+  )
 
-  src_messages = rbindlist(lapply(seq_along(msg_match), get_call_message))
-  src_messages[ , "line_number" := msg_line]
-  src_messages[ , "is_marked_for_translation" := is_translated]
+  src_messages[ , "line_number" := findInterval(call_start, newlines_loc)]
+  src_messages[ , "call_start" := NULL]
   src_messages[]
 }
 
@@ -237,6 +238,7 @@ skip_parens = function(jj, chars, array_boundaries) {
 }
 
 build_msgid = function(left, right, starts, ends, contents) {
+  if (!length(left)) return(character())
   # we have one or several macros between `_(` and `)`, between which is "grout".
   #   NB: we could have _("array ending with formatter: %"PRId64). I'm not sure it's possible
   #   for an array to start with a macro, but leave the logic to check here anyway
@@ -248,8 +250,10 @@ build_msgid = function(left, right, starts, ends, contents) {
   grout = character(length(starts) + 1L)
   grout[valid_idx] = substring(contents, grout_left[valid_idx], grout_right[valid_idx])
 
-  # drop spurious whitespace
-  grout = gsub("[ \n\r\t]", "", grout)
+  # drop spurious whitespace. first drop line continuations (\), then also strip arguments.
+  #   I think this assumes translated arrays only occur at one argument in the call...
+  grout = gsub("\\", "", grout, fixed = TRUE)
+  grout = gsub("^(?:.*,)?[ \n\r\t]*$|[ \n\r\t]*(?:,.*)?$", "", grout)
 
   # pad macros (e.g. "a formatter with %"PRId64" becomes" --> "a formatter with %<PRId64> becomes")
   macro_idx = nzchar(grout)
@@ -267,7 +271,8 @@ build_msgid = function(left, right, starts, ends, contents) {
 MESSAGE_CALLS = c(
   "Rprintf", "REprintf", "Rvprintf", "REvprintf",
   "R_ShowMessage", "R_Suicide",
-  "warning", "Rf_warning", "error", "Rf_error"
+  "warning", "Rf_warning", "error", "Rf_error",
+  "snprintf"
 )
 
 # https://docs.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-160 suggests this

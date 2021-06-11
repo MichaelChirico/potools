@@ -11,15 +11,7 @@ get_src_messages = function(dir = ".", translation_macro = "_") {
   src_files = package_src_files(dir)
   names(src_files) = src_files
 
-  if (!length(src_files)) {
-    return(data.table(
-      file = character(),
-      call = character(),
-      msgid = character(),
-      line_number = integer(),
-      is_marked_for_translation = logical()
-    ))
-  }
+  if (!length(src_files)) return(src_msg_schema())
 
   msg = rbindlist(lapply(src_files, get_file_src_messages, translation_macro), idcol = "file")
   # TODO(#40): plural messages in src
@@ -194,6 +186,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
 
   src_messages[ , "line_number" := findInterval(call_start, newlines_loc)]
   src_messages[ , "call_start" := NULL]
+  setcolorder(src_messages, c("msgid", "line_number", "call", "is_marked_for_translation"))
   src_messages[]
 }
 
@@ -309,6 +302,16 @@ MESSAGE_CALLS = c(
 C_IDENTIFIER_REGEX = "[_a-zA-Z][_a-zA-Z0-9]{0,30}"
 C_IDENTIFIER_1 = "[_a-zA-Z]"
 C_IDENTIFIER_REST = "[_a-zA-Z0-9]"
+
+src_msg_schema = function() data.table(
+  type = character(),
+  file = character(),
+  msgid = character(),
+  line_number = integer(),
+  call = character(),
+  is_repeat = logical(),
+  is_marked_for_translation = logical()
+)
 
 file_msg_schema = function() data.table(
   msgid = character(),

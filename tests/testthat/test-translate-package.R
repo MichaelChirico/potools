@@ -168,7 +168,6 @@ test_that("Packages with src code work correctly", {
     pkg <- test_package('r_src_c'),
     tmp_conn = mock_translation('test-translate-package-r_src_c-1.input'),
     {
-      debugonce(potools:::get_src_messages)
       translate_package(pkg, "zh_CN")
 
       pkg_files <- list.files(pkg, recursive = TRUE)

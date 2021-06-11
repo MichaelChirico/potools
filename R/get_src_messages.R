@@ -52,8 +52,9 @@ get_file_src_messages = function(file, translation_macro = "_") {
   # messy (impossible?) to write a regex for an unescaped quote directly --
   #   it should be " preceded by an even (0, 2, 4, ...) number of backslashes
   #   (for an odd number, the pairs become escaped backslashes, the leftover escapes the ").
-  #   instead, find all quotes, then mod out the escaped ones with this _relatively_ tame regex:
-  escape_quote_idx <- gregexpr('[^\\](?:[\\][\\]){0,}[\\]"', contents)[[1L]]
+  #   instead, find all quotes, then mod out the escaped ones with this much simpler regex:
+  escape_quote_idx <- gregexpr('[\\]+"', contents)[[1L]]
+  escape_quote_idx <- escape_quote_idx[attr(escape_quote_idx, "match.length") %% 2L == 0L]
   # also remove literal char elements '"'
   quote_char_idx <- gregexpr("'\"'", contents, fixed = TRUE)[[1L]]
   quote_idx <- setdiff(
@@ -85,7 +86,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
     "PROTECT", "UNPROTECT", "free", "malloc", "Calloc", "memcpy",
     "TYPEOF", "sizeof", "INHERITS", "type2char", "LENGTH", "length", "xlength", "strlen",
     "copyMostAttrib", "getAttrib", "setAttrib", "R_compute_identical",
-    "SET_STRING_ELT", "STRING_ELT", "CHAR", "SET_VECTOR_ELT", "VECTOR_ELT", "SEXPPTR_RO", "STRING_PTR",
+    "SET_STRING_ELT", "STRING_ELT", "CHAR", "ENC2UTF8", "SET_VECTOR_ELT", "VECTOR_ELT", "SEXPPTR_RO", "STRING_PTR",
     "RAW", "LOGICAL", "INTEGER", "REAL", "COMPLEX", "CAR", "CDR", "CADR", "checkArity",
     "isFactor", "isLogical", "isInteger", "isReal", "isString", "isS4", "isNull", "ISNAN"
   )]
@@ -118,6 +119,8 @@ get_file_src_messages = function(file, translation_macro = "_") {
 
   translation_idx = calls[ , fname == translation_macro]
   translations = calls[(translation_idx), .(paren_start, paren_end)]
+  # run here in case nrow(translations)=0
+  translations[ , "is_marked_for_translation" := TRUE]
 
   # nomatch=NULL: drop arrays appearing outside _any_ call (for now?)
   call_arrays = foverlaps(arrays, calls, by.x = c('array_start', 'array_end'), nomatch=NULL)
@@ -147,25 +150,35 @@ get_file_src_messages = function(file, translation_macro = "_") {
   translations[
     call_arrays,
     on = .(paren_start > paren_start, paren_end < paren_end),
-    c('call', 'call_start', 'fname') := .(substring(contents, i.call_start, i.paren_end), i.call_start, i.fname)
+    c('call', 'call_start') := .(substring(contents, i.call_start, i.paren_end), i.call_start)
   ]
 
   # drop calls associated with a translation
   call_arrays = call_arrays[!translations, on = 'call_start']
   call_arrays = call_arrays[fname %chin% MESSAGE_CALLS]
 
-  # TODO: handle calls with multiple distinct arrays
-  call_arrays = call_arrays[,
-    .(
-      msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents),
-      call = substring(contents, .BY$call_start, .BY$paren_end)
-    ),
-    by = .(call_start, paren_start, paren_end)
-  ]
+  if (nrow(call_arrays)) {
+    # TODO: handle calls with multiple distinct arrays
+    call_arrays = call_arrays[,
+      .(
+        msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents),
+        call = substring(contents, .BY$call_start, .BY$paren_end),
+        is_marked_for_translation = FALSE
+      ),
+      by = .(call_start, paren_start, paren_end)
+    ]
+  } else {
+    call_arrays = data.table(
+      msgid = character(),
+      call = character(),
+      call_start = integer(),
+      is_marked_for_translation = logical()
+    )
+  }
 
   src_messages = rbind(
-    translations[ , .(msgid, call, call_start, is_marked_for_translation = TRUE)],
-    call_arrays[ , .(msgid, call, call_start, is_marked_for_translation = FALSE)]
+    translations[ , .(msgid, call, call_start, is_marked_for_translation)],
+    call_arrays[ , .(msgid, call, call_start, is_marked_for_translation)]
   )
 
   src_messages[ , "line_number" := findInterval(call_start, newlines_loc)]

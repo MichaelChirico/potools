@@ -25,6 +25,10 @@ get_src_messages = function(dir = ".", translation_macro = "_") {
   # TODO(#40): plural messages in src
   msg[ , "type" := "singular"]
 
+  # TODO: write this
+  # internal line breaks & spacing minimized
+  # msg[ , call := cleanup_call(call)]
+
   # TODO: R side also uses column_number to sort, but it's ~basically~ not relevant for C... yet
   setorderv(msg, c("type", "file", "line_number"), c(-1L, 1L, 1L))
 
@@ -49,6 +53,9 @@ get_file_src_messages = function(file, translation_macro = "_") {
   #   be easier to skip because the " would have to be escaped, but we may as well skip
   #   this anyway.
   quote_idx <- gregexpr('"', contents, fixed = TRUE)[[1L]]
+  # no arrays --> nothing to do
+  if (quote_idx[1L] < 0L) return(file_msg_schema())
+
   # messy (impossible?) to write a regex for an unescaped quote directly --
   #   it should be " preceded by an even (0, 2, 4, ...) number of backslashes
   #   (for an odd number, the pairs become escaped backslashes, the leftover escapes the ").
@@ -302,3 +309,10 @@ MESSAGE_CALLS = c(
 C_IDENTIFIER_REGEX = "[_a-zA-Z][_a-zA-Z0-9]{0,30}"
 C_IDENTIFIER_1 = "[_a-zA-Z]"
 C_IDENTIFIER_REST = "[_a-zA-Z0-9]"
+
+file_msg_schema = function() data.table(
+  msgid = character(),
+  line_number = integer(),
+  call = character(),
+  is_marked_for_translation = logical()
+)

@@ -368,3 +368,13 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
     }
   )
 })
+
+test_that("use_base_rules is auto-detected", {
+  restore_package(
+    pkg <- test_package("grDevices"),
+    {
+      # there are messages marked in src/cairo/cairoBM.c, which are missed if auto-detect is working
+      expect_message(translate_package(pkg, verbose = TRUE), 'No messages to translate; finishing', fixed = TRUE)
+    }
+  )
+})

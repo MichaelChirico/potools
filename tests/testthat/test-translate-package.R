@@ -375,15 +375,34 @@ test_that("use_base_rules is auto-detected", {
     {
       translate_package(pkg)
 
-      # cairo subdirectory is excluded because use_base_rules is detected as TRUE
-      expect_false(file.exists(file.path(pkg, 'po', 'grDevices.pot')))
+      r_pot_lines <- readLines(file.path(pkg, 'po', 'R-grDevices.pot'))
+      src_pot_lines <- readLines(file.path(pkg, 'po', 'grDevices.pot'))
 
-      pot_lines <- readLines(file.path(pkg, 'po', 'R-grDevices.pot'))
-
+      browser()
       expect_all_match(
-        pot_lines,
+        r_pot_lines,
         c('"Project-Id-Version: R', '"Report-Msgid-Bugs-To: bugs.r-project.org\\n"'),
         fixed = TRUE
+      )
+
+      # copyright isn't written in the R file, but is in src? A bit strange but done for consistency w base
+      expect_all_match(
+        r_pot_lines,
+        '# Copyright (C) YEAR The R Core Team',
+        fixed = TRUE, invert = TRUE
+      )
+
+      expect_all_match(
+        src_pot_lines,
+        '# Copyright (C) YEAR The R Core Team',
+        fixed = TRUE
+      )
+
+      # message is in src/cairo subdirectory which is excluded because use_base_rules is detected as TRUE
+      expect_all_match(
+        src_pot_lines,
+        'unimplemented cairo-based device',
+        fixed = TRUE, invert = TRUE
       )
     }
   )

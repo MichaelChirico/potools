@@ -74,6 +74,13 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 
   po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
 
+  params$base_copyright <- FALSE
+  params$is_base_package <- params$package %chin% .potools$base_package_names
+  if (params$is_base_package) {
+    params$package <- "R"
+    params$bugs <- "bugs.r-project.org"
+  }
+
   params$template = template
   write_po_file(
     po_data[message_source == "R"],
@@ -83,6 +90,11 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   )
   # assign here to prevent lazyeval issue
   width = if (use_base_rules) 79L else Inf
+  # only applies to src .pot (part of https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121)
+  if (params$is_base_package) {
+    params$copyright <- "The R Core Team"
+    params$base_copyright <- TRUE
+  }
   write_po_file(
     po_data[message_source == "src"],
     file.path(po_dir, src_file),
@@ -149,11 +161,6 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
 build_po_header = function(params, use_base_rules = FALSE) {
   params$timestamp <- format(Sys.time(), tz = 'UTC')
 
-  if (params$package %chin% .potools$base_package_names) {
-    params$package <- "R"
-    params$bugs <- "bugs.r-project.org"
-  }
-
   if (is.null(params$bugs)) {
     params$bugs <- ''
   } else {
@@ -161,7 +168,12 @@ build_po_header = function(params, use_base_rules = FALSE) {
   }
 
   if (params$template) {
-    if (use_base_rules) {
+    # TODO: this is confusing... revisit?
+    if (params$base_copyright) {
+      params$copyright_template <- with(params, sprintf(COPYRIGHT_TEMPLATE, copyright, package))
+      params$copyright <- ''
+      params$fuzzy_header <- "#, fuzzy\n"
+    } else if (use_base_rules) {
       params$copyright_template <- params$copyright <- params$fuzzy_header <- ''
     } else if (is.null(params$copyright)) {
       params$copyright_template <- NO_COPYRIGHT_TEMPLATE

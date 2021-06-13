@@ -80,20 +80,25 @@ package_r_files = function(dir) {
 }
 
 # get src files in a directory. exclude .h files
-list_src_files = function(dir) {
+list_src_files = function(dir, use_base_rules = FALSE) {
   # recursive to include subdirectories, e.g. as found in R-devel/src/library/{grDevices,utils}
-  src_files = list.files(dir, full.names = TRUE, recursive = TRUE)
+  # NB: tools::update_pkg_po() is only looking for files in
+  #   src/*.{c,cc,cpp,m,mm} and src/windows/*.{c,cc,cpp,m,mm}
+  if (use_base_rules) {
+    src_files = c(list.files(dir, full.names = TRUE), list.files(file.path(dir, 'windows'), full.names = TRUE))
+  } else {
+    src_files = list.files(dir, full.names = TRUE, recursive = TRUE)
+  }
   # tried to be inclusive at first, but stringi broke my resolve -- src/ includes
   #   .zip, .txt, .html, .pl, ... broke my conviction we have any hope of making anything
   #   but an allow list succeed here.
-  # NB: tools::update_pkg_po() is only looking for files in
-  #   src/*.{c,cc,cpp,m,mm} and src/windows/*.{c,cc,cpp,m,mm}
-  grep("\\.(c|cc|cpp)", src_files, value = TRUE, ignore.case = TRUE)
+  # thus we match the update_pkg_po() behavior to only include *.{c,cc,cpp,m,mm} files
+  grep("\\.(c|cc|cpp|m|mm)$", src_files, value = TRUE, ignore.case = TRUE)
 }
 # get src files in a package
-package_src_files = function(dir) {
+package_src_files = function(dir, use_base_rules = FALSE) {
   dir = file.path(dir, 'src')
-  src_files = list_src_files(dir)
+  src_files = list_src_files(dir, use_base_rules)
   # somehow on windows I was seeing absolute paths with \ but paths
   #   from list.files as / -- normalizePath makes it consistent
   return(normalizePath(src_files))

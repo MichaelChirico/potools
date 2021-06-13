@@ -1,14 +1,8 @@
-# TODO:
-#   - Logic for ngettext usage (FWIW, no results on CRAN using this)
-#   - Logic to handle messaging functions where the translated string is not the
-#     first argument
-#   - mark c-format by looking for % ?, though note that this is note advised:
-#     https://www.gnu.org/software/gettext/manual/html_node/PO-Files.html#PO-Files
-#     will the wrap-up call to update_pkg_po() handle this for us?
-#   - check that we're parsing \-continued char arrays correctly:
-#     https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html#String-Constants
-get_src_messages = function(dir = ".", translation_macro = "_") {
-  src_files = package_src_files(dir)
+get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules = FALSE) {
+  # alternative that would keep these signatures cleaner of this parameter would be to
+  #   handle this in write_po_file(), which would require keeping track of column numbers
+  #   until that point so as to keep the file order correct in both use_base_rules cases
+  src_files = package_src_files(dir, use_base_rules)
   names(src_files) = src_files
 
   if (!length(src_files)) return(src_msg_schema())

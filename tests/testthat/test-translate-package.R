@@ -328,7 +328,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
       expect_all_match(
         src_pot_lines,
         # testing no strwrap for many duplicate locations
-        "(msg\\.c:[0-9]+ ){10}"
+        c("(msg\\.c:[0-9]+ ){10}", '^#: bedfellows\\.c:')
       )
     }
   )
@@ -337,7 +337,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
 test_that("use_base_rules=TRUE produces base-aligned behavior", {
   restore_package(
     pkg <- test_package("unusual_msg"),
-    tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
+    tmp_conn = mock_translation("test-translate-package-unusual_msg-2.input"),
     {
       translate_package(pkg, "es", use_base_rules = TRUE, diagnostics = NULL)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
@@ -357,6 +357,13 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
       expect_all_match(
         paste(src_pot_lines, collapse='\n'),
         c('MSGs\\.c.*msg\\.c', '#, c-format', '#: msg\\.c:.*#: msg\\.c', '"\'%s\': %s"')
+      )
+
+      # only src/*.c and src/windows/*.c are included (no other subdirectories), #114
+      expect_all_match(
+        src_pot_lines,
+        '#: bedfellows.c:',
+        fixed = TRUE, invert = TRUE
       )
     }
   )

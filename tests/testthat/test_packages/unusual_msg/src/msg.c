@@ -47,5 +47,8 @@ void hello_world(SEXP x) {
   Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
   Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);
 
+  // xgettext prefers splitting lines at templates, but bumps the ' to the next line as well.
+  error(_("error in evaluating the argument '%s' in selecting a method for function '%s': %s"), "abc", "def", "ghi");
+
   return;
 }

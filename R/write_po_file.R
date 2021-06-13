@@ -148,10 +148,16 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
 
 build_po_header = function(params, use_base_rules = FALSE) {
   params$timestamp <- format(Sys.time(), tz = 'UTC')
+
+  if (params$package %chin% .potools$base_package_names) {
+    params$package <- "R"
+    params$bugs <- "bugs.r-project.org"
+  }
+
   if (is.null(params$bugs)) {
     params$bugs <- ''
   } else {
-    params$bugs <- sprintf("\nReport-Msgid-Bugs-To: %s\\n", params$bugs)
+    params$bugs <- sprintf('\n"Report-Msgid-Bugs-To: %s\\n"', params$bugs)
   }
 
   if (params$template) {
@@ -197,8 +203,6 @@ build_po_header = function(params, use_base_rules = FALSE) {
       ''
     }
   }
-
-  if (params$package %chin% .potools$base_package_names) params$package <- "R"
 
   with(params, sprintf(
     PO_HEADER_TEMPLATE,

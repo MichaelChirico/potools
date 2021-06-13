@@ -234,7 +234,7 @@ wrap_strings = function(str, width) {
   #   - a preference to put formatting % on the next line too
   #   - pick the lattermost line splitter when they come consecutively
   # TODO: it looks like xgettext prefers to _always_ break at a newline?
-  boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|.(?=%)', str, perl = TRUE)
+  boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|[^\'](?=\'?%)', str, perl = TRUE)
   out = character(length(str))
   for (ii in seq_along(str)) {
     # supplement with the total string width for the case that the last word breaks the width

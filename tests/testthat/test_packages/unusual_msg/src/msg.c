@@ -27,8 +27,10 @@ void hello_world(SEXP x) {
   char * msg = "an error occurred";
   error(_(msg));
 
-  // Not thrown off by a char literal "
+  // Not thrown off by a char literal ", (, or )
   *msg = '"';
+  *msg = '(';
+  *msg = ')';
 
   // repeat a bunch of times to test the strwrap behavior of file markers
   Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);

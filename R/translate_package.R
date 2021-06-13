@@ -50,7 +50,7 @@ translate_package = function(
   r_message_data = get_r_messages(dir)
 
   if (verbose) message('Getting src-level messages...')
-  src_message_data = get_src_messages(dir, src_translation_macro)
+  src_message_data = get_src_messages(dir, src_translation_macro, use_base_rules)
 
   message_data = rbind(
     R = r_message_data,

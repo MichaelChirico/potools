@@ -198,6 +198,8 @@ build_po_header = function(params, use_base_rules = FALSE) {
     }
   }
 
+  if (params$package %chin% .potools$base_package_names) params$package <- "R"
+
   with(params, sprintf(
     PO_HEADER_TEMPLATE,
     copyright_template, fuzzy_header,

@@ -13,6 +13,10 @@ test_that("translate_package arg checking errors work", {
   file.create(tmp_desc <- file.path(tempdir(), "DESCRIPTION"))
   on.exit(unlink(tmp_desc), add=TRUE)
   expect_error(translate_package(tempdir()), "not a package (missing Package and/or Version", fixed=TRUE)
+
+  # diagnostic argument
+  expect_error(translate_package(tempdir(), diagnostics = 1L), "'diagnostics' should be", fixed=TRUE)
+  expect_error(translate_package(tempdir(), diagnostics = list(1L)), "'diagnostics' should be", fixed=TRUE)
 })
 
 test_that("translate_package handles empty packages", {
@@ -91,7 +95,7 @@ test_that("translate_package works on package with 'cracked' messages needing te
     tmp_conn = mock_translation("test-translate-package-r_non_template-1.input"),
     {
       expect_messages(
-        translate_package(pkg, "zh_CN"),
+        translate_package(pkg, "zh_CN", diagnostics = list(check_cracked_messages)),
         "Found 2 R messaging calls that might be better suited for gettextf",
         fixed = TRUE
       )

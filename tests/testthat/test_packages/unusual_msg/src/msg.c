@@ -27,8 +27,12 @@ void hello_world(SEXP x) {
   char * msg = "an error occurred";
   error(_(msg));
 
-  // Not thrown off by a char literal "
+  // Not thrown off by a char literal ", (, or ) (right-paren comes first to keep imbalance)
   *msg = '"';
+  *msg = ')';
+  *msg = '(';
+  // also make sure the char array jump is exactly right (if we over-jump here we won't find the right-parent)
+  foo(msg, '.');
 
   // repeat a bunch of times to test the strwrap behavior of file markers
   Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);

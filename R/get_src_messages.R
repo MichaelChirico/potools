@@ -257,7 +257,7 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
       ')' = { stack_size = stack_size - 1L; jj = jj + 1L },
       '"' = { jj = array_boundaries[.(jj), array_end] + 1L },
       # don't get mixed up by '(' or ')', #112
-      "'" = { jj = jj + 2L },
+      "'" = { jj = jj + 3L },
       { jj = jj + 1L }
     )
   }

@@ -378,12 +378,11 @@ test_that("use_base_rules is auto-detected", {
       # cairo subdirectory is excluded because use_base_rules is detected as TRUE
       expect_false(file.exists(file.path(pkg, 'po', 'grDevices.pot')))
 
-
       pot_lines <- readLines(file.path(pkg, 'po', 'R-grDevices.pot'))
 
       expect_all_match(
         pot_lines,
-        '"Project-Id-Version: R',
+        c('"Project-Id-Version: R', '"Report-Msgid-Bugs-To: bugs.r-project.org\\n"'),
         fixed = TRUE
       )
     }

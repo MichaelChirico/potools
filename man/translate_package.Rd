@@ -17,8 +17,8 @@ translate_package(
   dir='.', languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   src_translation_macro = "_",
-  use_base_rules = FALSE,
-  copyright, bugs, verbose=FALSE
+  use_base_rules = package \%chin\% .potools$base_package_names,
+  copyright = NULL, bugs = NULL, verbose=FALSE
 )
 }
 \arguments{
@@ -26,7 +26,7 @@ translate_package(
   \item{languages}{ Character vector; locale codes to which to translate. See Details. }
   \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details.}
   \item{src_translation_macro}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_}, is shared by R itself & recommended in WRE. }
-  \item{use_base_rules}{ Logical, default \code{FALSE}. Should internal behavior match base behavior as strictly as possible? See Details. }
+  \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
   \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }

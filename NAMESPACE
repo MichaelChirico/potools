@@ -4,7 +4,7 @@ importFrom(data.table, set, setcolorder, setindexv, setkeyv, setnames, setorderv
 importFrom(data.table, `:=`, .BY, .N, .SD)
 importFrom(data.table, fifelse)
 
-importFrom(utils, getParseData, globalVariables, tail, type.convert)
+importFrom(utils, getParseData, globalVariables, head, tail, type.convert)
 
 export(translate_package)
 

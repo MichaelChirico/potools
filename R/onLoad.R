@@ -9,6 +9,9 @@ globalVariables(
     'parent', 'x.parent', 'i.parent', 'ancestor', 'i.ancestor',
     'call_expr', 'call_id', 'call_expr_id', 'call_parent_id', 'arg_name', 'arg_value', 'lines',
     'source_location', 'c_fmt_tag', 'msgid_plural_str', 'msgstr_plural_str', 'suggested_call',
+    'array_start', 'array_end', 'call_start', 'x.call_start', 'i.call_start',
+    'paren_start', 'paren_end', 'i.paren_end', 'x.paren_end',
+    'i.msgid', 'replacement', 'non_spurious',
     '.'
   ),
   package = 'potools'

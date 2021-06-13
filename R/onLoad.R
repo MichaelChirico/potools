@@ -30,6 +30,8 @@ if (requireNamespace('crayon', quietly = TRUE)) {
   call_color = file_color = msgid_color = language_color = replacement_color = plural_range_color = identity
 }
 
+# nocov start
 .onLoad = function(libname, pkgname) {
   .potools$base_package_names = get(".get_standard_package_names", envir=asNamespace("tools"), mode="function")()$base
 }
+# nocov end

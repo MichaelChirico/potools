@@ -33,6 +33,8 @@ void hello_world(SEXP x) {
   *msg = '(';
   // also make sure the char array jump is exactly right (if we over-jump here we won't find the right-parent)
   foo(msg, '.');
+  // get the jump right in the case of an escaped char (#135)
+  foo(msg, '\0');
 
   // repeat a bunch of times to test the strwrap behavior of file markers
   Rprintf(_("an translated templated string: %"  PRId64  "\n"), 10000LL);

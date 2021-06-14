@@ -274,10 +274,11 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
 
       # (1) raw strings edge cases
       # (2) whitespace trimming behavior (trim for R singular, don't for R plural)
+      # (3) repeated escapables (#130)
       expect_all_match(
         r_pot_file,
         c('msgid "\'abc\'"', 'msgid "\\"def\\""', 'msgid "R(\'abc\')"', 'msgid "r(\\"def\\")"', 'msgid "ghi"',
-          'good %s', 'msgid "singular "'),
+          'good %s', 'msgid "singular "', '"I warned you!"'),
         fixed = TRUE
       )
 

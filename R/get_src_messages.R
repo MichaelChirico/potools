@@ -218,7 +218,7 @@ preprocess = function(contents) {
         }
       },
       # " as a char ('"') also presents an issue for char array detection
-      "'" = { ii = ii + 2L },
+      "'" = { ii = ii + 2L + (contents[ii+1L] == '\\')},
       "/" = {
         jj = 0L
         if (contents[ii + 1L] == "/") {
@@ -251,7 +251,8 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
       ')' = { stack_size = stack_size - 1L; jj = jj + 1L },
       '"' = { jj = array_boundaries[.(jj), array_end] + 1L },
       # don't get mixed up by '(' or ')', #112
-      "'" = { jj = jj + 3L },
+      # jump one further for e.g. '\0', #135
+      "'" = { jj = jj + 3L + (chars[jj+1L] == "\\") },
       { jj = jj + 1L }
     )
   }

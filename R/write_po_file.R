@@ -136,7 +136,7 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       source_location[singular_idx],
       c_fmt_tag[singular_idx],
       wrap_msg('msgid', msgid[singular_idx], width, params$ignore_width),
-      wrap_msg('msgstr', msgstr[singular_idx], width, params$ignore_width)
+      wrap_msg('msgstr', encodeString(msgstr[singular_idx]), width, params$ignore_width)
     )
     if (!all(singular_idx)) {
       msgid_plural = msgid_plural[!singular_idx]

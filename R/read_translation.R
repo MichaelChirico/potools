@@ -76,8 +76,6 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
       domain = "R-potools"
     ))
   }
-  # if (grepl("este mensaje", translation, fixed = TRUE)) browser()
-  if (grepl("string traducida con plantilla", translation, fixed=TRUE)) browser()
   translation
 }
 

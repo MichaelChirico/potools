@@ -116,7 +116,7 @@ test_that("translate_package works on package with outdated (fuzzy) translations
       )
     }
   )
-  # expect_match(prompts, "a similar message was previously translated as", all=FALSE)
+  expect_match(prompts, "a similar message was previously translated as", all=FALSE)
 })
 
 test_that("translate_package identifies potential translations in cat() calls", {

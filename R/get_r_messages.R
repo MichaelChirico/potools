@@ -342,7 +342,6 @@ clean_text = function(x) {
   #   like a raw string on the RHS but actually is not one. also consider a real
   #   pain like r'("abc")' and 'r"(abc)"' -- whatever we do, if we strip away one first,
   #   then the other, we'll end up with the wrong strings.
-  #   TODO: add tests for these edge cases
   x = gsub(
     '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
     '\\1\\2', x, perl = TRUE
@@ -357,6 +356,9 @@ clean_text = function(x) {
   x = gsub('\\\\', '\\', x, fixed = TRUE)
   return(x)
 }
+
+# shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
+escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)
 
 string_schema = function() data.table(
   file = character(),

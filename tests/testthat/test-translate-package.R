@@ -316,7 +316,9 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
     pkg <- test_package("unusual_msg"),
     tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
+      debug(potools:::run_msgfmt)
       translate_package(pkg, "es", diagnostics = NULL)
+      undebug(potools:::run_msgfmt)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 

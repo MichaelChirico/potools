@@ -242,7 +242,7 @@ wrap_msg = function(key, value, width, ignore_width = FALSE) {
   if (ignore_width) {
     wrap_idx <- rep(FALSE, length(value))
   } else {
-    wrap_idx <- nchar(value) + nchar(key) + 3L > width | grepl("\\n", value, fixed = TRUE)
+    wrap_idx <- nchar(value) + nchar(key) + 3L > width | grepl("\\n.", value)
   }
   out[!wrap_idx] = sprintf('%s "%s"', key, value[!wrap_idx])
   out[wrap_idx] = sprintf('%s ""\n%s', key, wrap_strings(value[wrap_idx], width))

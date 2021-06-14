@@ -12,13 +12,13 @@
 #  - we want to help users get templates right (which can be
 #    tough).
 read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
-  msgid = unescape_string(msgid)
+  msgid = unescape_string_out(msgid)
   # NB: it's tempting to vectorize running get_fmt to e.g.
   #   add a new column msgid_fmt to message_data. But
-  #   unescape_string here dashes hopes that could work.
+  #   unescape_string_out here dashes hopes that could work.
   #   Moreover we can't simply get the template _just prior_
   #   to running escape_string in get_r_messages, because
-  #   escape_string and unescape_string are (intentionally)
+  #   escape_string and unescape_string_out are (intentionally)
   #   not inverses. Bummer. So run it here, to make sure
   #   the match positions are relative to the string that
   #   will be shown to the user.
@@ -107,7 +107,8 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
   } else {
     out = readLines(conn, n=1L, encoding="UTF-8")
   }
-  if (missing(require_type)) return(out)
+  # See #105 / #95... confusing stuff
+  if (missing(require_type)) return(unescape_string_in(out))
   out = type.convert(out, as.is = TRUE)
   if (typeof(out) == require_type) return(out)
 
@@ -129,4 +130,25 @@ prompt_with_templates = function(n_target, prompt_msg) {
     ))
   }
   translation
+}
+
+# attempt to _partially_ invert escape_string. namely, unescape quotes
+#   and backslashes that were added by escape_string.
+#   NB: we leave the control characters as is for visibility. it's very
+#   common for messages for translation to end with \n -- if we unescape
+#   this, a newline will be printed, and it will take a trained eye or
+#   some extra text decoration to draw attention to this. moreover, while
+#   I suspect there could be hope for \n, i think all is lost for \r and even \t.
+unescape_string_out = function(x) {
+  gsub('[\\]([\\"])', '\\1', x)
+}
+
+# read input from prompts as the user likely intended, e.g. typing "\n" (i.e., '\'-'n') meant "newline"
+# NB: closely related: clean_text in get_r_messages. Could/should probably be merged...
+unescape_string_in = function(x) {
+  x = gsub("(?<![\\\\])[\\\\]n", "\n", x, perl = TRUE)
+  x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
+  # no \r: \r is not valid in msgid/msgstr anyway
+  x = gsub("\\\\", "\\", x, fixed = TRUE)
+  x
 }

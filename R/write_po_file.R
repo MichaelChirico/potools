@@ -82,6 +82,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   }
 
   params$template = template
+  params$ignore_width = use_base_rules
   write_po_file(
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
@@ -90,6 +91,8 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   )
   # assign here to prevent lazyeval issue
   width = if (use_base_rules) 79L else Inf
+  # See #125 and Bugzilla#18121. suggestions for a less horrible workaround welcome.
+  params$ignore_width = FALSE
   # only applies to src .pot (part of https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121)
   if (params$is_base_package) {
     params$copyright <- "The R Core Team"
@@ -120,6 +123,7 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
   if (use_base_rules) {
     plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d]    "%s"'
+
   } else {
     plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d] "%s"'
@@ -131,8 +135,8 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       '\n%s%s%s\n%s',
       source_location[singular_idx],
       c_fmt_tag[singular_idx],
-      wrap_msg('msgid', msgid[singular_idx], width),
-      wrap_msg('msgstr', msgstr[singular_idx], width)
+      wrap_msg('msgid', msgid[singular_idx], width, params$ignore_width),
+      wrap_msg('msgstr', escape_string(msgstr[singular_idx]), width, params$ignore_width)
     )
     if (!all(singular_idx)) {
       msgid_plural = msgid_plural[!singular_idx]
@@ -141,8 +145,8 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       msgid_plural = vapply(
         msgstr_plural[!singular_idx],
         function(msgstr) paste(
-          # TODO: should encodeString() be done directly at translation time?
-          sprintf(msgstr_fmt, seq_along(msgstr)-1L, encodeString(msgstr)),
+          # TODO: should escape_string() be done directly at translation time?
+          sprintf(msgstr_fmt, seq_along(msgstr)-1L, escape_string(msgstr)),
           collapse='\n'
         ),
         character(1L)
@@ -232,9 +236,14 @@ build_po_header = function(params, use_base_rules = FALSE) {
   ))
 }
 
-wrap_msg = function(key, value, width) {
+wrap_msg = function(key, value, width, ignore_width = FALSE) {
   out <- character(length(value))
-  wrap_idx <- nchar(value) + nchar(key) + 3L > width
+  # xgettext always wraps at a newline (even if the whole message fits inside 'width')
+  if (ignore_width) {
+    wrap_idx <- rep(FALSE, length(value))
+  } else {
+    wrap_idx <- nchar(value) + nchar(key) + 3L > width | grepl("[\\]n.", value)
+  }
   out[!wrap_idx] = sprintf('%s "%s"', key, value[!wrap_idx])
   out[wrap_idx] = sprintf('%s ""\n%s', key, wrap_strings(value[wrap_idx], width))
   out
@@ -243,6 +252,8 @@ wrap_msg = function(key, value, width) {
 # strwrap gets oh-so-close. but the xgettext behavior splits at more characters (e.g. [.]);
 #   so we roll our own
 wrap_strings = function(str, width) {
+  if (!length(str)) return(character())
+
   # valid splits for xgettext found by experimentation (couldn't find where in the source this is defined).
   #   write _("abcdefghijklm${CHAR}nopqrtstuvwxyz") for these ASCII $CHARs:
   #   rawToChar(as.raw(c(32:33, 35:47, 58:64, 91, 93:96, 123:126)))
@@ -251,28 +262,64 @@ wrap_strings = function(str, width) {
   # more experimentation shows
   #   - a preference to put formatting % on the next line too
   #   - pick the lattermost line splitter when they come consecutively
-  # TODO: it looks like xgettext prefers to _always_ break at a newline?
   boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|[^\'](?=\'?%)', str, perl = TRUE)
+  # xgettext _doesn't_ break on escaped-backslash-then-n, so match to an odd number of backslashes-then-n
+  # append . to simplify the logic below (and besides, the string won't ever split after the very end anyway)
+  has_newlines = grepl('(?:^|[^\\])[\\](?:[\\][\\]){0,}n.', str)
+  str_widths = nchar(str)
+
   out = character(length(str))
   for (ii in seq_along(str)) {
-    # supplement with the total string width for the case that the last word breaks the width
-    boundary = c(boundaries[[ii]], nchar(str[ii]))
-    # no places to split this string, so don't. xgettext also seems not to.
-    if (boundary[1L] < 0L) { out[ii] = str[ii]; next}
-    lines = character()
-    # 0 not 1 makes the arithmetic nicer below
-    start_idx = 0L
-    # 2 accounts for two " (added below)
-    while (any(wide_idx <- boundary > width - 2L)) {
-      split_idx = which(wide_idx)[1L] - 1L
-      lines = c(lines, substr(str[ii], start_idx + 1L, start_idx + boundary[split_idx]))
-      start_idx = start_idx + boundary[split_idx]
-      boundary = tail(boundary, -split_idx) - boundary[split_idx]
+    if (has_newlines[ii]) {
+      # split the string at newlines, then wrap each "segment" as we would other msgid.
+      #   eschew strsplit to do the splitting because it would require lookahead/lookbehind, which means
+      #   perl, which means a monstrosity w.r.t. escaped backslashes.
+      # TODO: feels like disastrously bad code. Would it be easier to always just iterate by word?
+      newline_indices = gregexpr('(?:^|[^\\])[\\](?:[\\][\\]){0,}n.', str[ii])[[1L]]
+      # +2 to adjust for -2 below
+      newline_indices = c(0L, newline_indices + attr(newline_indices, "match.length") - 2L, str_widths[ii] + 2L)
+      sub_str = character(length(newline_indices) - 1L)
+      for (jj in seq_along(sub_str)) {
+        # -2 to exclude \n
+        sub_str[jj] = substr(str[ii], newline_indices[jj]+1L, newline_indices[jj+1L]-2L)
+      }
+      sub_boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|[^\'](?=\'?%)', sub_str, perl = TRUE)
+      sub_str_widths = nchar(sub_str)
+      lines = vapply(
+        seq_along(sub_str),
+        function(jj) wrap_string(sub_str[jj], sub_boundaries[[jj]], sub_str_widths[jj], width),
+        character(1L)
+      )
+      # stitch sub_str components by re-appending the \n, _inside_ the " arrays, then add the outer-outer " to finish
+      out[ii] = paste0('"', paste(lines, collapse = '\\n"\n"'), '"')
+    } else {
+      out[ii] = paste0('"', wrap_string(str[ii], boundaries[[ii]], str_widths[ii], width), '"')
     }
-    if (start_idx < nchar(str[ii])) lines = c(lines, substr(str[ii], start_idx + 1L, nchar(str[ii])))
-    out[ii] = paste0('"', lines, '"', collapse = "\n")
   }
   out
+}
+
+wrap_string = function(str, boundary, str_width, line_width) {
+  # no places to split this string, so don't. xgettext also seems not to.
+  if (boundary[1L] < 0L) return(str)
+
+  # supplement with the total string width for the case that the last word breaks the width
+  boundary = c(boundary, str_width)
+  lines = character()
+
+  # 0 not 1 makes the arithmetic nicer below
+  start_char = 0L
+  # 2 accounts for two " (added below)
+  while (any(wide_idx <- boundary > line_width - 2L)) {
+    split_idx = which(wide_idx)[1L] - 1L
+    lines = c(lines, substr(str, start_char + 1L, start_char + boundary[split_idx]))
+    start_char = start_char + boundary[split_idx]
+    boundary = tail(boundary, -split_idx) - boundary[split_idx]
+  }
+  if (start_char < str_width) lines = c(lines, substr(str, start_char + 1L, str_width))
+
+  # wrap only internally here -- for the newline-broken case, we need to build the "outer" wrapper idiosyncratically
+  paste(lines, collapse = '"\n"')
 }
 
 # see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c

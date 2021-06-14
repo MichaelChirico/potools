@@ -342,7 +342,6 @@ clean_text = function(x) {
   #   like a raw string on the RHS but actually is not one. also consider a real
   #   pain like r'("abc")' and 'r"(abc)"' -- whatever we do, if we strip away one first,
   #   then the other, we'll end up with the wrong strings.
-  #   TODO: add tests for these edge cases
   x = gsub(
     '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
     '\\1\\2', x, perl = TRUE
@@ -353,7 +352,6 @@ clean_text = function(x) {
   x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
   # maybe stop() instead? \r is blocked by gettext...
   x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
-  x = gsub('\\"', '"', x, fixed = TRUE)
   x = gsub('\\\\', '\\', x, fixed = TRUE)
   return(x)
 }

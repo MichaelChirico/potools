@@ -136,20 +136,6 @@ gettextify = function(e, sep = '') {
   )
 }
 
-# shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
-escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)
-
-# attempt to _partially_ invert escape_string. namely, unescape quotes
-#   and backslashes that were added by escape_string.
-#   NB: we leave the control characters as is for visibility. it's very
-#   common for messages for translation to end with \n -- if we unescape
-#   this, a newline will be printed, and it will take a trained eye or
-#   some extra text decoration to draw attention to this. moreover, while
-#   I suspect there could be hope for \n, i think all is lost for \r and even \t.
-unescape_string = function(x) {
-  gsub('[\\]([\\"])', '\\1', x)
-}
-
 # two types of specials to highlight:
 #   (1: see ?sprintf) templates in the fmt argument to sprintf
 #   (2: see ?encodeString) escaped control characters: \\, \n, \t, \r, \v, \a, \b, \f
@@ -205,6 +191,9 @@ get_special_tags = function(s, specials) {
   }
   paste(out, collapse="")
 }
+
+# shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
+escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)
 
 # substring often gets run on 0-row j, which errors substring; just exit in that case
 safe_substring = function(text, first, last) {

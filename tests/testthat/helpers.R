@@ -29,7 +29,11 @@ expect_all_match = function(inputs, targets, ..., invert=FALSE) {
   expect(
     all(matched),
     sprintf(
-      "Not all messages found:\n  Observed: %s\n  Wanted: %s\n",
+      if (invert) {
+        "Unwanted messages found:\n  Observed: %s\n  Didn't want: %s\n"
+      } else {
+        "Not all messages found:\n  Observed: %s\n  Wanted: %s\n"
+      },
       toString(sQuote(inputs)),
       toString(sQuote(targets[!matched]))
     )

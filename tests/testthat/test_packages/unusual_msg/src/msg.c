@@ -50,5 +50,8 @@ void hello_world(SEXP x) {
   // xgettext prefers splitting lines at templates, but bumps the ' to the next line as well.
   error(_("error in evaluating the argument '%s' in selecting a method for function '%s': %s"), "abc", "def", "ghi");
 
+  // xgettext always splits at a newline, regardless of width
+  error(_("This message\nSpans two lines"));
+  error(_("This one does not\n"));
   return;
 }

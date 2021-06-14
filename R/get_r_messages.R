@@ -352,13 +352,9 @@ clean_text = function(x) {
   x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
   # maybe stop() instead? \r is blocked by gettext...
   x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
-  x = gsub('\\"', '"', x, fixed = TRUE)
   x = gsub('\\\\', '\\', x, fixed = TRUE)
   return(x)
 }
-
-# shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
-escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)
 
 string_schema = function() data.table(
   file = character(),

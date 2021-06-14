@@ -4,9 +4,9 @@ copia uno
 copia dos
 te avise!
 'abc'
-\"def\"
+"def"
 R('abc')
-r(\"def\")
+r("def")
 ghi
 Hola!
 bueno %s
@@ -18,12 +18,12 @@ quinto
 sexto
 \\n vs \n es OK
 \\t vs \t es OK
-string con \"comillas\" son OK
+string con "comillas" son OK
 string con \"comillas\" escapado son OK
 singular
 plural
-falta pequena\n
-falta grande\n
+falta pequena
+falta grande
 cualquier mensaje
 eso es un %<PRId64> pared grande sobre %<PRIu64>
 /* esto es lo que parece un comment en C */

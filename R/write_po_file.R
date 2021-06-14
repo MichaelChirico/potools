@@ -136,7 +136,7 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       source_location[singular_idx],
       c_fmt_tag[singular_idx],
       wrap_msg('msgid', msgid[singular_idx], width, params$ignore_width),
-      wrap_msg('msgstr', encodeString(msgstr[singular_idx]), width, params$ignore_width)
+      wrap_msg('msgstr', escape_string(msgstr[singular_idx]), width, params$ignore_width)
     )
     if (!all(singular_idx)) {
       msgid_plural = msgid_plural[!singular_idx]
@@ -145,8 +145,8 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       msgid_plural = vapply(
         msgstr_plural[!singular_idx],
         function(msgstr) paste(
-          # TODO: should encodeString() be done directly at translation time?
-          sprintf(msgstr_fmt, seq_along(msgstr)-1L, encodeString(msgstr)),
+          # TODO: should escape_string() be done directly at translation time?
+          sprintf(msgstr_fmt, seq_along(msgstr)-1L, escape_string(msgstr)),
           collapse='\n'
         ),
         character(1L)
@@ -242,7 +242,7 @@ wrap_msg = function(key, value, width, ignore_width = FALSE) {
   if (ignore_width) {
     wrap_idx <- rep(FALSE, length(value))
   } else {
-    wrap_idx <- nchar(value) + nchar(key) + 3L > width | grepl("\\n.", value)
+    wrap_idx <- nchar(value) + nchar(key) + 3L > width | grepl("[\\]n.", value)
   }
   out[!wrap_idx] = sprintf('%s "%s"', key, value[!wrap_idx])
   out[wrap_idx] = sprintf('%s ""\n%s', key, wrap_strings(value[wrap_idx], width))

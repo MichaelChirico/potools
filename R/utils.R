@@ -192,6 +192,9 @@ get_special_tags = function(s, specials) {
   paste(out, collapse="")
 }
 
+# shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
+escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)
+
 # substring often gets run on 0-row j, which errors substring; just exit in that case
 safe_substring = function(text, first, last) {
   if (!length(first)) return(character())

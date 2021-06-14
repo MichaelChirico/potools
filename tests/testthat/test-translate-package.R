@@ -295,15 +295,16 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       # escaping/unescaping
       expect_all_match(
         r_pot_files,
-        c('msgid "\\\\n vs \\n is OK"', 'msgid "\\\\t vs \\t is OK"',
+        c('"\\\\n vs \\n', 'msgid "\\\\t vs \\t is OK"',
           'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\"quotes\\" are OK"'),
         fixed = TRUE
       )
 
-      # whitespace trimming in C
+      # (1) whitespace trimming in C
+      # (2) always split at newlines
       expect_all_match(
         src_pot_files,
-        c('looks like */ "', 'looks like %s "'),
+        c('looks like */ "', 'looks like %s "', '"This message\\n"'),
         fixed = TRUE
       )
     }
@@ -319,10 +320,15 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
+      # (1) default copyright comment in metadata
+      # (2) default blank Language field in metadata
+      # (3) testing plural string padding
+      # (4) source tagging
+      # (5) splitting at newlines
       expect_all_match(
         r_pot_lines,
-        # third is testing plural string padding; fourth is for source tagging
-        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER", 'msgid "singular "', '#: foo.R'),
+        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER",
+          'msgid "singular "', '#: foo.R', '"\\\\n vs \\n"'),
         fixed = TRUE
       )
       expect_all_match(
@@ -343,9 +349,10 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
+      # (1)-(5) invert the corresponding number in the previous test_that
       expect_all_match(
         r_pot_lines,
-        c("SOME DESCRIPTIVE TITLE", "Language: [\\]n", "nplurals=INTEGER", '#: '),
+        c("SOME DESCRIPTIVE TITLE", "Language: [\\]n", "nplurals=INTEGER", '#: ', '"\\\\n vs \\n is OK"'),
         fixed = TRUE, invert = TRUE
       )
       expect_all_match(r_pot_lines, 'msgid        "small fail "', fixed = TRUE)
@@ -378,7 +385,6 @@ test_that("use_base_rules is auto-detected", {
       r_pot_lines <- readLines(file.path(pkg, 'po', 'R-grDevices.pot'))
       src_pot_lines <- readLines(file.path(pkg, 'po', 'grDevices.pot'))
 
-      browser()
       expect_all_match(
         r_pot_lines,
         c('"Project-Id-Version: R', '"Report-Msgid-Bugs-To: bugs.r-project.org\\n"'),

@@ -31,4 +31,5 @@ eso es un %<PRId64> pared grande sobre %<PRIu64>
 01234567890123456789.01234567890123456789
 un string traducida con plantilla: %<PRId64>\n
 falta en evaluar el argumento '%s' elegir metodo por funcion '%s': %s
+este mensaje\\nocupe dos lineas
 cualquier mensaje nuevo

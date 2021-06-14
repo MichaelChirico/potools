@@ -296,7 +296,7 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       expect_all_match(
         r_pot_files,
         c('"\\\\n vs \\n', 'msgid "\\\\t vs \\t is OK"',
-          'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\\\\\"quotes\\\\\\" are OK"'),
+          'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\"quotes\\" are OK"'),
         fixed = TRUE
       )
 
@@ -330,7 +330,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
         r_pot_lines,
         c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER",
           'msgid "singular "', '#: foo.R', '"\\\\n vs \\n"',
-          '"strings with escaped \\\\\\"quotes\\\\\\"'),
+          '"strings with escaped \\"quotes\\"'),
         fixed = TRUE
       )
       expect_all_match(

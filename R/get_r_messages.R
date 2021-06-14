@@ -352,6 +352,9 @@ clean_text = function(x) {
   x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
   # maybe stop() instead? \r is blocked by gettext...
   x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
+  # quotes that are escaped _in the text_ are not escaped _in R_ (i.e., after parsing),
+  #   e.g. in 'a string with an \"escaped\" quote', the escapes for " disappear after parsing. See #128
+  x = gsub("(?<![\\\\])[\\\\](['\"])", "\\1", x, perl = TRUE)
   x = gsub('\\\\', '\\', x, fixed = TRUE)
   return(x)
 }

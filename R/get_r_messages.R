@@ -346,12 +346,14 @@ clean_text = function(x) {
     '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
     '\\1\\2', x, perl = TRUE
   )
-  # there may be others, these are the main ones...
-  #   lookback since actual escaped \\n shouldn't be replaced. perl escaping sure is ugly.
-  x = gsub("(?<![\\\\])[\\\\]n", "\n", x, perl = TRUE)
-  x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
+  # there may be others, these are the main ones... lookback group since actual escaped \\n shouldn't be replaced.
+  x = gsub("(^|[^\\])[\\]n", "\\1\n", x)
+  x = gsub("(^|[^\\])[\\]t", "\\1\t", x)
   # maybe stop() instead? \r is blocked by gettext...
-  x = gsub("(?<![\\\\])[\\\\]r", "\r", x, perl = TRUE)
+  x = gsub("(^|[^\\])[\\]r", "\\1\r", x)
+  # quotes that are escaped _in the text_ are not escaped _in R_ (i.e., after parsing),
+  #   e.g. in 'a string with an \"escaped\" quote', the escapes for " disappear after parsing. See #128
+  x = gsub("(^|[^\\])[\\]([\"'])", "\\1\\2", x)
   x = gsub('\\\\', '\\', x, fixed = TRUE)
   return(x)
 }

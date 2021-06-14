@@ -269,41 +269,42 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
     {
       translate_package(pkg, diagnostics = NULL)
 
-      r_pot_files <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
-      src_pot_files <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
+      r_pot_file <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
+      src_pot_file <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
       # (1) raw strings edge cases
       # (2) whitespace trimming behavior (trim for R singular, don't for R plural)
       expect_all_match(
-        r_pot_files,
+        r_pot_file,
         c('msgid "\'abc\'"', 'msgid "\\"def\\""', 'msgid "R(\'abc\')"', 'msgid "r(\\"def\\")"', 'msgid "ghi"',
           'good %s', 'msgid "singular "'),
         fixed = TRUE
       )
 
       # skip empty strings
-      expect_all_match(paste(r_pot_files, collapse = "\n"), 'msgid ""\nmsgstr ""\n\n', fixed = TRUE, invert = TRUE)
+      expect_all_match(paste(r_pot_file, collapse = "\n"), 'msgid ""\nmsgstr ""\n\n', fixed = TRUE, invert = TRUE)
 
       # don't collapse strings in similar node positions across files
-      expect_all_match(r_pot_files, c('msgid "copy one"', 'msgid "copy two"'))
+      expect_all_match(r_pot_file, c('msgid "copy one"', 'msgid "copy two"'))
 
       # ordering within the file
-      expect_true(which(r_pot_files == 'msgid "first"') < which(r_pot_files == 'msgid "second"'))
-      expect_true(which(r_pot_files == 'msgid "second"') < which(r_pot_files == 'msgid "third"'))
-      expect_true(which(r_pot_files == 'msgid "third"') < which(r_pot_files == 'msgid "fourth"'))
+      # "\\"first\\"" also tests escaping of " on msgid border, #128
+      expect_true(which(r_pot_file == 'msgid "\\"first\\""') < which(r_pot_file == 'msgid "second"'))
+      expect_true(which(r_pot_file == 'msgid "second"') < which(r_pot_file == 'msgid "third"'))
+      expect_true(which(r_pot_file == 'msgid "third"') < which(r_pot_file == 'msgid "fourth"'))
 
       # escaping/unescaping
       expect_all_match(
-        r_pot_files,
+        r_pot_file,
         c('"\\\\n vs \\n', 'msgid "\\\\t vs \\t is OK"',
-          'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\\\\\"quotes\\\\\\" are OK"'),
+          'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\"quotes\\" are OK"'),
         fixed = TRUE
       )
 
       # (1) whitespace trimming in C
       # (2) always split at newlines
       expect_all_match(
-        src_pot_files,
+        src_pot_file,
         c('looks like */ "', 'looks like %s "', '"This message\\n"'),
         fixed = TRUE
       )
@@ -330,7 +331,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
         r_pot_lines,
         c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER",
           'msgid "singular "', '#: foo.R', '"\\\\n vs \\n"',
-          '"strings with escaped \\\\\\"quotes\\\\\\"'),
+          '"strings with escaped \\"quotes\\"'),
         fixed = TRUE
       )
       expect_all_match(

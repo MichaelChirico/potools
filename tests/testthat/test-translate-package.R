@@ -304,9 +304,10 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
 
       # (1) whitespace trimming in C
       # (2) always split at newlines
+      # (3) exotic formatters like %lld
       expect_all_match(
-        src_pot_file,
-        c('looks like */ "', 'looks like %s "', '"This message\\n"'),
+        paste(src_pot_file, collapse = "\n"),
+        c('looks like */ "', 'looks like %s "', '"This message\\n"', '#, c-format\nmsgid "Exotic formatters'),
         fixed = TRUE
       )
     }

@@ -106,6 +106,12 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
     out = enc2utf8(readLines(conn, n=1L)) # nocov
   } else {
     out = readLines(conn, n=1L, encoding="UTF-8")
+    # issue often encountered in dev when adjusting the test packages & things get bumped around...
+    # nocov start
+    if (is.na(out)) {
+      stop(domain=NA, gettextf("Connection empty when trying to read prompt %s", do.call(paste, list(...))))
+    }
+    # nocov end
   }
   # See #105 / #95... confusing stuff
   if (missing(require_type)) return(unescape_string_in(out))

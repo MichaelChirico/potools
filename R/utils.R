@@ -151,7 +151,7 @@ SPRINTF_TEMPLATE_REGEX = paste0(
     "[%]|", # % separately to reduce false positives -- it can't be used with other specials
     "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
     "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
-    "[aAcdeEfgGiopsuxX]|", # taken from https://en.wikipedia.org/wiki/Printf_format_string#Type_field
+    "[aAcdeEfgGiopsuxX]|(?:ll?|I(?:64|32))[diux]|", # taken from https://en.wikipedia.org/wiki/Printf_format_string
     "<[a-zA-Z0-9_]+>", # macro-based formatters in C, e.g. %<PRId64>
   ")"
 )

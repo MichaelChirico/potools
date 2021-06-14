@@ -53,5 +53,8 @@ void hello_world(SEXP x) {
   // xgettext always splits at a newline, regardless of width
   error(_("This message\nSpans two lines"));
   error(_("This one does not\n"));
+
+  // base has a few of these strewn about -- ideally they would be replaced by PRId64 & family
+  error(_("Exotic formatters like %I32u, %llx, %li"));
   return;
 }

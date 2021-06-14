@@ -296,7 +296,7 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       expect_all_match(
         r_pot_files,
         c('"\\\\n vs \\n', 'msgid "\\\\t vs \\t is OK"',
-          'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\"quotes\\" are OK"'),
+          'msgid "strings with \\"quotes\\" are OK"', 'msgid "strings with escaped \\\\\\"quotes\\\\\\" are OK"'),
         fixed = TRUE
       )
 

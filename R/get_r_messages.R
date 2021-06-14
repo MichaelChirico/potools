@@ -342,8 +342,9 @@ clean_text = function(x) {
   #   like a raw string on the RHS but actually is not one. also consider a real
   #   pain like r'("abc")' and 'r"(abc)"' -- whatever we do, if we strip away one first,
   #   then the other, we'll end up with the wrong strings.
+  # h/t https://stackoverflow.com/a/8303552/3576984 for (?s) for . to match \n in part 2
   x = gsub(
-    '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
+    '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^(?s)["\'](.*)["\']$',
     '\\1\\2', x, perl = TRUE
   )
   # there may be others, these are the main ones... lookback since actual escaped \\n shouldn't be replaced.

@@ -1,6 +1,8 @@
 f1 <- function(x) {
-  # terminal \n\n should be removed
-  base::warning("I warned you!\n\n")
+  # initial and terminal \n\n should be removed, including "implicit" \n, #130
+  base::warning("
+
+I warned you!\n\n")
   # testing nested strings parse correctly -- after peeling away raw strings,
   #   these look like "normal" quote-wrapped strings. don't remove those quotes.
   #   similarly for the reverse situation next.

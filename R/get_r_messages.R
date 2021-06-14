@@ -342,18 +342,20 @@ clean_text = function(x) {
   #   like a raw string on the RHS but actually is not one. also consider a real
   #   pain like r'("abc")' and 'r"(abc)"' -- whatever we do, if we strip away one first,
   #   then the other, we'll end up with the wrong strings.
+  # h/t https://stackoverflow.com/a/8303552/3576984 for (?s) for . to match \n in part 2
   x = gsub(
-    '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^["\'](.*)["\']$',
+    '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^(?s)["\'](.*)["\']$',
     '\\1\\2', x, perl = TRUE
   )
-  # there may be others, these are the main ones... lookback group since actual escaped \\n shouldn't be replaced.
-  x = gsub("(^|[^\\])[\\]n", "\\1\n", x)
-  x = gsub("(^|[^\\])[\\]t", "\\1\t", x)
+  # there may be others, these are the main ones... lookback since actual escaped \\n shouldn't be replaced.
+  #   an non-perl approach with capture groups like (^|[^\\])[\\]n fails on consecutive \\n\\n due to greediness
+  x = gsub("(?:^|(?<![\\\\]))[\\\\]n", "\n", x, perl = TRUE)
+  x = gsub("(?:^|(?<![\\\\]))[\\\\]t", "\t", x, perl = TRUE)
   # maybe stop() instead? \r is blocked by gettext...
-  x = gsub("(^|[^\\])[\\]r", "\\1\r", x)
+  x = gsub("(?:^|(?<![\\\\]))[\\\\]r", "\r", x, perl = TRUE)
   # quotes that are escaped _in the text_ are not escaped _in R_ (i.e., after parsing),
   #   e.g. in 'a string with an \"escaped\" quote', the escapes for " disappear after parsing. See #128
-  x = gsub("(^|[^\\])[\\]([\"'])", "\\1\\2", x)
+  x = gsub("(?:^|(?<![\\\\]))[\\\\](['\"])", "\\1", x, perl = TRUE)
   x = gsub('\\\\', '\\', x, fixed = TRUE)
   return(x)
 }

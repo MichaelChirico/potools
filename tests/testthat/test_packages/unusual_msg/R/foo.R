@@ -33,7 +33,7 @@ f4 <- function(x) {
   cat("i am not in .pot")
   # multiple strings in the same expression are ordered properly
   warning(
-    "first", "second", "third",
+    '"first"', "second", "third",
     "fourth", "fifth", "sixth"
   )
 }

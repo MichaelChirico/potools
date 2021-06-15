@@ -262,7 +262,8 @@ wrap_strings = function(str, width) {
   # more experimentation shows
   #   - a preference to put formatting % on the next line too
   #   - pick the lattermost line splitter when they come consecutively
-  boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|[^\'](?=\'?%)', str, perl = TRUE)
+  #   - \" is considered a boundary _if not preceded by [0-9()']_, see #91
+  boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|[^\'](?=\'?%)|[^0-9()\'](?=[\\\\]")', str, perl = TRUE)
   # xgettext _doesn't_ break on escaped-backslash-then-n, so match to an odd number of backslashes-then-n
   # append . to simplify the logic below (and besides, the string won't ever split after the very end anyway)
   has_newlines = grepl('(?:^|[^\\])[\\](?:[\\][\\]){0,}n.', str)

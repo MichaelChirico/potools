@@ -373,10 +373,15 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
         c('MSGs\\.c.*msg\\.c', '#, c-format', '#: msg\\.c:.*#: msg\\.c', '"\'%s\': %s"')
       )
 
-      # only src/*.c and src/windows/*.c are included (no other subdirectories), #114
+      # (1) only src/*.c and src/windows/*.c are included (no other subdirectories), #114
+      # (2)-(8) wrapping surrounding \" matches xgettex, #91
       expect_all_match(
         src_pot_lines,
-        '#: bedfellows.c:',
+        c(
+          '#: bedfellows.c:',
+          '56\\"890"', '5(\\"890"', '5\'\\"890"',
+          '345a"', '345A"', '345#"', '345@"'
+        ),
         fixed = TRUE, invert = TRUE
       )
     }

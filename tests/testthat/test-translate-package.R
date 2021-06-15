@@ -306,10 +306,11 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       # (2) always split at newlines
       # (3) exotic formatters like %lld
       # (4) ordering of files within the .pot (#104)
+      # (5) correct message after removing line continuation (#91)
       expect_all_match(
         paste(src_pot_file, collapse = "\n"),
         c('looks like [*]/ "', 'looks like %s "', '"This message[\\]n"',
-          '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c'),
+          '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c', '"any old message"'),
       )
     }
   )

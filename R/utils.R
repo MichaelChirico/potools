@@ -56,52 +56,14 @@ check_sys_reqs = function() {
 }
 # nocov end
 
-# parse the R files in a directory. do this once & reuse the results.
-parse_r_files = function(dir) {
-  r_files = package_r_files(dir)
-  out = lapply(r_files, parse, keep.source=TRUE)
-  names(out) = r_files
-  return(out)
-}
-
-# get R files in a directory
-list_r_files = function(dir) list.files(dir, full.names = TRUE, pattern = "(?i)\\.r$")
-# get R files in a package
-package_r_files = function(dir) {
-  dir = file.path(dir, 'R')
-  r_files = list_r_files(dir)
-  for (os in c("unix", "windows")) {
-    os_dir = file.path(dir, os)
-    if (dir.exists(os_dir)) r_files = c(r_files, list_r_files(os_dir))
+list_package_files = function(dir, subdir, subsubdirs, pattern) {
+  subdir = file.path(dir, subdir)
+  files = list.files(subdir, pattern = pattern)
+  for (subsubdir in subsubdirs) {
+    subsubdir_ = file.path(subdir, subsubdir)
+    if (dir.exists(subsubdir_)) files = c(files, file.path(subsubdir, list.files(subsubdir_, pattern = pattern)))
   }
-  # somehow on windows I was seeing absolute paths with \ but paths
-  #   from list.files as / -- normalizePath makes it consistent
-  return(normalizePath(r_files))
-}
-
-# get src files in a directory. exclude .h files
-list_src_files = function(dir, use_base_rules = FALSE) {
-  # recursive to include subdirectories, e.g. as found in R-devel/src/library/{grDevices,utils}
-  # NB: tools::update_pkg_po() is only looking for files in
-  #   src/*.{c,cc,cpp,m,mm} and src/windows/*.{c,cc,cpp,m,mm}
-  if (use_base_rules) {
-    src_files = c(list.files(dir, full.names = TRUE), list.files(file.path(dir, 'windows'), full.names = TRUE))
-  } else {
-    src_files = list.files(dir, full.names = TRUE, recursive = TRUE)
-  }
-  # tried to be inclusive at first, but stringi broke my resolve -- src/ includes
-  #   .zip, .txt, .html, .pl, ... broke my conviction we have any hope of making anything
-  #   but an allow list succeed here.
-  # thus we match the update_pkg_po() behavior to only include *.{c,cc,cpp,m,mm} files
-  grep("\\.(c|cc|cpp|m|mm)$", src_files, value = TRUE, ignore.case = TRUE)
-}
-# get src files in a package
-package_src_files = function(dir, use_base_rules = FALSE) {
-  dir = file.path(dir, 'src')
-  src_files = list_src_files(dir, use_base_rules)
-  # somehow on windows I was seeing absolute paths with \ but paths
-  #   from list.files as / -- normalizePath makes it consistent
-  return(normalizePath(src_files))
+  return(files)
 }
 
 # patch analogous fix for Bugzilla#18025 here

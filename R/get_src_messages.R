@@ -1,13 +1,16 @@
 get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules = FALSE) {
-  # alternative that would keep these signatures cleaner of this parameter would be to
-  #   handle this in write_po_file(), which would require keeping track of column numbers
+  # alternative would be to handle the if (!use_base_rules) branch in write_po_file(),
+  #   which would require keeping track of column numbers
   #   until that point so as to keep the file order correct in both use_base_rules cases
-  src_files = package_src_files(dir, use_base_rules)
-  names(src_files) = src_files
+  src_files = list_package_files(dir, 'src', c('windows', if (!use_base_rules) 'cairo'), "(?i)\\.(c|cc|cpp|m|mm)$")
 
   if (!length(src_files)) return(src_msg_schema())
 
-  msg = rbindlist(lapply(src_files, get_file_src_messages, translation_macro), idcol = "file")
+  msg = rbindlist(
+    lapply(normalizePath(file.path(dir, 'src', src_files)), get_file_src_messages, translation_macro),
+    idcol = "file"
+  )
+  msg[ , "file" := src_files[file]]
   # TODO(#40): plural messages in src
   msg[ , "type" := "singular"]
 

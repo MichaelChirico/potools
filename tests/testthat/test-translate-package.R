@@ -339,7 +339,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
       expect_all_match(
         src_pot_lines,
         # testing no strwrap for many duplicate locations
-        c("(msg\\.c:[0-9]+ ){10}", '^#: bedfellows\\.c:')
+        c("(msg\\.c:[0-9]+ ){10}", '^#: cairo/bedfellows\\.c:')
       )
     }
   )

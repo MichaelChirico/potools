@@ -15,8 +15,8 @@ get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules =
   msg[ , "type" := "singular"]
 
   # line continuation mid-array is treated as blank, #91. we might be able to handle this in pre-process but
-  #   that risks throwing off line numbers later on...
-  msg[ , "msgid" := gsub("\\\n", "", msgid, fixed = TRUE)]
+  #   that risks throwing off line numbers later on... \r? for windows of course
+  msg[ , "msgid" := gsub("[\\]\r?\n", "", msgid)]
 
   # TODO: write this
   # internal line breaks & spacing minimized

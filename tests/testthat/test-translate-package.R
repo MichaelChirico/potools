@@ -427,3 +427,15 @@ test_that("use_base_rules is auto-detected", {
     }
   )
 })
+
+test_that("translation of 'base' works correctly", {
+  restore_package(
+    pkg <- test_package("r-devel/src/library/base"),
+    {
+      translate_package(pkg, diagnostics = NULL)
+      # TODO: why not R.pot?
+      # TODO: add some R messages to the mock base
+      browser()
+    }
+  )
+})

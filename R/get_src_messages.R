@@ -1,13 +1,25 @@
-get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules = FALSE) {
-  # alternative would be to handle the if (!use_base_rules) branch in write_po_file(),
-  #   which would require keeping track of column numbers
-  #   until that point so as to keep the file order correct in both use_base_rules cases
-  src_files = list_package_files(dir, 'src', c(if (!use_base_rules) 'cairo', 'windows'), "(?i)\\.(c|cc|cpp|m|mm)$")
+get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules = FALSE, is_base = FALSE) {
+  if (is_base) {
+    potfiles_loc <- file.path(dir, "../../../po/POTFILES")
+    if (!file.exists(potfiles_loc)) {
+      stop("Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file po/POTFILES at the top level that is required to proceed.")
+    }
+    # NB: also skips blank lines
+    src_files <- grep("^[^#]", readLines(potfiles_loc), value = TRUE)
+    # in R.pot, file paths are given relative to the top level (and so include src/, where other packages drop src/)
+    dir = dirname(dirname(potfiles_loc))
+  } else {
+    # alternative would be to handle the if (!use_base_rules) branch in write_po_file(),
+    #   which would require keeping track of column numbers
+    #   until that point so as to keep the file order correct in both use_base_rules cases
+    src_files = list_package_files(dir, 'src', c(if (!use_base_rules) 'cairo', 'windows'), "(?i)\\.(c|cc|cpp|m|mm)$")
+    dir = file.path(dir, 'src')
+  }
 
   if (!length(src_files)) return(src_msg_schema())
 
   msg = rbindlist(
-    lapply(normalizePath(file.path(dir, 'src', src_files)), get_file_src_messages, translation_macro),
+    lapply(normalizePath(file.path(dir, src_files)), get_file_src_messages, translation_macro),
     idcol = "file"
   )
   msg[ , "file" := src_files[file]]
@@ -23,8 +35,12 @@ get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules =
   # msg[ , call := cleanup_call(call)]
 
   # TODO: R side also uses column_number to sort, but it's ~basically~ not relevant for C... yet
-  # in_subdir done for #104; see also the comment in get_r_messages.R
-  msg[ , "in_subdir" := grepl("/", file, fixed = TRUE)]
+  # in_subdir done for #104; see also the comment in get_r_messages.R. For base, POTFILES gives the right order.
+  if (is_base) {
+    msg[ , "in_subdir" := TRUE]
+  } else {
+    msg[ , "in_subdir" := grepl("/", file, fixed = TRUE)]
+  }
   setorderv(msg, c("type", "in_subdir", "file", "line_number"), c(-1L, 1L, 1L, 1L))
   msg[ , "in_subdir" := NULL]
 

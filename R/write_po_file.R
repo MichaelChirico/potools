@@ -24,7 +24,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 
   if (template) {
     r_file <- sprintf("R-%s.pot", params$package)
-    src_file <- sprintf("%s.pot", params$package)
+    src_file <- sprintf("%s.pot", if (params$package == 'base') 'R' else params$package)
 
     po_data[type == "plural", 'msgid_plural_str' := vapply(msgid_plural, paste, character(1L), collapse="|||")]
     po_data = po_data[,

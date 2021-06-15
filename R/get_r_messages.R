@@ -53,7 +53,7 @@ get_r_messages <- function (dir) {
   if (!nrow(msg)) return(r_message_schema())
 
   msg_files = unique(msg$file)
-  file_lines = lapply(msg_files, readLines, warn = FALSE)
+  file_lines = lapply(normalizePath(file.path(dir, 'R', msg_files)), readLines, warn = FALSE)
   names(file_lines) = msg_files
 
   # need to strip comments for build_call, see #59.
@@ -103,6 +103,29 @@ get_r_messages <- function (dir) {
   msg[ , 'fname' := NULL]
 
   msg[]
+}
+
+# parse the R files in a directory.
+parse_r_files = function(dir) {
+  # somehow on windows I was seeing absolute paths with \ but paths
+  #   from list.files as / -- normalizePath makes it consistent
+  r_files = package_r_files(dir)
+  out = lapply(normalizePath(file.path(dir, 'R', r_files)), parse, keep.source=TRUE)
+  names(out) = r_files
+  return(out)
+}
+
+# get R files in a directory
+list_r_files = function(dir) list.files(dir, pattern = "(?i)\\.r$")
+# get R files in a package
+package_r_files = function(dir) {
+  dir = file.path(dir, 'R')
+  r_files = list_r_files(dir)
+  for (os in c("unix", "windows")) {
+    os_dir = file.path(dir, os)
+    if (dir.exists(os_dir)) r_files = c(r_files, file.path(os, list_r_files(os_dir)))
+  }
+  return(r_files)
 }
 
 # these functions all have a domain= argument. taken from the xgettext source, but could be

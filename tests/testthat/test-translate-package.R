@@ -306,10 +306,11 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       # (2) always split at newlines
       # (3) exotic formatters like %lld
       # (4) ordering of files within the .pot (#104)
+      # (5) correct message after removing line continuation (#91)
       expect_all_match(
         paste(src_pot_file, collapse = "\n"),
         c('looks like [*]/ "', 'looks like %s "', '"This message[\\]n"',
-          '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c'),
+          '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c', '"any old message"'),
       )
     }
   )
@@ -372,10 +373,15 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
         c('MSGs\\.c.*msg\\.c', '#, c-format', '#: msg\\.c:.*#: msg\\.c', '"\'%s\': %s"')
       )
 
-      # only src/*.c and src/windows/*.c are included (no other subdirectories), #114
+      # (1) only src/*.c and src/windows/*.c are included (no other subdirectories), #114
+      # (2)-(8) wrapping surrounding \" matches xgettex, #91
       expect_all_match(
         src_pot_lines,
-        '#: bedfellows.c:',
+        c(
+          '#: bedfellows.c:',
+          '56\\"890"', '5(\\"890"', '5\'\\"890"',
+          '345a"', '345A"', '345#"', '345@"'
+        ),
         fixed = TRUE, invert = TRUE
       )
     }

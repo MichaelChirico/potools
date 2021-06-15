@@ -353,9 +353,7 @@ msgstr ""
 
 make_src_location <- function(files, lines, message_source, use_base_rules) {
   if (use_base_rules && message_source == "R") return("")
-  # TODO(#107): technically basename() is incorrect since relative paths are made, but I'm not
-  #   sure how the top-level path is decided for this. must be fixed to handle base.
-  s <- paste(sprintf("%s:%d", basename(files), lines), collapse = " ")
+  s <- paste(sprintf("%s:%d", files, lines), collapse = " ")
   # branch above implies use_base_rules => message_source == "src"
   # 76 = 79 - nchar("#: ")
   paste0("#: ", if (use_base_rules) strwrap(s, width=76) else s, "\n", collapse="")

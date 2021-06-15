@@ -2,7 +2,7 @@ get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules =
   # alternative would be to handle the if (!use_base_rules) branch in write_po_file(),
   #   which would require keeping track of column numbers
   #   until that point so as to keep the file order correct in both use_base_rules cases
-  src_files = list_package_files(dir, 'src', c('windows', if (!use_base_rules) 'cairo'), "(?i)\\.(c|cc|cpp|m|mm)$")
+  src_files = list_package_files(dir, 'src', c(if (!use_base_rules) 'cairo', 'windows'), "(?i)\\.(c|cc|cpp|m|mm)$")
 
   if (!length(src_files)) return(src_msg_schema())
 
@@ -19,7 +19,10 @@ get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules =
   # msg[ , call := cleanup_call(call)]
 
   # TODO: R side also uses column_number to sort, but it's ~basically~ not relevant for C... yet
-  setorderv(msg, c("type", "file", "line_number"), c(-1L, 1L, 1L))
+  # in_subdir done for #104; see also the comment in get_r_messages.R
+  msg[ , "in_subdir" := grepl("/", file, fixed = TRUE)]
+  setorderv(msg, c("type", "in_subdir", "file", "line_number"), c(-1L, 1L, 1L, 1L))
+  msg[ , "in_subdir" := NULL]
 
   msg[type == "singular", "is_repeat" := duplicated(msgid)]
   msg[]

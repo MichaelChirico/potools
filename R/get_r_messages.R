@@ -85,9 +85,11 @@ get_r_messages <- function (dir) {
 
   # descending 'type' so that "singular" comes before "plural".
   # NB: forder uses C order for file, which happens to match the base behavior to set LC_COLLATE=C
-  setorderv(msg, c("type", "file", "line_number", "column_number"), c(-1L, 1L, 1L, 1L))
+  # in_subdir is done to (hackily) match the within-directory ordering done by tools::update_pkg_po(); see #104
+  msg[ , "in_subdir" := grepl("/", file, fixed = TRUE)]
+  setorderv(msg, c("type", "in_subdir", "file", "line_number", "column_number"), c(-1L, 1L, 1L, 1L, 1L))
   # kept id, column_number to get order within lines; can drop now
-  msg[ , c('id', 'column_number') := NULL]
+  msg[ , c('id', 'column_number', 'in_subdir') := NULL]
 
   msg[type == 'singular', 'msgid' := escape_string(trimws(msgid))]
   msg[type == 'plural', 'msgid_plural' := lapply(msgid_plural, escape_string)]

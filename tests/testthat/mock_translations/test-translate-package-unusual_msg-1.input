@@ -25,7 +25,6 @@ plural
 falta pequena
 falta grande
 cualquier mensaje viejo
-cualquier mensaje nuevo
 eso es un %<PRId64> pared grande sobre %<PRIu64>
 /* esto es lo que parece un comment en C */
 // esto es lo que parece un comment en C %s
@@ -35,3 +34,4 @@ falta en evaluar el argumento '%s' elegir metodo por funcion '%s': %s
 este mensaje\nocupe dos lineas
 este mensaje no lo hace\n
 formateadores exoticos como %I32u, %llx, %li, %ls
+cualquier mensaje nuevo

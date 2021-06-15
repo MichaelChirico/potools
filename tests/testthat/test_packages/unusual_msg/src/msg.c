@@ -5,6 +5,9 @@
 #include <Rinternals.h>
 #include "po.h"
 
+// a message not found within a call still gets assigned a source line, #133
+#define MSG _("a message in a macro")
+
 void hello_world(SEXP x) {
   // odd-ish spacing in implicit-cat char arrays, and implicit cat ending with macro
   Rprintf(_("that's a mighty big %"  PRId64"-sized wall over %"PRIu64), 100LL, 10L);

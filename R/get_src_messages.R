@@ -169,6 +169,16 @@ get_file_src_messages = function(file, translation_macro = "_") {
     ]
   ]
 
+  # find cases like #define MSG _("msg") where the array doesn't show up in any "outer" call
+  translations[
+    !is.na(msgid) & is.na(call),
+    c("call_start", "call") := {
+      call_start = paren_start - macro_width
+      .(call_start, substring(contents, call_start, paren_end))
+    }
+  ]
+
+
   # drop calls associated with a translation
   call_arrays = call_arrays[!translations, on = 'call_start']
   call_arrays = call_arrays[fname %chin% MESSAGE_CALLS]

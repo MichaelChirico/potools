@@ -307,10 +307,12 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       # (3) exotic formatters like %lld
       # (4) ordering of files within the .pot (#104)
       # (5) correct message after removing line continuation (#91)
+      # (6) a message outside a call (e.g. in a macro) gets a source marker (#133)
       expect_all_match(
-        paste(src_pot_file, collapse = "\n"),
+        paste(src_pot_file, collapse = "\n"), # NB: this is a get-out-of-\r\n-jail-free card on Windows, too
         c('looks like [*]/ "', 'looks like %s "', '"This message[\\]n"',
-          '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c', '"any old message"'),
+          '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c',
+          '"any old message"', '#: msg[.]c:[0-9]+\nmsgid "a message in a macro"'),
       )
     }
   )

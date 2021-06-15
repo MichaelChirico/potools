@@ -24,7 +24,8 @@ singular
 plural
 falta pequena
 falta grande
-cualquier mensaje
+cualquier mensaje viejo
+un mensage en un macro
 eso es un %<PRId64> pared grande sobre %<PRIu64>
 /* esto es lo que parece un comment en C */
 // esto es lo que parece un comment en C %s

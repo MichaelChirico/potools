@@ -107,11 +107,13 @@ get_file_src_messages = function(file, translation_macro = "_") {
   calls = calls[!fname %chin% c(
     "if", "while", "for", "switch", "return",
     "PROTECT", "UNPROTECT", "free", "malloc", "Calloc", "memcpy",
-    "TYPEOF", "sizeof", "INHERITS", "type2char", "LENGTH", "length", "xlength", "strlen",
+    "TYPEOF", "sizeof", "INHERITS", "type2char", "LENGTH", "length", "XLENGTH", "xlength", "strlen",
     "copyMostAttrib", "getAttrib", "setAttrib", "R_compute_identical",
     "SET_STRING_ELT", "STRING_ELT", "CHAR", "ENC2UTF8", "SET_VECTOR_ELT", "VECTOR_ELT", "SEXPPTR_RO", "STRING_PTR",
-    "RAW", "LOGICAL", "INTEGER", "REAL", "COMPLEX", "CAR", "CDR", "CADR", "checkArity",
-    "isFactor", "isLogical", "isInteger", "isReal", "isString", "isS4", "isNull", "ISNAN"
+    "PRIMVAL", "RAW", "LOGICAL", "INTEGER", "INTEGER_RO", "REAL", "REAL_RO", "COMPLEX",
+    "CAR", "CDR", "CADR", "checkArity",
+    "isFactor", "isLogical", "isInteger", "isNumeric", "isReal", "isComplex", "isString",
+    "isS4", "isNull", "ISNA", "ISNAN", "R_FINITE"
   )]
   calls[ , "paren_end" := paren_start]
 
@@ -152,23 +154,25 @@ get_file_src_messages = function(file, translation_macro = "_") {
 
   calls = calls[(!translation_idx)]
 
-  # associate each translation
+  # translations like _("abc"), i.e., just one array and no gaps at all
   singular_array_idx = call_arrays[ , paren_start == array_start - 1L & paren_end == array_end + 1]
   translation_array_idx = call_arrays[ , fname == translation_macro]
   translations[
     call_arrays[translation_array_idx & singular_array_idx],
     on = c('paren_start', 'paren_end'),
-    msgid := safe_substring(contents, array_start + 1L, array_end - 1L)
+    c("msgid", "array_start") := .(safe_substring(contents, i.array_start + 1L, i.array_end - 1L), i.array_start)
   ]
 
   translations[
     call_arrays[
       translation_array_idx & !singular_array_idx,
-      .(msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents)),
+      # record the location of the first array to tag the source line correctly, see #148
+      .(array_start = array_start[1L],
+        msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents)),
       by= .(paren_start, paren_end)
     ],
     on = c('paren_start', 'paren_end'),
-    msgid := i.msgid
+    c("msgid", "array_start") := .(i.msgid, i.array_start)
   ]
 
   call_arrays = call_arrays[(!translation_array_idx)]
@@ -179,12 +183,13 @@ get_file_src_messages = function(file, translation_macro = "_") {
   ]
 
   # find cases like error(_(msg)); (i.e., arrays passed as variables instead of literals)
+  # assign paren_start of _(msg) (though it shouldn't matter since these shouldn't end up in the .pot file)
   translations[
     is.na(msgid),
-    c('call', 'call_start') := calls[
+    c('call', 'call_start', 'array_start') := calls[
       .SD,
       on = .(paren_start < paren_start, paren_end > paren_end),
-      .(safe_substring(contents, x.call_start, x.paren_end), x.call_start)
+      .(safe_substring(contents, x.call_start, x.paren_end), x.call_start, i.paren_start)
     ]
   ]
 
@@ -198,17 +203,18 @@ get_file_src_messages = function(file, translation_macro = "_") {
   ]
 
 
-  # drop calls associated with a translation
+  # drop calls associated with a translation, and anything but "known" messaging functions
   call_arrays = call_arrays[!translations, on = 'call_start']
   call_arrays = call_arrays[fname %chin% MESSAGE_CALLS]
 
-  # TODO: handle calls with multiple distinct arrays
+  # TODO: handle calls with multiple distinct arrays, e.g. foo("abc", "def")
   singular_array_idx = call_arrays[ , paren_start == array_start - 1L & paren_end == array_end + 1]
   call_arrays = rbind(
     call_arrays[
       (singular_array_idx),
       .(
         call_start, paren_start, paren_end,
+        array_start,
         msgid = safe_substring(contents, array_start + 1L, array_end - 1L),
         call = safe_substring(contents, call_start, paren_end)
       )
@@ -216,6 +222,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
     call_arrays[
       (!singular_array_idx),
       .(
+        array_start = array_start[1L],
         msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents),
         call = safe_substring(contents, .BY$call_start, .BY$paren_end)
       ),
@@ -224,13 +231,14 @@ get_file_src_messages = function(file, translation_macro = "_") {
   )
   call_arrays[ , "is_marked_for_translation" := FALSE]
 
+  # use paren_start for translated arrays to get the line number right when the call & array lines differ
   src_messages = rbind(
-    translations[ , .(msgid, call, call_start, is_marked_for_translation)],
-    call_arrays[ , .(msgid, call, call_start, is_marked_for_translation)]
+    translations[ , .(msgid, call, array_start, is_marked_for_translation)],
+    call_arrays[ , .(msgid, call, array_start, is_marked_for_translation)]
   )
 
-  src_messages[ , "line_number" := findInterval(call_start, newlines_loc)]
-  src_messages[ , "call_start" := NULL]
+  src_messages[ , "line_number" := findInterval(array_start, newlines_loc)]
+  src_messages[ , "array_start" := NULL]
   setcolorder(src_messages, c("msgid", "line_number", "call", "is_marked_for_translation"))
   src_messages[]
 }

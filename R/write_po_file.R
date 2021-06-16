@@ -321,7 +321,7 @@ wrap_string = function(str, boundary, str_width, line_width) {
   start_char = 0L
   # 2 accounts for two " (added below)
   while (any(wide_idx <- boundary > line_width - 2L)) {
-    split_idx = which(wide_idx)[1L] - 1L
+    split_idx = max(which(wide_idx)[1L] - 1L, 1L)
     lines = c(lines, substr(str, start_char + 1L, start_char + boundary[split_idx]))
     start_char = start_char + boundary[split_idx]
     boundary = tail(boundary, -split_idx) - boundary[split_idx]

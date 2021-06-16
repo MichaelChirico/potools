@@ -369,12 +369,14 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
       # (1) MSG.c comes before msg.c (sort/collate order)
       # (2) c-format tags are produced
       # (3) msgid with many duplicates wraps the source markers _exactly_ at width=79
-      # (4) when a template is bumped & '-wrapped, the ' is bumped to the next line as well (#90)
+      # (4)-(11) template-adjacent wrapping/non-wrapping (#90, #150)
       expect_all_match(
         paste(src_pot_lines, collapse='\n'),
         c(
           'MSGs\\.c.*msg\\.c', '#, c-format',
-          '#: [A-Za-z0-9]{63}[.]c:[0-9] msg[.]c:[0-9]{2}\n#: msg[.]c', '"\'%s\': %s"'
+          '#: [A-Za-z0-9]{63}[.]c:[0-9] msg[.]c:[0-9]{2}\n#: msg[.]c',
+          ' [.]"\n"%s[.]"', ' [?]"\n"%s[?]"', ' ;"\n"%s;"', ' /"\n"%s/"',
+          '"\'%s\'"', '"[[]%s[]]"', '"[|]%s[|]"', '"-%s-"'
         )
       )
 

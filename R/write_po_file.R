@@ -255,16 +255,7 @@ wrap_msg = function(key, value, width, ignore_width = FALSE) {
 wrap_strings = function(str, width) {
   if (!length(str)) return(character())
 
-  # valid splits for xgettext found by experimentation (couldn't find where in the source this is defined).
-  #   write _("abcdefghijklm${CHAR}nopqrtstuvwxyz") for these ASCII $CHARs:
-  #   rawToChar(as.raw(c(32:33, 35:47, 58:64, 91, 93:96, 123:126)))
-  #   then run the following to find which lines were split at the character before 'n':
-  #   xgettext --keyword=_ --width=20 $TMPFILE -o /dev/stdout | grep -F '"n' -B 1
-  # more experimentation shows
-  #   - a preference to put formatting % on the next line too
-  #   - pick the lattermost line splitter when they come consecutively
-  #   - \" is considered a boundary _if not preceded by [0-9()']_, see #91
-  boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|[^\'](?=\'?%)|[^0-9()\'](?=[\\\\]")', str, perl = TRUE)
+  boundaries = gregexpr(XGETTEXT_BOUNDARY_REGEX, str, perl = TRUE)
   # xgettext _doesn't_ break on escaped-backslash-then-n, so match to an odd number of backslashes-then-n
   # append . to simplify the logic below (and besides, the string won't ever split after the very end anyway)
   has_newlines = grepl('(?:^|[^\\])[\\](?:[\\][\\]){0,}n.', str)
@@ -301,6 +292,23 @@ wrap_strings = function(str, width) {
   out
 }
 
+# valid splits for xgettext found by experimentation (couldn't find where in the source this is defined).
+#   write _("abcdefghijklm${CHAR}nopqrtstuvwxyz") for these ASCII $CHARs:
+#   rawToChar(as.raw(c(32:33, 35:47, 58:64, 91, 93:96, 123:126)))
+#   then run the following to find which lines were split at the character before 'n':
+#   xgettext --keyword=_ --width=20 $TMPFILE -o /dev/stdout | grep -F '"n' -B 1
+# more experimentation shows
+#   - a preference to put formatting % on the next line too
+#      + including "dragging" certain surrounding characters along, e.g. `-`, '`, `[`, `|`
+#   - pick the lattermost line splitter when they come consecutively
+#   - \" is considered a boundary _if not preceded by [0-9()']_, see #91
+XGETTEXT_BOUNDARY_REGEX <- paste(
+  '[ !,-./:;?|}](?![ !,-./:;?|}])',
+  '[^-\'\\[|](?=[-\'\\[|]?%)',
+  '[^0-9()\'](?=[\\\\]")',
+  sep = '|'
+)
+
 wrap_string = function(str, boundary, str_width, line_width) {
   # no places to split this string, so don't. xgettext also seems not to.
   if (boundary[1L] < 0L) return(str)
@@ -313,7 +321,7 @@ wrap_string = function(str, boundary, str_width, line_width) {
   start_char = 0L
   # 2 accounts for two " (added below)
   while (any(wide_idx <- boundary > line_width - 2L)) {
-    split_idx = which(wide_idx)[1L] - 1L
+    split_idx = max(which(wide_idx)[1L] - 1L, 1L)
     lines = c(lines, substr(str, start_char + 1L, start_char + boundary[split_idx]))
     start_char = start_char + boundary[split_idx]
     boundary = tail(boundary, -split_idx) - boundary[split_idx]

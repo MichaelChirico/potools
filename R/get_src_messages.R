@@ -224,13 +224,14 @@ get_file_src_messages = function(file, translation_macro = "_") {
   )
   call_arrays[ , "is_marked_for_translation" := FALSE]
 
+  # use paren_start for translated arrays to get the line number right when the call & array lines differ
   src_messages = rbind(
-    translations[ , .(msgid, call, call_start, is_marked_for_translation)],
-    call_arrays[ , .(msgid, call, call_start, is_marked_for_translation)]
+    translations[ , .(msgid, call, loc = paren_start, is_marked_for_translation)],
+    call_arrays[ , .(msgid, call, loc = call_start, is_marked_for_translation)]
   )
 
-  src_messages[ , "line_number" := findInterval(call_start, newlines_loc)]
-  src_messages[ , "call_start" := NULL]
+  src_messages[ , "line_number" := findInterval(loc, newlines_loc)]
+  src_messages[ , "loc" := NULL]
   setcolorder(src_messages, c("msgid", "line_number", "call", "is_marked_for_translation"))
   src_messages[]
 }

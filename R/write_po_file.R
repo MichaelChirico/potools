@@ -153,7 +153,8 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       )
       out_lines[!singular_idx] = sprintf(
         plural_fmt,
-        source_location[!singular_idx], c_fmt_tag[!singular_idx],
+        source_location[!singular_idx],
+        c_fmt_tag[!singular_idx],
         msgid1, msgid2, msgid_plural
       )
     }
@@ -356,6 +357,6 @@ make_src_location <- function(files, lines, message_source, use_base_rules) {
   if (use_base_rules && message_source == "R") return("")
   s <- paste(sprintf("%s:%d", files, lines), collapse = " ")
   # branch above implies use_base_rules => message_source == "src"
-  # 76 = 79 - nchar("#: ")
-  paste0("#: ", if (use_base_rules) strwrap(s, width=76) else s, "\n", collapse="")
+  # 77 = 80 - nchar("#: "). 80 not 79 is for strwrap. NB: strwrap("012 345", width=4)
+  paste0("#: ", if (use_base_rules) strwrap(s, width=77L) else s, "\n", collapse="")
 }

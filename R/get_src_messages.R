@@ -29,6 +29,9 @@ get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules =
   # line continuation mid-array is treated as blank, #91. we might be able to handle this in pre-process but
   #   that risks throwing off line numbers later on... \r? for windows of course
   msg[ , "msgid" := gsub("[\\]\r?\n", "", msgid)]
+  # "\'" is treated the same as '\'', per
+  #   https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html#String-Constants
+  msg[ , "msgid" := gsub("\\'", "'", msgid, fixed = TRUE)]
 
   # TODO: write this
   # internal line breaks & spacing minimized

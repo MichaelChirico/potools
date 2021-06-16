@@ -433,9 +433,18 @@ test_that("translation of 'base' works correctly", {
     pkg <- test_package("r-devel/src/library/base"),
     {
       translate_package(pkg, diagnostics = NULL)
-      # TODO: why not R.pot?
-      # TODO: add some R messages to the mock base
-      browser()
+
+      expect_true(file.exists(file.path(pkg, 'po', 'R-base.pot')))
+      expect_true(file.exists(file.path(pkg, 'po', 'R.pot')))
+
+      src_pot_lines <- readLines(file.path(pkg, 'po', 'R.pot'))
+
+      # check relative path is recorded correctly
+      expect_all_match(
+        src_pot_lines,
+        "#: src/main/msg.c:",
+        fixed = TRUE
+      )
     }
   )
 })

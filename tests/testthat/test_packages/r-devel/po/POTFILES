@@ -1,0 +1,4 @@
+# mock-up of po/POTFILES file in r-devel
+
+src/main/msg.c
+

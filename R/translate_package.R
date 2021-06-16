@@ -24,11 +24,12 @@ translate_package = function(
 
   desc_data = get_desc_data(dir)
   package <- desc_data['Package']
+  is_base <- package == 'base'
   version <- desc_data['Version']
 
   po_dir <- file.path(dir, 'po')
   r_potfile <- file.path(po_dir, sprintf("R-%s.pot", package))
-  src_potfile <- file.path(po_dir, sprintf("%s.pot", package))
+  src_potfile <- file.path(po_dir, sprintf("%s.pot", if (is_base) 'R' else package))
   update = file.exists(po_dir) && (file.exists(r_potfile) || file.exists(src_potfile))
 
   if (verbose) {
@@ -50,7 +51,7 @@ translate_package = function(
   r_message_data = get_r_messages(dir)
 
   if (verbose) message('Getting src-level messages...')
-  src_message_data = get_src_messages(dir, src_translation_macro, use_base_rules)
+  src_message_data = get_src_messages(dir, src_translation_macro, use_base_rules, is_base)
 
   message_data = rbind(
     R = r_message_data,

@@ -278,6 +278,25 @@ preprocess = function(contents) {
           contents[idx] = fifelse(contents[idx] == "\n", "\n", " ")
           ii = jj + 1L
         }
+      },
+      # handling platform-robust template macros. See #154 for some discussion/exploration.
+      #   we ignore some possibilities involving LEAST/FAST/MAX/PTR and only allow 32/64 widths, for simplicity.
+      "P" = {
+        if (
+          ii < nn-6L
+          && (ii == 1L || !contents[ii-1L] %chin% C_IDENTIFIER_CHARS)
+          && contents[ii+1L] == "R" && contents[ii+2L] == "I"
+          && contents[ii+3L] %chin% c("d", "i", "o", "u", "x", "X")
+          && (
+            (contents[ii+4L] == "3" && contents[ii+5L] == "2")
+            || (contents[ii+4L] == "6" && contents[ii+5L] == "4")
+          # ensure the identifier ends here, and it's a symbol, not a call
+          && (ii == nn-7L || !contents[ii+6L] %chin% C_IDENTIFIER_CHARS)
+          )
+        ) {
+          contents = c(head(contents, ii-1L), '"', '<', contents[ii:(ii+5L)], '>', '"', tail(contents, -ii-5L))
+          ii = ii + 9L
+        }
       }
     )
     ii = ii + 1L
@@ -352,6 +371,8 @@ MESSAGE_CALLS = c(
 C_IDENTIFIER_REGEX = "[_a-zA-Z][_a-zA-Z0-9]{0,30}"
 C_IDENTIFIER_1 = "[_a-zA-Z]"
 C_IDENTIFIER_REST = "[_a-zA-Z0-9]"
+# ASCII-sorted
+C_IDENTIFIER_CHARS = c('(', as.character(0:9), LETTERS, '_', letters)
 
 src_msg_schema = function() data.table(
   type = character(),

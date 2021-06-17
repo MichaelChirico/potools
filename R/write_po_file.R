@@ -302,6 +302,8 @@ wrap_strings = function(str, width) {
 #      + including "dragging" certain surrounding characters along, e.g. `-`, '`, `[`, `|`
 #   - pick the lattermost line splitter when they come consecutively
 #   - \" is considered a boundary _if not preceded by [0-9()']_, see #91
+# Some insights on the source: x-c.c is the lexer that does preprocessing:
+#   https://cvs.savannah.gnu.org/viewvc/gettext/gettext/gettext-tools/src/x-c.c?view=markup
 XGETTEXT_BOUNDARY_REGEX <- paste(
   '[ !,-./:;?|}](?![ !,-./:;?|}])',
   '[^-\'\\[|](?=[-\'\\[|]?%)',

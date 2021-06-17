@@ -1,7 +1,7 @@
 translate_package = function(
   dir = '.', languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
-  src_translation_macro = "_",
+  src_translation_macros = c("_", "N_"),
   use_base_rules = package %chin% .potools$base_package_names,
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
@@ -51,7 +51,7 @@ translate_package = function(
   r_message_data = get_r_messages(dir)
 
   if (verbose) message('Getting src-level messages...')
-  src_message_data = get_src_messages(dir, src_translation_macro, use_base_rules, is_base)
+  src_message_data = get_src_messages(dir, src_translation_macros, use_base_rules, is_base)
 
   message_data = rbind(
     R = r_message_data,

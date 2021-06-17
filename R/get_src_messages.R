@@ -1,4 +1,4 @@
-get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules = FALSE, is_base = FALSE) {
+get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_base_rules = FALSE, is_base = FALSE) {
   if (is_base) {
     potfiles_loc <- file.path(dir, "../../../po/POTFILES")
     if (!file.exists(potfiles_loc)) {
@@ -19,7 +19,7 @@ get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules =
   if (!length(src_files)) return(src_msg_schema())
 
   msg = rbindlist(
-    lapply(normalizePath(file.path(dir, src_files)), get_file_src_messages, translation_macro),
+    lapply(normalizePath(file.path(dir, src_files)), get_file_src_messages, translation_macros),
     idcol = "file"
   )
   msg[ , "file" := src_files[file]]
@@ -51,9 +51,7 @@ get_src_messages = function(dir = ".", translation_macro = "_", use_base_rules =
   msg[]
 }
 
-get_file_src_messages = function(file, translation_macro = "_") {
-  macro_width = nchar(translation_macro)
-
+get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
   contents = readChar(file, file.size(file))
   # as a vector of single characters
   contents_char = preprocess(strsplit(contents, NULL)[[1L]])
@@ -144,8 +142,8 @@ get_file_src_messages = function(file, translation_macro = "_") {
   )]
   setkeyv(calls, c('paren_start', 'paren_end'))
 
-  translation_idx = calls[ , fname == translation_macro]
-  translations = calls[(translation_idx), .(paren_start, paren_end)]
+  translation_idx = calls[ , fname %chin% translation_macros]
+  translations = calls[(translation_idx), .(fname, paren_start, paren_end)]
   # run here in case nrow(translations)=0
   translations[ , "is_marked_for_translation" := TRUE]
 
@@ -156,7 +154,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
 
   # translations like _("abc"), i.e., just one array and no gaps at all
   singular_array_idx = call_arrays[ , paren_start == array_start - 1L & paren_end == array_end + 1]
-  translation_array_idx = call_arrays[ , fname == translation_macro]
+  translation_array_idx = call_arrays[ , fname %chin% translation_macros]
   translations[
     call_arrays[translation_array_idx & singular_array_idx],
     on = c('paren_start', 'paren_end'),
@@ -197,7 +195,7 @@ get_file_src_messages = function(file, translation_macro = "_") {
   translations[
     !is.na(msgid) & is.na(call),
     c("call_start", "call") := {
-      call_start = paren_start - macro_width
+      call_start = paren_start - nchar(fname)
       .(call_start, substring(contents, call_start, paren_end))
     }
   ]

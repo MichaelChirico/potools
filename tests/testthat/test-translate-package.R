@@ -182,6 +182,10 @@ test_that("Packages with src code work correctly", {
         any(grepl("inst/po/.*/rSrcMsg.mo", pkg_files)),
         "Didn't find rSrcMsg.mo; found %s", toString(pkg_files)
       )
+
+      # test N_-marked messages are included for translation
+      pot_lines <- readLines(file.path(pkg, 'po', 'rSrcMsg.pot'))
+      expect_all_match(pot_lines, '"Don\'t translate me now."', fixed = TRUE)
     }
   )
 

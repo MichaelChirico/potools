@@ -211,7 +211,7 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
     call_arrays[
       (singular_array_idx),
       .(
-        call_start, paren_start, paren_end,
+        fname, call_start, paren_start, paren_end,
         array_start,
         msgid = safe_substring(contents, array_start + 1L, array_end - 1L),
         call = safe_substring(contents, call_start, paren_end)
@@ -224,9 +224,10 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
         msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents),
         call = safe_substring(contents, .BY$call_start, .BY$paren_end)
       ),
-      by = .(call_start, paren_start, paren_end)
+      by = .(fname, call_start, paren_start, paren_end)
     ]
   )
+  if (any(call_arrays$fname == "dgettext")) browser()
   call_arrays[ , "is_marked_for_translation" := FALSE]
 
   # use paren_start for translated arrays to get the line number right when the call & array lines differ
@@ -366,7 +367,8 @@ MESSAGE_CALLS = c(
   "Rprintf", "REprintf", "Rvprintf", "REvprintf",
   "R_ShowMessage", "R_Suicide",
   "warning", "Rf_warning", "error", "Rf_error",
-  "snprintf"
+  "snprintf",
+  "dgettext"
 )
 
 # https://docs.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-160 suggests this

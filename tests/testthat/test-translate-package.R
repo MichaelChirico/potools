@@ -344,10 +344,15 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
           '"strings with escaped \\"quotes\\"'),
         fixed = TRUE
       )
+
+      # (1) lack of strwrap despite >79 width
+      # (2) inclusion of file in "unrecognized" cairo folder
       expect_all_match(
         src_pot_lines,
-        # testing lack of strwrap despite >79 width
-        c("#: [A-Za-z0-9]{63}[.]c:[0-9] msg[.]c:[0-9]{2} msg[.]c:[0-9]{2}", '^#: cairo/bedfellows\\.c:')
+        c(
+          "#: [A-Z]{26}[.]c:[0-9] [a-z0-5]{32}[.]c:[0-9] msg[.]c:[0-9]{2} msg[.]c:[0-9]{2}",
+          '^#: cairo/bedfellows\\.c:'
+        )
       )
     }
   )
@@ -378,7 +383,7 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
         paste(src_pot_lines, collapse='\n'),
         c(
           'MSGs\\.c.*msg\\.c', '#, c-format',
-          '#: [A-Za-z0-9]{63}[.]c:[0-9] msg[.]c:[0-9]{2}\n#: msg[.]c',
+          '#: [A-Z]{26}[.]c:[0-9] [a-z0-5]{32}[.]c:[0-9] msg[.]c:[0-9]{2}\n#: msg[.]c',
           ' [.]"\n"%s[.]"', ' [?]"\n"%s[?]"', ' ;"\n"%s;"', ' /"\n"%s/"',
           '"\'%s\'"', '"[[]%s[]]"', '"[|]%s[|]"', '"-%s-"'
         )

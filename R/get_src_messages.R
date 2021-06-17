@@ -330,13 +330,11 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
 }
 
 build_msgid = function(left, right, starts, ends, contents) {
-  # we have one or several macros between `_(` and `)`, between which is "grout".
-  #   NB: we could have _("array ending with formatter: %"PRId64). I'm not sure it's possible
-  #   for an array to start with a macro, but leave the logic to check here anyway
+  # we have one or several "bricks" (char arrays) between `_(` and `)`, between which is "grout".
   grout_left = c(left + 1L, ends + 1L)
   grout_right = c(starts - 1L, right - 1L)
 
-  # drop the first & last if there's no whitespace between `_(` and `"` or `"` and `)`
+  # drop the first & last if there's no whitespace between any "brick"s (e.g. `_("` or `"a""b"` or `")`)
   valid_idx = grout_left < grout_right
   grout = character(length(starts) + 1L)
   grout[valid_idx] = safe_substring(contents, grout_left[valid_idx], grout_right[valid_idx])
@@ -344,18 +342,23 @@ build_msgid = function(left, right, starts, ends, contents) {
   # drop spurious whitespace. first drop line continuations (\), then also strip arguments.
   #   I think this assumes translated arrays only occur at one argument in the call...
   grout = gsub("\\", "", grout, fixed = TRUE)
-  grout = gsub("^(?:.*,)?[ \n\r\t]*$|[ \n\r\t]*(?:,.*)?$", "", grout)
+  grout = gsub("^(?:.*,)?[ \n\r\t]*|[ \n\r\t]*(?:,.*)?$", "", grout)
 
-  # pad macros (e.g. "a formatter with %"PRId64" becomes" --> "a formatter with %<PRId64> becomes")
-  macro_idx = nzchar(grout)
-  grout[macro_idx] = paste0("<", trimws(grout[macro_idx]), ">")
+  # Only the first array is extracted from ternary operator usage inside _(), #154
+  # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse
+  if (endsWith(grout[1L], "?")) {
+    return(safe_substring(contents, starts[1L]+1L, ends[1L]-1L))
+  }
 
-  msgid = character(2L * length(starts) + 1L)
-  msgid[1L + 2L * seq_along(grout)] = grout
-  msgid[2L + 2L * seq_along(starts)] = safe_substring(contents, starts+1L, ends-1L)
+  # any unknown macros are not expanded and the recorded array is cut off on encountering one,
+  #   unless that macro comes between `_(` and the first literal array
+  #   (c.f. xgettext output on _(xxx"abc""def") vs _("abc"xxx"def") vs _("abc""def"xxx))
+  if (length(keep_idx <- which(nzchar(grout[-1L])))) {
+    starts = head(starts, keep_idx)
+    ends = head(ends, keep_idx)
+  }
 
-  # combine
-  paste(msgid, collapse = "")
+  paste(safe_substring(contents, starts+1L, ends-1L), collapse = "")
 }
 
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}

@@ -79,7 +79,7 @@ void hello_world(SEXP x) {
   error(_(test ? "abc" : "def"));
   // also testing unrecognized macro usage
   error(_(xxx "abc" "def"));
-  error(_("abc" xxx "def"));
+  error(_("abc" xxx "def" yyy));
   error(_("abc" "def" xxx));
   return;
 }

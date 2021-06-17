@@ -354,8 +354,8 @@ build_msgid = function(left, right, starts, ends, contents) {
   #   unless that macro comes between `_(` and the first literal array
   #   (c.f. xgettext output on _(xxx"abc""def") vs _("abc"xxx"def") vs _("abc""def"xxx))
   if (length(keep_idx <- which(nzchar(grout[-1L])))) {
-    starts = head(starts, keep_idx)
-    ends = head(ends, keep_idx)
+    starts = head(starts, keep_idx[1L])
+    ends = head(ends, keep_idx[1L])
   }
 
   paste(safe_substring(contents, starts+1L, ends-1L), collapse = "")

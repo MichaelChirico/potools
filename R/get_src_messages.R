@@ -145,7 +145,7 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
 
   # Vectorize over calls with just one array for efficiency
   # NB: down the route using `if (.N == 1) .I` lies anguish & suffering from edge cases.
-  singular_array_idx = call_arrays[ , .(.N == 1L), by = .(paren_start, paren_end)]$V1
+  singular_array_idx = call_arrays[ , if (.N == 1L) TRUE else rep(FALSE, .N), by = .(paren_start, paren_end)]$V1
   translation_array_idx = call_arrays[ , fname %chin% translation_macros]
   translations[
     call_arrays[translation_array_idx & singular_array_idx],
@@ -195,25 +195,24 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
 
   # drop calls associated with a translation, and anything but "known" messaging functions
   call_arrays = call_arrays[!translations, on = 'call_start']
-  call_arrays = call_arrays[fname %chin% MESSAGE_CALLS]
+  call_arrays = call_arrays[fname %chin% MESSAGE_CALLS$fname]
 
-  singular_array_idx = call_arrays[ , (.N == 1L), by = .(paren_start, paren_end)]$V1
-  untranslated = call_arrays[
-    (singular_array_idx),
-    .(
-      fname, call_start, paren_start, paren_end,
-      array_start,
-      msgid = safe_substring(contents, array_start + 1L, array_end - 1L),
-      call = safe_substring(contents, call_start, paren_end)
-    )
-  ]
-  if (length(singular_array_idx)) untranslated = rbind(
-    untranslated,
+  singular_array_idx = call_arrays[ , if (.N == 1L) TRUE else rep(FALSE, .N), by = .(paren_start, paren_end)]$V1
+  untranslated = rbind(
     call_arrays[
-      -singular_array_idx,
+      (singular_array_idx),
+      .(
+        fname, call_start, paren_start, paren_end,
+        array_start,
+        msgid_plural = as.list(safe_substring(contents, array_start + 1L, array_end - 1L)),
+        call = safe_substring(contents, call_start, paren_end)
+      )
+    ],
+    call_arrays[
+      (!singular_array_idx),
       .(
         array_start = array_start[1L],
-        msgid = build_msgid_plural(.BY$paren_start, .BY$paren_end, array_start, array_end, contents),
+        msgid_plural = build_msgid_plural(.BY$fname, .BY$paren_start, .BY$paren_end, array_start, array_end, contents),
         call = safe_substring(contents, .BY$call_start, .BY$paren_end)
       ),
       by = .(fname, call_start, paren_start, paren_end)
@@ -223,10 +222,10 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
   untranslated[ , "is_marked_for_translation" := FALSE]
 
   # use paren_start for translated arrays to get the line number right when the call & array lines differ
-  if (!'msgid' %chin% names(untranslated)) browser()
+  if (!'msgid_plural' %chin% names(untranslated)) browser()
   src_messages = rbind(
-    translations[ , .(msgid, call, array_start, is_marked_for_translation)],
-    untranslated[ , .(msgid, call, array_start, is_marked_for_translation)]
+    translations[ , .(msgid, msgid_plural = list(), call, array_start, is_marked_for_translation)],
+    untranslated[ , .(msgid = NA_character_, msgid_plural, call, array_start, is_marked_for_translation)]
   )
 
   src_messages[ , "line_number" := findInterval(array_start, newlines_loc)]
@@ -328,9 +327,37 @@ build_msgid = function(left, right, starts, ends, contents) {
   build_msgid_core(starts, ends, grout, contents)
 }
 
-build_msgid_plural = function(left, right, starts, ends, contents) {
+build_msgid_plural = function(fun, left, right, starts, ends, contents) {
   grout = get_grout(left, right, starts, ends, contents)
-  return('')
+  target_arg = MESSAGE_CALLS[.(fun), str_arg]
+
+  browser()
+  if (is.na(target_arg)) {
+    msgid_plural = list()
+    array_i = 1L
+    msgid = ''
+    for (ii in 2:length(grout)) {
+      msgid = paste0(msgid, substring(contents, starts[ii-1L], ends[ii-1L]))
+      if (grepl(',', grout[ii], fixed = TRUE)) {
+        msgid_plural[[array_i]] = msgid
+        array_i = array_i + 1L
+        msgid = ''
+      }
+    }
+    msgid_plural[[array_i]] = msgid
+  } else {
+    arg_i = 0L
+    msgid = ''
+    ii = 2L
+    while (arg_i < target_arg) {
+      msgid = paste0(msgid, substring(contents, starts[ii-1L], ends[ii-1L]))
+      commas = gregexpr(",", grout[ii], fixed=TRUE)[[1L]]
+      if (commas[1L] > 0L) arg_i = arg_i + length(commas)
+      ii = ii + 1L
+    }
+    msgid_plural = list(msgid)
+  }
+  return(msgid_plural)
 }
 
 build_msgid_core = function(starts, ends, grout, contents) {
@@ -368,13 +395,17 @@ get_grout = function(left, right, starts, ends, contents) {
 }
 
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}
-MESSAGE_CALLS = sort(c(
-  "Rprintf", "REprintf", "Rvprintf", "REvprintf",
-  "R_ShowMessage", "R_Suicide",
-  "warning", "Rf_warning", "error", "Rf_error",
-  "snprintf",
-  "dgettext"
-))
+MESSAGE_CALLS = data.table(
+  fname = c(
+    "dgettext",
+    "Rprintf", "REprintf", "Rvprintf", "REvprintf",
+    "R_ShowMessage", "R_Suicide",
+    "warning", "Rf_warning", "error", "Rf_error",
+    "snprintf"
+  ),
+  str_arg = c(NA_integer_, rep(1L, 10L), 3L),
+  key = 'fname'
+)
 
 COMMON_NON_MESSAGE_CALLS = sort(c(
   "if", "while", "for", "switch", "return",

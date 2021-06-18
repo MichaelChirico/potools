@@ -81,5 +81,8 @@ void hello_world(SEXP x) {
   error(_(xxx "abc" "def"));
   error(_("abc" xxx "def" yyy));
   error(_("abc" "def" xxx));
+
+  // dgettext messages are included, & regardless of domain, #153
+  error(dgettext("fakeDomain", "abcdef"));
   return;
 }

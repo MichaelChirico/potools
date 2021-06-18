@@ -313,7 +313,7 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       # (6) correct message after removing line continuation (#91)
       # (7) a message outside a call (e.g. in a macro) gets a source marker (#133)
       # (8) ternary operators return first array; only arrays through first interrupting macro are included (#154)
-      # (9) initial macro is ignored; arrays through first interrupting macro are included
+      # (9) initial macro is ignored; arrays through first interrupting macro are included; dgettext() included (#153)
       expect_all_match(
         paste(src_pot_file, collapse = "\n"), # NB: this is a get-out-of-\r\n-jail-free card on Windows, too
         c(
@@ -321,7 +321,7 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
           '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c:13',
           '"any old message"', '#: msg[.]c:[0-9]+\nmsgid "a message in a macro"',
           '#: msg[.]c:[0-9]+ msg[.]c:[0-9]+\nmsgid "abc"',
-          '#: msg[.]c:[0-9]+ msg[.]c:[0-9]+\nmsgid "abcdef"'
+          '#:( msg[.]c:[0-9]+){3}\nmsgid "abcdef"'
         ),
       )
     }

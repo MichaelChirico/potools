@@ -102,22 +102,13 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
     fname = trimws(safe_substring(contents, call_idx, call_idx + attr(call_idx, "match.length") - 2L), "right")
   )
   # remove common false positives for efficiency
-  calls = calls[!fname %chin% c(
-    "if", "while", "for", "switch", "return",
-    "PROTECT", "UNPROTECT", "free", "malloc", "Calloc", "memcpy",
-    "TYPEOF", "sizeof", "INHERITS", "type2char", "LENGTH", "length", "XLENGTH", "xlength", "strlen",
-    "copyMostAttrib", "getAttrib", "setAttrib", "R_compute_identical",
-    "SET_STRING_ELT", "STRING_ELT", "CHAR", "ENC2UTF8", "SET_VECTOR_ELT", "VECTOR_ELT", "SEXPPTR_RO", "STRING_PTR",
-    "PRIMVAL", "RAW", "LOGICAL", "INTEGER", "INTEGER_RO", "REAL", "REAL_RO", "COMPLEX",
-    "CAR", "CDR", "CADR", "checkArity",
-    "isFactor", "isLogical", "isInteger", "isNumeric", "isReal", "isComplex", "isString",
-    "isS4", "isNull", "ISNA", "ISNAN", "R_FINITE"
-  )]
+  calls = calls[!fname %chin% COMMON_NON_MESSAGE_CALLS]
   calls[ , "paren_end" := paren_start]
 
   calls[ , "non_spurious" := is.na(foverlaps(calls, arrays, by.x = c('paren_start', 'paren_end'), which = TRUE)$yid)]
   # mod out any that happen to be inside a char array
   calls = calls[(non_spurious)]
+  if (!nrow(calls)) return(file_msg_schema())
   calls[ , "non_spurious" := NULL]
 
   # slightly wasteful (a 10-times nested call will be skipped over many times), but oh well...
@@ -152,8 +143,9 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
 
   calls = calls[(!translation_idx)]
 
-  # translations like _("abc"), i.e., just one array and no gaps at all
-  singular_array_idx = call_arrays[ , paren_start == array_start - 1L & paren_end == array_end + 1]
+  # Vectorize over calls with just one array for efficiency
+  # NB: down the route using `if (.N == 1) .I` lies anguish & suffering from edge cases.
+  singular_array_idx = call_arrays[ , if (.N == 1L) TRUE else rep(FALSE, .N), by = .(paren_start, paren_end)]$V1
   translation_array_idx = call_arrays[ , fname %chin% translation_macros]
   translations[
     call_arrays[translation_array_idx & singular_array_idx],
@@ -203,17 +195,17 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
 
   # drop calls associated with a translation, and anything but "known" messaging functions
   call_arrays = call_arrays[!translations, on = 'call_start']
-  call_arrays = call_arrays[fname %chin% MESSAGE_CALLS]
+  call_arrays = call_arrays[fname %chin% MESSAGE_CALLS$fname]
 
-  # TODO: handle calls with multiple distinct arrays, e.g. foo("abc", "def")
-  singular_array_idx = call_arrays[ , paren_start == array_start - 1L & paren_end == array_end + 1]
-  call_arrays = rbind(
+  singular_array_idx = call_arrays[ , if (.N == 1L) TRUE else rep(FALSE, .N), by = .(paren_start, paren_end)]$V1
+  untranslated = rbind(
     call_arrays[
       (singular_array_idx),
       .(
-        call_start, paren_start, paren_end,
+        fname, call_start, paren_start, paren_end,
         array_start,
         msgid = safe_substring(contents, array_start + 1L, array_end - 1L),
+        msgid_plural = list(),
         call = safe_substring(contents, call_start, paren_end)
       )
     ],
@@ -221,23 +213,29 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
       (!singular_array_idx),
       .(
         array_start = array_start[1L],
-        msgid = build_msgid(.BY$paren_start, .BY$paren_end, array_start, array_end, contents),
+        msgid = NA_character_,
+        msgid_plural = build_msgid_plural(.BY$fname, .BY$paren_start, .BY$paren_end, array_start, array_end, contents),
         call = safe_substring(contents, .BY$call_start, .BY$paren_end)
       ),
-      by = .(call_start, paren_start, paren_end)
+      by = .(fname, call_start, paren_start, paren_end)
     ]
   )
-  call_arrays[ , "is_marked_for_translation" := FALSE]
+
+  untranslated[ , "is_marked_for_translation" := fname == "dgettext"]
+  untranslated[
+    lengths(msgid_plural) == 1L,
+    c('msgid', 'msgid_plural') := .(vapply(msgid_plural, `[`, character(1L), 1L), list(NULL))
+  ]
 
   # use paren_start for translated arrays to get the line number right when the call & array lines differ
   src_messages = rbind(
-    translations[ , .(msgid, call, array_start, is_marked_for_translation)],
-    call_arrays[ , .(msgid, call, array_start, is_marked_for_translation)]
+    translations[ , .(msgid, msgid_plural = list(), call, array_start, is_marked_for_translation)],
+    untranslated[ , .(msgid, msgid_plural, call, array_start, is_marked_for_translation)]
   )
 
   src_messages[ , "line_number" := findInterval(array_start, newlines_loc)]
   src_messages[ , "array_start" := NULL]
-  setcolorder(src_messages, c("msgid", "line_number", "call", "is_marked_for_translation"))
+  setcolorder(src_messages, c("msgid", "msgid_plural", "line_number", "call", "is_marked_for_translation"))
   src_messages[]
 }
 
@@ -330,19 +328,8 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
 }
 
 build_msgid = function(left, right, starts, ends, contents) {
-  # we have one or several "bricks" (char arrays) between `_(` and `)`, between which is "grout".
-  grout_left = c(left + 1L, ends + 1L)
-  grout_right = c(starts - 1L, right - 1L)
-
-  # drop the first & last if there's no whitespace between any "brick"s (e.g. `_("` or `"a""b"` or `")`)
-  valid_idx = grout_left < grout_right
-  grout = character(length(starts) + 1L)
-  grout[valid_idx] = safe_substring(contents, grout_left[valid_idx], grout_right[valid_idx])
-
-  # drop spurious whitespace. first drop line continuations (\), then also strip arguments.
-  #   I think this assumes translated arrays only occur at one argument in the call...
-  grout = gsub("\\", "", grout, fixed = TRUE)
-  grout = gsub("^(?:.*,)?[ \n\r\t]*|[ \n\r\t]*(?:,.*)?$", "", grout)
+  grout = get_grout(left, right, starts, ends, contents)
+  grout = gsub("[\n\t ]", "", grout)
 
   # Only the first array is extracted from ternary operator usage inside _(), #154
   # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse
@@ -361,13 +348,88 @@ build_msgid = function(left, right, starts, ends, contents) {
   paste(safe_substring(contents, starts+1L, ends-1L), collapse = "")
 }
 
+# this could probably go for more stress testing. it didn't _crash_ on base, but
+#   I haven't vetted whether it gets the results right always (just for the one dgettext() usage in base)
+build_msgid_plural = function(fun, left, right, starts, ends, contents) {
+  if (!length(starts)) return(list())
+
+  grout = get_grout(left, right, starts, ends, contents)
+  target_arg = MESSAGE_CALLS[.(fun), str_arg]
+
+  if (is.na(target_arg)) {
+    msgid_plural = character()
+    msgid = ''
+    for (ii in 2:length(grout)) {
+      msgid = paste0(msgid, substring(contents, starts[ii-1L]+1L, ends[ii-1L]-1L))
+      if (grepl(',', grout[ii], fixed = TRUE)) {
+        msgid_plural = c(msgid_plural, msgid)
+        msgid = ''
+      }
+    }
+    msgid_plural = c(msgid_plural, msgid)
+  } else {
+    arg_i = 1L
+    ii = 1L
+    while (arg_i != target_arg) {
+      # nocov start
+      if (arg_i > target_arg) stop(domain = NA, gettextf(
+        "Logic for detecting argument calls broken at: %s%s; please report.",
+        fun, substring(contents, left, right)
+      ))
+      # nocov end
+      # bold assumption: no nested commas. let's see if it works out...
+      commas = gregexpr(",", grout[ii], fixed=TRUE)[[1L]]
+      if (commas[1L] > 0L) arg_i = arg_i + length(commas)
+      ii = ii + 1L
+    }
+    jj = ii
+    while (jj < length(grout) && !grepl(",", grout[jj], fixed = TRUE)) { jj = jj + 1L }
+    msgid = paste(substring(contents, starts[ii:jj - 1L]+1L, ends[ii:jj - 1L]-1L), collapse = '')
+    msgid_plural = msgid
+  }
+  return(list(msgid_plural))
+}
+
+get_grout = function(left, right, starts, ends, contents) {
+  # we have one or several "bricks" (char arrays) between `(` and `)`, between which is "grout".
+  grout_left = c(left + 1L, ends + 1L)
+  grout_right = c(starts - 1L, right - 1L)
+
+  # drop the first & last if there's no whitespace between any "brick"s (e.g. `_("` or `"a""b"` or `")`)
+  valid_idx = grout_left < grout_right
+  grout = character(length(starts) + 1L)
+  grout[valid_idx] = safe_substring(contents, grout_left[valid_idx], grout_right[valid_idx])
+
+  # drop spurious whitespace. first drop line continuations (\), then also strip arguments.
+  #   I think this assumes translated arrays only occur at one argument in the call...
+  grout = gsub("\\", "", grout, fixed = TRUE)
+  grout
+}
+
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}
-MESSAGE_CALLS = c(
-  "Rprintf", "REprintf", "Rvprintf", "REvprintf",
-  "R_ShowMessage", "R_Suicide",
-  "warning", "Rf_warning", "error", "Rf_error",
-  "snprintf"
+MESSAGE_CALLS = data.table(
+  fname = c(
+    "Rprintf", "REprintf", "Rvprintf", "REvprintf",
+    "R_ShowMessage", "R_Suicide",
+    "warning", "Rf_warning", "error", "Rf_error",
+    "dgettext", # NB: xgettext ignores the domain when extracting templates, so we don't bother checking either
+    "snprintf"
+  ),
+  str_arg = c(rep(1L, 10L), 2L, 3L),
+  key = 'fname'
 )
+
+COMMON_NON_MESSAGE_CALLS = sort(c(
+  "if", "while", "for", "switch", "return",
+  "PROTECT", "UNPROTECT", "free", "malloc", "Calloc", "memcpy",
+  "TYPEOF", "sizeof", "INHERITS", "type2char", "LENGTH", "length", "XLENGTH", "xlength", "strlen",
+  "copyMostAttrib", "getAttrib", "setAttrib", "R_compute_identical",
+  "SET_STRING_ELT", "STRING_ELT", "CHAR", "ENC2UTF8", "SET_VECTOR_ELT", "VECTOR_ELT", "SEXPPTR_RO", "STRING_PTR",
+  "PRIMVAL", "RAW", "LOGICAL", "INTEGER", "INTEGER_RO", "REAL", "REAL_RO", "COMPLEX",
+  "CAR", "CDR", "CADR", "checkArity",
+  "isFactor", "isLogical", "isInteger", "isNumeric", "isReal", "isComplex", "isString",
+  "isS4", "isNull", "ISNA", "ISNAN", "R_FINITE"
+))
 
 # https://docs.microsoft.com/en-us/cpp/c-language/c-identifiers?view=msvc-160 suggests this
 #   ASCII identifier regex, though some other sources suggest a much broader range
@@ -381,6 +443,7 @@ src_msg_schema = function() data.table(
   type = character(),
   file = character(),
   msgid = character(),
+  msgid_plural = list(),
   line_number = integer(),
   call = character(),
   is_repeat = logical(),
@@ -389,6 +452,7 @@ src_msg_schema = function() data.table(
 
 file_msg_schema = function() data.table(
   msgid = character(),
+  msgid_plural = list(),
   line_number = integer(),
   call = character(),
   is_marked_for_translation = logical()

@@ -84,5 +84,8 @@ void hello_world(SEXP x) {
 
   // dgettext messages are included, & regardless of domain, #153
   error(dgettext("fakeDomain", "abcdef"));
+
+  // snprintf calls always get c-format tagged, even when the other appearance of the msgid is not a template call
+  snprintf(BUF, 100, _("This one does not\n"));
   return;
 }

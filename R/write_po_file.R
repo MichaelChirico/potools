@@ -28,12 +28,14 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 
     po_data[type == "plural", 'msgid_plural_str' := vapply(msgid_plural, paste, character(1L), collapse="|||")]
     po_data = po_data[,
-      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str, is_templated),
+      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
       .(
         source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
         c_fmt_tag = "",
         msgstr = if (.BY$type == 'singular') '' else NA_character_,
-        msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL)
+        msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL),
+        # see discussion in #137
+        is_templated = any(is_templated)
       )
     ]
     if (use_base_rules) {
@@ -53,13 +55,14 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
       )
     ]
     po_data = po_data[,
-      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str, is_templated),
+      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
       .(
         source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
         c_fmt_tag = "",
         msgstr = msgstr[1L],
         # [1] should be a no-op here
-        msgstr_plural = msgstr_plural_str[1L]
+        msgstr_plural = msgstr_plural_str[1L],
+        is_templated = any(is_templated)
       )
     ]
     if (use_base_rules) {

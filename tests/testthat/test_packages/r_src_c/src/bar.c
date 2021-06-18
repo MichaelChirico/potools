@@ -30,5 +30,8 @@ static void ziggy(SEXP y, SEXP z) {
 "warning: %s\n"), stardust(z));
   // just to demonstrate how an N_-marked message would be translated at run time
   warning(_(msg[0]));
+
+  // c-format is applied to all snprintf calls, regardless of template markers like %s
+  snprintf(BUF, 100, _("a simple message"));
   return;
 }

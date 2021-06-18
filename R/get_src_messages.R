@@ -22,9 +22,22 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_ba
     lapply(normalizePath(file.path(dir, src_files)), get_file_src_messages, translation_macros),
     idcol = "file"
   )
-  msg[ , "file" := src_files[file]]
+
   # TODO(#40): plural messages in src
   msg[ , "type" := "singular"]
+
+  # TODO: R side also uses column_number to sort, but it's ~basically~ not relevant for C... yet
+  # in_subdir done for #104; see also the comment in get_r_messages.R.
+  if (is_base) {
+    # For base, POTFILES gives the right order, so use the file number to sort before assigning file name
+    setorderv(msg, c("type", "file", "line_number"), c(-1L, 1L, 1L))
+    msg[ , "file" := src_files[file]]
+  } else {
+    msg[ , "file" := src_files[file]]
+    msg[ , "in_subdir" := grepl("/", file, fixed = TRUE)]
+    setorderv(msg, c("type", "in_subdir", "file", "line_number"), c(-1L, 1L, 1L, 1L))
+    msg[ , "in_subdir" := NULL]
+  }
 
   # line continuation mid-array is treated as blank, #91. we might be able to handle this in pre-process but
   #   that risks throwing off line numbers later on... \r? for windows of course
@@ -33,19 +46,13 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_ba
   #   https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html#String-Constants
   msg[ , "msgid" := gsub("\\'", "'", msgid, fixed = TRUE)]
 
+  # all calls to certain functions are marked as templated, regardless of template markers, #137
+  msg[ , "is_templated" := fname %chin% TEMPLATE_CALLS | grepl(SPRINTF_TEMPLATE_REGEX, msgid)]
+  msg[ , "fname" := NULL]
+
   # TODO: write this
   # internal line breaks & spacing minimized
   # msg[ , call := cleanup_call(call)]
-
-  # TODO: R side also uses column_number to sort, but it's ~basically~ not relevant for C... yet
-  # in_subdir done for #104; see also the comment in get_r_messages.R. For base, POTFILES gives the right order.
-  if (is_base) {
-    msg[ , "in_subdir" := TRUE]
-  } else {
-    msg[ , "in_subdir" := grepl("/", file, fixed = TRUE)]
-  }
-  setorderv(msg, c("type", "in_subdir", "file", "line_number"), c(-1L, 1L, 1L, 1L))
-  msg[ , "in_subdir" := NULL]
 
   msg[type == "singular", "is_repeat" := duplicated(msgid)]
   msg[]
@@ -169,7 +176,7 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
   translations[
     call_arrays,
     on = .(paren_start > paren_start, paren_end < paren_end),
-    c('call', 'call_start') := .(safe_substring(contents, i.call_start, i.paren_end), i.call_start)
+    c('call', 'call_start', 'fname') := .(safe_substring(contents, i.call_start, i.paren_end), i.call_start, i.fname)
   ]
 
   # find cases like error(_(msg)); (i.e., arrays passed as variables instead of literals)
@@ -229,13 +236,13 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
 
   # use paren_start for translated arrays to get the line number right when the call & array lines differ
   src_messages = rbind(
-    translations[ , .(msgid, msgid_plural = list(), call, array_start, is_marked_for_translation)],
-    untranslated[ , .(msgid, msgid_plural, call, array_start, is_marked_for_translation)]
+    translations[ , .(msgid, msgid_plural = list(), fname, call, array_start, is_marked_for_translation)],
+    untranslated[ , .(msgid, msgid_plural, fname, call, array_start, is_marked_for_translation)]
   )
 
   src_messages[ , "line_number" := findInterval(array_start, newlines_loc)]
   src_messages[ , "array_start" := NULL]
-  setcolorder(src_messages, c("msgid", "msgid_plural", "line_number", "call", "is_marked_for_translation"))
+  setcolorder(src_messages, c("msgid", "msgid_plural", "line_number", "fname", "call", "is_marked_for_translation"))
   src_messages[]
 }
 
@@ -419,6 +426,8 @@ MESSAGE_CALLS = data.table(
   key = 'fname'
 )
 
+TEMPLATE_CALLS = "snprintf"
+
 COMMON_NON_MESSAGE_CALLS = sort(c(
   "if", "while", "for", "switch", "return",
   "PROTECT", "UNPROTECT", "free", "malloc", "Calloc", "memcpy",
@@ -447,13 +456,15 @@ src_msg_schema = function() data.table(
   line_number = integer(),
   call = character(),
   is_repeat = logical(),
-  is_marked_for_translation = logical()
+  is_marked_for_translation = logical(),
+  is_templated = logical()
 )
 
 file_msg_schema = function() data.table(
   msgid = character(),
   msgid_plural = list(),
   line_number = integer(),
+  fname = character(),
   call = character(),
   is_marked_for_translation = logical()
 )

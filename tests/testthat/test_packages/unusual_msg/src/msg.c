@@ -48,7 +48,7 @@ void hello_world(SEXP x) {
   error(_("This one does not\n"));
 
   // base has a few of these strewn about -- ideally they would be replaced by PRId64 & family
-  error(_("Exotic formatters like %I32u, %llx, %li, %ls"));
+  error(_("Exotic formatters like %I32u, %llx, %li, %ls, %lc"));
 
   // wrapping behavior for \", see #91
   // don't break for these (preceded by a digit, `(`, `)`, or `'`)
@@ -84,5 +84,8 @@ void hello_world(SEXP x) {
 
   // dgettext messages are included, & regardless of domain, #153
   error(dgettext("fakeDomain", "abcdef"));
+
+  // snprintf calls always get c-format tagged, even when the other appearance of the msgid is not a template call
+  snprintf(BUF, 100, _("This one does not\n"));
   return;
 }

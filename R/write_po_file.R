@@ -33,13 +33,15 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
         source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
         c_fmt_tag = "",
         msgstr = if (.BY$type == 'singular') '' else NA_character_,
-        msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL)
+        msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL),
+        # see discussion in #137
+        is_templated = any(is_templated)
       )
     ]
     if (use_base_rules) {
-      po_data[message_source == 'src' & grepl(SPRINTF_TEMPLATE_REGEX, msgid), 'c_fmt_tag' := "#, c-format\n"]
+      po_data[message_source == 'src' & is_templated, 'c_fmt_tag' := "#, c-format\n"]
     } else {
-      po_data[grepl(SPRINTF_TEMPLATE_REGEX, msgid), 'c_fmt_tag' := "#, c-format\n"]
+      po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
     }
   } else {
     r_file <- sprintf("R-%s.po", params$language)
@@ -59,7 +61,8 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
         c_fmt_tag = "",
         msgstr = msgstr[1L],
         # [1] should be a no-op here
-        msgstr_plural = msgstr_plural_str[1L]
+        msgstr_plural = msgstr_plural_str[1L],
+        is_templated = any(is_templated)
       )
     ]
     if (use_base_rules) {

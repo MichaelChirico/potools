@@ -333,7 +333,7 @@ build_msgid = function(left, right, starts, ends, contents) {
 
   # Only the first array is extracted from ternary operator usage inside _(), #154
   # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse
-  if (endsWith(trimws(grout[1L]), "?")) {
+  if (endsWith(grout[1L], "?")) {
     return(safe_substring(contents, starts[1L]+1L, ends[1L]-1L))
   }
 
@@ -348,6 +348,8 @@ build_msgid = function(left, right, starts, ends, contents) {
   paste(safe_substring(contents, starts+1L, ends-1L), collapse = "")
 }
 
+# this could probably go for more stress testing. it didn't _crash_ on base, but
+#   I haven't vetted whether it gets the results right always (just for the one dgettext() usage in base)
 build_msgid_plural = function(fun, left, right, starts, ends, contents) {
   if (!length(starts)) return(list())
 
@@ -369,7 +371,12 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents) {
     arg_i = 1L
     ii = 1L
     while (arg_i != target_arg) {
-      if (arg_i > target_arg) stop(sprintf("Appear to have jumped past the target argument: %s%s", fun, substring(contents, left, right)))
+      # nocov start
+      if (arg_i > target_arg) stop(domain = NA, gettextf(
+        "Logic for detecting argument calls broken at: %s%s; please report.",
+        fun, substring(contents, left, right)
+      ))
+      # nocov end
       # bold assumption: no nested commas. let's see if it works out...
       commas = gregexpr(",", grout[ii], fixed=TRUE)[[1L]]
       if (commas[1L] > 0L) arg_i = arg_i + length(commas)

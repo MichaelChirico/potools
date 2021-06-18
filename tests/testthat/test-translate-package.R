@@ -183,9 +183,14 @@ test_that("Packages with src code work correctly", {
         "Didn't find rSrcMsg.mo; found %s", toString(pkg_files)
       )
 
-      # test N_-marked messages are included for translation
-      pot_lines <- readLines(file.path(pkg, 'po', 'rSrcMsg.pot'))
-      expect_all_match(pot_lines, '"Don\'t translate me now."', fixed = TRUE)
+      # (1) test N_-marked messages are included for translation
+      # (2) test untemplated snprintf() calls get c-format tagged (#137)
+      pot_file <- file.path(pkg, 'po', 'rSrcMsg.pot')
+      pot_lines <- readChar(pot_file, file.size(pot_file))
+      expect_all_match(
+        pot_lines,
+        c('"Don\'t translate me now."', '#, c-format\nmsgid "a simple message"')
+      )
     }
   )
 

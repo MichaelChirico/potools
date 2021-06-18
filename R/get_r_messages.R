@@ -102,7 +102,9 @@ get_r_messages <- function (dir) {
 
   msg[type == 'plural', 'is_marked_for_translation' := TRUE]
   msg[type == 'singular', 'is_marked_for_translation' := fname %chin% c(DOMAIN_DOTS_FUNS, 'gettextf')]
-  msg[ , 'fname' := NULL]
+
+  msg[ , "is_templated" := fname == "gettextf"]
+  msg[ , "fname" := NULL]
 
   msg[]
 }
@@ -392,5 +394,6 @@ r_message_schema = function() data.table(
   line_number = integer(),
   call = character(),
   is_repeat = logical(),
-  is_marked_for_translation = logical()
+  is_marked_for_translation = logical(),
+  is_templated = logical()
 )

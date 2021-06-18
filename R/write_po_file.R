@@ -28,7 +28,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 
     po_data[type == "plural", 'msgid_plural_str' := vapply(msgid_plural, paste, character(1L), collapse="|||")]
     po_data = po_data[,
-      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
+      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str, is_templated),
       .(
         source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
         c_fmt_tag = "",
@@ -37,9 +37,9 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
       )
     ]
     if (use_base_rules) {
-      po_data[message_source == 'src' & grepl(SPRINTF_TEMPLATE_REGEX, msgid), 'c_fmt_tag' := "#, c-format\n"]
+      po_data[message_source == 'src' & is_templated, 'c_fmt_tag' := "#, c-format\n"]
     } else {
-      po_data[grepl(SPRINTF_TEMPLATE_REGEX, msgid), 'c_fmt_tag' := "#, c-format\n"]
+      po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
     }
   } else {
     r_file <- sprintf("R-%s.po", params$language)
@@ -53,7 +53,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
       )
     ]
     po_data = po_data[,
-      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
+      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str, is_templated),
       .(
         source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
         c_fmt_tag = "",

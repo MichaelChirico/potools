@@ -329,6 +329,7 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
 
 build_msgid = function(left, right, starts, ends, contents) {
   grout = get_grout(left, right, starts, ends, contents)
+  grout = gsub("[\n\t ]", "", grout)
 
   # Only the first array is extracted from ternary operator usage inside _(), #154
   # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse

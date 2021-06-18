@@ -220,19 +220,22 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
       by = .(fname, call_start, paren_start, paren_end)
     ]
   )
-  if (any(untranslated$fname == "dgettext")) browser()
-  untranslated[ , "is_marked_for_translation" := FALSE]
+
+  untranslated[ , "is_marked_for_translation" := fname == "dgettext"]
+  untranslated[
+    lengths(msgid_plural) == 1L,
+    c('msgid', 'msgid_plural') := .(vapply(msgid_plural, `[`, character(1L), 1L), list(NULL))
+  ]
 
   # use paren_start for translated arrays to get the line number right when the call & array lines differ
-  if (!'msgid_plural' %chin% names(untranslated)) browser()
   src_messages = rbind(
     translations[ , .(msgid, msgid_plural = list(), call, array_start, is_marked_for_translation)],
-    untranslated[ , .(msgid = NA_character_, msgid_plural, call, array_start, is_marked_for_translation)]
+    untranslated[ , .(msgid, msgid_plural, call, array_start, is_marked_for_translation)]
   )
 
   src_messages[ , "line_number" := findInterval(array_start, newlines_loc)]
   src_messages[ , "array_start" := NULL]
-  setcolorder(src_messages, c("msgid", "line_number", "call", "is_marked_for_translation"))
+  setcolorder(src_messages, c("msgid", "msgid_plural", "line_number", "call", "is_marked_for_translation"))
   src_messages[]
 }
 
@@ -326,7 +329,22 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
 
 build_msgid = function(left, right, starts, ends, contents) {
   grout = get_grout(left, right, starts, ends, contents)
-  build_msgid_core(starts, ends, grout, contents)
+
+  # Only the first array is extracted from ternary operator usage inside _(), #154
+  # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse
+  if (endsWith(trimws(grout[1L]), "?")) {
+    return(safe_substring(contents, starts[1L]+1L, ends[1L]-1L))
+  }
+
+  # any unknown macros are not expanded and the recorded array is cut off on encountering one,
+  #   unless that macro comes between `_(` and the first literal array
+  #   (c.f. xgettext output on _(xxx"abc""def") vs _("abc"xxx"def") vs _("abc""def"xxx))
+  if (length(keep_idx <- which(nzchar(grout[-1L])))) {
+    starts = head(starts, keep_idx[1L])
+    ends = head(ends, keep_idx[1L])
+  }
+
+  paste(safe_substring(contents, starts+1L, ends-1L), collapse = "")
 }
 
 build_msgid_plural = function(fun, left, right, starts, ends, contents) {
@@ -357,29 +375,11 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents) {
       ii = ii + 1L
     }
     jj = ii
-    while (jj <= length(grout) && !grepl(",", grout[jj], fixed = TRUE)) { jj = jj + 1L }
+    while (jj < length(grout) && !grepl(",", grout[jj], fixed = TRUE)) { jj = jj + 1L }
     msgid = paste(substring(contents, starts[ii:jj - 1L]+1L, ends[ii:jj - 1L]-1L), collapse = '')
     msgid_plural = msgid
   }
   return(list(msgid_plural))
-}
-
-build_msgid_core = function(starts, ends, grout, contents) {
-  # Only the first array is extracted from ternary operator usage inside _(), #154
-  # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse
-  if (endsWith(trimws(grout[1L]), "?")) {
-    return(safe_substring(contents, starts[1L]+1L, ends[1L]-1L))
-  }
-
-  # any unknown macros are not expanded and the recorded array is cut off on encountering one,
-  #   unless that macro comes between `_(` and the first literal array
-  #   (c.f. xgettext output on _(xxx"abc""def") vs _("abc"xxx"def") vs _("abc""def"xxx))
-  if (length(keep_idx <- which(nzchar(grout[-1L])))) {
-    starts = head(starts, keep_idx[1L])
-    ends = head(ends, keep_idx[1L])
-  }
-
-  paste(safe_substring(contents, starts+1L, ends-1L), collapse = "")
 }
 
 get_grout = function(left, right, starts, ends, contents) {
@@ -401,13 +401,13 @@ get_grout = function(left, right, starts, ends, contents) {
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}
 MESSAGE_CALLS = data.table(
   fname = c(
-    "dgettext",
     "Rprintf", "REprintf", "Rvprintf", "REvprintf",
     "R_ShowMessage", "R_Suicide",
     "warning", "Rf_warning", "error", "Rf_error",
+    "dgettext", # NB: xgettext ignores the domain when extracting templates, so we don't bother checking either
     "snprintf"
   ),
-  str_arg = c(NA_integer_, rep(1L, 10L), 3L),
+  str_arg = c(rep(1L, 10L), 2L, 3L),
   key = 'fname'
 )
 
@@ -435,6 +435,7 @@ src_msg_schema = function() data.table(
   type = character(),
   file = character(),
   msgid = character(),
+  msgid_plural = list(),
   line_number = integer(),
   call = character(),
   is_repeat = logical(),
@@ -443,6 +444,7 @@ src_msg_schema = function() data.table(
 
 file_msg_schema = function() data.table(
   msgid = character(),
+  msgid_plural = list(),
   line_number = integer(),
   call = character(),
   is_marked_for_translation = logical()

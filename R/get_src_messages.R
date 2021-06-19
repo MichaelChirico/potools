@@ -2,7 +2,9 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_ba
   if (is_base) {
     potfiles_loc <- file.path(dir, "../../../po/POTFILES")
     if (!file.exists(potfiles_loc)) {
-      stop("Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file po/POTFILES at the top level that is required to proceed.")
+      stop(domain = NA, gettextf(
+        "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.", "po/POTFILES"
+      ))
     }
     # NB: also skips blank lines
     src_files <- grep("^[^#]", readLines(potfiles_loc), value = TRUE)

@@ -1,7 +1,7 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir) {
-  expr_data <- rbindlist(lapply(parse_r_files(dir), getParseData), idcol = 'file')
+get_r_messages <- function (dir, is_base) {
+  expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
 
@@ -53,7 +53,14 @@ get_r_messages <- function (dir) {
   if (!nrow(msg)) return(r_message_schema())
 
   msg_files = unique(msg$file)
-  file_lines = lapply(normalizePath(file.path(dir, 'R', msg_files)), readLines, warn = FALSE)
+  if (is_base) {
+    paths <- file.path(dir, 'R', msg_files)
+    share_idx <- grepl('^share/R', msg_files)
+    paths[share_idx] <- file.path(dir, '../../..', msg_files[share_idx])
+  } else {
+    paths <- file.path(dir, 'R', msg_files)
+  }
+  file_lines = lapply(normalizePath(paths), readLines, warn = FALSE)
   names(file_lines) = msg_files
 
   # need to strip comments for build_call, see #59.
@@ -87,7 +94,13 @@ get_r_messages <- function (dir) {
   # NB: forder uses C order for file, which happens to match the base behavior to set LC_COLLATE=C
   # in_subdir is done to (hackily) match the within-directory ordering done by tools::update_pkg_po(); see #104
   msg[ , "in_subdir" := grepl("/", file, fixed = TRUE)]
-  setorderv(msg, c("type", "in_subdir", "file", "line_number", "column_number"), c(-1L, 1L, 1L, 1L, 1L))
+  if (is_base) {
+    # share/R messages come after the other base/R source files
+    msg[ , "in_share" := grepl("share/R", file, fixed = TRUE)]
+    setorderv(msg, c("type", "in_subdir", "in_share", "file", "line_number", "column_number"), c(-1L, rep(1L, 5L)))
+  } else {
+    setorderv(msg, c("type", "in_subdir", "file", "line_number", "column_number"), c(-1L, 1L, 1L, 1L, 1L))
+  }
   # kept id, column_number to get order within lines; can drop now
   msg[ , c('id', 'column_number', 'in_subdir') := NULL]
 
@@ -110,11 +123,26 @@ get_r_messages <- function (dir) {
 }
 
 # parse the R files in a directory.
-parse_r_files = function(dir) {
+parse_r_files = function(dir, is_base) {
   # somehow on windows I was seeing absolute paths with \ but paths
   #   from list.files as / -- normalizePath makes it consistent
   r_files = list_package_files(dir, 'R', subsubdirs = c('unix', 'windows'), pattern = "(?i)\\.r$")
   out = lapply(normalizePath(file.path(dir, 'R', r_files)), parse, keep.source=TRUE)
+  if (is_base) {
+    r_share_dir = file.path(dir, "../../../share")
+    if (!dir.exists(file.path(r_share_dir, 'R'))) {
+      stop(domain = NA, gettextf(
+        "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.", "share/R/REMOVE.R"
+      ))
+    }
+    share_files = list_package_files(r_share_dir, 'R', pattern = "(?i)\\.r$")
+    out = c(
+      out,
+      lapply(normalizePath(file.path(r_share_dir, 'R', share_files)), parse, keep.source = TRUE)
+    )
+    names(out) = c(r_files, file.path('share', 'R', share_files))
+    return(out)
+  }
   names(out) = r_files
   return(out)
 }

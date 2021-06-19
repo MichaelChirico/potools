@@ -56,7 +56,7 @@ check_sys_reqs = function() {
 }
 # nocov end
 
-list_package_files = function(dir, subdir, subsubdirs, pattern) {
+list_package_files = function(dir, subdir, subsubdirs = character(), pattern) {
   subdir = file.path(dir, subdir)
   files = list.files(subdir, pattern = pattern)
   for (subsubdir in subsubdirs) {

@@ -472,6 +472,11 @@ test_that("translation of 'base' works correctly", {
   restore_package(
     pkg <- test_package("r-devel/src/library/base"),
     {
+      correct_location <- file.path(pkg, '../../../share/R/shared.R')
+      expect_true(file.rename(correct_location, tmp <- tempfile()))
+      expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
+      file.rename(tmp, correct_location)
+
       correct_location <- file.path(pkg, '../../../po/POTFILES')
       expect_true(file.rename(correct_location, tmp <- tempfile()))
       expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
@@ -482,7 +487,15 @@ test_that("translation of 'base' works correctly", {
       expect_true(file.exists(file.path(pkg, 'po', 'R-base.pot')))
       expect_true(file.exists(file.path(pkg, 'po', 'R.pot')))
 
+      r_pot_lines <- readLines(file.path(pkg, 'po', 'R-base.pot'))
       src_pot_lines <- readLines(file.path(pkg, 'po', 'R.pot'))
+
+      # confirm share/R messages are included
+      expect_all_match(
+        r_pot_lines,
+        'msgid "Go clean your room!"',
+        fixed = TRUE
+      )
 
       # check relative path is recorded correctly
       expect_all_match(

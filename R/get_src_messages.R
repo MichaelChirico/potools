@@ -374,9 +374,10 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents) {
   if (target_arg == 0L) {
     msgid_plural = character()
     msgid = ''
+    n_grout = length(grout)
     for (ii in 2:length(grout)) {
       msgid = paste0(msgid, substring(contents, starts[ii-1L]+1L, ends[ii-1L]-1L))
-      if (grepl(',', grout[ii], fixed = TRUE)) {
+      if (ii == n_grout || grepl(',', grout[ii], fixed = TRUE)) {
         msgid_plural = c(msgid_plural, msgid)
         msgid = ''
       }

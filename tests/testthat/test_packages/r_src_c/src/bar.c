@@ -33,5 +33,9 @@ static void ziggy(SEXP y, SEXP z) {
 
   // c-format is applied to all snprintf calls, regardless of template markers like %s
   snprintf(BUF, 100, _("a simple message"));
+
+  // test with/without formatting to make sure c-format is recorded correctly
+  error(ngettext("singular", "plural", z));
+  error(ngettext("singular %d", "plural %d", z));
   return;
 }

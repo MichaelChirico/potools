@@ -172,7 +172,7 @@ test_that("Packages with src code work correctly", {
     pkg <- test_package('r_src_c'),
     tmp_conn = mock_translation('test-translate-package-r_src_c-1.input'),
     {
-      translate_package(pkg, "zh_CN")
+      translate_package(pkg, "zh_CN", diagnostics = check_untranslated_src)
 
       pkg_files <- list.files(pkg, recursive = TRUE)
       expect_true("po/R-zh_CN.po" %in% pkg_files)
@@ -187,9 +187,15 @@ test_that("Packages with src code work correctly", {
       pot_lines <- paste(readLines(file.path(pkg, 'po', 'rSrcMsg.pot')), collapse = "\n")
       # (1) test N_-marked messages are included for translation
       # (2) test untemplated snprintf() calls get c-format tagged (#137)
+      # (3)-(4) ngettext() arrays are extracted
       expect_all_match(
         pot_lines,
-        c('"Don\'t translate me now."', '#, c-format\nmsgid "a simple message"')
+        c(
+          '"Don\'t translate me now."',
+          '#, c-format\nmsgid "a simple message"',
+          'msgid "singular"\nmsgid_plural "plural"',
+          'msgid "singular %d"\nmsgid_plural "plural %d"'
+        )
       )
     }
   )
@@ -198,6 +204,13 @@ test_that("Packages with src code work correctly", {
     prompts,
     c("Rprintf(_(", "warning(_("),
     fixed = TRUE
+  )
+
+  # error(ngettext(...)) doesn't show error() in check_untranslated_src
+  expect_outputs(
+    prompts,
+    "Problematic call",
+    invert = TRUE, fixed = TRUE
   )
 })
 

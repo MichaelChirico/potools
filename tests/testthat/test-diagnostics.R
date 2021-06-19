@@ -55,6 +55,20 @@ test_that("check_untranslated_cat works", {
 
   # input that can be converted to data.table is OK
   expect_equal(check_untranslated_cat(as.data.frame(message_data)), check_untranslated_cat(message_data))
+
+  # edge case: exit early after filtering translated sub-calls
+  message_data = data.table::data.table(
+    message_source = 'R',
+    type = 'singular',
+    file = 'foo.R',
+    msgid = 'hello',
+    msgid_plural = list(NULL),
+    call = 'cat(gettext("hello"))',
+    line_number = 1,
+    is_repeat = FALSE,
+    is_marked_for_translation = FALSE
+  )
+  expect_equal(nrow(check_untranslated_cat(message_data)), 0L)
 })
 
 test_that("check_untranslated_src works", {
@@ -83,4 +97,3 @@ test_that("check_untranslated_src works", {
   # input that can be converted to data.table is OK
   expect_equal(check_untranslated_src(as.data.frame(message_data)), check_untranslated_src(message_data))
 })
-

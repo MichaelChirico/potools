@@ -23,31 +23,35 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_ba
     idcol = "file"
   )
 
-  # TODO(#40): plural messages in src
-  msg[ , "type" := "singular"]
+  msg[ , "type" := fifelse(fname == "ngettext", "plural", "singular")]
 
   # TODO: R side also uses column_number to sort, but it's ~basically~ not relevant for C... yet
   # in_subdir done for #104; see also the comment in get_r_messages.R.
   if (is_base) {
     # For base, POTFILES gives the right order, so use the file number to sort before assigning file name
-    setorderv(msg, c("type", "file", "line_number"), c(-1L, 1L, 1L))
+    # NB: in R, singular comes before plural; not so here. strings are simply extracted in order.
+    setorderv(msg, c("file", "line_number"), c(1L, 1L))
     msg[ , "file" := src_files[file]]
   } else {
     msg[ , "file" := src_files[file]]
     msg[ , "in_subdir" := grepl("/", file, fixed = TRUE)]
-    setorderv(msg, c("type", "in_subdir", "file", "line_number"), c(-1L, 1L, 1L, 1L))
+    setorderv(msg, c("in_subdir", "file", "line_number"), c(1L, 1L, 1L))
     msg[ , "in_subdir" := NULL]
   }
 
   # line continuation mid-array is treated as blank, #91. we might be able to handle this in pre-process but
-  #   that risks throwing off line numbers later on... \r? for windows of course
+  #   that risks throwing off line numbers later on... \r? is for windows of course
   msg[ , "msgid" := gsub("[\\]\r?\n", "", msgid)]
   # "\'" is treated the same as '\'', per
   #   https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html#String-Constants
   msg[ , "msgid" := gsub("\\'", "'", msgid, fixed = TRUE)]
 
   # all calls to certain functions are marked as templated, regardless of template markers, #137
-  msg[ , "is_templated" := fname %chin% TEMPLATE_CALLS | grepl(SPRINTF_TEMPLATE_REGEX, msgid)]
+  msg[ , "is_templated" :=
+         fname %chin% TEMPLATE_CALLS
+         | grepl(SPRINTF_TEMPLATE_REGEX, msgid)
+         | vapply(msgid_plural, function(str) any(grepl(SPRINTF_TEMPLATE_REGEX, str)), logical(1L))
+      ]
   msg[ , "fname" := NULL]
 
   # TODO: write this
@@ -228,11 +232,15 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
     ]
   )
 
-  untranslated[ , "is_marked_for_translation" := fname == "dgettext"]
+  untranslated[ , "is_marked_for_translation" := fname %chin% c("dgettext", "ngettext")]
   untranslated[
     lengths(msgid_plural) == 1L,
     c('msgid', 'msgid_plural') := .(vapply(msgid_plural, `[`, character(1L), 1L), list(NULL))
   ]
+
+  # awkward workaround to error(ngettext("a", "b")) returning error:"a"
+  # TODO: revisit build_msgid_plural not to need this step
+  untranslated = untranslated[!msgid %chin% unlist(msgid_plural)]
 
   # use paren_start for translated arrays to get the line number right when the call & array lines differ
   src_messages = rbind(
@@ -363,17 +371,17 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents) {
   grout = get_grout(left, right, starts, ends, contents)
   target_arg = MESSAGE_CALLS[.(fun), str_arg]
 
-  if (is.na(target_arg)) {
+  if (target_arg == 0L) {
     msgid_plural = character()
     msgid = ''
+    n_grout = length(grout)
     for (ii in 2:length(grout)) {
       msgid = paste0(msgid, substring(contents, starts[ii-1L]+1L, ends[ii-1L]-1L))
-      if (grepl(',', grout[ii], fixed = TRUE)) {
+      if (ii == n_grout || grepl(',', grout[ii], fixed = TRUE)) {
         msgid_plural = c(msgid_plural, msgid)
         msgid = ''
       }
     }
-    msgid_plural = c(msgid_plural, msgid)
   } else {
     arg_i = 1L
     ii = 1L
@@ -416,13 +424,14 @@ get_grout = function(left, right, starts, ends, contents) {
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}
 MESSAGE_CALLS = data.table(
   fname = c(
+    "ngettext",
     "Rprintf", "REprintf", "Rvprintf", "REvprintf",
     "R_ShowMessage", "R_Suicide",
     "warning", "Rf_warning", "error", "Rf_error",
     "dgettext", # NB: xgettext ignores the domain when extracting templates, so we don't bother checking either
     "snprintf"
   ),
-  str_arg = c(rep(1L, 10L), 2L, 3L),
+  str_arg = c(0L, rep(1L, 10L), 2L, 3L),
   key = 'fname'
 )
 

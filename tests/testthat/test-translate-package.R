@@ -472,10 +472,17 @@ test_that("translation of 'base' works correctly", {
   restore_package(
     pkg <- test_package("r-devel/src/library/base"),
     {
-      correct_location <- normalizePath(file.path(pkg, '../../../share'))
-      expect_true(file.rename(correct_location, tmp <- tempfile()))
+      # NB: it seems file.rename doesn't work for directories on Windows, so we have the
+      #   more cumbersome file.copy() approach here
+      correct_location <- file.path(pkg, '../../../share')
+      tmp <- file.path(tempdir(), 'share')
+      dir.create(tmp)
+      on.exit(unlink(tmp, recursive=TRUE))
+      file.copy(dirname(correct_location), tmp, recursive = TRUE)
+      unlink(correct_location, recursive = TRUE)
       expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
-      file.rename(tmp, correct_location)
+      dir.create(correct_location)
+      file.copy(tmp, dirname(correct_location), recursive = TRUE)
 
       correct_location <- normalizePath(file.path(pkg, '../../../po/POTFILES'))
       expect_true(file.rename(correct_location, tmp <- tempfile()))

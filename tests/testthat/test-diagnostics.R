@@ -68,7 +68,7 @@ test_that("check_untranslated_cat works", {
     is_repeat = FALSE,
     is_marked_for_translation = FALSE
   )
-  expect_equal(nrow(check_untranslated_cat(messag_data)), 0L)
+  expect_equal(nrow(check_untranslated_cat(message_data)), 0L)
 })
 
 test_that("check_untranslated_src works", {

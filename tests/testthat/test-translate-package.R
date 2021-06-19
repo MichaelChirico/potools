@@ -472,12 +472,12 @@ test_that("translation of 'base' works correctly", {
   restore_package(
     pkg <- test_package("r-devel/src/library/base"),
     {
-      correct_location <- file.path(pkg, '../../../share')
+      correct_location <- normalizePath(file.path(pkg, '../../../share'))
       expect_true(file.rename(correct_location, tmp <- tempfile()))
       expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
       file.rename(tmp, correct_location)
 
-      correct_location <- file.path(pkg, '../../../po/POTFILES')
+      correct_location <- normalizePath(file.path(pkg, '../../../po/POTFILES'))
       expect_true(file.rename(correct_location, tmp <- tempfile()))
       expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
       file.rename(tmp, correct_location)

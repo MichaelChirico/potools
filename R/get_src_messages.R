@@ -1,4 +1,4 @@
-get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_base_rules = FALSE, is_base = FALSE) {
+get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_base_rules = FALSE, is_base = FALSE, is_rgui = FALSE) {
   if (is_base) {
     potfiles_loc <- file.path(dir, "../../../po/POTFILES")
     if (!file.exists(potfiles_loc)) {
@@ -10,6 +10,20 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_ba
     src_files <- grep("^[^#]", readLines(potfiles_loc), value = TRUE)
     # in R.pot, file paths are given relative to the top level (and so include src/, where other packages drop src/)
     dir = dirname(dirname(potfiles_loc))
+  } else if (is_rgui) {
+    # quite hacky way to get the relative paths correct for this special RGui case
+    # normalizePath -- otherwise '..' continues to mean '..' in tldname
+    dir = normalizePath(file.path(dir, '../../..'))
+    tld_name = basename(dir)
+    dir = file.path(dir, '..')
+    # tools:::update_RGui_po is more prescriptive; this approach seems more robust (but will be slower)
+    src_files = c(
+      list_package_files(dir, tld_name, 'src/gnuwin32', pattern = '(?i)\\.c$'),
+      list_package_files(dir, tld_name, 'src/extra/graphapp', pattern = '(?i)\\.c$'),
+      list_package_files(dir, tld_name, 'src/library/utils/src/windows', pattern = '(?i)\\.c$'),
+      list_package_files(dir, tld_name, 'src/library/grDevices/src', pattern = '(?i)\\.c$')
+    )
+    dir = file.path(dir, tld_name)
   } else {
     # alternative would be to handle the if (!use_base_rules) branch in write_po_file(),
     #   which would require keeping track of column numbers

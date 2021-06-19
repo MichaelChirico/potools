@@ -53,9 +53,17 @@ translate_package = function(
   if (verbose) message('Getting src-level messages...')
   src_message_data = get_src_messages(dir, src_translation_macros, use_base_rules, is_base)
 
+  if (is_base) {
+    if (verbose) message('Getting RGui messages...')
+    rgui_message_data = get_src_messages(dir, c('G_', 'GN_'), use_base_rules, is_rgui = TRUE)
+  } else {
+    rgui_message_data = data.table(NULL)
+  }
+
   message_data = rbind(
     R = r_message_data,
     src = src_message_data,
+    RGui = rgui_message_data,
     fill = TRUE, idcol = "message_source"
   )
 

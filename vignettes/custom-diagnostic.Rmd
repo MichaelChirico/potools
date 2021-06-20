@@ -27,17 +27,18 @@ check_spelling = function(message_data) {
   aspell_dir <- file.path(tempdir(), 'aspell')
   dir.create(aspell_dir)
   original_dir <- setwd(aspell_dir)
-  on.exit({unlink(aspell_dir, recursive = TRUE); setwd(original_dir)}, recursive = TRUE)
+  on.exit({unlink(aspell_dir, recursive = TRUE); setwd(original_dir)})
   
   # (!is_repeat) makes sure we only check duplicate messages once
   # plural messages are in a list, so handle them separately
   message_data[(!is_repeat), by = .(file, type), {
     if (.BY$type == "singular") {
       cat(msgid, file = .BY$file, sep = "\n")
+      # aspell() results has 5 columns: Original, File, Line, Column, Suggestions; we only need 1 & 5
       results = utils::aspell(.BY$file)
       unlink(.BY$file)
       
-      typo_idx <- grep(results$Original, msgid)
+      typo_idx <- sapply(results$Original, grep, msgid)
       # take the first suggestion
       replacement = sapply(
         seq_along(results$Suggestions),
@@ -65,28 +66,43 @@ check_spelling = function(message_data) {
       
       # odd numbers in grep output --> first entry for each plural_msgid; even numbers --> second entry.
       # do this arithmetic trick to re-map that to the original entry number in msgid_plural
-      typo_idx <- ((grep(results$Original, all_msgid) - 1L) %/% 2L) + 1L
-      replacement = sapply(
-        seq_along(results$Suggestions),
-        function(typo_i) {
-          # take the identified typo & replace it with aspell's 1st suggestion in the original `call`
-          gsub(
-            results$Original[typo_i], results$Suggestions[[typo_i]],
-            call[typo_idx[typo_i]], fixed = TRUE
-          )
-        }
-      )
-      
+      typo_idx <- ((sapply(results$Original, grep, all_msgid) - 1L) %/% 2L) + 1L
+      # potentially overwrite each call >1 time if both messages have a typo
+      replacement = call
+      for (typo_i in seq_along(results$Suggestions)) {
+        replacement[typo_idx[typo_i]] <- gsub(
+          results$Original[typo_i], results$Suggestions[[typo_i]][1L],
+          replacement[typo_idx[typo_i]], fixed = TRUE
+        )
+      }
+      typo_idx <- unique(typo_idx)
+
       .(
         call = call[typo_idx],
         file = file[typo_idx],
         line_number = line_number[typo_idx],
-        replacement = replacement
+        replacement = replacement[typo_idx]
       )
     }
   }]
-  
-  # now run aspell
-  utils::aspell(list.files(aspell_dir))
 }
 ```
+
+In a package, we would probably use a few more helper functions to clean up & simplify  the body of this diagnostic; we're piling everything in sequence for illustration to have everything in one place.
+
+# Running the diagnostic
+
+We can check how the diagnostic works on a simple test package `GreatSpelling` created for this vignette.
+
+```{r GreatSpelling}
+library(potools)
+great_spelling_messages = get_message_data("GreatSpelling")
+
+# showing the structure of the messagedata for this package
+great_spelling_messages
+
+# running our diagnostic
+check_spelling(great_spelling_messages)
+```
+
+That should covers the basics -- I look forward to seeing all the great uses you more creative developers can devise. Thanks for reading!

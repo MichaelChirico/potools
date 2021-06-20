@@ -47,17 +47,7 @@ translate_package = function(
   }
   if (!update) dir.create(po_dir, showWarnings = FALSE)
 
-  if (verbose) message('Getting R-level messages...')
-  r_message_data = get_r_messages(dir, is_base)
-
-  if (verbose) message('Getting src-level messages...')
-  src_message_data = get_src_messages(dir, src_translation_macros, use_base_rules, is_base)
-
-  message_data = rbind(
-    R = r_message_data,
-    src = src_message_data,
-    fill = TRUE, idcol = "message_source"
-  )
+  message_data = get_message_data(dir, src_translation_macros, use_base_rules, verbose=verbose)
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')

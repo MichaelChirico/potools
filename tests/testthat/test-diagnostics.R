@@ -1,5 +1,12 @@
 # TODO: can we refactor/eliminate anything from test-translate-package to just be done here instead of in
 #   the more circuitous tests there?
+
+test_that("translate_package works on package with 'cracked' messages needing templates", {
+  message_data <- get_message_data(test_package("r_non_template"))
+  cracked_messages <- check_cracked_messages(message_data)
+  expect_equal(nrow(cracked_messages), 2L)
+})
+
 test_that("check_cracked_messages works", {
   message_data = data.table::data.table(
     message_source = 'R',
@@ -69,6 +76,18 @@ test_that("check_untranslated_cat works", {
     is_marked_for_translation = FALSE
   )
   expect_equal(nrow(check_untranslated_cat(message_data)), 0L)
+})
+
+test_that("Diagnostic for unmarked src translations works", {
+  message_data <- get_message_data(test_package("r_src_untranslated"))
+  untranslated_src <- check_untranslated_src(message_data)
+
+  expect_equal(nrow(untranslated_src), 2L)
+  expect_all_match(
+    untranslated_src$call,
+    c('an untranslated string', 'an untranslated error'),
+    fixed=TRUE
+  )
 })
 
 test_that("check_untranslated_src works", {

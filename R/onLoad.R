@@ -3,7 +3,7 @@ globalVariables(
     'KNOWN_LANGUAGES', 'PLURAL_RANGE_STRINGS',
     'msgid', 'msgstr', 'x.msgstr', 'msgid_plural', 'msgstr_plural', 'x.msgstr_plural',
     'message_source', 'type', 'line_number', 'fuzzy', 'x.fuzzy',
-    'is_repeat', 'is_marked_for_translation',
+    'is_repeat', 'is_marked_for_translation', 'is_templated',
     'id', 'x.id', 'i.id', 'line1', 'i.line1', 'i.col1', 'i.line2', 'i.col2',
     'text', 'x.text', 'i.text', 'x.token', 'token', 'fname', 'x.fname', 'i.fname',
     'parent', 'x.parent', 'i.parent', 'ancestor', 'i.ancestor',
@@ -11,7 +11,7 @@ globalVariables(
     'source_location', 'c_fmt_tag', 'msgid_plural_str', 'msgstr_plural_str', 'suggested_call',
     'array_start', 'i.array_start', 'array_end', 'i.array_end', 'call_start', 'x.call_start', 'i.call_start',
     'paren_start', 'i.paren_start', 'paren_end', 'i.paren_end', 'x.paren_end',
-    'i.msgid', 'replacement', 'non_spurious',
+    'i.msgid', 'replacement', 'non_spurious', 'str_arg',
     '.'
   ),
   package = 'potools'

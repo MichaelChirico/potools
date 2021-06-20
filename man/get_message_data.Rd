@@ -7,7 +7,7 @@ Extract user-visible messages from a package
 This function looks in the R and src directories of a package for user-visible messages and compiles them as a \code{\link[data.table]{data.table}} to facilitate analyzing this corpus as such.
 }
 \usage{
-get_message_data = function(
+get_message_data(
   dir=".", src_translation_macros=c("_", "N_"),
   use_base_rules=package \%chin\% .potools$base_package_names,
   verbose=FALSE

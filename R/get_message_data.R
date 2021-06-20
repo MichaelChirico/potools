@@ -1,5 +1,5 @@
 get_message_data = function(
-  dir, src_translation_macros,
+  dir = ".", src_translation_macros = c("_", "N_"),
   use_base_rules = package %chin% .potools$base_package_names,
   verbose = FALSE
 ) {

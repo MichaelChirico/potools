@@ -26,6 +26,7 @@ get_po_messages <- function(po_file) {
   #   (2) count of msgid_plural
   # anchor to ^ to skip fuzzied messages
   msgid_start = grep("^msgid ", po_lines)
+  n_msgid = length(msgid_start)
   msgstr_start = grep("^msgstr ", po_lines)
 
   # land on the msgid coming just before each msgid_plural
@@ -57,19 +58,17 @@ get_po_messages <- function(po_file) {
   #   FALSE for a while loop to terminate gracefully on hitting file end
   is_msg_continuation = c(grepl('^"', po_lines), FALSE)
 
-  # TODO: isn't n_msg just length(grep("^msgid ", po_lines))?
-  n_msg = n_singular + n_plural
   po_data = data.table(
     message_source = message_source,
     type = rep(c("singular", "plural"), c(n_singular, n_plural)),
-    fuzzy = integer(n_msg),
-    msgid = character(n_msg),
-    msgstr = character(n_msg),
+    fuzzy = integer(n_msgid),
+    msgid = character(n_msgid),
+    msgstr = character(n_msgid),
     msgid_plural = vector('list'),
     msgstr_plural = vector('list')
   )
   # may not have been caught above if the file is all fuzzy translations, e.g.
-  if (n_msg == 0L) return(po_data)
+  if (n_msgid == 0L) return(po_data)
 
   # inherits is_msg_continuation
   find_msg_end <- function(start_idx) {
@@ -81,7 +80,7 @@ get_po_messages <- function(po_file) {
   }
   # inherits polines
   build_msg <- function(start, end, tag) {
-    paste(gsub(sprintf('^(?:%s )?"|"$', tag), '', po_lines[start:end]), collapse = '')
+    paste(gsub(sprintf('^(?:%s +)?"|"$', tag), '', po_lines[start:end]), collapse = '')
   }
 
   msg_j = 1L
@@ -125,10 +124,12 @@ get_po_messages <- function(po_file) {
     msg_j = msg_j + 1L
   }
 
+  # somewhat hacky approach -- strip the comment markers & recurse
   writeLines(
     gsub("^#~ ", "", grep("^#~ ", po_lines, value = TRUE)),
     tmp <- tempfile()
   )
+  on.exit(unlink(tmp))
   deprecated = get_po_messages(tmp)
   if (nrow(deprecated) > 0L) {
     set(deprecated, NULL, 'fuzzy', 2L)

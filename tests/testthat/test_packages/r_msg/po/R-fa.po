@@ -1,0 +1,38 @@
+# SOME DESCRIPTIVE TITLE.
+# This file is put in the public domain.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rMsg 0.0.1\n"
+"POT-Creation-Date: 2021-06-20 05:57:24\n"
+"PO-Revision-Date: 2021-06-20 05:57:24\n"
+"Last-Translator: کوروش_بزرگ <کوروش_بزرگ@gmail.com>\n"
+"Language-Team: Farsi\n"
+"Language: Farsi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: foo.R:2
+msgid "I warned you!"
+msgstr "من به شما هشدار دادم"
+
+#: foo.R:7 foo.R:12
+msgid "Oh no you don't!"
+msgstr "اوه نه تو نمی کنی!"
+
+#: foo.R:11
+msgid "Hi there"
+msgstr "سلام"
+
+#: foo.R:21
+#, c-format
+msgid "Avg cat() failures: %.02f; N failures: %d; failure: %s"
+msgstr "میانگینcat() شکست: %.02f; N شکست: %d; شکست: %s"
+
+#: windows/bar.R:3
+msgid "small fail"
+msgid_plural "big fail"
+msgstr[0] "شکست کوچک"

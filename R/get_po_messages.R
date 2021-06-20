@@ -2,6 +2,8 @@
 #   found from get_r_messages, namely with 3 columns: type, msgid, plural_msg.
 #   two columns (file, call) are missing because (at least for R files)
 #   these are not recorded by gettext.
+# TODO: can we just wrap libgettextpo?
+#   https://www.gnu.org/software/gettext/manual/gettext.html#libgettextpo
 get_po_messages <- function(po_file) {
   po_lines = readLines(po_file, encoding="UTF-8")
   message_source = if (startsWith(basename(po_file), "R-")) "R" else "src"

@@ -1,0 +1,40 @@
+# SOME DESCRIPTIVE TITLE.
+# This file is put in the public domain.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: rMsg 0.0.1\n"
+"POT-Creation-Date: 2021-06-20 05:58:19\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: foo.R:2
+msgid "I warned you!"
+msgstr ""
+
+#: foo.R:7 foo.R:12
+msgid "Oh no you don't!"
+msgstr ""
+
+#: foo.R:11
+msgid "Hi there"
+msgstr ""
+
+#: foo.R:21
+#, c-format
+msgid "Avg cat() failures: %.02f; N failures: %d; failure: %s"
+msgstr ""
+
+#: windows/bar.R:3
+msgid "small fail"
+msgid_plural "big fail"
+msgstr[0] ""
+msgstr[1] ""

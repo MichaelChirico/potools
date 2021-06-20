@@ -29,7 +29,8 @@ update_mo_files = function(dir, package, verbose) {
   languages <- gsub(lang_regex, "\\2", po_files)
   mo_files <- gsub(lang_regex, sprintf("\\1%s.mo", package), po_files)
   mo_dirs <- file.path(inst_dir, languages, "LC_MESSAGES")
-  dir.create(unique(mo_dirs), recursive = TRUE, showWarnings = FALSE)
+  # NB: dir.create() only accepts one directory at a time...
+  for (mo_dir in unique(mo_dirs)) dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
 
   for (ii in seq_along(po_files)) {
     run_msgfmt(

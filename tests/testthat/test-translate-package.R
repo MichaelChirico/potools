@@ -85,6 +85,18 @@ test_that("translate_package works on a simple package", {
     }
   )
   expect_outputs(prompts, c("^---^", "^^"), fixed=TRUE)
+
+  # all translations already done
+  restore_package(
+    pkg,
+    {
+      expect_messages(
+        translate_package(pkg, "fa", verbose=TRUE),
+        "Translations for fa are up to date! Skipping",
+        fixed = TRUE
+      )
+    }
+  )
 })
 
 test_that("translate_package works on package with outdated (fuzzy) translations", {
@@ -203,7 +215,13 @@ test_that("Packages with src code & fuzzy messages work", {
   prompts = restore_package(
     pkg <- test_package("r_src_fuzzy"),
     tmp_conn = mock_translation('test-translate-package-r_src_fuzzy-1.input'),
-    translate_package(pkg, "zh_CN")
+    {
+      expect_messages(
+        translate_package(pkg, "zh_CN", verbose = TRUE),
+        "Found existing src translations",
+        fixed = TRUE
+      )
+    }
   )
   expect_outputs(
     prompts,
@@ -281,7 +299,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
     pkg <- test_package("unusual_msg"),
     tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
-      translate_package(pkg, "es", diagnostics = NULL)
+      translate_package(pkg, "es", copyright = "Mata Hari", diagnostics = NULL)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
@@ -291,11 +309,15 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
       # (4) source tagging
       # (5) splitting at newlines
       # (6) msgid quote escaping
+      # (7)-(8) copyright
       expect_all_match(
         r_pot_lines,
-        c("SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER",
+        c(
+          "SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER",
           'msgid "singular "', '#: foo.R', '"\\\\n vs \\n"',
-          '"strings with escaped \\"quotes\\"'),
+          '"strings with escaped \\"quotes\\"',
+          'Copyright (C) YEAR Mata Hari', '"Copyright: Mata Hari\\n"'
+        ),
         fixed = TRUE
       )
 
@@ -404,19 +426,19 @@ test_that("translation of 'base' works correctly", {
       # NB: it seems file.rename doesn't work for directories on Windows, so we have the
       #   more cumbersome file.copy() approach here
       correct_location <- file.path(pkg, '../../../share')
-      tmp <- file.path(tempdir(), 'share')
-      dir.create(tmp)
-      on.exit(unlink(tmp, recursive=TRUE))
-      file.copy(dirname(correct_location), tmp, recursive = TRUE)
+      tmp_share <- file.path(tempdir(), 'share')
+      dir.create(tmp_share)
+      on.exit(unlink(tmp_share, recursive=TRUE))
+      file.copy(dirname(correct_location), tmp_share, recursive = TRUE)
       unlink(correct_location, recursive = TRUE)
       expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
       dir.create(correct_location)
-      file.copy(tmp, dirname(correct_location), recursive = TRUE)
+      file.copy(tmp_share, dirname(correct_location), recursive = TRUE)
 
       correct_location <- normalizePath(file.path(pkg, '../../../po/POTFILES'))
-      expect_true(file.rename(correct_location, tmp <- tempfile()))
+      expect_true(file.rename(correct_location, tmp_potfiles <- tempfile()))
       expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
-      file.rename(tmp, correct_location)
+      file.rename(tmp_potfiles, correct_location)
 
       translate_package(pkg, diagnostics = NULL)
 

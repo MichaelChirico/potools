@@ -1,5 +1,12 @@
 # TODO: can we refactor/eliminate anything from test-translate-package to just be done here instead of in
 #   the more circuitous tests there?
+
+test_that("translate_package works on package with 'cracked' messages needing templates", {
+  message_data <- get_message_data(test_package("r_non_template"))
+  cracked_messages <- check_cracked_messages(message_data)
+  expect_equal(nrow(cracked_messages), 2L)
+})
+
 test_that("check_cracked_messages works", {
   message_data = data.table::data.table(
     message_source = 'R',
@@ -28,6 +35,27 @@ test_that("check_cracked_messages works", {
 
   # input that can be converted to data.table is OK
   expect_equal(check_cracked_messages(as.data.frame(message_data)), check_cracked_messages(message_data))
+})
+
+test_that("translate_package identifies potential translations in cat() calls", {
+  message_data <- get_message_data(test_package("r_cat_msg"))
+  cat_messages <- check_untranslated_cat(message_data)
+
+  expect_equal(nrow(cat_messages), 4L)
+  expect_all_match(
+    cat_messages$replacement,
+    c(
+      'cat(gettext("I warned you!"), fill=TRUE)',
+      'cat(gettext("Oh no you\\ndon\'t!"))',
+      "Hixxboss"
+    ),
+    fixed=TRUE
+  )
+  expect_all_match(
+    cat_messages$replacement,
+    c("shouldn't be translated", "Miss me"),
+    fixed=TRUE, invert=TRUE
+  )
 })
 
 test_that("check_untranslated_cat works", {
@@ -69,6 +97,18 @@ test_that("check_untranslated_cat works", {
     is_marked_for_translation = FALSE
   )
   expect_equal(nrow(check_untranslated_cat(message_data)), 0L)
+})
+
+test_that("Diagnostic for unmarked src translations works", {
+  message_data <- get_message_data(test_package("r_src_untranslated"))
+  untranslated_src <- check_untranslated_src(message_data)
+
+  expect_equal(nrow(untranslated_src), 2L)
+  expect_all_match(
+    untranslated_src$call,
+    c('an untranslated string', 'an untranslated error'),
+    fixed=TRUE
+  )
 })
 
 test_that("check_untranslated_src works", {

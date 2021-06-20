@@ -103,6 +103,35 @@ test_that("translate_package works on package with outdated (fuzzy) translations
   expect_match(prompts, "a similar message was previously translated as", all=FALSE)
 })
 
+# NB: keep this test here (not in test-diagnostics) to keep coverage of the diagnostic flow in translate_package()
+test_that("translate_package identifies potential translations in cat() calls", {
+  prompts = restore_package(
+    pkg <- test_package("r_cat_msg"),
+    tmp_conn = mock_translation("test-translate-package-r_cat_message-1.input"),
+    {
+      expect_messages(
+        translate_package(pkg, "zh_CN"),
+        "Found 4 untranslated messaging calls passed through cat()",
+        fixed = TRUE
+      )
+    }
+  )
+  expect_outputs(
+    prompts,
+    c(
+      'cat(gettext("I warned you!"), fill=TRUE)',
+      'cat(gettext("Oh no you\\ndon\'t!"))',
+      "Hixxboss"
+    ),
+    fixed=TRUE
+  )
+  expect_outputs(
+    prompts,
+    c("shouldn't be translated", "Miss me"),
+    fixed=TRUE, invert=TRUE
+  )
+})
+
 test_that('Unknown language flow works correctly', {
   prompts = restore_package(
     pkg <- test_package('r_msg'),

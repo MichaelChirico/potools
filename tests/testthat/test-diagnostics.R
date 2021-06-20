@@ -37,27 +37,6 @@ test_that("check_cracked_messages works", {
   expect_equal(check_cracked_messages(as.data.frame(message_data)), check_cracked_messages(message_data))
 })
 
-test_that("translate_package identifies potential translations in cat() calls", {
-  message_data <- get_message_data(test_package("r_cat_msg"))
-  cat_messages <- check_untranslated_cat(message_data)
-
-  expect_equal(nrow(cat_messages), 4L)
-  expect_all_match(
-    cat_messages$replacement,
-    c(
-      'cat(gettext("I warned you!"), fill=TRUE)',
-      'cat(gettext("Oh no you\\ndon\'t!"))',
-      "Hixxboss"
-    ),
-    fixed=TRUE
-  )
-  expect_all_match(
-    cat_messages$replacement,
-    c("shouldn't be translated", "Miss me"),
-    fixed=TRUE, invert=TRUE
-  )
-})
-
 test_that("check_untranslated_cat works", {
   message_data = data.table::data.table(
     message_source = 'R',

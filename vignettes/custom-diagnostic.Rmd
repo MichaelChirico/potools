@@ -27,6 +27,12 @@ We'll call our function `check_spelling`; it will take as input a `data.table` l
 
 ```{r check_spelling}
 check_spelling = function(message_data) {
+  # if aspell isn't installed, this won't work; be sure to return an object with the right schema anyway
+  if (!nzchar(Sys.which("aspell"))) {
+    warning("'aspell' is not installed; returning nothing")
+    return(message_data[0, .(call, file, line_number)])
+  }
+
   # aspell() works on files, so we'll write the msgid to files
   aspell_dir <- file.path(tempdir(), 'aspell')
   dir.create(aspell_dir)

@@ -35,6 +35,7 @@ A \code{data.table} with the following schema:
   \item \code{line_number}, \code{integer}, the line in \code{file} where the string was found
   \item \code{is_repeat}, \code{logical}, whether the \code{msgid} is a duplicate within this \code{message_source}
   \item \code{is_marked_for_translation}, \code{logical}, whether the string is marked for translation (e.g., in R, all character literals supplied to a \code{...} argument in \code{\link{stop}} are so marked)
+  \item \code{is_templated}, \code{logical}, whether the string is templatable (e.g., uses \code{\%s} or other formatting markers)
 }
 
 }

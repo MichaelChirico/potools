@@ -1,0 +1,1 @@
+Attempting to substitute '%s' element with object of type '%s' but it has to be 'symbol' type when substituting name of the call argument, functions 'as.name' and 'I' can be used to work out proper substitution, see ?substitute2 examples.

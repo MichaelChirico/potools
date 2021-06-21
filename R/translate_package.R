@@ -3,6 +3,8 @@ translate_package = function(
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   src_translation_macros = c("_", "N_"),
   use_base_rules = package %chin% .potools$base_package_names,
+  team_size = 1L, team_id = 1L,
+  team_split_rule = c("equalize_char", "equalize_files"),
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
   check_sys_reqs()
@@ -14,8 +16,17 @@ translate_package = function(
     "'diagnostics' should be empty, a function, or list of functions" =
       is.null(diagnostics)
       || is.function(diagnostics)
-      || (is.list(diagnostics) && all(vapply(diagnostics, is.function, logical(1L))))
+      || (is.list(diagnostics) && all(vapply(diagnostics, is.function, logical(1L)))),
+    "'team_size' should be >=1 and 'team_id' should be between 1 and 'team_size'" =
+      is.numeric(team_size) && is.numeric(team_id)
+      && team_size >= 1 && team_id >= 1 && team_id <= team_size,
+    "When using team splitting, only translate one language at a time" =
+      team_size == 1L || length(languages) == 1L
   )
+
+  team_split_rule = match.arg(team_split_rule)
+  team_size = as.integer(team_size)
+  team_id = as.integer(team_id)
 
   # en-list singleton diagnostic for convenience
   if (is.function(diagnostics)) diagnostics = list(diagnostics)
@@ -133,6 +144,7 @@ translate_package = function(
     }
 
     new_idx = message_data[
+      !is_repeat &
       is_marked_for_translation & (
         fuzzy == 1L
         | (type == 'singular' & !nzchar(msgstr) & nzchar(msgid, keepNA = TRUE))
@@ -140,6 +152,61 @@ translate_package = function(
       ),
       which = TRUE
     ]
+
+    if (team_size > 1L) {
+      if ((n_files <- uniqueN(message_data[(new_idx)]$file)) < team_size) warning(domain=NA, gettextf(
+        "Requested to split %d files among %d translators, which will exclude %d translators; setting team_split_rule = 'equalize_char' instead",
+        n_files, team_size, team_size - n_files
+      ))
+      browser()
+      new_idx = switch(
+        team_split_rule,
+        equalize_char = {
+          message_data[
+            (new_idx),
+            {
+              msg_size = fifelse(
+                type == "singular",
+                nchar(msgid),
+                vapply(msgid_plural, function(x) sum(nchar(x)), numeric(1L))
+              )
+              char_rank = frank(msg_size, ties.method = "random")
+              assign_idx = which((char_rank %% team_size) == (team_id - 1L))
+              if (verbose) message(domain=NA, gettextf(
+                "Assigning team %d %d messages for translation totalling %d characters",
+                team_id, length(assign_idx), sum(msg_size[assign_idx])
+              ))
+              new_idx[assign_idx]
+            }
+          ]
+        },
+        equalize_files = {
+          assigned_files = message_data[
+            (new_idx),
+            by = file,
+            {
+              msg_size = fifelse(
+                type == "singular",
+                nchar(msgid),
+                vapply(msgid_plural, function(x) sum(nchar(x)), numeric(1L))
+              )
+              .(file_size = sum(msg_size))
+            }
+          ][
+            order(file_size),
+            {
+              assign_idx = (.I %% team_size) == (team_id - 1L)
+              if (verbose) message(domain=NA, gettextf(
+                "Assigning team %d %d files for translation totalling %d characters",
+                team_id, assign_idx, sum(file_size[assign_idx])
+              ))
+              file[assign_idx]
+            }
+          ]
+          message_data[(new_idx), new_idx[which(file %chin% assigned_files)]]
+        }
+      )
+    }
 
     if (!length(new_idx)) {
       if (verbose) message(domain=NA, gettextf(

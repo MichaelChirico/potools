@@ -4,7 +4,7 @@ translate_package = function(
   src_translation_macros = c("_", "N_"),
   use_base_rules = package %chin% .potools$base_package_names,
   team_size = 1L, team_id = 1L,
-  team_split_rule = c("equalize_char", "equalize_files"),
+  team_split_rule = c("equalize_char", "equalize_count", "equalize_files"),
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
   check_sys_reqs()
@@ -18,7 +18,7 @@ translate_package = function(
       || is.function(diagnostics)
       || (is.list(diagnostics) && all(vapply(diagnostics, is.function, logical(1L)))),
     "'team_size' should be >=1 and 'team_id' should be between 1 and 'team_size'" =
-      is.numeric(team_size) && is.numeric(team_id)
+      is.numeric(team_size) && length(team_size) == 1L && is.numeric(team_id) && length(team_id) == 1L
       && team_size >= 1 && team_id >= 1 && team_id <= team_size,
     "When using team splitting, only translate one language at a time" =
       team_size == 1L || length(languages) == 1L
@@ -170,7 +170,14 @@ translate_package = function(
                 nchar(msgid),
                 vapply(msgid_plural, function(x) sum(nchar(x)), numeric(1L))
               )
-              char_rank = frank(msg_size, ties.method = "random")
+
+              # NB: use order instead of frank because we don't care about ties. ties.method='random'
+              #   also won't work because of the difficulty in matching seed across machines for
+              #   distributed translation teams. even if we do set.seed(team_size), say, we can't
+              #   guarantee the same RNG generator is being used; ensuring this is much more complication
+              #   than it's worth. I think there is some risk based on collation order that msg_size may
+              #   be different, but this _should_ be static owing to data.table's consistent sorting rules.
+              char_rank = order(msg_size)
               assign_idx = which((char_rank %% team_size) == (team_id - 1L))
               if (verbose) message(domain=NA, gettextf(
                 "Assigning team %d %d messages for translation totalling %d characters",
@@ -180,6 +187,10 @@ translate_package = function(
             }
           ]
         },
+        equalize_count = {
+          # plain & simple
+          new_idx[seq(team_id, length(new_idx), by = team_size)]
+        }
         equalize_files = {
           assigned_files = message_data[
             (new_idx),

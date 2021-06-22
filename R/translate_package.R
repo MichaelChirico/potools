@@ -144,10 +144,9 @@ translate_package = function(
     }
 
     new_idx = message_data[
-      !is_repeat &
       is_marked_for_translation & (
         fuzzy == 1L
-        | (type == 'singular' & !nzchar(msgstr) & nzchar(msgid, keepNA = TRUE))
+        | (type == 'singular' & !nzchar(msgstr) & nzchar(msgid, keepNA = TRUE) & !is_repeat)
         | (type == 'plural' & !vapply(msgstr_plural, function(x) all(nzchar(x)), logical(1L)))
       ),
       which = TRUE

@@ -5,7 +5,7 @@ run_msgmerge = function(po_file, pot_file) {
     warning(domain = NA, gettextf("Running msgmerge on '%s' failed.", po_file))
   }
 
-  res <- tools::checkPoFile(po_file, strictPlural = TRUE)
+  res <- checkPoFile(po_file, strictPlural = TRUE)
   if (nrow(res)) {
     warning(domain = NA, gettextf("tools::checkPoFile() found some issues in %s", po_file))
     print(res)
@@ -15,9 +15,7 @@ run_msgmerge = function(po_file, pot_file) {
 
 run_msgfmt = function(po_file, mo_file, verbose) {
   use_stats <- if (verbose) '--statistics' else ''
-  browser()
   if (system(sprintf("msgfmt -c %s -o %s %s", use_stats, shQuote(mo_file), shQuote(po_file))) != 0L) {
-    browser()
     warning(domain = NA, gettextf("running msgfmt on %s failed", basename(po_file)), immediate. = TRUE)
   }
   return(invisible())

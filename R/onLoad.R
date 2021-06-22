@@ -11,7 +11,7 @@ globalVariables(
     'source_location', 'c_fmt_tag', 'msgid_plural_str', 'msgstr_plural_str', 'suggested_call',
     'array_start', 'i.array_start', 'array_end', 'i.array_end', 'call_start', 'x.call_start', 'i.call_start',
     'paren_start', 'i.paren_start', 'paren_end', 'i.paren_end', 'x.paren_end',
-    'i.msgid', 'replacement', 'non_spurious', 'str_arg',
+    'i.msgid', 'replacement', 'non_spurious', 'str_arg', 'file_size',
     '.'
   ),
   package = 'potools'

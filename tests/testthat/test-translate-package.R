@@ -177,7 +177,7 @@ test_that("Packages with src code work correctly", {
       expect_true("po/rSrcMsg.pot" %in% pkg_files)
       expect(
         any(grepl("inst/po/zh_CN/LC_MESSAGES/rSrcMsg.mo", pkg_files, fixed = TRUE)),
-        "Didn't find rSrcMsg.mo; found %s", toString(pkg_files)
+        sprintf("Didn't find rSrcMsg.mo; found %s", toString(pkg_files))
       )
 
       # NB: paste(readLines(), collapse="\n") instead of readChar() for platform robustness

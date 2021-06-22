@@ -16,6 +16,8 @@ translate_package(
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   src_translation_macros = c("_", "N_"),
   use_base_rules = package \%chin\% .potools$base_package_names,
+  team_size = 1L, team_id = 1L,
+  team_split_rule = c("equalize_char", "equalize_count", "equalize_files"),
   copyright = NULL, bugs = NULL, verbose=FALSE
 )
 }
@@ -25,6 +27,9 @@ translate_package(
   \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details.}
   \item{src_translation_macros}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_} and \code{N_}, is shared by R itself & recommended in R-exts and R-ints (See references). }
   \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
+  \item{team_size}{ Integer; how many translators are there for the (singular) language? See Details for this, \code{team_id}, and \code{team_split_rule}. }
+  \item{team_id}{ Integer; which translator is currently working? }
+  \item{team_split_rule}{ Character; how should the message base be split up among the teams? }
   \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
@@ -52,6 +57,22 @@ After each language is completed, a corresponding \file{.po} file is written to 
 directory (which is created if it does not yet exist).
 
 There are some discrepancies in the default behavior of \code{translate_package} and the translation workflow used to generate the \file{.po}/\file{.pot} files for R itself (mainly, the suite of functions from \code{tools}, \code{\link[tools]{update_pkg_po}}, \code{\link[tools]{xgettext2pot}}, \code{\link[tools]{xgettext}}, and \code{\link[tools]{xngettext}}). They should only be superficial (e.g., whitespace or comments), but nevertheless may represent a barrier to smoothly submitting patchings to R Core. To make the process of translating base R and the default packages (\code{tools}, \code{utils}, \code{stats}, etc.) as smooth as possible, set the \code{use_base_rules} argument to \code{TRUE} and your resulting \file{.po}/\file{.pot}/\file{.mo} file will match base's.
+
+\bold{Teams:}
+
+For packages with larger message bases to tackle (e.g., R itself or a large, currently-untranslated package), a divide-and-conquer approach may be preferable if a suitable team can be assembled. The arguments \code{team_size}, \code{team_id}, and \code{team_split_rule} are meant to facilitate the work of translation in this case. If \code{team_size > 1}, first the set of messages that need translation is divided "roughly"" equally into \code{team_size} parts, each of which is assigned an "ID" from \code{1} to \code{team_size}. You can select which block of messages you'd like to translate by passing your \code{team_id} (the ID for each translator will need to be coordinated amongst the team members).
+
+There are three ways the translation set can be split "equally", controlled by the \code{team_split_rule} argument:
+
+\enumerate{
+  \item \code{"equalize_char"}: Roughly assign each translator the same number of \emph{characters} of messages to translate (i.e., according to \code{\link{nchar}}).
+  \item \code{"equalize_count"}: Roughly assign each translator the same number of \emph{messages} to translate. Specific implementation is analogous to \code{"equalize_char"}.
+  \item \code{"equalize_files"}: Roughly assign each translator the same number of \emph{soure files} to translate. The thinking here is to try and give one translator many similar messages on the hope that there are some efficiency gains from autocorrelation in the messages.
+}
+
+NB: \code{"equalize_char"} and \code{"equalize_files"} are implemented by sorting the and slicing. For example, if \code{team_size=3}, for \code{"equalize_char"}, the first translator (\code{team_id=1}) will get the 1st, 4th, 7th, ... largest messages, the second (\code{team_id=2}) will get the 2nd, 5th, 8th, ... largest, and the third (\code{team_id=3}) will get the 3rd, 6th, 9th, ... largest. For \code{"equalize_count"}, messages are simply taken in alternating order, sorted as they are from \code{\link{get_message_data}}.
+
+NB: this option only applies when a single language is specified for translation.
 
 \bold{Diagnostics:}
 

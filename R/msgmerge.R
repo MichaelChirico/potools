@@ -5,7 +5,7 @@ run_msgmerge = function(po_file, pot_file) {
     warning(domain = NA, gettextf("Running msgmerge on '%s' failed.", po_file))
   }
 
-  res <- tools::checkPoFile(po_file, strictPlural = TRUE)
+  res <- checkPoFile(po_file, strictPlural = TRUE)
   if (nrow(res)) {
     warning(domain = NA, gettextf("tools::checkPoFile() found some issues in %s", po_file))
     print(res)

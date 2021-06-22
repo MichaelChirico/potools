@@ -15,7 +15,9 @@ run_msgmerge = function(po_file, pot_file) {
 
 run_msgfmt = function(po_file, mo_file, verbose) {
   use_stats <- if (verbose) '--statistics' else ''
+  browser()
   if (system(sprintf("msgfmt -c %s -o %s %s", use_stats, shQuote(mo_file), shQuote(po_file))) != 0L) {
+    browser()
     warning(domain = NA, gettextf("running msgfmt on %s failed", basename(po_file)), immediate. = TRUE)
   }
   return(invisible())

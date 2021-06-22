@@ -190,7 +190,7 @@ translate_package = function(
         equalize_count = {
           # plain & simple
           new_idx[seq(team_id, length(new_idx), by = team_size)]
-        }
+        },
         equalize_files = {
           assigned_files = message_data[
             (new_idx),
@@ -206,7 +206,7 @@ translate_package = function(
           ][
             order(file_size),
             {
-              assign_idx = (.I %% team_size) == (team_id - 1L)
+              assign_idx = (seq_len(.N) %% team_size) == (team_id - 1L)
               if (verbose) message(domain=NA, gettextf(
                 "Assigning team %d %d files for translation totalling %d characters",
                 team_id, assign_idx, sum(file_size[assign_idx])

@@ -157,7 +157,6 @@ translate_package = function(
         "Requested to split %d files among %d translators, which will exclude %d translators; setting team_split_rule = 'equalize_char' instead",
         n_files, team_size, team_size - n_files
       ))
-      browser()
       new_idx = switch(
         team_split_rule,
         equalize_char = {

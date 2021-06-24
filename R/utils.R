@@ -109,40 +109,77 @@ gettextify = function(e, sep = '') {
 #   (e.g., sprintf has no problem with sprintf("%#0###     ++++0f", pi) )
 SPRINTF_TEMPLATE_REGEX = paste0(
   "[%]",
-  "(?:",
-    "[%]|", # % separately to reduce false positives -- it can't be used with other specials
-    "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
-    "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
-    # taken from https://en.wikipedia.org/wiki/Printf_format_string and http://manpages.org/sprintf
-    "[aAcdeEfgGiopsuxX]|(?:ll?|I(?:64|32))[diux]|l[cs]|",
-    "<[a-zA-Z0-9_]+>", # macro-based formatters in C, e.g. %<PRId64>
+  "(?<all_template>",
+    "[%]|",
+    "(?<template>", # % separately to reduce false positives -- it can't be used with other specials
+      "(?<redirect>[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
+      "(?<width_precision>[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[- +#])*",
+      # taken from https://en.wikipedia.org/wiki/Printf_format_string and http://manpages.org/sprintf
+      "(?<id>[aAcdeEfgGiopsuxX]|(?:ll?|I(?:32|64))[diux]|l[cs]|<PRI[diux](?:32|64)>)",
+    ")",
   ")"
 )
-ENCODED_STRING_REGEX = "[\\][\\ntrvabf]"
 
-# basically return the gregexpr output on SPRINTF_TEMPLATE_REGEX|ENCODED_STRING_REGEX in a nicer format
-get_specials = function(x) {
-  special_starts = gregexpr(sprintf("(?:%s|%s)", SPRINTF_TEMPLATE_REGEX, ENCODED_STRING_REGEX), x)
-  # NULL when no match is easier to work with (can use lengths, e.g.)
-  lapply(special_starts, function(l) {
-    if (length(l) == 1L && l < 0L) return(NULL)
-    list(idx = as.integer(l), length = attr(l, 'match.length'))
-  })
+# given a string like
+#   Found %d arguments in %s. Average %02.3f%%
+# get data necessary to build a second line
+# highlighting the string format templates:
+#   Found %d arguments in %s. \n Average %02.3f%%\n
+#         ^^              ^^             ^----^^^^^
+get_specials_metadata = function(x) {
+  # tested with xgettext: warning against using \a | \b | \f | \v in internationalized messages;
+  #   and msgfmt doesn't warn about whether \t is matched, so no need to bother matching that either
+  special_matches = gregexpr(sprintf("%s|^[\\]n|[\\]n$", SPRINTF_TEMPLATE_REGEX), x)[[1L]]
+
+  if (special_matches[1L] < 0L) {
+    return(data.table(special=character(), id = character(), start=integer(), stop=integer()))
+  }
+
+  meta = data.table(
+    start = special_matches,
+    end = special_matches + attr(special_matches, 'match.length') - 1L
+  )
+  meta[ , "special" := substring(x, start, end)]
+
+  # % escapes don't matter for validation
+  meta = meta[special != "%%"]
+
+  template_idx = meta$special != "\\n"
+  redirect_idx = grepl("%[1-9][0-9]?[$]", meta$special)
+  if (any(template_idx & redirect_idx)) {
+    if (any(template_idx & !redirect_idx)) stop(domain=NA, gettextf(
+      "Invalid templated message. If any %N$ redirects are used, all templates must be redirected.\n\tRedirected tempates: %s\n\t Un-redirected templates: %s",
+      meta$special[template_idx & redirect_idx], meta$special[template_idx & !redirect_idx]
+    ))
+
+    meta[ , "redirect_id" := fifelse(
+      template_idx,
+      as.integer(sub("%([1-9][0-9]?)[$].*", "\\1", special)),
+      0L
+    )]
+    meta[(template_idx), "special" := gsub("%[1-9][0-9]?[$](.*)", "%\\1", special)]
+
+    meta[(template_idx), "special_id" := gsub("%(?:[^*]*)([a-zA-Z].*)")]
+  }
+  redirect_id = rep(0L, length(special))
+  redirect_id[template_idx]
+
+  # strip away extraneous parts of the format to which
+  id =
+  list(idx = as.integer(special_starts), length = attr(special_starts, 'match.length'))
 }
 
 # streamlined get_specials for counting the matches
 count_formats = function(x) vapply(
   gregexpr(SPRINTF_TEMPLATE_REGEX, x),
-  function(x) if (length(x) == 1L && x == -1L) 0L else length(x),
+  function(x) if (x[1L] < 0L) 0L else length(x),
   integer(1L)
 )
 
-# given a string like
-#   Found %d arguments in %s. Average %02.3f%%
-# get a second line highlighting the string format templates:
-#   Found %d arguments in %s. \n Average %02.3f%%
-#         ^^              ^^  ^^         ^----^^^
-get_special_tags = function(s, specials) {
+get_specials_metadata = function(s) {
+  specials = get_specials(s)
+  if (!length(specials)) return('')
+
   out = rep(" ", nchar(s))
   for (ii in seq_along(specials$idx)) {
     start = specials$idx[ii]

@@ -13,7 +13,7 @@
 #    tough).
 read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
   msgid = unescape_string_out(msgid)
-  # NB: it's tempting to vectorize running get_fmt to e.g.
+  # NB: it's tempting to vectorize running get_specials to e.g.
   #   add a new column msgid_fmt to message_data. But
   #   unescape_string_out here dashes hopes that could work.
   #   Moreover we can't simply get the template _just prior_
@@ -22,12 +22,8 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
   #   not inverses. Bummer. So run it here, to make sure
   #   the match positions are relative to the string that
   #   will be shown to the user.
-  specials = get_specials(msgid)[[1L]]
-  if (length(specials)) {
-    special_tags = get_special_tags(msgid, specials)
-  } else {
-    special_tags = ""
-  }
+  special_tags = get_specials_metadata(msgid)
+  # separate from get_special_tags() because they don't give 100% the same thing
   n_format = count_formats(msgid)
   if (type == 'plural') {
     translation <- character(metadata$nplurals)

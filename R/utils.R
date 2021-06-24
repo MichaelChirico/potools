@@ -129,7 +129,9 @@ SPRINTF_TEMPLATE_REGEX = paste0(
 get_specials_metadata = function(x) {
   # tested with xgettext: warning against using \a | \b | \f | \v in internationalized messages;
   #   and msgfmt doesn't warn about whether \t is matched, so no need to bother matching that either
-  special_matches = gregexpr(sprintf("%s|^[\\]n|[\\]n$", SPRINTF_TEMPLATE_REGEX), x)[[1L]]
+  special_matches = gregexpr(sprintf("%s|^[\\\\]n|[\\\\]n$", SPRINTF_TEMPLATE_REGEX), x, perl = TRUE)[[1L]]
+  group_starts = attr(special_matches, "capture.start")
+  group_lengths = attr(special_matches, "capture.length")
 
   if (special_matches[1L] < 0L) {
     return(data.table(special=character(), id = character(), start=integer(), stop=integer()))
@@ -137,7 +139,11 @@ get_specials_metadata = function(x) {
 
   meta = data.table(
     start = special_matches,
-    end = special_matches + attr(special_matches, 'match.length') - 1L
+    end = special_matches + attr(special_matches, 'match.length') - 1L,
+    redirect_start = group_starts[ , "redirect"],
+    redirect_length = group_lengths[ , "redirect"],
+    id_start = group_starts[ , "id"],
+    id_length = group_lengths[ , "id"]
   )
   meta[ , "special" := substring(x, start, end)]
 
@@ -145,7 +151,7 @@ get_specials_metadata = function(x) {
   meta = meta[special != "%%"]
 
   template_idx = meta$special != "\\n"
-  redirect_idx = grepl("%[1-9][0-9]?[$]", meta$special)
+  redirect_idx = meta$redirect_start > 0L
   if (any(template_idx & redirect_idx)) {
     if (any(template_idx & !redirect_idx)) stop(domain=NA, gettextf(
       "Invalid templated message. If any %N$ redirects are used, all templates must be redirected.\n\tRedirected tempates: %s\n\t Un-redirected templates: %s",
@@ -154,42 +160,18 @@ get_specials_metadata = function(x) {
 
     meta[ , "redirect_id" := fifelse(
       template_idx,
-      as.integer(sub("%([1-9][0-9]?)[$].*", "\\1", special)),
+      as.integer(substring(x, redirect_start, redirect_start + redirect_length - 1L)),
       0L
     )]
-    meta[(template_idx), "special" := gsub("%[1-9][0-9]?[$](.*)", "%\\1", special)]
-
-    meta[(template_idx), "special_id" := gsub("%(?:[^*]*)([a-zA-Z].*)")]
+    # TODO: error on %1$d %1$f
+    # TODO: reorder by redirect_id
   }
-  redirect_id = rep(0L, length(special))
-  redirect_id[template_idx]
 
-  # strip away extraneous parts of the format to which
-  id =
-  list(idx = as.integer(special_starts), length = attr(special_starts, 'match.length'))
-}
+  meta[(template_idx), "id" := substring(x, id_start, id_start + id_length - 1L)]
+  # either it's an initial newline or it's a terminal newline; tag so as to distinguish
+  meta[(!template_idx), "id" := fifelse(start == 1L, "^\\n", "\\n$")]
 
-# streamlined get_specials for counting the matches
-count_formats = function(x) vapply(
-  gregexpr(SPRINTF_TEMPLATE_REGEX, x),
-  function(x) if (x[1L] < 0L) 0L else length(x),
-  integer(1L)
-)
-
-get_specials_metadata = function(s) {
-  specials = get_specials(s)
-  if (!length(specials)) return('')
-
-  out = rep(" ", nchar(s))
-  for (ii in seq_along(specials$idx)) {
-    start = specials$idx[ii]
-    end = start + specials$length[ii] - 1L
-    out[c(start, end)] = '^'
-    if (end - start > 1L) {
-      out[seq(start + 1L, end - 1L)] = '-'
-    }
-  }
-  paste(out, collapse="")
+  meta[ , .(special, id, start, stop)]
 }
 
 # shQuote(type='cmd') + encodeString, but don't wrap in the outer ""

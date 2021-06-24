@@ -51,8 +51,8 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_ba
   # all calls to certain functions are marked as templated, regardless of template markers, #137
   msg[ , "is_templated" :=
          fname %chin% TEMPLATE_CALLS
-         | grepl(SPRINTF_TEMPLATE_REGEX, msgid)
-         | vapply(msgid_plural, function(str) any(grepl(SPRINTF_TEMPLATE_REGEX, str)), logical(1L))
+         | grepl(SPRINTF_TEMPLATE_REGEX, msgid, perl=TRUE)
+         | vapply(msgid_plural, function(str) any(grepl(SPRINTF_TEMPLATE_REGEX, str, perl=TRUE)), logical(1L))
       ]
   msg[ , "fname" := NULL]
 

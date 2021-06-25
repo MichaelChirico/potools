@@ -23,12 +23,8 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
   #   the match positions are relative to the string that
   #   will be shown to the user.
   msgid_metadata = get_specials_metadata(msgid)
-  # separate from get_special_tags() because they don't give 100% the same thing
-  n_format = count_formats(msgid)
   if (type == 'plural') {
     translation <- character(metadata$nplurals)
-    # add enough blanks for Plural message:
-    if (nzchar(special_tags)) special_tags = paste0("\n                ", special_tags)
     for (jj in seq_len(metadata$nplurals)) {
       if (fuzzy == 1L) {
         fuzzy_tag = gettextf(
@@ -38,12 +34,13 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
       } else {
         fuzzy_tag = ""
       }
-      translation[jj] = prompt_with_templates(n_format, gettextf(
+      translation[jj] = prompt_with_templates(msgid_metadata, gettextf(
         '\nFile: %s\nCall: %s\nPlural message: %s%s\nHow would you translate this message into %s %s?%s',
         file_color(file),
         call_color(call),
         msgid_color(msgid),
-        special_tags,
+        # add enough blanks for Plural message:
+        paste0("\n                ", format(msgid_metadata)),
         language_color(metadata$full_name_eng),
         plural_range_color(PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
         fuzzy_tag,
@@ -51,8 +48,6 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
       ))
     }
   } else {
-    # add enough blanks for Message:
-    if (nzchar(special_tags)) special_tags = paste0("\n         ", special_tags)
     if (fuzzy == 1L) {
       fuzzy_tag = gettextf(
         "\n **Note: a similar message was previously translated as: **\n%s",
@@ -61,12 +56,13 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
     } else {
       fuzzy_tag = ""
     }
-    translation = prompt_with_templates(n_format, gettextf(
+    translation = prompt_with_templates(msgid_metadata, gettextf(
       '\nFile: %s\nCall: %s\nMessage: %s%s\nHow would you translate this message into %s?%s',
       file_color(file),
       call_color(call),
       msgid_color(msgid),
-      special_tags,
+      # add enough blanks for Message:
+      paste0("\n         ", format(msgid_metadata)),
       language_color(metadata$full_name_eng),
       fuzzy_tag,
       domain = "R-potools"
@@ -121,15 +117,15 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
   return(prompt(..., conn=conn, require_type=require_type))
 }
 
-prompt_with_templates = function(n_target, prompt_msg) {
-  if (n_target == 0) return(prompt(prompt_msg))
-  while (TRUE) {
+prompt_with_templates = function(msgid_metadata, prompt_msg) {
+  if (nrow(msgid_metadata)) return(prompt(prompt_msg))
+  repeat {
     translation = prompt(prompt_msg)
-    if (!nzchar(translation) || (n_fmt <- count_formats(translation)) == n_target) break
-    cat(gettextf(
-      "\n\n** Oops! You supplied %d templates; but the target message has %d. Retrying... **\n",
-      n_fmt, n_target
-    ))
+    if (
+      !nzchar(translation)
+      || isTRUE(diagnosis <- all.equal(msgid_metadata, get_specials_metadata(translation)))
+    ) break
+    cat(gettextf("\n\n** Oops! %s. Retrying... **\n", diagnosis))
   }
   translation
 }

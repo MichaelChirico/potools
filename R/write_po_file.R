@@ -139,7 +139,7 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       source_location[singular_idx],
       c_fmt_tag[singular_idx],
       wrap_msg('msgid', msgid[singular_idx], width, params$ignore_width),
-      wrap_msg('msgstr', escape_string(msgstr[singular_idx]), width, params$ignore_width)
+      wrap_msg('msgstr', msgstr[singular_idx], width, params$ignore_width)
     )
     if (!all(singular_idx)) {
       msgid_plural = msgid_plural[!singular_idx]
@@ -148,8 +148,7 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       msgid_plural = vapply(
         msgstr_plural[!singular_idx],
         function(msgstr) paste(
-          # TODO: should escape_string() be done directly at translation time?
-          sprintf(msgstr_fmt, seq_along(msgstr)-1L, escape_string(msgstr)),
+          sprintf(msgstr_fmt, seq_along(msgstr)-1L, msgstr),
           collapse='\n'
         ),
         character(1L)

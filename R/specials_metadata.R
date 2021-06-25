@@ -20,9 +20,10 @@ get_specials_metadata = function(x) {
     return(meta)
   }
 
+  # strip attributes with as.integer()
   meta = data.table(
-    start = special_matches,
-    end = special_matches + attr(special_matches, 'match.length') - 1L,
+    start = as.integer(special_matches),
+    end = as.integer(special_matches + attr(special_matches, 'match.length') - 1L),
     redirect_start = group_starts[ , "redirect"],
     redirect_length = group_lengths[ , "redirect"],
     width_precision_start = group_starts[ , "width_precision"],
@@ -96,10 +97,10 @@ format.specials_metadata = function(x, ...) {
 # target: msgid [template translation]
 # current: msgstr [received translation]
 all.equal.specials_metadata = function(target, current, ...) {
-  if (nrow(target) != nrow(current)) return(gettextf(
+  if (nrow(target) != nrow(current)) {browser(); return(gettextf(
     "received %d unique templated arguments but there are %d in the original",
     nrow(current), nrow(target)
-  ))
+  ))}
 
   matched = merge(target, current, by = c('id', 'sequence'), all = TRUE)
   # found in y, not x (i.e., in msgstr, not msgid)

@@ -12,6 +12,8 @@
 #  - we want to help users get templates right (which can be
 #    tough).
 read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
+  # drop escaping for quotes/backslashes so they appear unadorned to the user,
+  #   who can then enter then without escaping (and we handle the escaping for them).
   msgid = unescape_string_out(msgid)
   # NB: it's tempting to vectorize running get_specials to e.g.
   #   add a new column msgid_fmt to message_data. But
@@ -106,7 +108,7 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
     # nocov end
   }
   # See #105 / #95... confusing stuff
-  if (missing(require_type)) return(unescape_string_in(out))
+  if (missing(require_type)) return(out)
   out = type.convert(out, as.is = TRUE)
   if (typeof(out) == require_type) return(out)
 
@@ -118,7 +120,8 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
 }
 
 prompt_with_templates = function(msgid_metadata, prompt_msg) {
-  if (!nrow(msgid_metadata)) return(prompt(prompt_msg))
+  # NB: this allows msgstr to have templates missing from msgid, but then again, so does msgfmt
+  if (!nrow(msgid_metadata)) return(escape_string_in(prompt(prompt_msg)))
   repeat {
     translation = prompt(prompt_msg)
     if (
@@ -127,26 +130,23 @@ prompt_with_templates = function(msgid_metadata, prompt_msg) {
     ) break
     cat(gettextf("\n\n** Oops! Invalid translation -- %s. Retrying... **\n", diagnosis))
   }
-  translation
+  escape_string_in(translation)
 }
 
-# attempt to _partially_ invert escape_string. namely, unescape quotes
-#   and backslashes that were added by escape_string.
+# hide escaping that's only needed for the .po file
+# TODO: still need to think if this is the best way to handle it. A universal
+#   approach to escaping in the package would do wonders.
 #   NB: we leave the control characters as is for visibility. it's very
 #   common for messages for translation to end with \n -- if we unescape
 #   this, a newline will be printed, and it will take a trained eye or
-#   some extra text decoration to draw attention to this. moreover, while
+#   some extra text decoration to draw attention to this. Moreover, while
 #   I suspect there could be hope for \n, i think all is lost for \r and even \t.
 unescape_string_out = function(x) {
-  gsub('[\\]([\\"])', '\\1', x)
+  gsub('\\"', '"', x, fixed = TRUE)
 }
 
-# read input from prompts as the user likely intended, e.g. typing "\n" (i.e., '\'-'n') meant "newline"
-# NB: closely related: clean_text in get_r_messages. Could/should probably be merged...
-unescape_string_in = function(x) {
-  x = gsub("(?<![\\\\])[\\\\]n", "\n", x, perl = TRUE)
-  x = gsub("(?<![\\\\])[\\\\]t", "\t", x, perl = TRUE)
-  # no \r: \r is not valid in msgid/msgstr anyway
-  x = gsub("\\\\", "\\", x, fixed = TRUE)
+# reverse of unescape_string_out -- restore escaped quotes & backslashes
+escape_string_in = function(x) {
+  x = gsub('"', '\\"', x, fixed = TRUE)
   x
 }

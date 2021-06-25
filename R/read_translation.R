@@ -118,14 +118,14 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
 }
 
 prompt_with_templates = function(msgid_metadata, prompt_msg) {
-  if (nrow(msgid_metadata)) return(prompt(prompt_msg))
+  if (!nrow(msgid_metadata)) return(prompt(prompt_msg))
   repeat {
     translation = prompt(prompt_msg)
     if (
       !nzchar(translation)
       || isTRUE(diagnosis <- all.equal(msgid_metadata, get_specials_metadata(translation)))
     ) break
-    cat(gettextf("\n\n** Oops! %s. Retrying... **\n", diagnosis))
+    cat(gettextf("\n\n** Oops! Invalid translation -- %s. Retrying... **\n", diagnosis))
   }
   translation
 }

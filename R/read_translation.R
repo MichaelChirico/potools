@@ -22,7 +22,7 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
   #   not inverses. Bummer. So run it here, to make sure
   #   the match positions are relative to the string that
   #   will be shown to the user.
-  special_tags = get_specials_metadata(msgid)
+  msgid_metadata = get_specials_metadata(msgid)
   # separate from get_special_tags() because they don't give 100% the same thing
   n_format = count_formats(msgid)
   if (type == 'plural') {

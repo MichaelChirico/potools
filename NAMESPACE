@@ -10,3 +10,6 @@ export(translate_package)
 export(get_message_data)
 
 export(check_cracked_messages, check_untranslated_cat, check_untranslated_src)
+
+S3method(format, specials_metadata)
+S3method(all.equal, specials_metadata)

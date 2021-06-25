@@ -12,7 +12,9 @@ get_specials_metadata = function(x) {
   group_lengths = attr(special_matches, "capture.length")
 
   if (special_matches[1L] < 0L) {
-    return(data.table(special=character(), id = character(), start=integer(), stop=integer()))
+    meta = data.table(special=character(), id = character(), sequence = integer(), start=integer(), stop=integer())
+    setattr(meta, "class", c("specials_metadata", class(meta)))
+    return(meta)
   }
 
   meta = data.table(
@@ -34,7 +36,7 @@ get_specials_metadata = function(x) {
   redirect_idx = meta$redirect_start > 0L
   if (any(template_idx & redirect_idx)) {
     if (any(template_idx & !redirect_idx)) stop(domain=NA, gettextf(
-      "Invalid templated message. If any %N$ redirects are used, all templates must be redirected.\n\tRedirected tempates: %s\n\t Un-redirected templates: %s",
+      "Invalid templated message. If any %%N$ redirects are used, all templates must be redirected.\n\tRedirected tempates: %s\n\t Un-redirected templates: %s",
       meta$special[template_idx & redirect_idx], meta$special[template_idx & !redirect_idx]
     ))
 

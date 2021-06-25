@@ -4,6 +4,9 @@
 # highlighting the string format templates:
 #   Found %d arguments in %s. \n Average %02.3f%%\n
 #         ^^              ^^             ^----^^^^^
+# TODO: maybe erroring here is too harsh? maybe let these cases pass &
+#   (1) error if it's being run on msgid
+#   (2) throw the warning in all.equal() if it's an issue with msgstr so user can retry?
 get_specials_metadata = function(x) {
   # tested with xgettext: warning against using \a | \b | \f | \v in internationalized messages;
   #   and msgfmt doesn't warn about whether \t is matched, so no need to bother matching that either

@@ -98,24 +98,18 @@ gettextify = function(e, sep = '') {
   )
 }
 
-# two types of specials to highlight:
-#   (1: see ?sprintf) templates in the fmt argument to sprintf
-#   (2: see ?encodeString) escaped control characters: \\, \n, \t, \r, \v, \a, \b, \f
-# NB: also tried combining these two regexes, but they're not used the same.
-#   For sprintf, we try to enforce consistency between the translated & original message
-#   (e.g. %d is used in both), but such consistency is not required for encoded strings.
-# regex for sprintf templates is taken from a thorough reading of ?sprintf. it will
-#   generate some false positives, though it is a bit hard to cook up such examples
-#   (e.g., sprintf has no problem with sprintf("%#0###     ++++0f", pi) )
+# regex for sprintf templates is taken from a thorough reading of ?sprintf,
+#   https://en.wikipedia.org/wiki/Printf_format_string, http://manpages.org/sprintf,
+#   lots of iteration on the set of msgid in .pot files in r-devel, and some ad-hoc testing
+#   of msgfmt in sample .po files. See #7.
 SPRINTF_TEMPLATE_REGEX = paste0(
   "[%]",
   "(?<all_template>",
-    "[%]|",
-    "(?<template>", # % separately to reduce false positives -- it can't be used with other specials
-      "(?<redirect>[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
-      "(?<width_precision>[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[- +#])*",
-      # taken from https://en.wikipedia.org/wiki/Printf_format_string and http://manpages.org/sprintf
-      "(?<id>[aAcdeEfgGiopsuxX]|(?:ll?|I(?:32|64))[diux]|l[cs]|<PRI[diux](?:32|64)>)",
+    "[%]|", # % separately to reduce false positives -- it can't be used with other specials
+    "(?<template>",
+      "(?<redirect>[1-9][0-9]?[$])?",
+      "(?<width_precision>[0-9]+[.]?|[0-9]*[.][0-9]+|[*]|[*][.][0-9]+|[0-9]+[.][*]|[- +#])?",
+      "(?<id>[aAcdeEfgGiopsuxX]|ll?[diux]|I(?:32|64)[diux]|l[cs]|<PRI[diux](?:32|64)>)",
     ")",
   ")"
 )
@@ -142,6 +136,8 @@ get_specials_metadata = function(x) {
     end = special_matches + attr(special_matches, 'match.length') - 1L,
     redirect_start = group_starts[ , "redirect"],
     redirect_length = group_lengths[ , "redirect"],
+    width_precision_start = group_starts[ , "width_precision"],
+    width_precision_length = group_lengths[ , "width_precision"],
     id_start = group_starts[ , "id"],
     id_length = group_lengths[ , "id"]
   )
@@ -158,20 +154,42 @@ get_specials_metadata = function(x) {
       meta$special[template_idx & redirect_idx], meta$special[template_idx & !redirect_idx]
     ))
 
-    meta[ , "redirect_id" := fifelse(
+    # make sure newlines are retained in the right order, if present
+    meta[ , "redirect_id" := fcase(
       template_idx,
-      as.integer(substring(x, redirect_start, redirect_start + redirect_length - 1L)),
-      0L
+      as.integer(substring(x, redirect_start, redirect_start + redirect_length - 2L)),
+      start == 1L, 0L,
+      default = .N + 1L
     )]
-    # TODO: error on %1$d %1$f
-    # TODO: reorder by redirect_id
+
+    setorderv(meta, "redirect_id")
   }
 
-  meta[(template_idx), "id" := substring(x, id_start, id_start + id_length - 1L)]
+  meta[(template_idx), "id" := safe_substring(x, id_start, id_start + id_length - 1L)]
+  # check if variable-width/precision formatting is used (e.g. %.*f or %*.0f)
+  meta[
+    template_idx & width_precision_start > 0L,
+    "width_precision" := safe_substring(x, width_precision_start, width_precision_start + width_precision_length - 1L)
+  ]
+  meta[template_idx & grepl("*", width_precision, fixed = TRUE), "id" := paste0("*", id)]
   # either it's an initial newline or it's a terminal newline; tag so as to distinguish
   meta[(!template_idx), "id" := fifelse(start == 1L, "^\\n", "\\n$")]
 
-  meta[ , .(special, id, start, stop)]
+  if (any(template_idx & redirect_idx)) {
+    if (nrow(fail <- meta[ , .N, by = c("redirect_id", "id")][ , .N, by = "redirect_id"][N > 1L])) {
+      stop(domain = NA, gettextf(
+        "Invalid templated message string with redirects -- all messages pointing to the same input must have identical formats, but received %s",
+        meta[
+          fail,
+          on = "redirect_id"
+        ][ , .(by_id = sprintf("[%s]", toString(special))), by = "redirect_id"][ , paste(by_id, collapse = " / ")]
+      ))
+    }
+    meta = unique(meta, by = "redirect_id")
+  }
+
+  meta = meta[ , .(special, id, start, end)]
+  setattr(meta, "class", c("specials_metadata", class(meta)))
 }
 
 # shQuote(type='cmd') + encodeString, but don't wrap in the outer ""

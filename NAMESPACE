@@ -1,8 +1,8 @@
 importFrom(data.table, data.table, foverlaps, fread, rbindlist, uniqueN, "%chin%")
 importFrom(data.table, is.data.table, as.data.table)
-importFrom(data.table, set, setcolorder, setindexv, setkeyv, setnames, setorderv)
+importFrom(data.table, set, setattr, setcolorder, setindexv, setkeyv, setnames, setorderv)
 importFrom(data.table, `:=`, .BY, .N, .SD)
-importFrom(data.table, fifelse)
+importFrom(data.table, fcase, fifelse)
 
 importFrom(utils, getParseData, globalVariables, head, tail, type.convert)
 
@@ -10,3 +10,6 @@ export(translate_package)
 export(get_message_data)
 
 export(check_cracked_messages, check_untranslated_cat, check_untranslated_src)
+
+S3method(format, specials_metadata)
+S3method(all.equal, specials_metadata)

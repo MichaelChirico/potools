@@ -98,62 +98,21 @@ gettextify = function(e, sep = '') {
   )
 }
 
-# two types of specials to highlight:
-#   (1: see ?sprintf) templates in the fmt argument to sprintf
-#   (2: see ?encodeString) escaped control characters: \\, \n, \t, \r, \v, \a, \b, \f
-# NB: also tried combining these two regexes, but they're not used the same.
-#   For sprintf, we try to enforce consistency between the translated & original message
-#   (e.g. %d is used in both), but such consistency is not required for encoded strings.
-# regex for sprintf templates is taken from a thorough reading of ?sprintf. it will
-#   generate some false positives, though it is a bit hard to cook up such examples
-#   (e.g., sprintf has no problem with sprintf("%#0###     ++++0f", pi) )
+# regex for sprintf templates is taken from a thorough reading of ?sprintf,
+#   https://en.wikipedia.org/wiki/Printf_format_string, http://manpages.org/sprintf,
+#   lots of iteration on the set of msgid in .pot files in r-devel, and some ad-hoc testing
+#   of msgfmt in sample .po files. See #7.
 SPRINTF_TEMPLATE_REGEX = paste0(
   "[%]",
-  "(?:",
+  "(?<all_template>",
     "[%]|", # % separately to reduce false positives -- it can't be used with other specials
-    "(?:[1-9][0-9]?[$])?", # "redirection" markers -- %2$s says "use the second element of ... here"
-    "(?:[0-9*]+[.]?|[.]?[0-9*]+|[0-9]+[.][0-9]+|[ -+#])*",
-    # taken from https://en.wikipedia.org/wiki/Printf_format_string and http://manpages.org/sprintf
-    "[aAcdeEfgGiopsuxX]|(?:ll?|I(?:64|32))[diux]|l[cs]|",
-    "<[a-zA-Z0-9_]+>", # macro-based formatters in C, e.g. %<PRId64>
+    "(?<template>",
+      "(?<redirect>[1-9][0-9]?[$])?",
+      "(?<width_precision>[0-9]+[.]?|[0-9]*[.][0-9]+|[*]|[*][.][0-9]+|[0-9]+[.][*]|[- +#])?",
+      "(?<id>[aAcdeEfgGiopsuxX]|ll?[diux]|I(?:32|64)[diux]|l[cs]|<PRI[diux](?:32|64)>)",
+    ")",
   ")"
 )
-ENCODED_STRING_REGEX = "[\\][\\ntrvabf]"
-
-# basically return the gregexpr output on SPRINTF_TEMPLATE_REGEX|ENCODED_STRING_REGEX in a nicer format
-get_specials = function(x) {
-  special_starts = gregexpr(sprintf("(?:%s|%s)", SPRINTF_TEMPLATE_REGEX, ENCODED_STRING_REGEX), x)
-  # NULL when no match is easier to work with (can use lengths, e.g.)
-  lapply(special_starts, function(l) {
-    if (length(l) == 1L && l < 0L) return(NULL)
-    list(idx = as.integer(l), length = attr(l, 'match.length'))
-  })
-}
-
-# streamlined get_specials for counting the matches
-count_formats = function(x) vapply(
-  gregexpr(SPRINTF_TEMPLATE_REGEX, x),
-  function(x) if (length(x) == 1L && x == -1L) 0L else length(x),
-  integer(1L)
-)
-
-# given a string like
-#   Found %d arguments in %s. Average %02.3f%%
-# get a second line highlighting the string format templates:
-#   Found %d arguments in %s. \n Average %02.3f%%
-#         ^^              ^^  ^^         ^----^^^
-get_special_tags = function(s, specials) {
-  out = rep(" ", nchar(s))
-  for (ii in seq_along(specials$idx)) {
-    start = specials$idx[ii]
-    end = start + specials$length[ii] - 1L
-    out[c(start, end)] = '^'
-    if (end - start > 1L) {
-      out[seq(start + 1L, end - 1L)] = '-'
-    }
-  }
-  paste(out, collapse="")
-}
 
 # shQuote(type='cmd') + encodeString, but don't wrap in the outer ""
 escape_string = function(x) gsub('"', '\\"', encodeString(x), fixed = TRUE)

@@ -47,7 +47,7 @@ translate_package = function(
   }
   if (!update) dir.create(po_dir, showWarnings = FALSE)
 
-  message_data = get_message_data(dir, src_translation_macros, use_base_rules, verbose=verbose)
+  message_data = get_message_data(dir, src_translation_macros, verbose=verbose)
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')

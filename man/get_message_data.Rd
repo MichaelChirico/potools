@@ -7,20 +7,12 @@ Extract user-visible messages from a package
 This function looks in the R and src directories of a package for user-visible messages and compiles them as a \code{\link[data.table]{data.table}} to facilitate analyzing this corpus as such.
 }
 \usage{
-get_message_data(
-  dir=".", src_translation_macros=c("_", "N_"),
-  use_base_rules=package \%chin\% .potools$base_package_names,
-  verbose=FALSE
-)
+get_message_data(dir=".", src_translation_macros=c("_", "N_"), verbose=FALSE)
 }
 \arguments{
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
   \item{src_translation_macros}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_} and \code{N_}, is shared by R itself & recommended in R-exts and R-ints (See references). }
-  \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
   \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
-}
-\details{
-For this function, the role of \code{use_base_rules} is to dictate where to look for source files in the \file{src} directory. When \code{use_base_rules = TRUE}, only files in \file{src}, \file{src/unix}, and \file{src/windows} are included. Otherwise, \file{src/cairo} is included as well.
 }
 \value{
 A \code{data.table} with the following schema:

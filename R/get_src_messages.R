@@ -1,4 +1,4 @@
-get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_base_rules = FALSE, is_base = FALSE) {
+get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), is_base = FALSE) {
   if (is_base) {
     potfiles_loc <- file.path(dir, "../../../po/POTFILES")
     if (!file.exists(potfiles_loc)) {
@@ -11,10 +11,7 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), use_ba
     # in R.pot, file paths are given relative to the top level (and so include src/, where other packages drop src/)
     dir = dirname(dirname(potfiles_loc))
   } else {
-    # alternative would be to handle the if (!use_base_rules) branch in write_po_file(),
-    #   which would require keeping track of column numbers
-    #   until that point so as to keep the file order correct in both use_base_rules cases
-    src_files = list_package_files(dir, 'src', c(if (!use_base_rules) 'cairo', 'windows'), "(?i)\\.(c|cc|cpp|m|mm)$")
+    src_files = list_package_files(dir, 'src', c('cairo', 'windows'), "(?i)\\.(c|cc|cpp|m|mm)$")
     dir = file.path(dir, 'src')
   }
 

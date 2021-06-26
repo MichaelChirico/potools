@@ -367,7 +367,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
 test_that("use_base_rules=TRUE produces base-aligned behavior", {
   restore_package(
     pkg <- test_package("unusual_msg"),
-    tmp_conn = mock_translation("test-translate-package-unusual_msg-2.input"),
+    tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
       translate_package(pkg, "es", use_base_rules = TRUE, diagnostics = NULL)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))

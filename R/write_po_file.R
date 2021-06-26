@@ -5,12 +5,6 @@
 #   default by xgettext, etc (unless --no-location is set, or if --add-location=never).
 # note also that the gettext manual says we shouldn't write these ourselves... for now i'm
 #   going to go ahead and try to anyway until it breaks something :)
-# TODO: respect xgettext --width= default? per gettext/gettext-tools/src/write-catalog.c,
-#   the default is PAGE_WIDTH which is defined in gettext/gettext-tools/configure.ac as 79, which
-#   matches what tools::update_pkg_po() produces for R-devel/src/library/base/po/R.pot, e.g.
-#   note that xgettext is not run for R-*.pot files, so this width is not respected.
-#   See also https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121
-# TODO: experiment with allowing source_location in R-*.pot? files. See #41.
 write_po_files <- function(message_data, po_dir, params, template = FALSE, use_base_rules = FALSE) {
   # drop untranslated strings, collapse duplicates, drop unneeded data.
   #   for now, treating R & src separately so they can be treated differently; eventually this should

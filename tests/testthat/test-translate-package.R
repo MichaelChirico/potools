@@ -367,7 +367,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
 test_that("use_base_rules=TRUE produces base-aligned behavior", {
   restore_package(
     pkg <- test_package("unusual_msg"),
-    tmp_conn = mock_translation("test-translate-package-unusual_msg-2.input"),
+    tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
       translate_package(pkg, "es", use_base_rules = TRUE, diagnostics = NULL)
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
@@ -412,9 +412,9 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
 
 test_that("use_base_rules is auto-detected", {
   restore_package(
-    pkg <- test_package("grDevices"),
+    pkg <- test_package("r-devel/src/library/grDevices"),
     {
-      translate_package(pkg)
+      translate_package(pkg, diagnostics = NULL)
 
       r_pot_lines <- readLines(file.path(pkg, 'po', 'R-grDevices.pot'))
       src_pot_lines <- readLines(file.path(pkg, 'po', 'grDevices.pot'))

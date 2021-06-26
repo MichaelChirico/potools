@@ -412,9 +412,9 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
 
 test_that("use_base_rules is auto-detected", {
   restore_package(
-    pkg <- test_package("grDevices"),
+    pkg <- test_package("r-devel/src/library/grDevices"),
     {
-      translate_package(pkg)
+      translate_package(pkg, diagnostics = NULL)
 
       r_pot_lines <- readLines(file.path(pkg, 'po', 'R-grDevices.pot'))
       src_pot_lines <- readLines(file.path(pkg, 'po', 'grDevices.pot'))

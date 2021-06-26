@@ -157,10 +157,40 @@ test_that('Unknown language flow works correctly', {
       )
     }
   )
+  # also include coverage tests of incorrect templating in supplied translations
   expect_outputs(
     prompts,
-    c('How would you refer to this language in English?'),
+    c(
+      'How would you refer to this language in English?',
+      'received the same set of templates',
+      'received 2 unique templated arguments',
+      'received 4 unique templated arguments'
+    ),
     fixed=TRUE
+  )
+})
+
+test_that('Erroneous messages stop get_specials_metadata', {
+  restore_package(
+    pkg <- test_package('r_msg'),
+    tmp_conn = mock_translation('test-translate-package-r_msg-3.input'),
+    {
+      expect_error(
+        translate_package(pkg, 'zh_CN', diagnostics = NULL),
+        'Invalid templated message. If any %N$', fixed = TRUE
+      )
+    }
+  )
+
+  restore_package(
+    pkg <- test_package('r_msg'),
+    tmp_conn = mock_translation('test-translate-package-r_msg-4.input'),
+    {
+      expect_error(
+        translate_package(pkg, 'zh_CN', diagnostics = NULL),
+        'all messages pointing to the same input', fixed = TRUE
+      )
+    }
   )
 })
 

@@ -116,13 +116,9 @@ all.equal.specials_metadata = function(target, current, ...) {
       toString(matched[is.na(start.x)]$special.y)
     ))
   }
+  # NB: since nrow(target) == nrow(current) and !anyNA(matched$start.x), we are done --
+  #   anyNA(matched$start.y is already impossible)
   # found in x, not y (i.e., in msgid, not msgstr)
-  if (anyNA(matched$start.y)) {
-    return(gettextf(
-      "missing some templates in the original: %s",
-      toString(matched[is.na(start.y)]$special.x)
-    ))
-  }
 
   # else target/current have the same number of rows
   return(TRUE)

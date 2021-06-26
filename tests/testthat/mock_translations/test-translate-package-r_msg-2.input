@@ -11,6 +11,8 @@ test-user@github.com
 wrong-template-1:%.02f然后%s然后%d.
 wrong-template-2:%.02f然后%s然后%s.
 wrong-template-3:%1$.02f然后%3$d然后%2$s.
+wrong-template-4:%d然后%d.
+wrong-template-5:%.02f然后%d然后%s然后%s.
 %.02f然后%d然后%s.
 0该起床了
 1该起床了

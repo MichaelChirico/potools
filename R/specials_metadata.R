@@ -97,15 +97,15 @@ format.specials_metadata = function(x, ...) {
 # target: msgid [template translation]
 # current: msgstr [received translation]
 all.equal.specials_metadata = function(target, current, ...) {
-  if (nrow(target) != nrow(current)) {browser(); return(gettextf(
+  if (nrow(target) != nrow(current)) return(gettextf(
     "received %d unique templated arguments but there are %d in the original",
     nrow(current), nrow(target)
-  ))}
+  ))
 
   matched = merge(target, current, by = c('id', 'sequence'), all = TRUE)
   # found in y, not x (i.e., in msgstr, not msgid)
   if (anyNA(matched$start.x)) {
-    if (all.equal(table(target$id), table(current$id))) {
+    if (isTRUE(all.equal(table(target$id), table(current$id)))) {
       return(gettextf(
         "received the same set of templates, but in incorrect order (%s vs %s). Recall that you can use %%$N to do redirect, e.g. to swap the order of '%%d %%s' to be translated more naturally, your translation can use '%%1$s %%2$d'",
         sprintf("[%s]", toString(target$special)), sprintf("[%s]", toString(current$special))

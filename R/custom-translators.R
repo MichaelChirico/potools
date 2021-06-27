@@ -1,5 +1,6 @@
-stopf = function(fmt, ..., call. = TRUE, domain = NULL) {
-  stop(gettextf(fmt, ..., domain = NULL), domain = NA, call. = call.)
+# tends to make some really repetitive messages with call.=TRUE, so always turn it off
+stopf = function(fmt, ..., domain = NULL) {
+  stop(gettextf(fmt, ..., domain = NULL), domain = NA, call. = FALSE)
 }
 
 warningf = function(fmt, ..., call. = TRUE, immediate. = FALSE, noBreaks. = FALSE) {

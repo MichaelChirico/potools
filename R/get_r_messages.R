@@ -140,9 +140,10 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  msg[type == 'plural', 'is_marked_for_translation' := TRUE]
-  msg[type == 'singular', 'is_marked_for_translation' := fname %chin% c(DOMAIN_DOTS_FUNS, 'gettextf')]
+  known_translators = c(DOMAIN_DOTS_FUNS, 'ngettext', 'gettextf', get_fnames(custom_params))
+  msg[ , 'is_marked_for_translation' := fname %chin% known_translators]
 
+  # TODO: assume custom translators are translated? or maybe just check the regex?
   msg[ , "is_templated" := fname == "gettextf"]
   msg[ , "fname" := NULL]
 
@@ -228,6 +229,15 @@ parse_r_keywords = function(spec) {
       }
     )
   )
+}
+
+# wrapper for extracting the fnames from the parse_r_keywords object
+get_fnames = function(params) {
+  unlist(c(
+    lapply(params$singular$dots, `[[`, "fname"),
+    lapply(params$singular$named, `[[`, "fname"),
+    lapply(params$plural, `[[`, "fname")
+  ))
 }
 
 # these functions all have a domain= argument. taken from the xgettext source, but could be

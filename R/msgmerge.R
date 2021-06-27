@@ -16,7 +16,7 @@ run_msgmerge = function(po_file, pot_file) {
 run_msgfmt = function(po_file, mo_file, verbose) {
   use_stats <- if (verbose) '--statistics' else ''
   if (system(sprintf("msgfmt -c %s -o %s %s", use_stats, shQuote(mo_file), shQuote(po_file))) != 0L) {
-    warningf("running msgfmt on %s failed", basename(po_file), immediate. = TRUE)
+    warningf("running msgfmt on %s failed.\nHere is the po file:\n%s", basename(po_file), paste(readLines(po_file), collapse = "\n"), immediate. = TRUE)
   }
   return(invisible())
 }

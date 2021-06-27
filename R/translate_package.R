@@ -1,6 +1,7 @@
 translate_package = function(
   dir = '.', languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
+  custom_translation_functions = list(R = NULL, src = NULL),
   src_translation_macros = c("_", "N_"),
   use_base_rules = package %chin% .potools$base_package_names,
   copyright = NULL, bugs = NULL, verbose = FALSE
@@ -47,7 +48,7 @@ translate_package = function(
   }
   if (!update) dir.create(po_dir, showWarnings = FALSE)
 
-  message_data = get_message_data(dir, src_translation_macros, verbose=verbose)
+  message_data = get_message_data(dir, custom_translation_functions, src_translation_macros, verbose=verbose)
 
   if (!nrow(message_data)) {
     if (verbose) message('No messages to translate; finishing')

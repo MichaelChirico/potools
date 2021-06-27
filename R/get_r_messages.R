@@ -1,6 +1,6 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir, is_base = FALSE) {
+get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE) {
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
@@ -43,6 +43,33 @@ get_r_messages <- function (dir, is_base = FALSE) {
   # for plural strings, the ordering within lines doesn't really matter since there's only one .pot entry,
   #   so just use the parent's location to get the line number
   plural_strings[ , id := parent]
+
+  # TODO: how hard would it be to run it all at once? i.e. create a fun-arg lookup table and "vectorize" over that
+  #   all at once and for all functions? it would speed things up a bit & also get around the hand-waving now where
+  #   we just specify NON_DOTS_ARGS the same for all the translators (even though they have different signatures)
+  if (length(custom_translation_functions)) {
+    custom_params = parse_r_keywords(custom_translation_functions)
+
+    singular_strings = rbind(
+      singular_strings,
+      rbindlist(lapply(
+        custom_params$singular$dots,
+        function(params) get_dots_strings(expr_data, params$call, params$excluded_args)
+      )),
+      rbindlist(lapply(
+        custom_params$singular$named,
+        function(params) get_named_arg_strings(expr_data, params$call, params$args)
+      ))
+    )
+
+    plural_strings = rbind(
+      plural_strings,
+      rbindlist(lapply(
+        custom_params$plural,
+        function(params) get_named_arg_strings(expr_data, params$call, params$args, plural = TRUE)
+      ))
+    )
+  }
 
   msg = rbind(
     singular = singular_strings,
@@ -145,6 +172,60 @@ parse_r_files = function(dir, is_base) {
   }
   names(out) = r_files
   return(out)
+}
+
+# inspired by the --keyword argument in gettext, but customized to make sense for R.
+# specifically there are two ways to specify a function for translation:
+#   (1) f:arg1|n1[,arg2|n2] - named arguments & positions, e.g. gettextf:fmt|1 and ngettext:msg1|2,msg2|3
+#   (2) f:...\arg1,...,argn - varargs & excluded arguments, e.g. stop:...\call.,domain or message:...\domain,appendLF
+parse_r_keywords = function(spec) {
+  keyval = setDT(tstrsplit(spec, ":", fixed = TRUE))
+  if (ncol(keyval) != 2L) {
+    idx <- if (ncol(keyval) == 1L) seq_along(spec) else which(is.na(keyval$V2))
+    stop(domain = NA, gettextf(
+      "Invalid custom translator specification(s): %s.\nAll inputs must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
+      toString(spec[idx])
+    ))
+  }
+
+  # not a proper test of R identifiers, but that should be OK, they just won't be found in the result -- no error
+  named_idx = grepl("^[a-zA-Z0-9._]+\\|[0-9]+$", keyval$V2)
+  plural_idx = grepl("^[a-zA-Z0-9._]+\\|[0-9]+,[a-zA-Z0-9._]+\\|[0-9]+$", keyval$V2)
+  dots_idx = grepl("^[.]{3}[\\](?:[a-zA-Z0-9._]+,)*[a-zA-Z0-9._]+$", keyval$V2)
+  if (any(idx <- !named_idx & !dots_idx & !plural_idx)) {
+    stop(domain = NA, gettextf(
+      "Invalid custom translator specification(s): %s.\nAll inputs must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
+      toString(spec[idx])
+    ))
+  }
+
+  list(
+    singular = list(
+      dots = lapply(
+        which(dots_idx),
+        function(ii) list(
+          call = keyval$V1[ii],
+          excluded_args = strsplit(gsub("^[.]{3}[\\]", "", keyval$V2[ii]), ",", fixed = TRUE)[[1L]]
+        )
+      ),
+      named = lapply(
+        which(named_idx),
+        function(ii) {
+          arg_keyval = strsplit(keyval$V2[ii], "|", fixed = TRUE)[[1L]]
+          # regex above ensures as.integer() will succeed here
+          list(call = keyval$V1[ii], args = setNames(as.integer(arg_keyval[2L]), arg_keyval[1L]))
+        }
+      )
+    ),
+    plural = lapply(
+      which(plural_idx),
+      function(ii) {
+        arg_keyval = tstrsplit(strsplit(keyval$V2[ii], ",", fixed = TRUE)[[1L]], "|", fixed = TRUE)
+        # regex above ensures as.integer() will succeed here
+        list(call = keyval$V1[ii], args = setNames(as.integer(arg_keyval[[2L]]), arg_keyval[[1L]]))
+      }
+    )
+  )
 }
 
 # these functions all have a domain= argument. taken from the xgettext source, but could be

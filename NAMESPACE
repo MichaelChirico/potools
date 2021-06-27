@@ -2,7 +2,7 @@ importFrom(data.table, data.table, foverlaps, fread, rbindlist, uniqueN, "%chin%
 importFrom(data.table, is.data.table, as.data.table)
 importFrom(data.table, set, setattr, setcolorder, setindexv, setkeyv, setnames, setorderv)
 importFrom(data.table, `:=`, .BY, .N, .SD)
-importFrom(data.table, fcase, fifelse)
+importFrom(data.table, fcase, fifelse, shift)
 
 importFrom(utils, getParseData, globalVariables, head, tail, type.convert)
 

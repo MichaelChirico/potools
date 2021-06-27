@@ -442,10 +442,10 @@ test_that("use_base_rules is auto-detected", {
         fixed = TRUE
       )
 
-      # message is in src/cairo subdirectory which is excluded because use_base_rules is detected as TRUE
+      # first argument to dgettext() should be ignored, #184
       expect_all_match(
         src_pot_lines,
-        'unimplemented cairo-based device',
+        'msgid "grDevices"',
         fixed = TRUE, invert = TRUE
       )
     }

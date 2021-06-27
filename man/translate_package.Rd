@@ -153,7 +153,7 @@ rm(pkg, tmp_pkg)
 \url{https://www.isi-web.org/publications/glossary-of-statistical-terms} \cr
 \url{https://www.gnu.org/software/gettext/} \cr
 \url{https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip} \cr
-\url{https://saimana.com/list-of-country-locale-code}
+\url{https://saimana.com/list-of-country-locale-code/}
 }
 \seealso{
 \code{\link[tools]{xgettext}}, \code{\link[tools]{update_pkg_po}}, \code{\link[tools]{checkPoFile}},

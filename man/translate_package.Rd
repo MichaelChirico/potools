@@ -13,7 +13,11 @@ To do so, it builds on low-level command line tools from \code{gettext}. See Det
 \usage{
 translate_package(
   dir='.', languages,
-  diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
+  diagnostics = list(
+    check_cracked_messages,
+    check_untranslated_cat,
+    check_untranslated_src
+  ),
   custom_translation_functions = list(R = NULL, src = NULL),
   use_base_rules = package \%chin\% .potools$base_package_names,
   copyright = NULL, bugs = NULL, verbose=FALSE

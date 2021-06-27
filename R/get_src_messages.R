@@ -6,9 +6,11 @@ get_src_messages = function(
   if (is_base) {
     potfiles_loc <- file.path(dir, "../../../po/POTFILES")
     if (!file.exists(potfiles_loc)) {
-      stop(domain = NA, gettextf(
-        "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.", "po/POTFILES"
-      ))
+      # templated to share with R-side message
+      stopf(
+        "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.",
+        "po/POTFILES"
+      )
     }
     # NB: also skips blank lines
     src_files <- grep("^[^#]", readLines(potfiles_loc), value = TRUE)
@@ -101,10 +103,10 @@ get_file_src_messages = function(file, custom_params = NULL) {
     )
   )
   if (length(quote_idx) %% 2L != 0L) {
-    stop(domain=NA, call. = FALSE, gettextf(
+    stopf(
       'Parsing error: found an odd number (%d) of unscaped double quotes (") in %s.',
-      length(quote_idx), file
-    ))
+      length(quote_idx), file, call. = FALSE
+    )
   }
   arrays <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
   setnames(arrays, c('array_start', 'array_end'))
@@ -277,10 +279,10 @@ get_file_src_messages = function(file, custom_params = NULL) {
 #   no added complexity to do so, whereas it would be here.
 parse_src_keywords = function(spec) {
   if (!all(idx <- grepl("[a-z0-9_]+:[0-9]+", spec))) {
-    stop(domain = NA, gettextf(
+    stopf(
       "Invalid custom translator specification(s): %s.\nAll inputs for src must be key-value pairs like fn:arg1. Custom plural messagers are not yet supported.",
       toString(spec[!idx])
-    ))
+    )
   }
 
   keyval = setDT(tstrsplit(spec, ":", fixed = TRUE))
@@ -369,10 +371,10 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
     )
   }
   # file & newlines_loc both only needed for this error region which is a bit awkward
-  if (jj > nn) stop(domain = NA, call. = FALSE, gettextf(
+  if (jj > nn) stopf(
     "Parsing error: unmatched parentheses in %s starting from line %d",
-    file, findInterval(ii, newlines_loc)
-  ))
+    file, findInterval(ii, newlines_loc), call. = FALSE
+  )
 
   jj
 }
@@ -423,10 +425,10 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents, message_
     ii = 1L
     while (arg_i != target_arg) {
       # nocov start
-      if (arg_i > target_arg) stop(domain = NA, gettextf(
+      if (arg_i > target_arg) stopf(
         "Logic for detecting argument calls broken at: %s%s; please report.",
         fun, substring(contents, left, right)
-      ))
+      )
       # nocov end
       # bold assumption: no nested commas. let's see if it works out...
       commas = gregexpr(",", grout[ii], fixed=TRUE)[[1L]]

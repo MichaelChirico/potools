@@ -1,15 +1,15 @@
-stopf = function(fmt, ..., domain = NULL) {
-  stop(domain = NA, gettextf(fmt, ..., domain = NULL))
+stopf = function(fmt, ..., call. = TRUE, domain = NULL) {
+  stop(gettextf(fmt, ..., domain = NULL), domain = NA, call. = call.)
 }
 
-warningf = function(fmt, ...) {
-  warning(domain = NA, gettextf(fmt, ..., domain = NULL))
+warningf = function(fmt, ..., call. = TRUE, immediate. = FALSE, noBreaks. = FALSE) {
+  warning(gettextf(fmt, ..., domain = NULL), domain = NA, call. = call., immediate. = immediate., noBreaks. = noBreaks.)
 }
 
-messagef = function(fmt, ...) {
-  message(domain = NA, gettextf(fmt, ..., domain = NULL))
+messagef = function(fmt, ..., appendLF = TRUE) {
+  message(gettextf(fmt, ..., domain = NULL), domain = NA, appendLF = appendLF)
 }
 
-packageStartupMessage(fmt, ...) {
-  packageStartupMessage(gettextf(fmt, ..., domain = NULL))
+packageStartupMessagef = function(fmt, ..., appendLF = TRUE) {
+  packageStartupMessage(gettextf(fmt, ..., domain = NULL), domain = NA, appendLF = appendLF)
 }

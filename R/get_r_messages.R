@@ -158,9 +158,11 @@ parse_r_files = function(dir, is_base) {
   if (is_base) {
     r_share_dir = file.path(dir, "../../../share")
     if (!dir.exists(file.path(r_share_dir, 'R'))) {
-      stop(domain = NA, gettextf(
-        "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.", "share/R/REMOVE.R"
-      ))
+      # templated to share with src-side message
+      stopf(
+        "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.",
+        "share/R/REMOVE.R"
+      )
     }
     share_files = list_package_files(r_share_dir, 'R', pattern = "(?i)\\.r$")
     out = c(
@@ -182,10 +184,10 @@ parse_r_keywords = function(spec) {
   keyval = setDT(tstrsplit(spec, ":", fixed = TRUE))
   if (ncol(keyval) != 2L) {
     idx <- if (ncol(keyval) == 1L) seq_along(spec) else which(is.na(keyval$V2))
-    stop(domain = NA, gettextf(
+    stopf(
       "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
       toString(spec[idx])
-    ))
+    )
   }
 
   # not a proper test of R identifiers, but that should be OK, they just won't be found in the result -- no error
@@ -193,10 +195,10 @@ parse_r_keywords = function(spec) {
   plural_idx = grepl("^[a-zA-Z0-9._]+\\|[0-9]+,[a-zA-Z0-9._]+\\|[0-9]+$", keyval$V2)
   dots_idx = grepl("^[.]{3}[\\](?:[a-zA-Z0-9._]+,)*[a-zA-Z0-9._]+$", keyval$V2)
   if (any(idx <- !named_idx & !dots_idx & !plural_idx)) {
-    stop(domain = NA, gettextf(
+    stopf(
       "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
       toString(spec[idx])
-    ))
+    )
   }
 
   list(
@@ -277,10 +279,10 @@ get_named_arg_strings = function(expr_data, fun, args, recursive = FALSE, plural
     {
       idx = shift(token, fill = '') == 'SYMBOL_SUB' & shift(text, fill = '') %chin% names(args)
       if (any(idx) & !all(matched <- names(args) %chin% text[token == 'SYMBOL_SUB'])) {
-        stop(domain = NA, call. = FALSE, gettextf(
+        stopf(
           "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
-          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args))
-        ))
+          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args)), call. = FALSE
+        )
       }
       .(id = id[idx])
     }

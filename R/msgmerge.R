@@ -2,12 +2,12 @@
 run_msgmerge = function(po_file, pot_file) {
   if (system(sprintf("msgmerge --update %s %s", po_file, shQuote(pot_file))) != 0L) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
-    warning(domain = NA, gettextf("Running msgmerge on '%s' failed.", po_file))
+    warningf("Running msgmerge on '%s' failed.", po_file)
   }
 
   res <- tools::checkPoFile(po_file, strictPlural = TRUE)
   if (nrow(res)) {
-    warning(domain = NA, gettextf("tools::checkPoFile() found some issues in %s", po_file))
+    warningf("tools::checkPoFile() found some issues in %s", po_file)
     print(res)
   }
   return(invisible())
@@ -16,7 +16,7 @@ run_msgmerge = function(po_file, pot_file) {
 run_msgfmt = function(po_file, mo_file, verbose) {
   use_stats <- if (verbose) '--statistics' else ''
   if (system(sprintf("msgfmt -c %s -o %s %s", use_stats, shQuote(mo_file), shQuote(po_file))) != 0L) {
-    warning(domain = NA, gettextf("running msgfmt on %s failed", basename(po_file)), immediate. = TRUE)
+    warningf("running msgfmt on %s failed", basename(po_file), immediate. = TRUE)
   }
   return(invisible())
 }

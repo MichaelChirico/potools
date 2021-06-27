@@ -36,13 +36,13 @@ translate_package = function(
     if (update) {
       # is it worthwhile to try and distinguish the creation time of the
       #  R pot file and the src pot file? probably not...
-      message(domain=NA, gettextf(
+      messagef(
         "Updating translation template for package '%s' (last updated %s)",
         package,
         format(file.info(r_potfile)$atime)
-      ))
+      )
     } else {
-      message(domain=NA, gettextf("Starting translations for package '%s'", package))
+      messagef("Starting translations for package '%s'", package)
     }
   }
   if (!update) dir.create(po_dir, showWarnings = FALSE)
@@ -105,10 +105,10 @@ translate_package = function(
     lang_file <- file.path(po_dir, sprintf("R-%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
-        message(domain=NA, gettextf(
+        messagef(
           'Found existing R translations for %s (%s/%s) in %s. Running msgmerge...',
           language, metadata$full_name_eng, metadata$full_name_native, lang_file
-        ))
+        )
       }
       run_msgmerge(lang_file, r_potfile)
 
@@ -120,10 +120,10 @@ translate_package = function(
     lang_file <- file.path(po_dir, sprintf("%s.po", language))
     if (update && file.exists(lang_file)) {
       if (verbose) {
-        message(domain=NA, gettextf(
+        messagef(
           'Found existing src translations for %s (%s/%s) in %s. Running msgmerge...',
           language, metadata$full_name_eng, metadata$full_name_native, lang_file
-        ))
+        )
       }
       run_msgmerge(lang_file, src_potfile)
 
@@ -142,17 +142,14 @@ translate_package = function(
     ]
 
     if (!length(new_idx)) {
-      if (verbose) message(domain=NA, gettextf(
-        'Translations for %s are up to date! Skipping.',
-        language
-      ))
+      if (verbose) messagef('Translations for %s are up to date! Skipping.', language)
       next
     }
     if (verbose) {
-      message(domain=NA, gettextf(
+      messagef(
         'Beginning new translations for %s (%s/%s); found %d untranslated messages',
         language, metadata$full_name_eng, metadata$full_name_native, length(new_idx)
-      ))
+      )
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
 

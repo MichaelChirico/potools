@@ -3,10 +3,10 @@ get_directory = function(dir) {
   dir = normalizePath(dir, mustWork=FALSE)
 
   if (!file.exists(dir)) {
-    stop(domain=NA, gettextf('%s does not exist', dir))
+    stopf('%s does not exist', dir)
   }
   if (!file.info(dir)$isdir) {
-    stop(domain=NA, gettextf('%s is not a directory', dir))
+    stopf('%s is not a directory', dir)
   }
   return(normalizePath(dir))
 }
@@ -15,14 +15,11 @@ get_directory = function(dir) {
 get_desc_data = function(dir) {
   desc_file <- file.path(dir, 'DESCRIPTION')
   if (!file.exists(desc_file)) {
-    stop(domain=NA, gettextf('%s is not a package (missing DESCRIPTION)', dir))
+    stopf('%s is not a package (missing DESCRIPTION)', dir)
   }
   desc_data <- read.dcf(desc_file, c('Package', 'Version'))
   if (nrow(desc_data) != 1L || anyNA(desc_data)) {
-    stop(domain=NA, gettextf(
-      '%s is not a package (missing Package and/or Version field in DESCRIPTION)',
-      dir
-    ))
+    stopf('%s is not a package (missing Package and/or Version field in DESCRIPTION)', dir)
   }
   return(desc_data[1L, ])
 }
@@ -48,10 +45,10 @@ check_sys_reqs = function() {
         )
       }
     }
-    stop(domain = NA, gettextf(
+    stopf(
       'Missing (or not on PATH) system requirements %s.\n%s',
       toString(SYSTEM_REQUIREMENTS[is_missing]), platform_msg
-    ))
+    )
   }
 }
 # nocov end

@@ -103,7 +103,7 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
     # issue often encountered in dev when adjusting the test packages & things get bumped around...
     # nocov start
     if (is.na(out)) {
-      stop(domain=NA, gettextf("Connection empty when trying to read prompt %s", do.call(paste, list(...))))
+      stopf("Connection empty when trying to read prompt %s", do.call(paste, list(...)))
     }
     # nocov end
   }
@@ -112,10 +112,7 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
   out = type.convert(out, as.is = TRUE)
   if (typeof(out) == require_type) return(out)
 
-  message(domain=NA, gettextf(
-    "Input must be of type '%s', but received '%s'. Trying again.",
-    require_type, typeof(out)
-  ))
+  messagef("Input must be of type '%s', but received '%s'. Trying again.", require_type, typeof(out))
   return(prompt(..., conn=conn, require_type=require_type))
 }
 

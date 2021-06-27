@@ -106,7 +106,7 @@ get_file_src_messages = function(file, custom_params = NULL) {
   if (length(quote_idx) %% 2L != 0L) {
     stopf(
       'Parsing error: found an odd number (%d) of unscaped double quotes (") in %s.',
-      length(quote_idx), file, call. = FALSE
+      length(quote_idx), file
     )
   }
   arrays <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
@@ -379,7 +379,7 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
   # file & newlines_loc both only needed for this error region which is a bit awkward
   if (jj > nn) stopf(
     "Parsing error: unmatched parentheses in %s starting from line %d",
-    file, findInterval(ii, newlines_loc), call. = FALSE
+    file, findInterval(ii, newlines_loc)
   )
 
   jj

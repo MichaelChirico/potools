@@ -4,8 +4,8 @@ stopf = function(fmt, ..., domain = NULL) {
 }
 
 # uncovered for now, used in msgmerge.R
-warningf = function(fmt, ..., call. = TRUE, immediate. = FALSE, noBreaks. = FALSE) {
-  warning(gettextf(fmt, ..., domain = NULL), domain = NA, call. = call., immediate. = immediate., noBreaks. = noBreaks.)
+warningf = function(fmt, ..., immediate. = FALSE, noBreaks. = FALSE) {
+  warning(gettextf(fmt, ..., domain = NULL), domain = NA, call. = FALSE, immediate. = immediate., noBreaks. = noBreaks.)
 }
 
 messagef = function(fmt, ..., appendLF = TRUE) {

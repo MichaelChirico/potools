@@ -293,7 +293,7 @@ get_named_arg_strings = function(expr_data, fun, args, recursive = FALSE, plural
       if (any(idx) & !all(matched <- names(args) %chin% text[token == 'SYMBOL_SUB'])) {
         stopf(
           "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
-          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args)), call. = FALSE
+          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args))
         )
       }
       .(id = id[idx])

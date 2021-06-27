@@ -20,3 +20,39 @@ test_that("Partially named messaging arguments are an error", {
     fixed = TRUE
   )
 })
+
+test_that("Custom translation functions work in R and src", {
+  message_data = get_message_data(
+    test_package("custom_translation"),
+    custom_translation_functions = list(
+      R = c('MyTranslator:fmt|1', 'MyDotsTranslator:...\\excluded'),
+      src = 'MySrcTranslator:1'
+    )
+  )
+  expect_equal(
+    message_data$msgid,
+    c(
+      "A default message", "you found me!", "a translated", "argument",
+      "A default message", "a standard src message", "An untranslated string"
+    )
+  )
+
+  message_data = get_message_data(
+    test_package("custom_translation"),
+    custom_translation_functions = list(
+      R = c('MyOtherTranslator:target_arg|2', 'MyPluralTranslator:singular|3,plural|4'),
+      src = 'MyArg4Translator:4'
+    )
+  )
+  expect_equal(
+    message_data$msgid,
+    c(
+      "A default message", "A default message", "you found me too!", "found by position",
+      NA_character_, NA_character_, "a standard src message", "Another untranslated string"
+    )
+  )
+  expect_equal(
+    message_data$msgid_plural,
+    list(NULL, NULL, NULL, NULL, c("singular", "plural"), c("another singular", "another plural"), NULL, NULL)
+  )
+})

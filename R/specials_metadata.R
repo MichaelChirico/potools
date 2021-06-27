@@ -39,10 +39,10 @@ get_specials_metadata = function(x) {
   template_idx = meta$special != "\\n"
   redirect_idx = meta$redirect_start > 0L
   if (any(template_idx & redirect_idx)) {
-    if (any(template_idx & !redirect_idx)) stop(domain=NA, gettextf(
+    if (any(template_idx & !redirect_idx)) stopf(
       "Invalid templated message. If any %%N$ redirects are used, all templates must be redirected.\n\tRedirected tempates: %s\n\t Un-redirected templates: %s",
       meta$special[template_idx & redirect_idx], meta$special[template_idx & !redirect_idx]
-    ))
+    )
 
     # make sure newlines are retained in the right order, if present
     meta[ , "redirect_id" := fcase(
@@ -67,13 +67,13 @@ get_specials_metadata = function(x) {
 
   if (any(template_idx & redirect_idx)) {
     if (nrow(fail <- meta[ , .N, by = c("redirect_id", "id")][ , .N, by = "redirect_id"][N > 1L])) {
-      stop(domain = NA, gettextf(
+      stopf(
         "Invalid templated message string with redirects -- all messages pointing to the same input must have identical formats, but received %s",
         meta[
           fail,
           on = "redirect_id"
         ][ , .(by_id = sprintf("[%s]", toString(special))), by = "redirect_id"][ , paste(by_id, collapse = " / ")]
-      ))
+      )
     }
     meta = unique(meta, by = "redirect_id")
   }

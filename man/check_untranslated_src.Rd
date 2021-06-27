@@ -14,7 +14,7 @@ check_untranslated_src(message_data)
 }
 \details{
 
-This diagnostic looks for literal \code{char} arrays passed to messaging functions (as identified by \code{\link{translate_package}}) which are not marked for translation (by tagging them with the correct \code{src_translation_macro}). These strings cannot be translated until they are so marked.
+This diagnostic looks for literal \code{char} arrays passed to messaging functions (as identified by \code{\link{translate_package}}) which are not marked for translation (by tagging them for translation with \code{_} or \code{N_} macros). These strings cannot be translated until they are so marked.
 
 }
 \value{

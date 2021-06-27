@@ -1,6 +1,6 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir, is_base = FALSE) {
+get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE) {
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
@@ -43,6 +43,35 @@ get_r_messages <- function (dir, is_base = FALSE) {
   # for plural strings, the ordering within lines doesn't really matter since there's only one .pot entry,
   #   so just use the parent's location to get the line number
   plural_strings[ , id := parent]
+
+  # TODO: how hard would it be to run it all at once? i.e. create a fun-arg lookup table and "vectorize" over that
+  #   all at once and for all functions? it would speed things up a bit & also get around the hand-waving now where
+  #   we just specify NON_DOTS_ARGS the same for all the translators (even though they have different signatures)
+  if (length(custom_translation_functions)) {
+    custom_params = parse_r_keywords(custom_translation_functions)
+
+    singular_strings = rbind(
+      singular_strings,
+      rbindlist(lapply(
+        custom_params$singular$dots,
+        function(params) get_dots_strings(expr_data, params$fname, params$excluded_args)
+      )),
+      rbindlist(lapply(
+        custom_params$singular$named,
+        function(params) get_named_arg_strings(expr_data, params$fname, params$args)
+      ))
+    )
+
+    plural_strings = rbind(
+      plural_strings,
+      rbindlist(lapply(
+        custom_params$plural,
+        function(params) get_named_arg_strings(expr_data, params$fname, params$args, plural = TRUE)
+      ))
+    )
+  } else {
+    custom_params = list()
+  }
 
   msg = rbind(
     singular = singular_strings,
@@ -113,9 +142,10 @@ get_r_messages <- function (dir, is_base = FALSE) {
   #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  msg[type == 'plural', 'is_marked_for_translation' := TRUE]
-  msg[type == 'singular', 'is_marked_for_translation' := fname %chin% c(DOMAIN_DOTS_FUNS, 'gettextf')]
+  known_translators = c(DOMAIN_DOTS_FUNS, 'ngettext', 'gettextf', get_fnames(custom_params))
+  msg[ , 'is_marked_for_translation' := fname %chin% known_translators]
 
+  # TODO: assume custom translators are translated? or maybe just check the regex?
   msg[ , "is_templated" := fname == "gettextf"]
   msg[ , "fname" := NULL]
 
@@ -131,9 +161,11 @@ parse_r_files = function(dir, is_base) {
   if (is_base) {
     r_share_dir = file.path(dir, "../../../share")
     if (!dir.exists(file.path(r_share_dir, 'R'))) {
-      stop(domain = NA, gettextf(
-        "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.", "share/R/REMOVE.R"
-      ))
+      # templated to share with src-side message
+      stopf(
+        "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.",
+        "share/R/REMOVE.R"
+      )
     }
     share_files = list_package_files(r_share_dir, 'R', pattern = "(?i)\\.r$")
     out = c(
@@ -145,6 +177,69 @@ parse_r_files = function(dir, is_base) {
   }
   names(out) = r_files
   return(out)
+}
+
+# inspired by the --keyword argument in gettext, but customized to make sense for R.
+# specifically there are two ways to specify a function for translation:
+#   (1) f:arg1|n1[,arg2|n2] - named arguments & positions, e.g. gettextf:fmt|1 and ngettext:msg1|2,msg2|3
+#   (2) f:...\arg1,...,argn - varargs & excluded arguments, e.g. stop:...\call.,domain or message:...\domain,appendLF
+parse_r_keywords = function(spec) {
+  keyval = setDT(tstrsplit(spec, ":", fixed = TRUE))
+  if (ncol(keyval) != 2L) {
+    idx <- if (ncol(keyval) == 1L) seq_along(spec) else which(is.na(keyval$V2))
+    stopf(
+      "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
+      toString(spec[idx])
+    )
+  }
+
+  # not a proper test of R identifiers, but that should be OK, they just won't be found in the result -- no error
+  named_idx = grepl("^[a-zA-Z0-9._]+\\|[0-9]+$", keyval$V2)
+  plural_idx = grepl("^[a-zA-Z0-9._]+\\|[0-9]+,[a-zA-Z0-9._]+\\|[0-9]+$", keyval$V2)
+  dots_idx = grepl("^[.]{3}[\\](?:[a-zA-Z0-9._]+,)*[a-zA-Z0-9._]+$", keyval$V2)
+  if (any(idx <- !named_idx & !dots_idx & !plural_idx)) {
+    stopf(
+      "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
+      toString(spec[idx])
+    )
+  }
+
+  list(
+    singular = list(
+      dots = lapply(
+        which(dots_idx),
+        function(ii) list(
+          fname = keyval$V1[ii],
+          excluded_args = strsplit(gsub("^[.]{3}[\\]", "", keyval$V2[ii]), ",", fixed = TRUE)[[1L]]
+        )
+      ),
+      named = lapply(
+        which(named_idx),
+        function(ii) {
+          arg_keyval = strsplit(keyval$V2[ii], "|", fixed = TRUE)[[1L]]
+          # regex above ensures as.integer() will succeed here
+          list(fname = keyval$V1[ii], args = setNames(as.integer(arg_keyval[2L]), arg_keyval[1L]))
+        }
+      )
+    ),
+    plural = lapply(
+      which(plural_idx),
+      function(ii) {
+        arg_keyval = tstrsplit(strsplit(keyval$V2[ii], ",", fixed = TRUE)[[1L]], "|", fixed = TRUE)
+        # regex above ensures as.integer() will succeed here
+        list(fname = keyval$V1[ii], args = setNames(as.integer(arg_keyval[[2L]]), arg_keyval[[1L]]))
+      }
+    )
+  )
+}
+
+# wrapper for extracting the fnames from the parse_r_keywords object
+get_fnames = function(params) {
+  unlist(c(
+    lapply(params$singular$dots, `[[`, "fname"),
+    lapply(params$singular$named, `[[`, "fname"),
+    lapply(params$plural, `[[`, "fname")
+  ))
 }
 
 # these functions all have a domain= argument. taken from the xgettext source, but could be
@@ -196,10 +291,10 @@ get_named_arg_strings = function(expr_data, fun, args, recursive = FALSE, plural
     {
       idx = shift(token, fill = '') == 'SYMBOL_SUB' & shift(text, fill = '') %chin% names(args)
       if (any(idx) & !all(matched <- names(args) %chin% text[token == 'SYMBOL_SUB'])) {
-        stop(domain = NA, call. = FALSE, gettextf(
+        stopf(
           "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
-          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args))
-        ))
+          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args)), call. = FALSE
+        )
       }
       .(id = id[idx])
     }

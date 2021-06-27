@@ -50,17 +50,21 @@ count_dots = function(call) {
   )
   DT = data.table(call, fname)
   DT[ , 'n_args' := 0L]
-  DT[!fname %chin% c("gettext", "gettextf") & lengths(call) > 2L, by = fname, 'n_args' := {
-    definition = get(.BY$fname)
-    vapply(
-      call,
-      function(x) {
-        e = match.call(definition, x)
-        if (is.null(names(e))) return(length(e) - 1L)
-        return(length(e) - sum(names(e) %chin% c("call.", "immediate.", "noBreaks.", "domain", "appendLF")) - 1L)
-      },
-      integer(1L)
-    )
-  }]
+  DT[
+    fname %chin% c("stop", "warning", "message", "packageStartupMessage") & lengths(call) > 2L,
+    by = fname,
+    'n_args' := {
+      definition = get(.BY$fname)
+      vapply(
+        call,
+        function(x) {
+          e = match.call(definition, x)
+          if (is.null(names(e))) return(length(e) - 1L)
+          return(length(e) - sum(names(e) %chin% c("call.", "immediate.", "noBreaks.", "domain", "appendLF")) - 1L)
+        },
+        integer(1L)
+      )
+    }
+  ]
   DT$n_args
 }

@@ -1,5 +1,5 @@
 show_diagnostic_results <- function(results, diagnostic) {
-  message(domain=NA, gettextf('Found %d %s:', nrow(results), attr(diagnostic, "diagnostic_tag")))
+  messagef('Found %d %s:', nrow(results), attr(diagnostic, "diagnostic_tag"))
 
   for (ii in seq_len(nrow(results))) {
     results[ii, cat(gettextf(

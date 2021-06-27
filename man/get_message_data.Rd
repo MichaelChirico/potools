@@ -7,11 +7,15 @@ Extract user-visible messages from a package
 This function looks in the R and src directories of a package for user-visible messages and compiles them as a \code{\link[data.table]{data.table}} to facilitate analyzing this corpus as such.
 }
 \usage{
-get_message_data(dir=".", src_translation_macros=c("_", "N_"), verbose=FALSE)
+get_message_data(
+  dir=".",
+  custom_translation_functions = list(R = NULL, src = NULL),
+  verbose=FALSE
+)
 }
 \arguments{
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
-  \item{src_translation_macros}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_} and \code{N_}, is shared by R itself & recommended in R-exts and R-ints (See references). }
+  \item{custom_translation_functions}{ A \code{list} with either/both of two components, \code{R} and \code{src}, together governing how to extract any non-standard strings from the package. See Details in \code{\link{translate_package}}. }
   \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
 }
 \value{

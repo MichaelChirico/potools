@@ -22,7 +22,8 @@ translate_package(
 \arguments{
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
   \item{languages}{ Character vector; locale codes to which to translate. See Details. }
-  \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details.}
+  \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details. }
+  \item{custom_translation_functions}{ A \code{list} with either/both of two components, \code{R} and \code{src}, together governing how to extract any non-standard strings from the package. See Details. }
   \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
   \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
@@ -51,6 +52,24 @@ After each language is completed, a corresponding \file{.po} file is written to 
 directory (which is created if it does not yet exist).
 
 There are some discrepancies in the default behavior of \code{translate_package} and the translation workflow used to generate the \file{.po}/\file{.pot} files for R itself (mainly, the suite of functions from \code{tools}, \code{\link[tools]{update_pkg_po}}, \code{\link[tools]{xgettext2pot}}, \code{\link[tools]{xgettext}}, and \code{\link[tools]{xngettext}}). They should only be superficial (e.g., whitespace or comments), but nevertheless may represent a barrier to smoothly submitting patchings to R Core. To make the process of translating base R and the default packages (\code{tools}, \code{utils}, \code{stats}, etc.) as smooth as possible, set the \code{use_base_rules} argument to \code{TRUE} and your resulting \file{.po}/\file{.pot}/\file{.mo} file will match base's.
+
+\bold{Custom translation functions:}
+
+Some package developers may want to write their own messaging interface, or to use wrappers around the base interface (i.e., \code{stop}, \code{warning}, \code{message}, and a few others) which won't be detected by default (e.g. with \code{\link[tools]{update_pkg_po}}).
+
+In such cases, use the \code{custom_translation_functions} argument, whose interface is inspired by the \code{--keyword} argument to the \code{xgettext} command-line tool. This argument consists of a list with two components, \code{R} and \code{src} (either can be excluded), owing to differences between R and C/C++. Both components, if present, should consist of a character vector.
+
+For R, there are two types of input: one for named arguments, the other for unnamed arguments.
+
+Entries for named arguments will look like \code{"fname:arg|num"} (singular string) or \code{"fname:arg1|num1,arg2|num2"} (plural string). \code{fname} gives the name of the function/call to be extracted from the R source, \code{arg}/\code{arg1}/\code{arg2} specify the name of the argument to \code{fname} from which strings should be extracted, and \code{num}/\code{num1}/\code{num2} specify the \emph{order} of the named argument within the signature of \code{fname}.
+
+Entries for unnamed arguments will look like \code{"fname:...\\xarg1,...,xargn"}. All strings within calls to \code{fname} \emph{except} those supplied to the arguments named among \code{xarg1}, ..., \code{xargn} will be extracted.
+
+To clarify, consider the how we would (redundantly) specify \code{custom_translation_functions} for some of the default messagers, \code{gettext}, \code{gettextf}, and \code{ngettext}: \code{custom_translation_functions = list(R = c("gettext:...\\domain", "gettextf:fmt|1", "ngettext:msg1|2,msg2|3"))}.
+
+For src, there is only one type of input, which looks like \code{"fname:num"}, which says to look at the \code{num} argument of calls to \code{fname} for \code{char} arrays.
+
+Note that there is a difference in how translation works for src vs. R -- in R, all strings passed to certain functions are considered marked for translations, but in src, all translatable strings must be explicitly marked as such. So for \code{src} translations, \code{custom_translation_functions} is not used to customize which strings are marked for translation, but rather, to expand the set of calls which are searched for potentially \emph{untranslated} arrays (i.e., arrays passed to the specified calls that are not explicitly marked for translation). These can then be reported in the \code{\link{check_untranslated_src}} diagnostic, for example.
 
 \bold{Diagnostics:}
 

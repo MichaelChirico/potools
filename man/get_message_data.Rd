@@ -15,6 +15,7 @@ get_message_data(
 }
 \arguments{
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
+  \item{custom_translation_functions}{ A \code{list} with either/both of two components, \code{R} and \code{src}, together governing how to extract any non-standard strings from the package. See Details in \code{\link{translate_package}}. }
   \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
 }
 \value{

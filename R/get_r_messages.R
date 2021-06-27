@@ -188,7 +188,7 @@ parse_r_keywords = function(spec) {
   if (ncol(keyval) != 2L) {
     idx <- if (ncol(keyval) == 1L) seq_along(spec) else which(is.na(keyval$V2))
     stopf(
-      "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
+      "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
       toString(spec[idx])
     )
   }
@@ -199,7 +199,7 @@ parse_r_keywords = function(spec) {
   dots_idx = grepl("^[.]{3}[\\](?:[a-zA-Z0-9._]+,)*[a-zA-Z0-9._]+$", keyval$V2)
   if (any(idx <- !named_idx & !dots_idx & !plural_idx)) {
     stopf(
-      "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
+      "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
       toString(spec[idx])
     )
   }

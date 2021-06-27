@@ -56,3 +56,37 @@ test_that("Custom translation functions work in R and src", {
     list(NULL, NULL, NULL, NULL, c("singular", "plural"), c("another singular", "another plural"), NULL, NULL)
   )
 })
+
+test_that("faulty custom_translation_functions specs error", {
+  expect_error(
+    get_message_data(
+      test_package("custom_translation"),
+      custom_translation_functions = list(src = "abc:def")
+    ),
+    "All inputs for src must be key-value pairs like fn:arg1", fixed = TRUE
+  )
+
+  expect_error(
+    get_message_data(
+      test_package("custom_translation"),
+      custom_translation_functions = list(R = "abc")
+    ),
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+  )
+
+  expect_error(
+    get_message_data(
+      test_package("custom_translation"),
+      custom_translation_functions = list(R = "abc:def:ghi")
+    ),
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+  )
+
+  expect_error(
+    get_message_data(
+      test_package("custom_translation"),
+      custom_translation_functions = list(R = "abc:def")
+    ),
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+  )
+})

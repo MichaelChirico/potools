@@ -4,6 +4,7 @@ importFrom(data.table, set, setattr, setcolorder, setDT, setindexv, setkeyv, set
 importFrom(data.table, `:=`, .BY, .N, .SD)
 importFrom(data.table, fcase, fifelse, shift, tstrsplit)
 
+importFrom(stats, setNames)
 importFrom(utils, getParseData, globalVariables, head, tail, type.convert)
 
 export(translate_package)

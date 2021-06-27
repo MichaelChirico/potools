@@ -12,7 +12,9 @@ globalVariables(
     'array_start', 'i.array_start', 'array_end', 'i.array_end', 'call_start', 'x.call_start', 'i.call_start',
     'paren_start', 'i.paren_start', 'paren_end', 'i.paren_end', 'x.paren_end',
     'i.msgid', 'replacement', 'non_spurious', 'str_arg',
-    '.'
+    'start', 'start.x', 'end', 'special', 'redirect_start', 'redirect_length', 'id_start', 'id_length',
+    'width_precision', 'width_precision_start', 'width_precision_length', 'by_id',
+    '.', 'N'
   ),
   package = 'potools'
 )

@@ -76,6 +76,7 @@ get_file_src_messages = function(file, custom_params = NULL) {
   # as a single string
   contents = paste(contents_char, collapse = "")
 
+  # NB: should still be fine to look only for \n on windows
   newlines_loc = c(0L, as.integer(gregexpr("\n", contents, fixed = TRUE)[[1L]]))
 
   # need to strip out arrays from matching translation arrays, e.g. if we have
@@ -105,7 +106,7 @@ get_file_src_messages = function(file, custom_params = NULL) {
   if (length(quote_idx) %% 2L != 0L) {
     stopf(
       'Parsing error: found an odd number (%d) of unscaped double quotes (") in %s.',
-      length(quote_idx), file, call. = FALSE
+      length(quote_idx), file
     )
   }
   arrays <- as.data.table(matrix(quote_idx, ncol = 2L, byrow = TRUE))
@@ -322,13 +323,15 @@ preprocess = function(contents) {
         if (contents[ii + 1L] == "/") {
           jj = ii + 2L
           while (jj <= nn && contents[jj] != "\n") { jj = jj + 1L }
-          contents[ii:(jj - 1L)] = " "
+          # blank the comment, not the newline; also don't overwrite \r on Windows
+          contents[ii:(jj - 1L - (contents[jj-1L] == "\r"))] = " "
           ii = jj
         } else if (contents[ii + 1L] == "*") {
           jj = ii + 2L
           while (jj <= nn - 1L && (contents[jj] != "*" || contents[jj + 1L] != "/")) { jj = jj + 1L }
           idx = ii:(jj + 1L)
-          contents[idx] = fifelse(contents[idx] == "\n", "\n", " ")
+          # <3 windows
+          contents[idx] = fifelse(contents[idx] %chin% c("\n", "\r"),  contents[idx], " ")
           ii = jj + 1L
         }
       },
@@ -376,7 +379,7 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
   # file & newlines_loc both only needed for this error region which is a bit awkward
   if (jj > nn) stopf(
     "Parsing error: unmatched parentheses in %s starting from line %d",
-    file, findInterval(ii, newlines_loc), call. = FALSE
+    file, findInterval(ii, newlines_loc)
   )
 
   jj
@@ -384,7 +387,7 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
 
 build_msgid = function(left, right, starts, ends, contents) {
   grout = get_grout(left, right, starts, ends, contents)
-  grout = gsub("[\n\t ]", "", grout)
+  grout = gsub("[\n\r\t ]", "", grout)
 
   # Only the first array is extracted from ternary operator usage inside _(), #154
   # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse

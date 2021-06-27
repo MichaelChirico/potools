@@ -1,7 +1,6 @@
 get_message_data = function(
   dir = ".",
   custom_translation_functions = list(R = NULL, src = NULL),
-  src_translation_macros = c("_", "N_"),
   verbose = FALSE
 ) {
   package = get_desc_data(dir)['Package']
@@ -18,7 +17,6 @@ get_message_data = function(
   src_message_data = get_src_messages(
     dir,
     custom_translation_functions = custom_translation_functions$src,
-    src_translation_macros,
     is_base
   )
 

@@ -14,7 +14,7 @@ To do so, it builds on low-level command line tools from \code{gettext}. See Det
 translate_package(
   dir='.', languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
-  src_translation_macros = c("_", "N_"),
+  custom_translation_functions = list(R = NULL, src = NULL),
   use_base_rules = package \%chin\% .potools$base_package_names,
   copyright = NULL, bugs = NULL, verbose=FALSE
 )
@@ -23,7 +23,6 @@ translate_package(
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
   \item{languages}{ Character vector; locale codes to which to translate. See Details. }
   \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details.}
-  \item{src_translation_macros}{ Character, the macro used to indicate which \code{char} arrays are to be marked for translation in C/C++ files. The default, \code{_} and \code{N_}, is shared by R itself & recommended in R-exts and R-ints (See references). }
   \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
   \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }

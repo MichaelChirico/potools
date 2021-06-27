@@ -54,11 +54,11 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
       singular_strings,
       rbindlist(lapply(
         custom_params$singular$dots,
-        function(params) get_dots_strings(expr_data, params$call, params$excluded_args)
+        function(params) get_dots_strings(expr_data, params$fname, params$excluded_args)
       )),
       rbindlist(lapply(
         custom_params$singular$named,
-        function(params) get_named_arg_strings(expr_data, params$call, params$args)
+        function(params) get_named_arg_strings(expr_data, params$fname, params$args)
       ))
     )
 
@@ -66,7 +66,7 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
       plural_strings,
       rbindlist(lapply(
         custom_params$plural,
-        function(params) get_named_arg_strings(expr_data, params$call, params$args, plural = TRUE)
+        function(params) get_named_arg_strings(expr_data, params$fname, params$args, plural = TRUE)
       ))
     )
   }
@@ -183,7 +183,7 @@ parse_r_keywords = function(spec) {
   if (ncol(keyval) != 2L) {
     idx <- if (ncol(keyval) == 1L) seq_along(spec) else which(is.na(keyval$V2))
     stop(domain = NA, gettextf(
-      "Invalid custom translator specification(s): %s.\nAll inputs must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
+      "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
       toString(spec[idx])
     ))
   }
@@ -194,7 +194,7 @@ parse_r_keywords = function(spec) {
   dots_idx = grepl("^[.]{3}[\\](?:[a-zA-Z0-9._]+,)*[a-zA-Z0-9._]+$", keyval$V2)
   if (any(idx <- !named_idx & !dots_idx & !plural_idx)) {
     stop(domain = NA, gettextf(
-      "Invalid custom translator specification(s): %s.\nAll inputs must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
+      "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\arg1,...,argn.",
       toString(spec[idx])
     ))
   }
@@ -204,7 +204,7 @@ parse_r_keywords = function(spec) {
       dots = lapply(
         which(dots_idx),
         function(ii) list(
-          call = keyval$V1[ii],
+          fname = keyval$V1[ii],
           excluded_args = strsplit(gsub("^[.]{3}[\\]", "", keyval$V2[ii]), ",", fixed = TRUE)[[1L]]
         )
       ),
@@ -213,7 +213,7 @@ parse_r_keywords = function(spec) {
         function(ii) {
           arg_keyval = strsplit(keyval$V2[ii], "|", fixed = TRUE)[[1L]]
           # regex above ensures as.integer() will succeed here
-          list(call = keyval$V1[ii], args = setNames(as.integer(arg_keyval[2L]), arg_keyval[1L]))
+          list(fname = keyval$V1[ii], args = setNames(as.integer(arg_keyval[2L]), arg_keyval[1L]))
         }
       )
     ),
@@ -222,7 +222,7 @@ parse_r_keywords = function(spec) {
       function(ii) {
         arg_keyval = tstrsplit(strsplit(keyval$V2[ii], ",", fixed = TRUE)[[1L]], "|", fixed = TRUE)
         # regex above ensures as.integer() will succeed here
-        list(call = keyval$V1[ii], args = setNames(as.integer(arg_keyval[[2L]]), arg_keyval[[1L]]))
+        list(fname = keyval$V1[ii], args = setNames(as.integer(arg_keyval[[2L]]), arg_keyval[[1L]]))
       }
     )
   )

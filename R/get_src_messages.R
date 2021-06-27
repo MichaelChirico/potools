@@ -1,4 +1,8 @@
-get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), is_base = FALSE) {
+get_src_messages = function(
+  dir = ".",
+  custom_translation_functions = NULL,
+  is_base = FALSE
+) {
   if (is_base) {
     potfiles_loc <- file.path(dir, "../../../po/POTFILES")
     if (!file.exists(potfiles_loc)) {
@@ -17,12 +21,14 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), is_bas
 
   if (!length(src_files)) return(src_msg_schema())
 
+  custom_params = parse_src_keywords(custom_translation_functions)
+
   msg = rbindlist(
-    lapply(normalizePath(file.path(dir, src_files)), get_file_src_messages, translation_macros),
+    lapply(normalizePath(file.path(dir, src_files)), get_file_src_messages, custom_params),
     idcol = "file"
   )
 
-  msg[ , "type" := fifelse(fname == "ngettext", "plural", "singular")]
+  msg[ , "type" := fifelse(fname == 'ngettext', "plural", "singular")]
 
   # TODO: R side also uses column_number to sort, but it's ~basically~ not relevant for C... yet
   # in_subdir done for #104; see also the comment in get_r_messages.R.
@@ -61,7 +67,7 @@ get_src_messages = function(dir = ".", translation_macros = c("_", "N_"), is_bas
   msg[]
 }
 
-get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
+get_file_src_messages = function(file, custom_params = NULL) {
   contents = readChar(file, file.size(file))
   # as a vector of single characters
   contents_char = preprocess(strsplit(contents, NULL)[[1L]])
@@ -143,7 +149,7 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
   )]
   setkeyv(calls, c('paren_start', 'paren_end'))
 
-  translation_idx = calls[ , fname %chin% translation_macros]
+  translation_idx = calls[ , fname %chin% DEFAULT_MACROS]
   translations = calls[(translation_idx), .(fname, paren_start, paren_end)]
   # run here in case nrow(translations)=0
   translations[ , "is_marked_for_translation" := TRUE]
@@ -156,7 +162,7 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
   # Vectorize over calls with just one array for efficiency
   # NB: down the route using `if (.N == 1) .I` lies anguish & suffering from edge cases.
   singular_array_idx = call_arrays[ , if (.N == 1L) TRUE else rep(FALSE, .N), by = .(paren_start, paren_end)]$V1
-  translation_array_idx = call_arrays[ , fname %chin% translation_macros]
+  translation_array_idx = call_arrays[ , fname %chin% DEFAULT_MACROS]
   translations[
     call_arrays[translation_array_idx & singular_array_idx],
     on = c('paren_start', 'paren_end'),
@@ -205,7 +211,17 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
 
   # drop calls associated with a translation, and anything but "known" messaging functions
   call_arrays = call_arrays[!translations, on = 'call_start']
-  call_arrays = call_arrays[fname %chin% MESSAGE_CALLS$fname]
+  if (length(custom_params)) {
+    # NB: could potentially save & do this just once (vs now: once per file), but it should be very cheap to do
+    message_calls = rbind(
+      DEFAULT_MESSAGE_CALLS,
+      custom_params
+    )
+    setkeyv(message_calls, "fname")
+  } else {
+    message_calls = DEFAULT_MESSAGE_CALLS
+  }
+  call_arrays = call_arrays[fname %chin% message_calls$fname]
 
   singular_array_idx = call_arrays[ , if (.N == 1L) TRUE else rep(FALSE, .N), by = .(paren_start, paren_end)]$V1
   untranslated = rbind(
@@ -224,7 +240,11 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
       .(
         array_start = array_start[1L],
         msgid = NA_character_,
-        msgid_plural = build_msgid_plural(.BY$fname, .BY$paren_start, .BY$paren_end, array_start, array_end, contents),
+        msgid_plural = build_msgid_plural(
+          .BY$fname, .BY$paren_start, .BY$paren_end,
+          array_start, array_end,
+          contents, message_calls
+        ),
         call = safe_substring(contents, .BY$call_start, .BY$paren_end)
       ),
       by = .(fname, call_start, paren_start, paren_end)
@@ -251,6 +271,22 @@ get_file_src_messages = function(file, translation_macros = c("_", "N_")) {
   src_messages[ , "array_start" := NULL]
   setcolorder(src_messages, c("msgid", "msgid_plural", "line_number", "fname", "call", "is_marked_for_translation"))
   src_messages[]
+}
+
+# TODO: support custom plural messaging functions in src? only really did so on the base side since it's
+#   no added complexity to do so, whereas it would be here.
+parse_src_keywords = function(spec) {
+  if (!all(idx <- grepl("[a-z0-9_]+:[0-9]+", spec))) {
+    stop(domain = NA, gettextf(
+      "Invalid custom translator specification(s): %s.\nAll inputs for src must be key-value pairs like fn:arg1. Custom plural messagers are not yet supported.",
+      toString(spec[!idx])
+    ))
+  }
+
+  keyval = setDT(tstrsplit(spec, ":", fixed = TRUE))
+  setnames(keyval, c("fname", "str_arg"))
+  set(keyval, NULL, "str_arg", as.integer(keyval$str_arg))
+  keyval
 }
 
 # strip comments (specifically, overwrite them to " " so all
@@ -364,12 +400,13 @@ build_msgid = function(left, right, starts, ends, contents) {
 
 # this could probably go for more stress testing. it didn't _crash_ on base, but
 #   I haven't vetted whether it gets the results right always (just for the one dgettext() usage in base)
-build_msgid_plural = function(fun, left, right, starts, ends, contents) {
+build_msgid_plural = function(fun, left, right, starts, ends, contents, message_calls) {
   if (!length(starts)) return(list())
 
   grout = get_grout(left, right, starts, ends, contents)
-  target_arg = MESSAGE_CALLS[.(fun), str_arg]
+  target_arg = message_calls[.(fun), str_arg]
 
+  # this is not really the same as the implicit xgettext behavior of --keyword=dngettext:2,3
   if (target_arg == 0L) {
     msgid_plural = character()
     msgid = ''
@@ -420,8 +457,10 @@ get_grout = function(left, right, starts, ends, contents) {
   grout
 }
 
+DEFAULT_MACROS = c("_", "N_")
+
 # gleaned from iterating among WRE, src/include/Rinternals.h, src/include/R_ext/{Error.h,Print.h}
-MESSAGE_CALLS = data.table(
+DEFAULT_MESSAGE_CALLS = data.table(
   fname = c(
     "ngettext",
     "Rprintf", "REprintf", "Rvprintf", "REvprintf",

@@ -20,6 +20,8 @@ sexto
 \\t vs \t es OK
 string con "comillas" son OK
 string con "comillas" escapado son OK
+parte 1 %s
+parte 2
 singular
 plural
 falta pequena

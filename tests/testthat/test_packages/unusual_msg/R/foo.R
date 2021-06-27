@@ -48,6 +48,7 @@ f5 <- function(y) {
   message('strings with "quotes" are OK')
   message("strings with escaped \"quotes\" are OK")
   message(domain = NA, gettextf(
-    paste("part 1 %s", "part 2")
+    paste("part 1 %s", "part 2"),
+    "input"
   ))
 }

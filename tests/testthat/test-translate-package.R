@@ -270,13 +270,17 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
       r_pot_file <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_file <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
-      # (1) raw strings edge cases
-      # (2) whitespace trimming behavior (trim for R singular, don't for R plural)
-      # (3) repeated escapables (#130)
+      # (1)-(4) raw strings edge cases
+      # (5)-(6) whitespace trimming behavior (trim for R singular, don't for R plural)
+      # (7) repeated escapables (#130)
+      # (8)-(9) gettextf(paste()) gets nested strings (#163)
       expect_all_match(
         r_pot_file,
-        c('msgid "\'abc\'"', 'msgid "\\"def\\""', 'msgid "R(\'abc\')"', 'msgid "r(\\"def\\")"', 'msgid "ghi"',
-          'good %s', 'msgid "singular "', '"I warned you!"'),
+        c(
+          'msgid "\'abc\'"', 'msgid "\\"def\\""', 'msgid "R(\'abc\')"', 'msgid "r(\\"def\\")"',
+          'msgid "ghi"', 'good %s', 'msgid "singular "', '"I warned you!"',
+          'msgid "part 1 %s"', 'msgid "part 2"'
+        ),
         fixed = TRUE
       )
 

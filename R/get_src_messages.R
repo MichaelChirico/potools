@@ -76,6 +76,7 @@ get_file_src_messages = function(file, custom_params = NULL) {
   # as a single string
   contents = paste(contents_char, collapse = "")
 
+  # NB: should still be fine to look only for \n on windows
   newlines_loc = c(0L, as.integer(gregexpr("\n", contents, fixed = TRUE)[[1L]]))
 
   # need to strip out arrays from matching translation arrays, e.g. if we have
@@ -322,13 +323,15 @@ preprocess = function(contents) {
         if (contents[ii + 1L] == "/") {
           jj = ii + 2L
           while (jj <= nn && contents[jj] != "\n") { jj = jj + 1L }
-          contents[ii:(jj - 1L)] = " "
+          # blank the comment, not the newline; also don't overwrite \r on Windows
+          contents[ii:(jj - 1L - (contents[jj-1L] == "\r"))] = " "
           ii = jj
         } else if (contents[ii + 1L] == "*") {
           jj = ii + 2L
           while (jj <= nn - 1L && (contents[jj] != "*" || contents[jj + 1L] != "/")) { jj = jj + 1L }
           idx = ii:(jj + 1L)
-          contents[idx] = fifelse(contents[idx] == "\n", "\n", " ")
+          # <3 windows
+          contents[idx] = fifelse(contents[idx] %chin% c("\n", "\r"),  contents[idx], " ")
           ii = jj + 1L
         }
       },
@@ -384,7 +387,7 @@ skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
 
 build_msgid = function(left, right, starts, ends, contents) {
   grout = get_grout(left, right, starts, ends, contents)
-  grout = gsub("[\n\t ]", "", grout)
+  grout = gsub("[\n\r\t ]", "", grout)
 
   # Only the first array is extracted from ternary operator usage inside _(), #154
   # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse

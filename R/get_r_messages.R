@@ -69,6 +69,8 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
         function(params) get_named_arg_strings(expr_data, params$fname, params$args, plural = TRUE)
       ))
     )
+  } else {
+    custom_params = list()
   }
 
   msg = rbind(

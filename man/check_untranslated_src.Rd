@@ -20,6 +20,26 @@ This diagnostic looks for literal \code{char} arrays passed to messaging functio
 \value{
 A \code{data.table} with columns \code{call}, \code{file}, \code{line_number}, and \code{replacement} summarizing the results. \code{replacement} is \code{NA} at this time, i.e., no replacement is provided.
 }
+\examples{
+pkg <- file.path(system.file(package = 'potools'), 'pkg')
+# copy to a temporary location to be able to read/write/update below
+tmp_pkg <- file.path(tempdir(), "pkg")
+dir.create(tmp_pkg)
+file.copy(pkg, dirname(tmp_pkg), recursive = TRUE)
+
+# first, extract message data
+message_data = get_message_data(
+  tmp_pkg,
+  custom_translation_functions = list(src = "ReverseTemplateMessage:2")
+)
+
+# now, diagnose the messages for any untranslated messages in C/C++
+check_untranslated_src(message_data)
+
+# cleanup
+unlink(tmp_pkg, recursive = TRUE)
+rm(pkg, tmp_pkg, message_data)
+}
 \seealso{
 \code{\link{translate_package}}, \code{\link{update_pkg_po}}
 }

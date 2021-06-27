@@ -200,7 +200,6 @@ test_that("Packages with src code work correctly", {
     tmp_conn = mock_translation('test-translate-package-r_src_c-1.input'),
     {
       translate_package(pkg, "zh_CN", diagnostics = check_untranslated_src)
-      browser()
 
       pkg_files <- list.files(pkg, recursive = TRUE)
       expect_true("po/R-zh_CN.po" %in% pkg_files)

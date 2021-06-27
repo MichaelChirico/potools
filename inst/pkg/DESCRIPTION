@@ -1,0 +1,6 @@
+Package: potoolsExample
+Version: 0.0.1
+Title: Test package for potools examples
+Author: Michael Chirico
+Description: Some illustrative usages for running the package functions in examples
+

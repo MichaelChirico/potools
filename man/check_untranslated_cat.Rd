@@ -24,6 +24,23 @@ NB: not all \code{cat} calls are included -- in particular, no \code{cat} call s
 \value{
 A \code{data.table} with columns \code{call}, \code{file}, \code{line_number}, and \code{replacement} summarizing the results.
 }
+\examples{
+pkg <- file.path(system.file(package = 'potools'), 'pkg')
+# copy to a temporary location to be able to read/write/update below
+tmp_pkg <- file.path(tempdir(), "pkg")
+dir.create(tmp_pkg)
+file.copy(pkg, dirname(tmp_pkg), recursive = TRUE)
+
+# first, extract message data
+message_data = get_message_data(tmp_pkg)
+
+# now, diagnose the messages for any untranslated strings shown through cat()
+check_untranslated_cat(message_data)
+
+# cleanup
+unlink(tmp_pkg, recursive = TRUE)
+rm(pkg, tmp_pkg, message_data)
+}
 \seealso{
 \code{\link{translate_package}}, \code{\link{update_pkg_po}}
 }

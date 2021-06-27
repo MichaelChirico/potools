@@ -1,0 +1,3 @@
+useDynLib(potoolsExample, .registration = TRUE)
+
+export(add, reverse)

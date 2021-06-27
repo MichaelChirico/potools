@@ -175,7 +175,7 @@ translate_package = function(
         "Some helpful reminders:\n",
         " * You can skip a translation by entering nothing (just press RETURN)\n",
         " * Special characters (like newlines, \\n, or tabs, \\t) should be written just like that (with an escape)\n",
-        " * Be sure to match message templates. The count of templates (%s, %d, etc.) must match in all languages\n",
+        " * Be sure to match message templates. The count of templates (%s, %d, etc.) must match in all languages, as must initial and terminal newlines (\\n)\n",
         " * While the count of templates must match, the _order_ can be changed by using e.g. %2$s to mean 'use the second input as a string here'\n",
         " * Whenever templates or escaping is happening in a string, these will be 'highlighted' by carets (^) in the line below"
       )

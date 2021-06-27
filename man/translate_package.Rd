@@ -124,6 +124,27 @@ This function returns nothing invisibly. As a side effect, a \file{.pot} file is
 \file{po} directory (updated if one does not yet exist, or created from scratch otherwise), and a
 \file{.po} file is written in the same directory for each element of \code{languages}.
 }
+\examples{
+pkg <- file.path(system.file(package = 'potools'), 'pkg')
+# copy to a temporary location to be able to read/write/update below
+tmp_pkg <- file.path(tempdir(), "pkg")
+dir.create(tmp_pkg)
+file.copy(pkg, dirname(tmp_pkg), recursive = TRUE)
+
+# run translate_package() without any languages
+# this will generate a .pot template file and en@quot translations (in UTF-8 locales)
+# we can also pass empty 'diagnostics' to skip the diagnostic step
+translate_package(tmp_pkg, diagnostics = NULL)
+
+\dontrun{
+# launches the interactive translation dialog for translations into Estonian:
+translate_package(tmp_pkg, "et_EE", diagnostics = NULL, verbose = TRUE)
+}
+
+# cleanup
+unlink(tmp_pkg, recursive = TRUE)
+rm(pkg, tmp_pkg)
+}
 \references{
 \url{https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Internationalization} \cr
 \url{https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Internationalization} \cr

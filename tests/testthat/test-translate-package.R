@@ -459,20 +459,23 @@ test_that("translation of 'base' works correctly", {
     {
       # NB: it seems file.rename doesn't work for directories on Windows, so we have the
       #   more cumbersome file.copy() approach here
-      correct_location <- file.path(pkg, '../../../share')
+      correct_share <- file.path(pkg, '../../../share')
       tmp_share <- file.path(tempdir(), 'share')
       dir.create(tmp_share)
       on.exit(unlink(tmp_share, recursive=TRUE))
-      file.copy(dirname(correct_location), tmp_share, recursive = TRUE)
-      unlink(correct_location, recursive = TRUE)
+      file.copy(dirname(correct_share), tmp_share, recursive = TRUE)
+      unlink(correct_share, recursive = TRUE)
       expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
-      dir.create(correct_location)
-      file.copy(tmp_share, dirname(correct_location), recursive = TRUE)
+      dir.create(correct_share)
+      file.copy(tmp_share, dirname(correct_share), recursive = TRUE)
 
-      correct_location <- normalizePath(file.path(pkg, '../../../po/POTFILES'))
-      expect_true(file.rename(correct_location, tmp_potfiles <- tempfile()))
+      correct_potfiles <- normalizePath(file.path(pkg, '../../../po/POTFILES'))
+      # tried file.rename, but it fails on some systems (e.g. Debian) as an "Invalid cross-device link"
+      expect_true(file.copy(correct_potfiles, tmp_potfiles <- tempfile()))
+      unlink(correct_potfiles)
       expect_error(translate_package(pkg, diagnostics = NULL), "Translation of the 'base' package", fixed = TRUE)
-      file.rename(tmp_potfiles, correct_location)
+      file.copy(tmp_potfiles, correct_potfiles)
+      on.exit(unlink(tmp_potfiles), add = TRUE)
 
       translate_package(pkg, diagnostics = NULL)
 

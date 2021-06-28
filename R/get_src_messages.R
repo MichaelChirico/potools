@@ -253,7 +253,7 @@ get_file_src_messages = function(file, custom_params = NULL) {
   # awkward workaround to error(ngettext("a", "b")) returning error:"a"
   # TODO: revisit build_msgid_plural not to need this step
   # msgid != "NA" for #184... could be revisited. I'm too motivated to fix it quickly.
-  untranslated = untranslated[!msgid %chin% unlist(msgid_plural) & msgid != "NA"]
+  untranslated = untranslated[!msgid %chin% unlist(msgid_plural) & (is.na(msgid) | msgid != "NA")]
 
   # use paren_start for translated arrays to get the line number right when the call & array lines differ
   src_messages = rbind(

@@ -27,9 +27,16 @@
 #include <Defn.h>
 #include <R_ext/GraphicsEngine.h>
 
-#include "grDevices.h"
+#ifdef ENABLE_NLS
+#include <libintl.h>
+#undef _
+// here as a regression test for #184
+#define _(String) dgettext ("grDevices", String)
+#else
+#define _(String) (String)
+#endif
 
-SEXP setMask(SEXP args) 
+SEXP setMask(SEXP args)
 {
     pGEDevDesc dd = GEcurrentDevice();
     SEXP mask = CADR(args);

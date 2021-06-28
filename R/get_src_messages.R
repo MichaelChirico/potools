@@ -226,33 +226,23 @@ get_file_src_messages = function(file, custom_params = NULL) {
   }
   call_arrays = call_arrays[fname %chin% message_calls$fname]
 
-  singular_array_idx = call_arrays[ , if (.N == 1L) TRUE else rep(FALSE, .N), by = .(paren_start, paren_end)]$V1
-  untranslated = rbind(
-    call_arrays[
-      (singular_array_idx),
-      .(
-        fname, call_start, paren_start, paren_end,
-        array_start,
-        msgid = safe_substring(contents, array_start + 1L, array_end - 1L),
-        msgid_plural = list(),
-        call = safe_substring(contents, call_start, paren_end)
-      )
-    ],
-    call_arrays[
-      (!singular_array_idx),
-      .(
-        array_start = array_start[1L],
-        msgid = NA_character_,
-        msgid_plural = build_msgid_plural(
-          .BY$fname, .BY$paren_start, .BY$paren_end,
-          array_start, array_end,
-          contents, message_calls
-        ),
-        call = safe_substring(contents, .BY$call_start, .BY$paren_end)
+  # skip checking for singular arrays, since build_msgid_plural is doing a check
+  #   on if that singular array should be translated to begin with (by vetting against message_calls)
+  # NB: it's a bit sleight-of-hand-y to call it build_msgid_plural() when it's more like "extract_messages"
+  untranslated = call_arrays[
+    ,
+    .(
+      array_start = array_start[1L],
+      msgid = NA_character_,
+      msgid_plural = build_msgid_plural(
+        .BY$fname, .BY$paren_start, .BY$paren_end,
+        array_start, array_end,
+        contents, message_calls
       ),
-      by = .(fname, call_start, paren_start, paren_end)
-    ]
-  )
+      call = safe_substring(contents, .BY$call_start, .BY$paren_end)
+    ),
+    by = .(fname, call_start, paren_start, paren_end)
+  ]
 
   untranslated[ , "is_marked_for_translation" := fname %chin% c("dgettext", "ngettext")]
   untranslated[
@@ -262,7 +252,8 @@ get_file_src_messages = function(file, custom_params = NULL) {
 
   # awkward workaround to error(ngettext("a", "b")) returning error:"a"
   # TODO: revisit build_msgid_plural not to need this step
-  untranslated = untranslated[!msgid %chin% unlist(msgid_plural)]
+  # msgid != "NA" for #184... could be revisited. I'm too motivated to fix it quickly.
+  untranslated = untranslated[!msgid %chin% unlist(msgid_plural) & (is.na(msgid) | msgid != "NA")]
 
   # use paren_start for translated arrays to get the line number right when the call & array lines differ
   src_messages = rbind(
@@ -420,7 +411,7 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents, message_
     msgid = ''
     n_grout = length(grout)
     for (ii in 2:length(grout)) {
-      msgid = paste0(msgid, substring(contents, starts[ii-1L]+1L, ends[ii-1L]-1L))
+      msgid = paste0(msgid, safe_substring(contents, starts[ii-1L]+1L, ends[ii-1L]-1L))
       if (ii == n_grout || grepl(',', grout[ii], fixed = TRUE)) {
         msgid_plural = c(msgid_plural, msgid)
         msgid = ''
@@ -443,7 +434,7 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents, message_
     }
     jj = ii
     while (jj < length(grout) && !grepl(",", grout[jj], fixed = TRUE)) { jj = jj + 1L }
-    msgid = paste(substring(contents, starts[ii:jj - 1L]+1L, ends[ii:jj - 1L]-1L), collapse = '')
+    msgid = paste(safe_substring(contents, starts[ii:jj - 1L]+1L, ends[ii:jj - 1L]-1L), collapse = '')
     msgid_plural = msgid
   }
   return(list(msgid_plural))
@@ -474,7 +465,7 @@ DEFAULT_MESSAGE_CALLS = data.table(
     "Rprintf", "REprintf", "Rvprintf", "REvprintf",
     "R_ShowMessage", "R_Suicide",
     "warning", "Rf_warning", "error", "Rf_error",
-    "dgettext", # NB: xgettext ignores the domain when extracting templates, so we don't bother checking either
+    "dgettext", # NB: xgettext ignores the domain (first arg) when extracting templates, so we don't bother checking either
     "snprintf"
   ),
   str_arg = c(0L, rep(1L, 10L), 2L, 3L),

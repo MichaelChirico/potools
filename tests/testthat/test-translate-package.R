@@ -318,7 +318,7 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
         c(
           'looks like [*]/ "', 'looks like %s "', '"This message[\\]n"',
           '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c:13',
-          '"any old message"', '#: msg[.]c:[0-9]+\nmsgid "a message in a macro"',
+          '"any old message"', '#: msg[.]c:[0-9]+\n#, c-format\nmsgid "a message in a macro %s"',
           '#: msg[.]c:[0-9]+ msg[.]c:[0-9]+\nmsgid "abc"',
           '#:( msg[.]c:[0-9]+){3}\nmsgid "abcdef"',
           '#: msg[.]c:[0-9]+ msg[.]c:[0-9]+\n#, c-format\nmsgid "This one does not[\\]n"'
@@ -442,10 +442,10 @@ test_that("use_base_rules is auto-detected", {
         fixed = TRUE
       )
 
-      # message is in src/cairo subdirectory which is excluded because use_base_rules is detected as TRUE
+      # first argument to dgettext() should be ignored, #184
       expect_all_match(
         src_pot_lines,
-        'unimplemented cairo-based device',
+        'msgid "grDevices"',
         fixed = TRUE, invert = TRUE
       )
     }

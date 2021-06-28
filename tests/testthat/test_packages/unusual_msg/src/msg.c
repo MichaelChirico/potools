@@ -6,7 +6,7 @@
 #include "po.h"
 
 // a message not found within a call still gets assigned a source line, #133
-#define MSG _("a message in a macro")
+#define MSG _("a message in a macro %s")
 
 void hello_world(SEXP x) {
   // odd-ish spacing in implicit-cat char arrays, and implicit cat ending with macro
@@ -87,5 +87,8 @@ void hello_world(SEXP x) {
 
   // snprintf calls always get c-format tagged, even when the other appearance of the msgid is not a template call
   snprintf(BUF, 100, _("This one does not\n"));
+
+  // don't fail when using the macro message
+  error(MSG, "unknown");
   return;
 }

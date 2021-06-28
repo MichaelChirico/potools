@@ -318,7 +318,7 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
         c(
           'looks like [*]/ "', 'looks like %s "', '"This message[\\]n"',
           '#, c-format\nmsgid "Exotic formatters', '#: msg[.]c.*#: cairo/bedfellows[.]c:13',
-          '"any old message"', '#: msg[.]c:[0-9]+\nmsgid "a message in a macro"',
+          '"any old message"', '#: msg[.]c:[0-9]+\n#, c-format\nmsgid "a message in a macro %s"',
           '#: msg[.]c:[0-9]+ msg[.]c:[0-9]+\nmsgid "abc"',
           '#:( msg[.]c:[0-9]+){3}\nmsgid "abcdef"',
           '#: msg[.]c:[0-9]+ msg[.]c:[0-9]+\n#, c-format\nmsgid "This one does not[\\]n"'

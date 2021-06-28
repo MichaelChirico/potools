@@ -28,7 +28,7 @@ falta pequena
 falta grande
 un string traducida con plantilla: %<PRId64>\n
 cualquier mensaje viejo
-un mensage en un macro
+un mensage en un macro %s
 eso es un %<PRId64> pared grande sobre %<PRIu64>
 /* esto es lo que parece un comment en C */
 // esto es lo que parece un comment en C %s

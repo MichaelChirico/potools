@@ -4,7 +4,7 @@ author: "Michael Chirico"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{From base R to dplyr}
+  %\VignetteIndexEntry{Writing a custom diagnostic}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

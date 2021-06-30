@@ -93,9 +93,9 @@ NB: Translation in C/C++ requires some additional `#include`s and declarations, 
 
 ## Installation
 
-`potools` is not yet available on CRAN. Your early feedback is welcome!
+`potools` is on CRAN as of v0.2.0.
 
-For now, please install from GitHub; the easiest way to do so:
+You can also install the latest development version from GitHub. The easiest way to do so:
 
 ```r
 # install.packages("remotes")

@@ -134,7 +134,10 @@ file.copy(pkg, dirname(tmp_pkg), recursive = TRUE)
 # run translate_package() without any languages
 # this will generate a .pot template file and en@quot translations (in UTF-8 locales)
 # we can also pass empty 'diagnostics' to skip the diagnostic step
-translate_package(tmp_pkg, diagnostics = NULL)
+# (skip if gettext isn't available to avoid an error)
+if (isTRUE(check_potools_sys_reqs)) {
+  translate_package(tmp_pkg, diagnostics = NULL)
+}
 
 \dontrun{
 # launches the interactive translation dialog for translations into Estonian:

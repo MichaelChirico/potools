@@ -24,32 +24,34 @@ get_desc_data = function(dir) {
   return(desc_data[1L, ])
 }
 
-# see ?tools::update_pkg_po
-SYSTEM_REQUIREMENTS = c('xgettext', 'msgmerge', 'msgfmt', 'msginit', 'msgconv')
+# msgmerge | msgmerge.R | run_msgmerge()
+# msgfmt   | msgmerge.R | run_msgfmt()
+# msginit  | msgmerge.R | tools:::en_quote()
+# msgconv  | msgmerge.R | tools:::en_quote()
+SYSTEM_REQUIREMENTS = c('msgmerge', 'msgfmt', 'msginit', 'msgconv')
 RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 
 # nocov start. in principal, could do another GH action on an ill-equipped machine?
-check_sys_reqs = function() {
+check_potools_sys_reqs = function() {
   if (any(is_missing <- !nzchar(Sys.which(SYSTEM_REQUIREMENTS)))) {
     if (.Platform$OS.type == 'windows') {
       platform_msg = gettextf(
         'These tools are available as an Rtools goodie, check %s',
         RTOOLS_URL
       )
-    } else {
-      if (Sys.info()['sysname'] == 'Darwin') {
+    } else if (Sys.info()['sysname'] == 'Darwin') {
         platform_msg = gettext('These GNU tools are commonly available, try installing from brew or apt-get')
-      } else {
-        platform_msg = gettext(
-          'These GNU tools are commonly available from the Linux package manager for your system'
-        )
-      }
+    } else {
+      platform_msg = gettext(
+        'These GNU tools are commonly available from the Linux package manager for your system'
+      )
     }
-    stopf(
+    return(gettextf(
       'Missing (or not on PATH) system requirements %s.\n%s',
       toString(SYSTEM_REQUIREMENTS[is_missing]), platform_msg
-    )
+    ))
   }
+  return(TRUE)
 }
 # nocov end
 

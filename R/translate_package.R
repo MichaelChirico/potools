@@ -5,7 +5,8 @@ translate_package = function(
   use_base_rules = package %chin% .potools$base_package_names,
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
-  check_sys_reqs()
+  result <- check_potools_sys_reqs()
+  if (!isTRUE(result)) stop(result) # nocov
 
   stopifnot(
     'Only one package at a time' = length(dir) == 1L,

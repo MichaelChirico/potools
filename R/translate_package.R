@@ -6,7 +6,7 @@ translate_package = function(
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
   result <- check_potools_sys_reqs()
-  if (!isTRUE(result)) stop(result)
+  if (!isTRUE(result)) stop(result) # nocov
 
   stopifnot(
     'Only one package at a time' = length(dir) == 1L,

@@ -114,6 +114,7 @@ get_file_src_messages = function(file, custom_params = NULL) {
   setkeyv(arrays, names(arrays))
 
   # first find all calls.
+  # TODO: maybe leverage the match_parens() call which runs a nearly identical gregexpr?
   call_idx = gregexpr(sprintf("%s\\s*\\(", C_IDENTIFIER_REGEX), contents)[[1L]]
   calls = data.table(
     call_start = as.integer(call_idx),
@@ -130,26 +131,8 @@ get_file_src_messages = function(file, custom_params = NULL) {
   if (!nrow(calls)) return(file_msg_schema())
   calls[ , "non_spurious" := NULL]
 
-  # slightly wasteful (a 10-times nested call will be skipped over many times), but oh well...
-  #   the largest file in R-devel (src/library/grDevices/src/devPS.c) has O(4K) calls in it. not terrible.
-  #   this step runs in about .75 seconds on that file which is :\
-  # more efficient ideas:
-  #   (1) iterate over calls. whenever stack_size increases, start recording that call too, then update
-  #       all of the calls at once in this table
-  #   (2) restrict focus to known calls; problem is that this approach will inevitably miss translated arrays
-  #   (3) gregexpr("[()]", contents) to pre-fetch all the parens rather than checking characters individually
-  #       * could be used to make a rudimentary AST? associate each ( / ) pair with ascendants/descendants?
-  #   (4) implement a C parser/AST builder :|
-  #   (5) write this (or the whole function?) in C
-  calls[ , "paren_end" := -1L + vapply(
-    paren_start,
-    skip_parens,
-    integer(1L),
-    contents_char,
-    arrays,
-    file,
-    newlines_loc
-  )]
+  calls[match_parens(contents, arrays), on = 'paren_start', "paren_end" := i.paren_end]
+
   setkeyv(calls, c('paren_start', 'paren_end'))
 
   translation_idx = calls[ , fname %chin% DEFAULT_MACROS]
@@ -351,29 +334,38 @@ preprocess = function(contents) {
   return(contents)
 }
 
-skip_parens = function(ii, chars, array_boundaries, file, newlines_loc) {
-  nn = length(chars)
-  stack_size = 1L
-  jj = ii + 1L
-  while (jj <= nn && stack_size > 0L) {
-    switch(
-      chars[jj],
-      '(' = { stack_size = stack_size + 1L; jj = jj + 1L },
-      ')' = { stack_size = stack_size - 1L; jj = jj + 1L },
-      '"' = { jj = array_boundaries[.(jj), array_end] + 1L },
-      # don't get mixed up by '(' or ')', #112
-      # jump one further for e.g. '\0', #135
-      "'" = { jj = jj + 3L + (chars[jj+1L] == "\\") },
-      { jj = jj + 1L }
-    )
+# this approach is ~8x faster than the earlier approach of iterating over calls' lparens & finding its rparen.
+# other ideas for potential ways to find paren_end:
+#   (1) iterate over calls. whenever stack_size increases, start recording that call too, then update
+#       all of the calls at once in this table
+#   (2) restrict focus to known calls; problem is that this approach will inevitably miss translated arrays
+#   (3) implement a C parser/AST builder :|
+#   (4) write this (or the whole function?) in C
+match_parens = function(contents, arrays) {
+  # also exclude char arrays like '(' or ')' (for which it suffices to check if preceded by ')
+  paren_locs = gregexpr("(?<!')[()]", contents, perl = TRUE)[[1L]]
+  all_parens = data.table(paren_start = paren_locs, paren_end = paren_locs, key = c("paren_start", "paren_end"))
+  # exclude parens inside arrays, which needn't be balanced
+  in_array = foverlaps(arrays, all_parens, nomatch = NULL, which = TRUE)$yid
+  if (length(in_array)) {
+    all_parens = all_parens[-in_array]
   }
-  # file & newlines_loc both only needed for this error region which is a bit awkward
-  if (jj > nn) stopf(
-    "Parsing error: unmatched parentheses in %s starting from line %d",
-    file, findInterval(ii, newlines_loc)
-  )
+  if (nrow(all_parens) %% 2L != 0L) stopf("Parsing error: unmatched parentheses in %s", file)
 
-  jj
+  # goal: associate lparens with their corresponding rparen. rparens assigned end=-1 for the %in% step below to work
+  all_parens[ , "lparen" := substring(contents, paren_start, paren_start) == "("]
+  all_parens[ , "paren_end" := fifelse(lparen, NA_integer_, -1L)]
+
+  # idea: match all lparens immediately followed by rparen. next, ignore matched parens & repeat for unmatched parens.
+  while (any(idx <- is.na(all_parens$paren_end))) {
+    all_parens[idx | (!lparen & !paren_start %in% paren_end), `:=`(
+      next_paren = shift(lparen, type="lead"),
+      next_start = shift(paren_start, type="lead")
+    )]
+    all_parens[idx & lparen, "paren_end" := fcase(!next_paren, next_start)]
+    all_parens[ , c("next_paren", "next_start") := NULL]
+  }
+  return(all_parens[(lparen)])
 }
 
 build_msgid = function(left, right, starts, ends, contents) {

@@ -22,7 +22,7 @@ test_that("check_cracked_messages works", {
 
   expect_equal(
     check_cracked_messages(message_data),
-    data.table(
+    data.table::data.table(
       call = c('message("farewell", "sir")', 'warning("found ", nn, " problems")'),
       file = 'foo.R',
       line_number = c(2L, 4L),
@@ -52,7 +52,7 @@ test_that("check_untranslated_cat works", {
 
   expect_equal(
     check_untranslated_cat(message_data),
-    data.table(
+    data.table::data.table(
       call = c('cat("hello")', 'cat("farewell", "sir")'),
       file = 'foo.R',
       line_number = 1:2,
@@ -105,7 +105,7 @@ test_that("check_untranslated_src works", {
 
   expect_equal(
     check_untranslated_src(message_data),
-    data.table(
+    data.table::data.table(
       call = c('Rprintf("Found an issue", s)'),
       file = 'bar.c',
       line_number = 1L,

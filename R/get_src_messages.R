@@ -131,7 +131,7 @@ get_file_src_messages = function(file, custom_params = NULL) {
   if (!nrow(calls)) return(file_msg_schema())
   calls[ , "non_spurious" := NULL]
 
-  calls[match_parens(contents, arrays), on = 'paren_start', "paren_end" := i.paren_end]
+  calls[match_parens(file, contents, arrays), on = 'paren_start', "paren_end" := i.paren_end]
 
   setkeyv(calls, c('paren_start', 'paren_end'))
 
@@ -341,19 +341,24 @@ preprocess = function(contents) {
 #   (2) restrict focus to known calls; problem is that this approach will inevitably miss translated arrays
 #   (3) implement a C parser/AST builder :|
 #   (4) write this (or the whole function?) in C
-match_parens = function(contents, arrays) {
-  # also exclude char arrays like '(' or ')' (for which it suffices to check if preceded by ')
-  paren_locs = gregexpr("(?<!')[()]", contents, perl = TRUE)[[1L]]
+match_parens = function(file, contents, arrays) {
+  # also exclude char arrays like '(' or ')'; note the difficulty of including/excluding correctly in
+  #   foo('(') with regex alone -- a naive approach might exclude any of the three parens.
+  paren_locs = setdiff(
+    gregexpr("[()]", contents, perl = TRUE)[[1L]],
+    gregexpr("(?<=')[()](?=')", contents, perl = TRUE)[[1L]]
+  )
   all_parens = data.table(paren_start = paren_locs, paren_end = paren_locs, key = c("paren_start", "paren_end"))
   # exclude parens inside arrays, which needn't be balanced
   in_array = foverlaps(arrays, all_parens, nomatch = NULL, which = TRUE)$yid
   if (length(in_array)) {
     all_parens = all_parens[-in_array]
   }
-  if (nrow(all_parens) %% 2L != 0L) stopf("Parsing error: unmatched parentheses in %s", file)
 
   # goal: associate lparens with their corresponding rparen. rparens assigned end=-1 for the %in% step below to work
   all_parens[ , "lparen" := substring(contents, paren_start, paren_start) == "("]
+  # TODO: this still fails for a file like )))((( -- we'd have to stop() if there's no update within the while loop...
+  if (sum(all_parens$lparen) != nrow(all_parens) / 2L) stopf("Parsing error: unmatched parentheses in %s", file)
   all_parens[ , "paren_end" := fifelse(lparen, NA_integer_, -1L)]
 
   # idea: match all lparens immediately followed by rparen. next, ignore matched parens & repeat for unmatched parens.

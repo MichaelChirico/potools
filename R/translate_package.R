@@ -2,6 +2,7 @@ translate_package = function(
   dir = '.', languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   custom_translation_functions = list(R = NULL, src = NULL),
+  max_translations = Inf,
   use_base_rules = package %chin% .potools$base_package_names,
   copyright = NULL, bugs = NULL, verbose = FALSE
 ) {
@@ -182,7 +183,7 @@ translate_package = function(
       )
     }
     # NB: loop over rows to facilitate quitting without losing progress
-    for (ii in new_idx) {
+    for (ii in head(new_idx, max_translations)) {
       if (message_data$type[ii] == 'plural') {
         translation = read_translation(
           message_data$msgid_plural[[ii]][1L],

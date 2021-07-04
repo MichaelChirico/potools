@@ -19,6 +19,7 @@ translate_package(
     check_untranslated_src
   ),
   custom_translation_functions = list(R = NULL, src = NULL),
+  max_translations = Inf,
   use_base_rules = package \%chin\% .potools$base_package_names,
   copyright = NULL, bugs = NULL, verbose=FALSE
 )
@@ -28,6 +29,7 @@ translate_package(
   \item{languages}{ Character vector; locale codes to which to translate. See Details. }
   \item{diagnostics}{ A \code{list} of diagnostic functions to be run on the package's message data. See Details. }
   \item{custom_translation_functions}{ A \code{list} with either/both of two components, \code{R} and \code{src}, together governing how to extract any non-standard strings from the package. See Details. }
+  \item{max_translations}{ Numeric; used for setting a cap on the number of translations to be done for each language. Defaults to \code{Inf}, meaning all messages in the package. }
   \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
   \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
   \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }

@@ -501,3 +501,19 @@ test_that("translation of 'base' works correctly", {
     }
   )
 })
+
+test_that("max_translations works as expected", {
+  prompts <- restore_package(
+    pkg <- test_package("r_msg"),
+    tmp_conn = mock_translation('test-translate-package-r_msg-1.input'),
+    {
+      translate_package(pkg, 'es', max_translations = 1L, diagnostics = NULL)
+    }
+  )
+  expect_outputs(
+    prompts,
+    "Oh no you don't!",
+    fixed = TRUE, invert = TRUE
+  )
+  browser()
+})

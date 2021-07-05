@@ -54,7 +54,7 @@ test_that("translate_package works on a simple package", {
       # testing gettextf's ... arguments are skipped
       expect_all_match(readLines(file.path(pkg, pot_file)), "don't translate me", invert=TRUE, fixed=TRUE)
 
-      # Non-UTF-8 machines dont run en@quot translations by default.
+      # Non-UTF-8 machines don't run en@quot translations by default.
       #   Mostly applies to Windows, but can also apply to Unix
       #   (e.g. r-devel-linux-x86_64-debian-clang on CRAN), #191
       if (l10n_info()[["UTF-8"]]) {

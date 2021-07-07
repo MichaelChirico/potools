@@ -1,4 +1,4 @@
-importFrom(data.table, data.table, foverlaps, fread, rbindlist, uniqueN, "%chin%")
+importFrom(data.table, data.table, foverlaps, fread, rbindlist, uniqueN, chmatch, "%chin%")
 importFrom(data.table, is.data.table, as.data.table)
 importFrom(data.table, set, setattr, setcolorder, setDT, setindexv, setkeyv, setnames, setorderv)
 importFrom(data.table, `:=`, .BY, .N, .SD)

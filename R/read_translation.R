@@ -44,7 +44,7 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
         # add enough blanks for Plural message:
         paste0("\n                ", format(msgid_metadata)),
         language_color(metadata$full_name_eng),
-        plural_range_color(PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
+        plural_range_color(.potools$PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
         fuzzy_tag,
         domain = "R-potools"
       ))

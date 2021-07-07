@@ -19,6 +19,7 @@ restore_package <- function(dir, expr, tmp_conn) {
   invisible(capture.output(expr))
 }
 
+# TODO: I think this can just be replaced by expect_match and expect_no_match in current testthat dev
 expect_all_match = function(inputs, targets, ..., invert=FALSE) {
   matched <- vapply(
     targets,
@@ -40,14 +41,9 @@ expect_all_match = function(inputs, targets, ..., invert=FALSE) {
   )
 }
 
-# TODO: I think this can just be replaced by expect_match and expect_no_match in current testthat dev
 expect_messages = function(expr, msgs, ..., invert=FALSE) {
   observed_messages = capture_messages(expr)
   expect_all_match(observed_messages, msgs, ..., invert=invert)
-}
-
-expect_outputs = function(output, outs, ..., invert=FALSE) {
-  expect_all_match(output, outs, ..., invert=invert)
 }
 
 test_package = function(pkg) test_path(file.path("test_packages", pkg))

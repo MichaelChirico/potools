@@ -265,7 +265,8 @@ KNOWN_LANGUAGES = fread(system.file('extdata', 'language_metadata.csv', package=
 #   translate that to something human-legible here.
 # NB: 'plural' is 0-based (like in the .po file), but
 #   'plural_index' is 1-based (to match the above R-level code).
-PLURAL_RANGE_STRINGS = fread(
+# assign to .potools, not a package env, to keep more readily mutable inside add_new_metadata()
+.potools$PLURAL_RANGE_STRINGS = fread(
   system.file('extdata', 'plurals_metadata.csv', package='potools'),
   key = c('plural', 'plural_index')
 )

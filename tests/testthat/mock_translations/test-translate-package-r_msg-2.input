@@ -1,22 +1,20 @@
-Syrian Arabic
-عربي سوري
+Welsh
+Cymraeg
 <non-numeric testing require_type>
-6
-(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5)
+4
+(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3
 test-user
 test-user@github.com
-早上好
-不要
-下午好
-wrong-template-1:%.02f然后%s然后%d.
-wrong-template-2:%.02f然后%s然后%s.
-wrong-template-3:%1$.02f然后%3$d然后%2$s.
-wrong-template-4:%d然后%d.
-wrong-template-5:%.02f然后%d然后%s然后%s.
-%.02f然后%d然后%s.
-0该起床了
-1该起床了
-2该起床了
-3该起床了
-4该起床了
-5该起床了
+Rhybuddiais i chi!
+O na, dydych chi ddim!
+Helo yno
+wrong-template-1:%.02f ac yna%s ac yna%d.
+wrong-template-2:%.02f ac yna%s ac yna%s.
+wrong-template-3:%1$.02f ac yna%3$d ac yna%2$s.
+wrong-template-4:%d ac yna%d.
+wrong-template-5:%.02f ac yna%d ac yna%s ac yna%s.
+%.02f ac yna%d ac yna%s.
+neges 0
+neges 1
+neges 2
+neges 3

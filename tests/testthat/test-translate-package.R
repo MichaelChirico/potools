@@ -86,7 +86,7 @@ test_that("translate_package works on a simple package", {
       expect_match(zh_translations, "该起床了", all = FALSE)
     }
   )
-  expect_outputs(prompts, c("^---^", "^^"), fixed=TRUE)
+  expect_all_match(prompts, c("^---^", "^^"), fixed=TRUE)
 
   # all translations already done
   restore_package(
@@ -130,7 +130,7 @@ test_that("translate_package identifies potential translations in cat() calls", 
       )
     }
   )
-  expect_outputs(
+  expect_all_match(
     prompts,
     c(
       'cat(gettext("I warned you!"), fill=TRUE)',
@@ -139,7 +139,7 @@ test_that("translate_package identifies potential translations in cat() calls", 
     ),
     fixed=TRUE
   )
-  expect_outputs(
+  expect_all_match(
     prompts,
     c("shouldn't be translated", "Miss me"),
     fixed=TRUE, invert=TRUE
@@ -152,15 +152,22 @@ test_that('Unknown language flow works correctly', {
     tmp_conn = mock_translation('test-translate-package-r_msg-2.input'),
     {
       expect_messages(
-        translate_package(pkg, 'ar_SY'),
-        # TODO: why isn't "Did not match any known 'plural's" matching?
-        c('not a known language', 'Please file an issue'),
+        # earlier, did Arabic, but now that's a chosen language. switched two Welsh on the
+        #   (perhaps naive) judgment that it's unlikely to enter our scope anytime soon
+        #   and because there are still several (4) plural forms
+        translate_package(pkg, 'cy'),
+        c(
+          'not a known language', 'Please file an issue',
+          # NB: this test will fail if test_that is re-run on the same R session since potools'
+          #   internal state is altered for the remainder of the session... not sure it's worth changing...
+          "Did not match any known 'plural's"
+        ),
         fixed=TRUE
       )
     }
   )
   # also include coverage tests of incorrect templating in supplied translations
-  expect_outputs(
+  expect_all_match(
     prompts,
     c(
       'How would you refer to this language in English?',
@@ -169,6 +176,25 @@ test_that('Unknown language flow works correctly', {
       'received 4 unique templated arguments'
     ),
     fixed=TRUE
+  )
+
+  # whitespace matching for plural is lenient, #183
+  prompts = restore_package(
+    pkg <- test_package('r_msg'),
+    tmp_conn = mock_translation('test-translate-package-r_msg-5.input'),
+    {
+      expect_messages(
+        # Catalan -- romance language with >1 plural
+        translate_package(pkg, 'ca', diagnostics=NULL),
+        c("Did not match any known 'plural's"),
+        fixed=TRUE, invert=TRUE
+      )
+    }
+  )
+  expect_all_match(
+    prompts,
+    c("when n = 1", "when n is not 1"),
+    fixed = TRUE
   )
 })
 
@@ -229,14 +255,14 @@ test_that("Packages with src code work correctly", {
     }
   )
 
-  expect_outputs(
+  expect_all_match(
     prompts,
     c("Rprintf(_(", "warning(_("),
     fixed = TRUE
   )
 
   # error(ngettext(...)) doesn't show error() in check_untranslated_src
-  expect_outputs(
+  expect_all_match(
     prompts,
     "Problematic call",
     invert = TRUE, fixed = TRUE
@@ -255,7 +281,7 @@ test_that("Packages with src code & fuzzy messages work", {
       )
     }
   )
-  expect_outputs(
+  expect_all_match(
     prompts,
     "Note: a similar message was previously translated as",
     fixed = TRUE
@@ -512,10 +538,9 @@ test_that("max_translations works as expected", {
       translate_package(pkg, 'es', max_translations = 1L, diagnostics = NULL)
     }
   )
-  expect_outputs(
+  expect_all_match(
     prompts,
     "Oh no you don't!",
     fixed = TRUE, invert = TRUE
   )
-  browser()
 })

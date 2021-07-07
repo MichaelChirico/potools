@@ -71,7 +71,8 @@ test_that("faulty custom_translation_functions specs error", {
       test_package("custom_translation"),
       custom_translation_functions = list(R = "abc")
     ),
-    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
+    fixed = TRUE
   )
 
   expect_error(
@@ -79,7 +80,8 @@ test_that("faulty custom_translation_functions specs error", {
       test_package("custom_translation"),
       custom_translation_functions = list(R = "abc:def:ghi")
     ),
-    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
+    fixed = TRUE
   )
 
   expect_error(
@@ -87,6 +89,15 @@ test_that("faulty custom_translation_functions specs error", {
       test_package("custom_translation"),
       custom_translation_functions = list(R = "abc:def")
     ),
-    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
+    fixed = TRUE
+  )
+})
+
+test_that("Message exclusions are respected", {
+  expect_all_match(
+    get_message_data(test_package("r_msg"))$msgid,
+    c("skip me for translation", "me too", "me three"),
+    fixed = TRUE, invert = TRUE
   )
 })

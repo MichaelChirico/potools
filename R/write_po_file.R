@@ -71,40 +71,38 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 
   po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
 
-  params$base_copyright <- FALSE
-  params$is_base_package <- params$package %chin% .potools$base_package_names
-  if (params$is_base_package) {
+  is_base_package <- params$package %chin% .potools$base_package_names
+  if (is_base_package) {
     params$package <- "R"
     params$bugs <- "bugs.r-project.org"
   }
 
   params$template = template
-  params$ignore_width = use_base_rules
   write_po_file(
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
-    params,
+    wrap_at_newline = !use_base_rules,
     use_base_rules = use_base_rules
   )
   # assign here to prevent lazyeval issue
   width = if (use_base_rules) 79L else Inf
-  # See #125 and Bugzilla#18121. suggestions for a less horrible workaround welcome.
-  params$ignore_width = FALSE
   # only applies to src .pot (part of https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121)
-  if (params$is_base_package) {
-    params$copyright <- "The R Core Team"
-    params$base_copyright <- TRUE
+  if (is_base_package) {
+    copyright <- "The R Core Team"
   }
   write_po_file(
     po_data[message_source == "src"],
     file.path(po_dir, src_file),
-    params,
     width = width,
   )
   return(invisible())
 }
 
-write_po_file <- function(message_data, po_file, params, width = Inf, use_base_rules = FALSE) {
+write_po_file <- function(
+  message_data, po_file, package, author,
+  copyright = NULL, bugs = NULL, language_team = NULL, is_template = FALSE,
+  width = Inf, wrap_at_newline = TRUE, use_base_rules = FALSE
+) {
   if (!nrow(message_data)) return(invisible())
 
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
@@ -112,7 +110,9 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
   po_conn = file(po_file, "wb")
   on.exit(close(po_conn))
 
-  params$has_plural = any(message_data$type == "plural")
+  params = list(
+    has_plural = any(message_data$type == "plural")
+  )
   po_header = build_po_header(params, use_base_rules)
 
   writeLines(con=po_conn, useBytes=TRUE, po_header)
@@ -132,8 +132,8 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
       '\n%s%s%s\n%s',
       source_location[singular_idx],
       c_fmt_tag[singular_idx],
-      wrap_msg('msgid', msgid[singular_idx], width, params$ignore_width),
-      wrap_msg('msgstr', msgstr[singular_idx], width, params$ignore_width)
+      wrap_msg('msgid', msgid[singular_idx], width, wrap_at_newline),
+      wrap_msg('msgstr', msgstr[singular_idx], width, wrap_at_newline)
     )
     if (!all(singular_idx)) {
       msgid_plural = msgid_plural[!singular_idx]
@@ -233,13 +233,12 @@ build_po_header = function(params, use_base_rules = FALSE) {
   ))
 }
 
-wrap_msg = function(key, value, width, ignore_width = FALSE) {
+wrap_msg = function(key, value, width, wrap_at_newline = TRUE) {
   out <- character(length(value))
   # xgettext always wraps at a newline (even if the whole message fits inside 'width')
-  if (ignore_width) {
-    wrap_idx <- rep(FALSE, length(value))
-  } else {
-    wrap_idx <- nchar(value) + nchar(key) + 3L > width | grepl("[\\]n.", value)
+  wrap_idx <- nchar(value) + nchar(key) + 3L > width
+  if (wrap_at_newline) {
+     wrap_idx <- wrap_idx | grepl("[\\]n.", value)
   }
   out[!wrap_idx] = sprintf('%s "%s"', key, value[!wrap_idx])
   out[wrap_idx] = sprintf('%s ""\n%s', key, wrap_strings(value[wrap_idx], width))

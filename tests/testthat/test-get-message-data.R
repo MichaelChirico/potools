@@ -100,4 +100,15 @@ test_that("Message exclusions are respected", {
     c("skip me for translation", "me too", "me three"),
     fixed = TRUE, invert = TRUE
   )
+
+  # mismatch of start/end counts in a file
+  expect_error(
+    get_message_data(test_package("r_err_1")),
+    "Invalid # notranslate start/end.*start\\(s\\)"
+  )
+  # end comes before start, so there's a mismatch even if the counts are the same
+  expect_error(
+    get_message_data(test_package("r_err_2")),
+    "Invalid # notranslate start/end.*Unmatched"
+  )
 })

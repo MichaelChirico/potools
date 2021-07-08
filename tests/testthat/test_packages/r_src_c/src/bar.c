@@ -39,3 +39,12 @@ static void ziggy(SEXP y, SEXP z) {
   error(ngettext("singular %d", "plural %d", z));
   return;
 }
+
+static void skippy() {
+  warning(_("Watch me disappear")); // # notranslate
+
+  // # notranslate start
+  warning(_("Like a ghost"));
+  warning(_("Into thin air"));
+  // # notranslate end
+}

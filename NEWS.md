@@ -4,6 +4,7 @@
  * Faster parsing of src messages (e.g. `get_message_data()` for the `base` package reduced from 14 to 7 seconds), #119
  * [New feature] New argument `max_translations` for `translate_package()` to limit the number of translations done, #188
  * When adding metadata for a new language, added tolerance for whitespace differences in specifying `plurals`, #183
+ * [New feature] `get_message_data()` skips over messages on lines with comments `# notranslate`, and regions of lines between matched pairs of comments `# notranslate start` and `# notranslate end`, #10. Most useful for small fragmentary strings that are untranslateable/not worth translating, and for strings that are technically untranslateable (e.g., because they contain `\r`).
 
 ### v0.2.0 (June 2202)
 

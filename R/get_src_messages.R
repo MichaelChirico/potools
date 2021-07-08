@@ -71,6 +71,7 @@ get_src_messages = function(
 
 get_file_src_messages = function(file, custom_params = NULL) {
   contents = readChar(file, file.size(file))
+  exclusion_pos = gregexpr("# notranslate( (start|end))?", contents, perl=TRUE)[[1L]]
   # as a vector of single characters
   contents_char = preprocess(strsplit(contents, NULL)[[1L]])
   # as a single string
@@ -123,13 +124,11 @@ get_file_src_messages = function(file, custom_params = NULL) {
   )
   # remove common false positives for efficiency
   calls = calls[!fname %chin% COMMON_NON_MESSAGE_CALLS]
-  calls[ , "paren_end" := paren_start]
 
-  calls[ , "non_spurious" := is.na(foverlaps(calls, arrays, by.x = c('paren_start', 'paren_end'), which = TRUE)$yid)]
   # mod out any that happen to be inside a char array
-  calls = calls[(non_spurious)]
+  calls = calls[is_outside_char_array(paren_start, arrays)]
+
   if (!nrow(calls)) return(file_msg_schema())
-  calls[ , "non_spurious" := NULL]
 
   calls[match_parens(file, contents, arrays), on = 'paren_start', "paren_end" := i.paren_end]
 
@@ -245,6 +244,15 @@ get_file_src_messages = function(file, custom_params = NULL) {
   )
 
   src_messages[ , "line_number" := findInterval(array_start, newlines_loc)]
+  if (length(exclusion_pos)) {
+    # build_exclusion_ranges designed for R where file & line1 are inherited from getParseData, so conform to that
+    exclusions = data.table(
+      file = file,
+      line1 = findInterval(as.integer(exclusion_pos), newlines_loc),
+      capture_lengths = attr(exclusion_pos, "capture.length")[ , 1L]
+    )
+    src_messages = drop_excluded(src_messages, exclusions[is_outside_char_array(exclusion_pos, arrays)])
+  }
   src_messages[ , "array_start" := NULL]
   setcolorder(src_messages, c("msgid", "msgid_plural", "line_number", "fname", "call", "is_marked_for_translation"))
   src_messages[]
@@ -332,6 +340,27 @@ preprocess = function(contents) {
     ii = ii + 1L
   }
   return(contents)
+}
+
+is_outside_char_array = function(char_pos, arrays) {
+  if (char_pos[1L] < 0L) return(logical())
+
+  charDT = data.table(start = char_pos, end = char_pos)
+  is.na(foverlaps(charDT, arrays, by.x = c('start', 'end'), which = TRUE)$yid)
+}
+
+drop_excluded = function(msg_data, exclusions) {
+  if (any(inline_idx <- exclusions$capture_lengths == 0L)) {
+    msg_data = msg_data[!line_number %in% exclusions[(inline_idx), line1]]
+    exclusions = exclusions[(!inline_idx)]
+  }
+  if (nrow(exclusions)) {
+    # somewhat hacky (and not at all robust to being flexible about the range marker), but 6 = nchar(" start")
+    start_idx = exclusions$capture_lengths == 6L
+    ranges = build_exclusion_ranges(exclusions[(start_idx)], exclusions[(!start_idx)])
+    msg_data = msg_data[!ranges, on = .(line_number > start, line_number < end)]
+  }
+  msg_data
 }
 
 # this approach is ~8x faster than the earlier approach of iterating over calls' lparens & finding its rparen.

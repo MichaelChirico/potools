@@ -14,6 +14,13 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   setindexv(expr_data, c("file", "parent"))
   setindexv(expr_data, c("token", "text"))
 
+  # skip # notranslate lines / blocks
+  # comments assigned here & re-used below
+  # NB: at the R level, each COMMENT token is restricted to a single line
+  comments = expr_data[token == "COMMENT"]
+  setkeyv(comments, c("file", "line1"))
+  expr_data = exclude_untranslated(expr_data, comments)
+
   # on the XML tree, messaging calls look like
   # <expr>    <- parent of 'msg_call_neighbors'
   #   <expr>  <- 'msg_call_exprs'; might also be a more complicated expression here e.g. for base::stop()
@@ -92,15 +99,12 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   file_lines = lapply(normalizePath(paths), readLines, warn = FALSE)
   names(file_lines) = msg_files
 
-  # need to strip comments for build_call, see #59.
-  # NB: at the R level, each COMMENT token is restricted to a single line
-  comments = expr_data[token == "COMMENT"]
-  setkeyv(comments, c("file", "line1"))
 
   msg[
     expr_data, on = c('file', parent = 'id'),
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
+  # need to strip comments for build_call, see #59.
   msg[ , by = c('file', 'line1', 'col1', 'line2', 'col2'),
     call := build_call(
       file_lines[[.BY$file]],
@@ -240,6 +244,27 @@ get_fnames = function(params) {
     lapply(params$singular$named, `[[`, "fname"),
     lapply(params$plural, `[[`, "fname")
   ))
+}
+
+exclude_untranslated = function(expr_data, comments) {
+  # single-line exclusions
+  inline_idx <- grepl("# notranslate", comments$text, fixed = TRUE)
+  if (any(inline_idx)) {
+    expr_data = expr_data[
+      !comments[(inline_idx)],
+      on = c("file", "line1")
+    ]
+  }
+
+  starts = comments[grepl("# notranslate start", text, fixed = TRUE)]
+  ends = comments[grepl("# notranslate end", text, fixed = TRUE)]
+
+  ranges = build_exclusion_ranges(starts, ends)
+  if (nrow(ranges)) {
+    expr_data = expr_data[!ranges, on = .(file == file, line1 > start, line1 < end)]
+  }
+
+  expr_data
 }
 
 # these functions all have a domain= argument. taken from the xgettext source, but could be

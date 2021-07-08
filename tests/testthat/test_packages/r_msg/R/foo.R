@@ -22,3 +22,16 @@ f4 <- function(x) {
     mean(x), length(x), "don't translate me"
   ))
 }
+
+f5 <- function(x) {
+  # source markers for skipping translation.
+  # notranslate for single lines
+  message("skip me for translation") # notranslate
+
+  # # notranslate start / # notranslate end for ranges.
+  # ^ also testing that within-line "range" doesn't break things
+  # notranslate start
+  message("me too")
+  message("me three")
+  # notranslate end
+}

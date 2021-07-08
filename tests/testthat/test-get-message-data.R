@@ -71,7 +71,8 @@ test_that("faulty custom_translation_functions specs error", {
       test_package("custom_translation"),
       custom_translation_functions = list(R = "abc")
     ),
-    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
+    fixed = TRUE
   )
 
   expect_error(
@@ -79,7 +80,8 @@ test_that("faulty custom_translation_functions specs error", {
       test_package("custom_translation"),
       custom_translation_functions = list(R = "abc:def:ghi")
     ),
-    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
+    fixed = TRUE
   )
 
   expect_error(
@@ -87,6 +89,33 @@ test_that("faulty custom_translation_functions specs error", {
       test_package("custom_translation"),
       custom_translation_functions = list(R = "abc:def")
     ),
-    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.", fixed = TRUE
+    "All inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
+    fixed = TRUE
+  )
+})
+
+test_that("Message exclusions are respected", {
+  expect_all_match(
+    get_message_data(test_package("r_msg"))$msgid,
+    c("skip me for translation", "me too", "me three"),
+    fixed = TRUE, invert = TRUE
+  )
+
+  # C-level exclusions
+  expect_all_match(
+    get_message_data(test_package("r_src_c"))$msgid,
+    c("Watch me disappear", "Like a ghost", "Into thin air"),
+    fixed = TRUE, invert = TRUE
+  )
+
+  # mismatch of start/end counts in a file
+  expect_error(
+    get_message_data(test_package("r_err_1")),
+    "Invalid # notranslate start/end.*start\\(s\\)"
+  )
+  # end comes before start, so there's a mismatch even if the counts are the same
+  expect_error(
+    get_message_data(test_package("r_err_2")),
+    "Invalid # notranslate start/end.*Unmatched"
   )
 })

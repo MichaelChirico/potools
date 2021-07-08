@@ -121,3 +121,28 @@ safe_substring = function(text, first, last) {
   if (!length(first)) return(character())
   substring(text, first, last)
 }
+
+build_exclusion_ranges = function(starts, ends) {
+  all_counts = merge(
+    starts[ , .N, by = 'file'],
+    ends[ , .N, by = 'file'],
+    by = 'file', all = TRUE
+  )
+  setnafill(all_counts, fill=0L, cols = 2:3)
+  if (nrow(all_counts[N.x != N.y])) {
+    stopf(
+      "Invalid # notranslate start/end range(s):\n%s",
+      all_counts[N.x != N.y, toString(gettextf("File %s: %d start(s) / %d end(s)", file, N.x, N.y))]
+    )
+  }
+
+  ranges = starts[ends, on = c('file', 'line1'), roll = Inf, .(file, start = x.line1, end = i.line1)]
+  if (anyNA(ranges$start)) {
+    stopf(
+      "Invalid # notranslate start/end range(s):\n%s",
+      ranges[is.na(start), gettextf("Unmatched start/end pairs in files: %s", toString(unique(file)))]
+    )
+  }
+
+  ranges
+}

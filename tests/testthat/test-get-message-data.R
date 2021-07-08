@@ -101,6 +101,13 @@ test_that("Message exclusions are respected", {
     fixed = TRUE, invert = TRUE
   )
 
+  # C-level exclusions
+  expect_all_match(
+    get_message_data(test_package("r_src_c"))$msgid,
+    c("Watch me disappear", "Like a ghost", "Into thin air"),
+    fixed = TRUE, invert = TRUE
+  )
+
   # mismatch of start/end counts in a file
   expect_error(
     get_message_data(test_package("r_err_1")),

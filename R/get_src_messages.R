@@ -245,7 +245,13 @@ get_file_src_messages = function(file, custom_params = NULL) {
 
   src_messages[ , "line_number" := findInterval(array_start, newlines_loc)]
   if (length(exclusion_pos)) {
-    src_messages = drop_excluded(src_messages, exclusion_pos, arrays, newlines_loc)
+    # build_exclusion_ranges designed for R where file & line1 are inherited from getParseData, so conform to that
+    exclusions = data.table(
+      file = file,
+      line1 = findInterval(as.integer(exclusion_pos), newlines_loc),
+      capture_lengths = attr(exclusion_pos, "capture.length")[ , 1L]
+    )
+    src_messages = drop_excluded(src_messages, exclusions[is_outside_char_array(exclusion_pos, arrays)])
   }
   src_messages[ , "array_start" := NULL]
   setcolorder(src_messages, c("msgid", "msgid_plural", "line_number", "fname", "call", "is_marked_for_translation"))
@@ -343,18 +349,19 @@ is_outside_char_array = function(char_pos, arrays) {
   is.na(foverlaps(charDT, arrays, by.x = c('start', 'end'), which = TRUE)$yid)
 }
 
-drop_excluded = function(msg_data, exclusion_pos, arrays, newlines_loc) {
-  # brought this logic inside this function since it's somewhat messy to subset a
-  #   gregexpr object (since [] drops attributes), so hide that logic here
-  exclusions = data.table(
-    start_idx = as.integer(exclusion_pos),
-    capture_lengths = attr(exclusion_pos, "capture.length")[ , 1L]
-  )
-  exclusions = exclusions[is_outside_char_array(exclusion_pos, arrays)]
-
-  if (any(idx <- msg_data$capture_lengths == 0L)) {
-
+drop_excluded = function(msg_data, exclusions) {
+  browser()
+  if (any(inline_idx <- exclusions$capture_lengths == 0L)) {
+    msg_data = msg_data[!line_number %in% exclusions[(inline_idx), line1]]
+    exclusions = exclusions[(!inline_idx)]
   }
+  if (nrow(exclusions)) {
+    # somewhat hacky (and not at all robust to being flexible about the range marker), but 6 = nchar(" start")
+    start_idx = exclusions$capture_lengths == 6L
+    ranges = build_exclusion_ranges(exclusions[(start_idx)], exclusions[(!start_idx)])
+    msg_data = msg_data[!ranges, on = .(line_number > start, line_number < end)]
+  }
+  msg_data
 }
 
 # this approach is ~8x faster than the earlier approach of iterating over calls' lparens & finding its rparen.

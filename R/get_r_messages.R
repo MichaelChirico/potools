@@ -248,16 +248,21 @@ get_fnames = function(params) {
 
 exclude_untranslated = function(expr_data, comments) {
   # single-line exclusions
-  expr_data = expr_data[
-    !comments[grepl("# notranslate", text, fixed = TRUE)],
-    on = c("file", "line1")
-  ]
+  inline_idx <- grepl("# notranslate", comments$text, fixed = TRUE)
+  if (any(inline_idx)) {
+    expr_data = expr_data[
+      !comments[(inline_idx)],
+      on = c("file", "line1")
+    ]
+  }
 
   starts = comments[grepl("# notranslate start", text, fixed = TRUE)]
   ends = comments[grepl("# notranslate end", text, fixed = TRUE)]
 
   ranges = build_exclusion_ranges(starts, ends)
-  expr_data = expr_data[!ranges, on = .(file == file, line1 > start, line1 < end)]
+  if (nrow(ranges)) {
+    expr_data = expr_data[!ranges, on = .(file == file, line1 > start, line1 < end)]
+  }
 
   expr_data
 }

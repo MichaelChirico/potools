@@ -350,7 +350,6 @@ is_outside_char_array = function(char_pos, arrays) {
 }
 
 drop_excluded = function(msg_data, exclusions) {
-  browser()
   if (any(inline_idx <- exclusions$capture_lengths == 0L)) {
     msg_data = msg_data[!line_number %in% exclusions[(inline_idx), line1]]
     exclusions = exclusions[(!inline_idx)]

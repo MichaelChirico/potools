@@ -365,3 +365,34 @@ make_src_location <- function(files, lines, message_source, use_base_rules) {
   # 77 = 80 - nchar("#: "). 80 not 79 is for strwrap. NB: strwrap("012 345", width=4)
   paste0("#: ", if (use_base_rules) strwrap(s, width=77L) else s, "\n", collapse="")
 }
+
+# See https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html
+po_metadata = function(package, version, language, author, email, bugs, copyright = NULL, ...) {
+  stopifnot(
+    "All fields are required" = !(
+      missing(package)
+      || missing(version)
+      || missing(language)
+      || missing(author)
+      || missing(email)
+      || missing(bugs)
+    )
+  )
+  pm = c(as.list(environment()), list(...))
+  pm$timestamp <- Sys.time()
+  class(pm) = 'po_metadata'
+  pm
+}
+
+as.po_metadata = function(x) {
+  metadata_names <- c("package", "version", "language", "author", "email", "bugs", "copyright")
+  stopifnot("Input should be a key-value list" = typeof(x) == "list", metadata_names %chin% names(x))
+  if (!"timestamp" %chin% names(x)) x$timestamp <- Sys.time()
+
+  class(pm) = 'po_metadata'
+  pm
+}
+
+format.po_metadata = function(x, ...) {
+
+}

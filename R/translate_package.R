@@ -91,11 +91,13 @@ translate_package = function(
   }
 
   for (language in languages) {
-    metadata = KNOWN_LANGUAGES[.(language)]
-    # if the language is unknown, the right join above won't match rows in KNOWN_LANGUAGES
-    if (is.na(metadata$full_name_eng)) add_new_metadata(metadata, language)
+    if (language %chin% .potools$KNOWN_LANGUAGES$code) {
+      metadata = .potools$KNOWN_LANGUAGES[.(language)]
+    } else {
+      metadata = update_metadata(language)
+    }
+      add_new_metadata(language)
     po_params$language = language
-    po_params[c('full_name_eng', 'nplurals', 'plural')] = metadata[ , c('full_name_eng', 'nplurals', 'plural')]
 
     # overwrite any existing translations written in previous translation.
     #   set blank initially (rather than deleting the column) to allow
@@ -259,13 +261,14 @@ invisible({
 # nplurals,plural info from https://l10n.gnome.org/teams/<language>
 # NB: looks may be deceiving for right-to-left scripts (e.g. Farsi), where the
 #   displayed below might not be in the order it is parsed.
-KNOWN_LANGUAGES = fread(system.file('extdata', 'language_metadata.csv', package='potools'), key='code')
+# assign to .potools, not a package env, to keep more readily mutable inside update_metadata()
+.potools$KNOWN_LANGUAGES = fread(system.file('extdata', 'language_metadata.csv', package='potools'), key='code')
 
 # the 'plural' column above is designed for computers;
 #   translate that to something human-legible here.
 # NB: 'plural' is 0-based (like in the .po file), but
 #   'plural_index' is 1-based (to match the above R-level code).
-# assign to .potools, not a package env, to keep more readily mutable inside add_new_metadata()
+# assign to .potools, not a package env, to keep more readily mutable inside update_metadata()
 .potools$PLURAL_RANGE_STRINGS = fread(
   system.file('extdata', 'plurals_metadata.csv', package='potools'),
   key = c('plural', 'plural_index')

@@ -233,7 +233,7 @@ build_po_header = function(params, use_base_rules = FALSE) {
   ))
 }
 
-wrap_msg = function(key, value, width, wrap_at_newline = TRUE) {
+wrap_msg = function(key, value, width=Inf, wrap_at_newline = TRUE) {
   out <- character(length(value))
   # xgettext always wraps at a newline (even if the whole message fits inside 'width')
   wrap_idx <- nchar(value) + nchar(key) + 3L > width
@@ -347,17 +347,7 @@ NO_COPYRIGHT_TEMPLATE = '# SOME DESCRIPTIVE TITLE.
 #   as newlines (not literal \n). encodeString is "soft-applied" here.
 #   might be better to treat this as a DCF and write it from a list
 #   instead of building it up from sprintf
-PO_HEADER_TEMPLATE = '%s%smsgid ""
-msgstr ""
-"Project-Id-Version: %s %s\\n"%s
-"POT-Creation-Date: %s\\n"
-"PO-Revision-Date: %s\\n"
-"Last-Translator: %s\\n"
-"Language-Team: %s\\n"%s%s
-"MIME-Version: 1.0\\n"
-"Content-Type: text/plain; charset=%s\\n"
-"Content-Transfer-Encoding: 8bit\\n"%s'
-
+PO_HEADER_TEMPLATE =
 make_src_location <- function(files, lines, message_source, use_base_rules) {
   if (use_base_rules && message_source == "R") return("")
   s <- paste(sprintf("%s:%d", files, lines), collapse = " ")
@@ -376,9 +366,12 @@ po_metadata = function(package, version, language, author, email, bugs, copyrigh
       || missing(author)
       || missing(email)
       || missing(bugs)
-    )
+    ),
+    "copyright should be empty, a single name, or a list of components" =
+      is.null(copyright) || is.character(copyright) || is.list(copyright)
   )
   pm = c(as.list(environment()), list(...))
+  pm$charset <- "UTF-8"
   pm$timestamp <- Sys.time()
   class(pm) = 'po_metadata'
   pm
@@ -386,13 +379,63 @@ po_metadata = function(package, version, language, author, email, bugs, copyrigh
 
 as.po_metadata = function(x) {
   metadata_names <- c("package", "version", "language", "author", "email", "bugs", "copyright")
-  stopifnot("Input should be a key-value list" = typeof(x) == "list", metadata_names %chin% names(x))
+  stopifnot(is.list(x), metadata_names %chin% names(x))
   if (!"timestamp" %chin% names(x)) x$timestamp <- Sys.time()
 
   class(pm) = 'po_metadata'
   pm
 }
 
-format.po_metadata = function(x, ...) {
+format.po_metadata = function(x, is_fuzzy = FALSE, use_plurals = FALSE, ...) {
+  copyright = x$copyright
+  if (is.null(copyright)) {
+    copyright = character()
+  } else if (is.character(copyright)) {
+    copyright <- paste(
+      "#",
+      c(
+        sprintf("Copyright (C) %d %s", format(x$timestamp, "%Y"), copyright),
+        "This file is distributed under the same license as the R package"
+      )
+    )
+  } else if (is.list(copyright)) {
+    copyright <- paste(
+      "#",
+      c(
+        sprintf("Copyright (C) %d %s", copyright$years, copyright$holder),
+        "This file is distributed under the same license as the R package",
+        copyright$additional
+      )
+    )
+  }
+  if (is_fuzzy) copyright <- c(copyright, if (length(copyright)) "#", "#, fuzzy")
+  keys = with(x, c(
+    `Project-Id-Version` = sprintf("%s %s", package, version),
+    `Report-Msgid-Bugs-To` = bugs,
+    `POT-Creation-Date` = format(timestamp),
+    `PO-Revision-Date` = format(timestamp),
+    `Last-Translator` = sprintf("%s <%s>", author, email),
+    `Language-Team` = language,
+    `MIME-Version` = "1.0",
+    `Content-Type` = sprintf("text/plain; charset=%s", charset),
+    `Content-Transfer-Encoding` = "8bit"
+  ))
+  if (use_plurals) keys["Plural-Forms"] = sprintf(
+    "nplurals=%s; plural=%s;"
+  )
 
+  extra_keys = setdiff(
+    names(x),
+    c("copyright", "package", "version", "bugs", "timestamp", "author", "email", "language", "charset")
+  )
+  keys = c(keys, setNames(unlist(x[extra_keys]), extra_keys))
+
+  paste(
+    c(
+      copyright,
+      wrap_msg("msgid", ""),
+      wrap_msg("msgstr", paste(sprintf("%s: %s\\n", names(keys), keys), collapse = ""))
+    ),
+    collapse = "\n"
+  )
 }

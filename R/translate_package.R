@@ -91,12 +91,7 @@ translate_package = function(
   }
 
   for (language in languages) {
-    if (language %chin% .potools$KNOWN_LANGUAGES$code) {
-      metadata = .potools$KNOWN_LANGUAGES[.(language)]
-    } else {
-      metadata = update_metadata(language)
-    }
-      add_new_metadata(language)
+    metadata = get_lang_metadata(language)
     po_params$language = language
 
     # overwrite any existing translations written in previous translation.
@@ -157,9 +152,8 @@ translate_package = function(
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
 
-    author = prompt('Thanks! Who should be credited with these translations?')
-    email = prompt('And what is their email?')
-    po_params$author = sprintf("%s <%s>", author, email)
+    po_params$author = prompt('Thanks! Who should be credited with these translations?')
+    po_params$email = prompt('And what is their email?')
 
     # on.exit this to allow ESC to quit mid-translation. the intent is for the
     #   on.exit command to be overwritten on each iteration over languages --

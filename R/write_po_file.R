@@ -420,9 +420,12 @@ format.po_metadata = function(x, is_fuzzy = FALSE, use_plurals = FALSE, ...) {
     `Content-Type` = sprintf("text/plain; charset=%s", charset),
     `Content-Transfer-Encoding` = "8bit"
   ))
-  if (use_plurals) keys["Plural-Forms"] = sprintf(
-    "nplurals=%s; plural=%s;"
-  )
+  if (use_plurals) {
+    keys["Plural-Forms"] = with(
+      get_lang_metadata(x$language),
+      sprintf("nplurals=%s; plural=%s;", as.character(nplurals), plural)
+    )
+  }
 
   extra_keys = setdiff(
     names(x),

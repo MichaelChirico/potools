@@ -329,25 +329,6 @@ wrap_string = function(str, boundary, str_width, line_width) {
   paste(lines, collapse = '"\n"')
 }
 
-# see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c
-COPYRIGHT_TEMPLATE = '# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR %s
-# This file is distributed under the same license as the %s package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-'
-NO_COPYRIGHT_TEMPLATE = '# SOME DESCRIPTIVE TITLE.
-# This file is put in the public domain.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-'
-
-# balance here: keeping newlines in the string to facilitate writing,
-#   but need to escape the in-string newlines or they'll be written
-#   as newlines (not literal \n). encodeString is "soft-applied" here.
-#   might be better to treat this as a DCF and write it from a list
-#   instead of building it up from sprintf
-PO_HEADER_TEMPLATE =
 make_src_location <- function(files, lines, message_source, use_base_rules) {
   if (use_base_rules && message_source == "R") return("")
   s <- paste(sprintf("%s:%d", files, lines), collapse = " ")
@@ -357,37 +338,36 @@ make_src_location <- function(files, lines, message_source, use_base_rules) {
 }
 
 # See https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html
-po_metadata = function(package, version, language, author, email, bugs, copyright = NULL, ...) {
+po_metadata = function(package='', version='', language='', author='', email='', bugs='', copyright = NULL, ...) {
   stopifnot(
-    "All fields are required" = !(
-      missing(package)
-      || missing(version)
-      || missing(language)
-      || missing(author)
-      || missing(email)
-      || missing(bugs)
-    ),
     "copyright should be empty, a single name, or a list of components" =
       is.null(copyright) || is.character(copyright) || is.list(copyright)
   )
   pm = c(as.list(environment()), list(...))
   pm$charset <- "UTF-8"
-  pm$timestamp <- Sys.time()
+  if (is.null(pm$pot_timestamp)) pm$pot_timestamp <- Sys.time()
+  if (is.null(pm$po_timestamp)) pm$po_timestamp <- pm$pot_timestamp
+  if (is.null(pm$language_team)) pm$language_team <- pm$language
   class(pm) = 'po_metadata'
   pm
 }
 
-as.po_metadata = function(x) {
-  metadata_names <- c("package", "version", "language", "author", "email", "bugs", "copyright")
-  stopifnot(is.list(x), metadata_names %chin% names(x))
-  if (!"timestamp" %chin% names(x)) x$timestamp <- Sys.time()
-
-  class(pm) = 'po_metadata'
-  pm
-}
-
-format.po_metadata = function(x, is_fuzzy = FALSE, use_plurals = FALSE, ...) {
+format.po_metadata = function(x, template = FALSE, is_fuzzy = FALSE, use_plurals = FALSE, ...) {
+  # see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c for the copyright construction
   copyright = x$copyright
+  if (template) {
+    if (!is.null(copyright)) {
+      copyright = list(
+        title = "SOME DESCRIPTIVE TITLE", years = "YEAR", holder = copyright$holder,
+        additional = 'FIRST AUTHOR <EMAIL@ADDRESS>, YEAR'
+      )
+    }
+    x$po_timestamp = "YEAR-MO-DA HO:MI+ZONE"
+    x$author = "FULL NAME"
+    x$email = "EMAIL@ADDRESS"
+    x$language = ''
+    x$language_team = "LANGUAGE <LL@li.org>"
+  }
   if (is.null(copyright)) {
     copyright = character()
   } else if (is.character(copyright)) {
@@ -402,7 +382,8 @@ format.po_metadata = function(x, is_fuzzy = FALSE, use_plurals = FALSE, ...) {
     copyright <- paste(
       "#",
       c(
-        sprintf("Copyright (C) %d %s", copyright$years, copyright$holder),
+        copyright$title,
+        sprintf("Copyright (C) %s %s", copyright$years, copyright$holder),
         "This file is distributed under the same license as the R package",
         copyright$additional
       )
@@ -412,26 +393,35 @@ format.po_metadata = function(x, is_fuzzy = FALSE, use_plurals = FALSE, ...) {
   keys = with(x, c(
     `Project-Id-Version` = sprintf("%s %s", package, version),
     `Report-Msgid-Bugs-To` = bugs,
-    `POT-Creation-Date` = format(timestamp),
-    `PO-Revision-Date` = format(timestamp),
-    `Last-Translator` = sprintf("%s <%s>", author, email),
-    `Language-Team` = language,
+    `POT-Creation-Date` = format(pot_timestamp),
+    `PO-Revision-Date` = format(po_timestamp),
+    `Last-Translator` = if (nzchar(author) && nzchar(email)) sprintf("%s <%s>", author, email) else '',
+    `Language-Team` = language_team,
+    `Language` = language,
     `MIME-Version` = "1.0",
     `Content-Type` = sprintf("text/plain; charset=%s", charset),
     `Content-Transfer-Encoding` = "8bit"
   ))
   if (use_plurals) {
-    keys["Plural-Forms"] = with(
-      get_lang_metadata(x$language),
-      sprintf("nplurals=%s; plural=%s;", as.character(nplurals), plural)
-    )
+    if (template) {
+      keys["Plural-Forms"] = "nplurals=INTEGER; plural=EXPRESSION;"
+    } else {
+      keys["Plural-Forms"] = with(
+        get_lang_metadata(x$language),
+        sprintf("nplurals=%s; plural=%s;", as.character(nplurals), plural)
+      )
+    }
   }
 
   extra_keys = setdiff(
     names(x),
-    c("copyright", "package", "version", "bugs", "timestamp", "author", "email", "language", "charset")
+    c(
+      "copyright", "package", "version", "bugs",
+      "pot_timestamp", "po_timestamp",
+      "author", "email", "language", "language_team", "charset"
+    )
   )
-  keys = c(keys, setNames(unlist(x[extra_keys]), extra_keys))
+  if (length(extra_keys)) keys = c(keys, setNames(unlist(x[extra_keys]), extra_keys))
 
   paste(
     c(

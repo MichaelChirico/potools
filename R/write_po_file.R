@@ -31,9 +31,11 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     params$bugs <- "bugs.r-project.org"
   }
 
-  metadata = po_metadata(
-    package = params$package, version = params$version
-  )
+  metadata = with(params, po_metadata(
+    package = package, version = version, language = language,
+    author = author, email = email, bugs = bugs, copyright = copyright,
+    `X-Generator` = sprintf("potools %s", packageVersion("potools"))
+  ))
   write_po_file(
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
@@ -45,7 +47,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   width = if (use_base_rules) 79L else Inf
   # only applies to src .pot (part of https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121)
   if (is_base_package) {
-    copyright <- "The R Core Team"
+    metadata$copyright$holder <- "The R Core Team"
   }
   write_po_file(
     po_data[message_source == "src"],

@@ -21,7 +21,7 @@ translate_package(
   custom_translation_functions = list(R = NULL, src = NULL),
   max_translations = Inf,
   use_base_rules = package \%chin\% .potools$base_package_names,
-  copyright = NULL, bugs = NULL, verbose=FALSE
+  copyright = NULL, bugs = '', verbose=FALSE
 )
 }
 \arguments{
@@ -31,8 +31,8 @@ translate_package(
   \item{custom_translation_functions}{ A \code{list} with either/both of two components, \code{R} and \code{src}, together governing how to extract any non-standard strings from the package. See Details. }
   \item{max_translations}{ Numeric; used for setting a cap on the number of translations to be done for each language. Defaults to \code{Inf}, meaning all messages in the package. }
   \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
-  \item{copyright}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
-  \item{bugs}{ Character; passed on to \code{\link[tools]{update_pkg_po}}. }
+  \item{copyright}{ Character; passed on to \code{\link{write_po_file}}. }
+  \item{bugs}{ Character; passed on to \code{\link{write_po_file}}. }
   \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
 }
 \details{
@@ -98,10 +98,12 @@ See \code{\link{check_cracked_messages}}, \code{\link{check_untranslated_cat}}, 
 
 \bold{Domains:}
 
-The input to \code{languages} are the locale codes described in \code{\link[base]{Sys.getlocale}}, e.g.
-\code{es} for Spanish, \code{es_AR} for Argentinian Spanish, \code{ro} for Romanian, etc. See that help
-file for some helpful tips about how to tell which locales are currently available on your machine, and
-see the References below for some web resources listing more locales.
+The input to \code{languages} conform to the valid languages accepted by gettext. This almost always takes the form of
+(1) an ISO 639 2-letter language code; or (2) \code{ll_CC}, where \code{ll} is an ISO 639 2-letter language code and
+\code{CC} is an ISO 3166 2-letter country code e.g. \code{es} for Spanish, \code{es_AR} for Argentinian Spanish,
+\code{ro} for Romanian, etc. See \code{\link[base]{Sys.getlocale}} for some helpful tips about how to tell which
+locales are currently available on your machine, and see the References below for
+some web resources listing more locales.
 
 Note also the advice given in the R Installation and Administration manual (also cited below) -- if you
 are writing Spanish translations, a typical package should use \code{language = "es"} to generate
@@ -157,10 +159,13 @@ rm(pkg, tmp_pkg)
 \url{https://developer.r-project.org/Translations30.html} \cr
 \url{https://www.isi-web.org/publications/glossary-of-statistical-terms} \cr
 \url{https://www.gnu.org/software/gettext/} \cr
+\url{https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes} \cr
+\url{https://www.gnu.org/software/gettext/manual/html_node/Country-Codes.html#Country-Codes} \cr
 \url{https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip} \cr
 \url{https://saimana.com/list-of-country-locale-code/}
 }
 \seealso{
+\code{\link{get_message_data}}, \code{\link{write_po_file}},
 \code{\link[tools]{xgettext}}, \code{\link[tools]{update_pkg_po}}, \code{\link[tools]{checkPoFile}},
 \code{\link[base]{gettext}}
 }

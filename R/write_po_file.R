@@ -47,11 +47,10 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
     metadata,
+    width = if (use_base_rules) Inf else 79L,
     wrap_at_newline = !use_base_rules,
     use_base_rules = use_base_rules
   )
-  # assign here to prevent lazyeval issue
-  width = if (use_base_rules) 79L else Inf
   # only applies to src .pot (part of https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121)
   if (is_base_package) {
     metadata$copyright$holder <- "The R Core Team"
@@ -60,7 +59,6 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     po_data[message_source == "src"],
     file.path(po_dir, src_file),
     metadata,
-    width = width,
     use_base_rules = use_base_rules
   )
   return(invisible())
@@ -68,7 +66,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 
 write_po_file <- function(
   message_data, po_file, metadata,
-  width = Inf, wrap_at_newline = TRUE, use_base_rules = FALSE
+  width = 79L, wrap_at_newline = TRUE, use_base_rules = FALSE
 ) {
   if (!nrow(message_data)) return(invisible())
 
@@ -295,47 +293,7 @@ po_metadata = function(package='', version='', language='', author='', email='',
 }
 
 format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
-  # see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c for the copyright construction
-  copyright = x$copyright
-  if (template) {
-    if (!is.null(copyright)) {
-      copyright = list(
-        title = "SOME DESCRIPTIVE TITLE",
-        years = "YEAR",
-        holder = if (is.list(copyright)) copyright$holder else copyright,
-        additional = 'FIRST AUTHOR <EMAIL@ADDRESS>, YEAR'
-      )
-    }
-    x$po_timestamp = "YEAR-MO-DA HO:MI+ZONE"
-    x$author = "FULL NAME"
-    x$email = "EMAIL@ADDRESS"
-    x$language = ''
-    x$language_team = "LANGUAGE <LL@li.org>"
-  }
-  if (is.null(copyright)) {
-    copyright = character()
-  } else if (is.character(copyright)) {
-    copyright <- paste(
-      "#",
-      c(
-        sprintf("Copyright (C) %s %s", format(x$timestamp, "%Y"), copyright),
-        "This file is distributed under the same license as the R package"
-      )
-    )
-  } else if (is.list(copyright)) {
-    copyright <- paste(
-      "#",
-      c(
-        copyright$title,
-        sprintf("Copyright (C) %s %s", copyright$years, copyright$holder),
-        "This file is distributed under the same license as the R package",
-        copyright$additional
-      )
-    )
-  }
-  # see https://stackoverflow.com/q/15653093/3576984
-  # not added above because #, is incongruent
-  if (template && length(copyright)) copyright <- c(copyright, "#", "#, fuzzy")
+  copyright = build_copyright(x$copyright, template, x$pot_timestamp)
   keys = with(x, c(
     `Project-Id-Version` = sprintf("%s %s", package, version),
     `Report-Msgid-Bugs-To` = bugs,
@@ -380,3 +338,47 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
 }
 
 print.po_metadata = function(x, ...) writeLines(format(x, ...))
+
+# see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c for the copyright construction
+build_copyright = function(copyright, template, timestamp) {
+  if (template) {
+    if (!is.null(copyright)) {
+      copyright = list(
+        title = "SOME DESCRIPTIVE TITLE",
+        years = "YEAR",
+        holder = if (is.list(copyright)) copyright$holder else copyright,
+        additional = 'FIRST AUTHOR <EMAIL@ADDRESS>, YEAR'
+      )
+    }
+    x$po_timestamp = "YEAR-MO-DA HO:MI+ZONE"
+    x$author = "FULL NAME"
+    x$email = "EMAIL@ADDRESS"
+    x$language = ''
+    x$language_team = "LANGUAGE <LL@li.org>"
+  }
+  if (is.null(copyright)) {
+    copyright = character()
+  } else if (is.character(copyright)) {
+    copyright <- paste(
+      "#",
+      c(
+        sprintf("Copyright (C) %s %s", format(timestamp, "%Y"), copyright),
+        "This file is distributed under the same license as the R package"
+      )
+    )
+  } else if (is.list(copyright)) {
+    copyright <- paste(
+      "#",
+      c(
+        copyright$title,
+        sprintf("Copyright (C) %s %s", copyright$years, copyright$holder),
+        "This file is distributed under the same license as the R package",
+        copyright$additional
+      )
+    )
+  }
+  # see https://stackoverflow.com/q/15653093/3576984
+  # not added above because #, is incongruent
+  if (template && length(copyright)) copyright <- c(copyright, "#", "#, fuzzy")
+  copyright
+}

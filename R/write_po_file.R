@@ -61,6 +61,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     file.path(po_dir, src_file),
     metadata,
     width = width,
+    use_base_rules = use_base_rules
   )
   return(invisible())
 }
@@ -89,7 +90,6 @@ write_po_file <- function(
   if (use_base_rules) {
     plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d]    "%s"'
-
   } else {
     plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d] "%s"'
@@ -335,7 +335,7 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   }
   # see https://stackoverflow.com/q/15653093/3576984
   # not added above because #, is incongruent
-  if (template) copyright <- c(copyright, "#", "#, fuzzy")
+  if (template && length(copyright)) copyright <- c(copyright, "#", "#, fuzzy")
   keys = with(x, c(
     `Project-Id-Version` = sprintf("%s %s", package, version),
     `Report-Msgid-Bugs-To` = bugs,
@@ -378,3 +378,5 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
     collapse = "\n"
   )
 }
+
+print.po_metadata = function(x, ...) writeLines(format(x, ...))

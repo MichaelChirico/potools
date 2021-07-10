@@ -378,7 +378,7 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
           "SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER",
           'msgid "singular "', '#: foo.R', '"\\\\n vs \\n"',
           '"strings with escaped \\"quotes\\"',
-          'Copyright (C) YEAR Mata Hari',
+          'Copyright (C) YEAR Mata Hari'
         ),
         fixed = TRUE
       )

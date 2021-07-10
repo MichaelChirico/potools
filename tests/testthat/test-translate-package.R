@@ -371,14 +371,14 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
       # (4) source tagging
       # (5) splitting at newlines
       # (6) msgid quote escaping
-      # (7)-(8) copyright
+      # (7) copyright
       expect_all_match(
         r_pot_lines,
         c(
           "SOME DESCRIPTIVE TITLE", "Language: \\n", "nplurals=INTEGER",
           'msgid "singular "', '#: foo.R', '"\\\\n vs \\n"',
           '"strings with escaped \\"quotes\\"',
-          'Copyright (C) YEAR Mata Hari', '"Copyright: Mata Hari\\n"'
+          'Copyright (C) YEAR Mata Hari',
         ),
         fixed = TRUE
       )

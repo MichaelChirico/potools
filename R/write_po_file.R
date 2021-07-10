@@ -31,11 +31,18 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     params$bugs <- "bugs.r-project.org"
   }
 
-  metadata = with(params, po_metadata(
-    package = package, version = version, language = language,
-    author = author, email = email, bugs = bugs, copyright = copyright,
-    `X-Generator` = sprintf("potools %s", packageVersion("potools"))
-  ))
+  if (template) {
+    metadata = with(params, po_metadata(
+      package = package, version = version,
+      bugs = bugs, copyright = copyright
+    ))
+  } else {
+    metadata = with(params, po_metadata(
+      package = package, version = version, language = language,
+      author = author, email = email, bugs = bugs, copyright = copyright,
+      `X-Generator` = sprintf("potools %s", packageVersion("potools"))
+    ))
+  }
   write_po_file(
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
@@ -293,7 +300,9 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   if (template) {
     if (!is.null(copyright)) {
       copyright = list(
-        title = "SOME DESCRIPTIVE TITLE", years = "YEAR", holder = copyright$holder,
+        title = "SOME DESCRIPTIVE TITLE",
+        years = "YEAR",
+        holder = if (is.list(copyright)) copyright$holder else copyright,
         additional = 'FIRST AUTHOR <EMAIL@ADDRESS>, YEAR'
       )
     }
@@ -309,7 +318,7 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
     copyright <- paste(
       "#",
       c(
-        sprintf("Copyright (C) %d %s", format(x$timestamp, "%Y"), copyright),
+        sprintf("Copyright (C) %s %s", format(x$timestamp, "%Y"), copyright),
         "This file is distributed under the same license as the R package"
       )
     )

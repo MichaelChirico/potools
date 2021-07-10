@@ -267,3 +267,15 @@ invisible({
   system.file('extdata', 'plurals_metadata.csv', package='potools'),
   key = c('plural', 'plural_index')
 )
+
+# for testing; unexported
+reset_language_metadata = function() {
+  .potools$KNOWN_LANGUAGES = fread(
+    system.file('extdata', 'language_metadata.csv', package='potools'),
+    key='code'
+  )
+  .potools$PLURAL_RANGE_STRINGS = fread(
+    system.file('extdata', 'plurals_metadata.csv', package='potools'),
+    key = c('plural', 'plural_index')
+  )
+}

@@ -129,7 +129,7 @@ This function returns nothing invisibly. As a side effect, a \file{.pot} file is
 \file{.po} file is written in the same directory for each element of \code{languages}.
 }
 \examples{
-pkg <- file.path(system.file(package = 'potools'), 'pkg')
+pkg <- system.file('pkg', package = 'potools')
 # copy to a temporary location to be able to read/write/update below
 tmp_pkg <- file.path(tempdir(), "pkg")
 dir.create(tmp_pkg)

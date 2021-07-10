@@ -11,6 +11,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   #   be removed, or at least controlled by an option.
   # also considered:
   #   * rbind() each {R,src}x{singular,plural} combination together, but was getting quite lengthy/verbose/repetitive.
+  #     also won't work for src because plural messages are interwoven there, not tucked at the end.
   #   * split(,by='message_source,type') but missing levels (e.g., src.plural) need to be handled separately
   # also drop empty strings. these are kept until now in case they are needed for diagnostics, but can't be
   #   written to the .po/.pot files (msgid "" is reserved for the metadata header). Related: #83.
@@ -19,57 +20,10 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   if (template) {
     r_file <- sprintf("R-%s.pot", params$package)
     src_file <- sprintf("%s.pot", if (params$package == 'base') 'R' else params$package)
-
-    po_data[type == "plural", 'msgid_plural_str' := vapply(msgid_plural, paste, character(1L), collapse="|||")]
-    po_data = po_data[,
-      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
-      .(
-        source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
-        c_fmt_tag = "",
-        msgstr = if (.BY$type == 'singular') '' else NA_character_,
-        msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL),
-        # see discussion in #137
-        is_templated = any(is_templated)
-      )
-    ]
-    if (use_base_rules) {
-      po_data[message_source == 'src' & is_templated, 'c_fmt_tag' := "#, c-format\n"]
-    } else {
-      po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
-    }
   } else {
     r_file <- sprintf("R-%s.po", params$language)
     src_file <- sprintf("%s.po", params$language)
-
-    po_data[
-      type == "plural",
-      `:=`(
-        msgid_plural_str = vapply(msgid_plural, paste, character(1L), collapse="|||"),
-        msgstr_plural_str = vapply(msgstr_plural, paste, character(1L), collapse="|||")
-      )
-    ]
-    po_data = po_data[,
-      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
-      .(
-        source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
-        c_fmt_tag = "",
-        msgstr = msgstr[1L],
-        # [1] should be a no-op here
-        msgstr_plural = msgstr_plural_str[1L],
-        is_templated = any(is_templated)
-      )
-    ]
-    if (use_base_rules) {
-      po_data[message_source == 'src' & is_templated, 'c_fmt_tag' := "#, c-format\n"]
-    } else {
-      po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
-    }
-    # only do in non-template branch b/c we can't define a dummy msgstr_plural that splits to list('', '')
-    # don't filter to type=='plural' here -- causes a type conflict with the str elsewhere. we need a full plonk.
-    po_data[ , 'msgstr_plural' := strsplit(msgstr_plural, "|||", fixed = TRUE)]
   }
-
-  po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
 
   is_base_package <- params$package %chin% .potools$base_package_names
   if (is_base_package) {
@@ -108,6 +62,8 @@ write_po_file <- function(
 ) {
   if (!nrow(message_data)) return(invisible())
 
+  template = endsWith(po_file, ".pot")
+
   # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
   #   https://stackoverflow.com/q/10675360
   po_conn = file(po_file, "wb")
@@ -115,7 +71,7 @@ write_po_file <- function(
 
   po_header = format(
     metadata,
-    template = endsWith(po_file, ".pot"),
+    template = template,
     use_plurals = any(message_data$type == "plural")
   )
 
@@ -129,7 +85,54 @@ write_po_file <- function(
     plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d] "%s"'
   }
-  message_data[ , {
+
+  # since this is exported, don't overwrite user's table with temp column.
+  #   could also consider some on.exit() magic or using shallow() to avoid this, but the message tables aren't large
+  po_data = copy(message_data)
+  if (template) {
+    po_data[type == "plural", 'msgid_plural_str' := vapply(msgid_plural, paste, character(1L), collapse="|||")]
+    po_data = po_data[,
+      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
+      .(
+        source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
+        c_fmt_tag = "",
+        msgstr = if (.BY$type == 'singular') '' else NA_character_,
+        msgstr_plural = if (.BY$type == "plural") list(c('', '')) else list(NULL),
+        # see discussion in #137
+        is_templated = any(is_templated)
+      )
+    ]
+  } else {
+    po_data[
+      type == "plural",
+      `:=`(
+        msgid_plural_str = vapply(msgid_plural, paste, character(1L), collapse="|||"),
+        msgstr_plural_str = vapply(msgstr_plural, paste, character(1L), collapse="|||")
+      )
+    ]
+    po_data = po_data[,
+      by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
+      .(
+        source_location = make_src_location(file, line_number, .BY$message_source, use_base_rules),
+        c_fmt_tag = "",
+        msgstr = msgstr[1L],
+        # [1] should be a no-op here
+        msgstr_plural = msgstr_plural_str[1L],
+        is_templated = any(is_templated)
+      )
+    ]
+    # only do in non-template branch b/c we can't define a dummy msgstr_plural that splits to list('', '')
+    # don't filter to type=='plural' here -- causes a type conflict with the str elsewhere. we need a full plonk.
+    po_data[ , 'msgstr_plural' := strsplit(msgstr_plural, "|||", fixed = TRUE)]
+  }
+  if (use_base_rules) {
+    po_data[message_source == 'src' & is_templated, 'c_fmt_tag' := "#, c-format\n"]
+  } else {
+    po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
+  }
+  po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
+
+  po_data[ , {
     out_lines = character(.N)
     singular_idx = type == 'singular'
     out_lines[singular_idx] = sprintf(

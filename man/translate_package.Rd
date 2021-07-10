@@ -69,7 +69,7 @@ For R, there are two types of input: one for named arguments, the other for unna
 
 Entries for named arguments will look like \code{"fname:arg|num"} (singular string) or \code{"fname:arg1|num1,arg2|num2"} (plural string). \code{fname} gives the name of the function/call to be extracted from the R source, \code{arg}/\code{arg1}/\code{arg2} specify the name of the argument to \code{fname} from which strings should be extracted, and \code{num}/\code{num1}/\code{num2} specify the \emph{order} of the named argument within the signature of \code{fname}.
 
-Entries for unnamed arguments will look like \code{"fname:...\\xarg1,...,xargn"}. All strings within calls to \code{fname} \emph{except} those supplied to the arguments named among \code{xarg1}, ..., \code{xargn} will be extracted.
+Entries for unnamed arguments will look like \code{"fname:...\\xarg1,...,xargn"}, i.e., \code{fname}, followed by \code{:}, followed by \code{...} (three dots), followed by a backslash (\code{\\}), followed by a comma-separated list of argument names. All strings within calls to \code{fname} \emph{except} those supplied to the arguments named among \code{xarg1}, ..., \code{xargn} will be extracted.
 
 To clarify, consider the how we would (redundantly) specify \code{custom_translation_functions} for some of the default messagers, \code{gettext}, \code{gettextf}, and \code{ngettext}: \code{custom_translation_functions = list(R = c("gettext:...\\domain", "gettextf:fmt|1", "ngettext:msg1|2,msg2|3"))}.
 

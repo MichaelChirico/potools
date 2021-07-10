@@ -66,7 +66,8 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 
 write_po_file <- function(
   message_data, po_file, metadata,
-  width = 79L, wrap_at_newline = TRUE, use_base_rules = FALSE
+  width = 79L, wrap_at_newline = TRUE,
+  use_base_rules = metadata$package %chin% .potools$base_package_names
 ) {
   if (!nrow(message_data)) return(invisible())
 

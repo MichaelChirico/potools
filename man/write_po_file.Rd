@@ -1,6 +1,8 @@
 \name{write_po_file}
 \alias{write_po_file}
 \alias{po_metadata}
+\alias{format.po_metadata}
+\alias{print.po_metadata}
 \title{
 Write a .po or .pot file corresponding to a message database
 }

@@ -54,6 +54,6 @@ get_message_data(
 rm(pkg)
 }
 \seealso{
-\code{\link{translate_package}, \code{\link{write_po_file}}}
+\code{\link{translate_package}}, \code{\link{write_po_file}}
 }
 \author{Michael Chirico}

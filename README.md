@@ -14,6 +14,30 @@ The core function of `potools`, `translate_package`, is a one-stop-shop for inte
 
 `potools` is a UTF-8 package -- all `.po` and `.pot` files it produces will be treated as UTF-8.
 
+### Translating your package interactively with `translate_package()`
+
+The primary feature of `potools` is the `translate_package()` function, which is designed to be your first & only stop for typical experience internationalizing a package
+
+#### As a developer -- generating a .pot template
+
+A .pot template can be used by translators to produce translations; just running `translate_package()` on your package's source will produce this file (or files, if your package has both R and C/C++ messages to translated), e.g.
+
+```
+# run from the directory into which potools is cloned, i.e., 'potools' here is a file path
+translate_package('potools')
+```
+
+#### As a translator -- generating a .po translation & .mo translation binary
+
+To further add translations in your desired language, include the target language in the `translate_package()` call.
+
+Running the following will launch an interactive dialog prompting for translations message-by-message:
+
+```
+# es.po & es.mo Spanish translation files will be produced
+translate_package('potools', 'es')
+```
+
 ### Customized translators
 
 `base` R provides several functions for messaging that are natively equipped for translation (they all have a `domain` argument): `stop()`, `warning()`, `message()`, `gettext()`, `gettextf()`, `ngettext()`, and `packageStartupMessage()`.
@@ -131,3 +155,18 @@ spelling, for example.
 Say a user is running in `es_GT` and triggers an error. R will first look for a translation into `es_GT`; if
 none is defined, it will look for a translation into `es`. If none is defined again, it will finally fall
 back to the package's default language (i.e., whatever language is written in the source code, usually English).
+
+
+## Alternative software
+
+`potools` is by no means the first tool for facilitating internationalization; other open-source projects have deeper
+experience in this domain and as a result there are some relatively mature options for working with gettext/the po
+ecosystem in general. Here is a smattering of such tools that I've come across:
+
+ - Poedit - https://poedit.net/ - GUI Software for writing translations
+ - Gtranslator - https://wiki.gnome.org/Apps/Gtranslator - GNOME Translation editor
+ - Lokalize - https://userbase.kde.org/Lokalize - KDE's Computer-Aided Translation system
+ - Virtaal - https://virtaal.translatehouse.org/?id=virtaal/index - Another FOSS software for translation
+ - Pootle - https://pootle.translatehouse.org/ - Apparently related to Virtaal, and apparently there's even [a paper](https://www.academia.edu/16211610/A_Comparative_Study_of_Two_FOSS_Localisation_Tools_Pootle_and_Virtaal) written comparing the two
+ - Localization Toolkit - https://toolkit.translatehouse.org/ - Again I'm not sure the difference vs. Virtaal & Pootle
+ - PO mode in Emacs - https://www.emacswiki.org/emacs/PoMode

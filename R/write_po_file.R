@@ -11,6 +11,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   #   be removed, or at least controlled by an option.
   # also considered:
   #   * rbind() each {R,src}x{singular,plural} combination together, but was getting quite lengthy/verbose/repetitive.
+  #     also won't work for src because plural messages are interwoven there, not tucked at the end.
   #   * split(,by='message_source,type') but missing levels (e.g., src.plural) need to be handled separately
   # also drop empty strings. these are kept until now in case they are needed for diagnostics, but can't be
   #   written to the .po/.pot files (msgid "" is reserved for the metadata header). Related: #83.
@@ -19,7 +20,84 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   if (template) {
     r_file <- sprintf("R-%s.pot", params$package)
     src_file <- sprintf("%s.pot", if (params$package == 'base') 'R' else params$package)
+  } else {
+    r_file <- sprintf("R-%s.po", params$language)
+    src_file <- sprintf("%s.po", params$language)
+  }
 
+  is_base_package <- params$package %chin% .potools$base_package_names
+  if (is_base_package) {
+    params$package <- "R"
+    params$bugs <- "bugs.r-project.org"
+  }
+
+  if (template) {
+    metadata = with(params, po_metadata(
+      package = package, version = version,
+      bugs = bugs, copyright = copyright
+    ))
+  } else {
+    metadata = with(params, po_metadata(
+      package = package, version = version, language = language,
+      author = author, email = email, bugs = bugs, copyright = copyright,
+      `X-Generator` = sprintf("potools %s", packageVersion("potools"))
+    ))
+  }
+  write_po_file(
+    po_data[message_source == "R"],
+    file.path(po_dir, r_file),
+    metadata,
+    width = if (use_base_rules) Inf else 79L,
+    wrap_at_newline = !use_base_rules,
+    use_base_rules = use_base_rules
+  )
+  # only applies to src .pot (part of https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121)
+  if (is_base_package) {
+    metadata$copyright$holder <- "The R Core Team"
+  }
+  write_po_file(
+    po_data[message_source == "src"],
+    file.path(po_dir, src_file),
+    metadata,
+    use_base_rules = use_base_rules
+  )
+  return(invisible())
+}
+
+write_po_file <- function(
+  message_data, po_file, metadata,
+  width = 79L, wrap_at_newline = TRUE,
+  use_base_rules = metadata$package %chin% .potools$base_package_names
+) {
+  if (!nrow(message_data)) return(invisible())
+
+  template = endsWith(po_file, ".pot")
+
+  # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
+  #   https://stackoverflow.com/q/10675360
+  po_conn = file(po_file, "wb")
+  on.exit(close(po_conn))
+
+  po_header = format(
+    metadata,
+    template = template,
+    use_plurals = any(message_data$type == "plural")
+  )
+
+  writeLines(con=po_conn, useBytes=TRUE, po_header)
+
+  if (use_base_rules) {
+    plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
+    msgstr_fmt <- 'msgstr[%d]    "%s"'
+  } else {
+    plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
+    msgstr_fmt <- 'msgstr[%d] "%s"'
+  }
+
+  # since this is exported, don't overwrite user's table with temp column.
+  #   could also consider some on.exit() magic or using shallow() to avoid this, but the message tables aren't large
+  po_data = copy(message_data)
+  if (template) {
     po_data[type == "plural", 'msgid_plural_str' := vapply(msgid_plural, paste, character(1L), collapse="|||")]
     po_data = po_data[,
       by = .(message_source, type, msgid, msgid_plural = msgid_plural_str),
@@ -32,15 +110,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
         is_templated = any(is_templated)
       )
     ]
-    if (use_base_rules) {
-      po_data[message_source == 'src' & is_templated, 'c_fmt_tag' := "#, c-format\n"]
-    } else {
-      po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
-    }
   } else {
-    r_file <- sprintf("R-%s.po", params$language)
-    src_file <- sprintf("%s.po", params$language)
-
     po_data[
       type == "plural",
       `:=`(
@@ -59,81 +129,26 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
         is_templated = any(is_templated)
       )
     ]
-    if (use_base_rules) {
-      po_data[message_source == 'src' & is_templated, 'c_fmt_tag' := "#, c-format\n"]
-    } else {
-      po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
-    }
     # only do in non-template branch b/c we can't define a dummy msgstr_plural that splits to list('', '')
     # don't filter to type=='plural' here -- causes a type conflict with the str elsewhere. we need a full plonk.
     po_data[ , 'msgstr_plural' := strsplit(msgstr_plural, "|||", fixed = TRUE)]
   }
-
+  if (use_base_rules) {
+    po_data[message_source == 'src' & is_templated, 'c_fmt_tag' := "#, c-format\n"]
+  } else {
+    po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
+  }
   po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
 
-  params$base_copyright <- FALSE
-  params$is_base_package <- params$package %chin% .potools$base_package_names
-  if (params$is_base_package) {
-    params$package <- "R"
-    params$bugs <- "bugs.r-project.org"
-  }
-
-  params$template = template
-  params$ignore_width = use_base_rules
-  write_po_file(
-    po_data[message_source == "R"],
-    file.path(po_dir, r_file),
-    params,
-    use_base_rules = use_base_rules
-  )
-  # assign here to prevent lazyeval issue
-  width = if (use_base_rules) 79L else Inf
-  # See #125 and Bugzilla#18121. suggestions for a less horrible workaround welcome.
-  params$ignore_width = FALSE
-  # only applies to src .pot (part of https://bugs.r-project.org/bugzilla/show_bug.cgi?id=18121)
-  if (params$is_base_package) {
-    params$copyright <- "The R Core Team"
-    params$base_copyright <- TRUE
-  }
-  write_po_file(
-    po_data[message_source == "src"],
-    file.path(po_dir, src_file),
-    params,
-    width = width,
-  )
-  return(invisible())
-}
-
-write_po_file <- function(message_data, po_file, params, width = Inf, use_base_rules = FALSE) {
-  if (!nrow(message_data)) return(invisible())
-
-  # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
-  #   https://stackoverflow.com/q/10675360
-  po_conn = file(po_file, "wb")
-  on.exit(close(po_conn))
-
-  params$has_plural = any(message_data$type == "plural")
-  po_header = build_po_header(params, use_base_rules)
-
-  writeLines(con=po_conn, useBytes=TRUE, po_header)
-
-  if (use_base_rules) {
-    plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
-    msgstr_fmt <- 'msgstr[%d]    "%s"'
-
-  } else {
-    plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
-    msgstr_fmt <- 'msgstr[%d] "%s"'
-  }
-  message_data[ , {
+  po_data[ , {
     out_lines = character(.N)
     singular_idx = type == 'singular'
     out_lines[singular_idx] = sprintf(
       '\n%s%s%s\n%s',
       source_location[singular_idx],
       c_fmt_tag[singular_idx],
-      wrap_msg('msgid', msgid[singular_idx], width, params$ignore_width),
-      wrap_msg('msgstr', msgstr[singular_idx], width, params$ignore_width)
+      wrap_msg('msgid', msgid[singular_idx], width, wrap_at_newline),
+      wrap_msg('msgstr', msgstr[singular_idx], width, wrap_at_newline)
     )
     if (!all(singular_idx)) {
       msgid_plural = msgid_plural[!singular_idx]
@@ -159,87 +174,12 @@ write_po_file <- function(message_data, po_file, params, width = Inf, use_base_r
   }]
 }
 
-build_po_header = function(params, use_base_rules = FALSE) {
-  params$timestamp <- format(Sys.time(), tz = 'UTC')
-
-  if (is.null(params$bugs)) {
-    params$bugs <- ''
-  } else {
-    params$bugs <- sprintf('\n"Report-Msgid-Bugs-To: %s\\n"', params$bugs)
-  }
-
-  if (params$template) {
-    # TODO: this is confusing... revisit?
-    if (params$base_copyright) {
-      params$copyright_template <- with(params, sprintf(COPYRIGHT_TEMPLATE, copyright, package))
-      params$copyright <- ''
-      params$fuzzy_header <- "#, fuzzy\n"
-    } else if (use_base_rules) {
-      params$copyright_template <- params$copyright <- params$fuzzy_header <- ''
-    } else if (is.null(params$copyright)) {
-      params$copyright_template <- NO_COPYRIGHT_TEMPLATE
-      params$copyright <- ''
-      params$fuzzy_header <- "#, fuzzy\n"
-    } else {
-      params$copyright_template <- with(params, sprintf(COPYRIGHT_TEMPLATE, copyright, package))
-      params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
-      params$fuzzy_header <- "#, fuzzy\n"
-    }
-    params$po_revision_date <- 'YEAR-MO-DA HO:MI+ZONE'
-    params$author <- 'FULL NAME <EMAIL@ADDRESS>'
-    params$lang_team <- 'LANGUAGE <LL@li.org>'
-    params$lang_name <- if (use_base_rules) '' else '\n"Language: \\n"'
-    params$charset <- "CHARSET"
-    params$plural_forms <- if (!use_base_rules && params$has_plural) {
-      '\n"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"'
-    } else {
-      ''
-    }
-  } else {
-    # TODO(#76): don't do this
-    params$copyright_template <- NO_COPYRIGHT_TEMPLATE
-    if (is.null(params$copyright)) {
-      params$copyright <- ''
-    } else {
-      params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
-    }
-    # get a warning from msgfmt: PO file header fuzzy; older versions of msgfmt will give an error on this
-    params$fuzzy_header <- ''
-    params$po_revision_date <- params$timestamp
-    params$lang_team <- params$full_name_eng
-    # must write Language: in the .po file
-    params$lang_name <- sprintf('\n"Language: %s\\n"', params$lang_team)
-    params$charset <- "UTF-8"
-    params$plural_forms <- if (params$has_plural) {
-      with(params, sprintf('\n"Plural-Forms: nplurals=%s; plural=%s;\\n"', nplurals, plural))
-    } else {
-      ''
-    }
-  }
-
-  with(params, sprintf(
-    PO_HEADER_TEMPLATE,
-    copyright_template, fuzzy_header,
-    package, version,
-    bugs,
-    timestamp,
-    po_revision_date,
-    author,
-    lang_team,
-    lang_name,
-    copyright,
-    charset,
-    plural_forms
-  ))
-}
-
-wrap_msg = function(key, value, width, ignore_width = FALSE) {
+wrap_msg = function(key, value, width=Inf, wrap_at_newline = TRUE) {
   out <- character(length(value))
   # xgettext always wraps at a newline (even if the whole message fits inside 'width')
-  if (ignore_width) {
-    wrap_idx <- rep(FALSE, length(value))
-  } else {
-    wrap_idx <- nchar(value) + nchar(key) + 3L > width | grepl("[\\]n.", value)
+  wrap_idx <- nchar(value) + nchar(key) + 3L > width
+  if (wrap_at_newline) {
+     wrap_idx <- wrap_idx | grepl("[\\]n.", value)
   }
   out[!wrap_idx] = sprintf('%s "%s"', key, value[!wrap_idx])
   out[wrap_idx] = sprintf('%s ""\n%s', key, wrap_strings(value[wrap_idx], width))
@@ -330,39 +270,108 @@ wrap_string = function(str, boundary, str_width, line_width) {
   paste(lines, collapse = '"\n"')
 }
 
-# see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c
-COPYRIGHT_TEMPLATE = '# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR %s
-# This file is distributed under the same license as the %s package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-'
-NO_COPYRIGHT_TEMPLATE = '# SOME DESCRIPTIVE TITLE.
-# This file is put in the public domain.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-'
-
-# balance here: keeping newlines in the string to facilitate writing,
-#   but need to escape the in-string newlines or they'll be written
-#   as newlines (not literal \n). encodeString is "soft-applied" here.
-#   might be better to treat this as a DCF and write it from a list
-#   instead of building it up from sprintf
-PO_HEADER_TEMPLATE = '%s%smsgid ""
-msgstr ""
-"Project-Id-Version: %s %s\\n"%s
-"POT-Creation-Date: %s\\n"
-"PO-Revision-Date: %s\\n"
-"Last-Translator: %s\\n"
-"Language-Team: %s\\n"%s%s
-"MIME-Version: 1.0\\n"
-"Content-Type: text/plain; charset=%s\\n"
-"Content-Transfer-Encoding: 8bit\\n"%s'
-
 make_src_location <- function(files, lines, message_source, use_base_rules) {
   if (use_base_rules && message_source == "R") return("")
   s <- paste(sprintf("%s:%d", files, lines), collapse = " ")
   # branch above implies use_base_rules => message_source == "src"
   # 77 = 80 - nchar("#: "). 80 not 79 is for strwrap. NB: strwrap("012 345", width=4)
   paste0("#: ", if (use_base_rules) strwrap(s, width=77L) else s, "\n", collapse="")
+}
+
+# See https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html
+po_metadata = function(package='', version='', language='', author='', email='', bugs='', copyright = NULL, ...) {
+  stopifnot(
+    "copyright should be empty, a single name, or a list of components" =
+      is.null(copyright) || is.character(copyright) || is.list(copyright)
+  )
+  pm = c(as.list(environment()), list(...))
+  pm$charset <- "UTF-8"
+  if (is.null(pm$pot_timestamp)) pm$pot_timestamp <- Sys.time()
+  if (is.null(pm$po_timestamp)) pm$po_timestamp <- pm$pot_timestamp
+  if (is.null(pm$language_team)) pm$language_team <- pm$language
+  class(pm) = 'po_metadata'
+  pm
+}
+
+format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
+  if (template) {
+    x$po_timestamp = "YEAR-MO-DA HO:MI+ZONE"
+    x$author = "FULL NAME"
+    x$email = "EMAIL@ADDRESS"
+    x$language = ''
+    x$language_team = "LANGUAGE <LL@li.org>"
+  }
+  if (is.character(x$copyright)) {
+    x$copyright = list(years = format(x$pot_timestamp, "%Y"), holder = x$copyright)
+  }
+  copyright = build_copyright(x$copyright, template)
+  keys = with(x, c(
+    `Project-Id-Version` = sprintf("%s %s", package, version),
+    `Report-Msgid-Bugs-To` = bugs,
+    `POT-Creation-Date` = format(pot_timestamp),
+    `PO-Revision-Date` = format(po_timestamp),
+    `Last-Translator` = if (nzchar(author) && nzchar(email)) sprintf("%s <%s>", author, email) else '',
+    `Language-Team` = language_team,
+    `Language` = language,
+    `MIME-Version` = "1.0",
+    `Content-Type` = sprintf("text/plain; charset=%s", charset),
+    `Content-Transfer-Encoding` = "8bit"
+  ))
+  if (use_plurals) {
+    if (template) {
+      keys["Plural-Forms"] = "nplurals=INTEGER; plural=EXPRESSION;"
+    } else {
+      keys["Plural-Forms"] = with(
+        get_lang_metadata(x$language),
+        sprintf("nplurals=%s; plural=%s;", as.character(nplurals), plural)
+      )
+    }
+  }
+
+  extra_keys = setdiff(
+    names(x),
+    c(
+      "copyright", "package", "version", "bugs",
+      "pot_timestamp", "po_timestamp",
+      "author", "email", "language", "language_team", "charset"
+    )
+  )
+  if (length(extra_keys)) keys = c(keys, setNames(unlist(x[extra_keys]), extra_keys))
+
+  paste(
+    c(
+      copyright,
+      wrap_msg("msgid", ""),
+      wrap_msg("msgstr", paste(sprintf("%s: %s\\n", names(keys), keys), collapse = ""))
+    ),
+    collapse = "\n"
+  )
+}
+
+print.po_metadata = function(x, ...) writeLines(format(x, ...))
+
+# see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c for the copyright construction
+build_copyright = function(copyright, template) {
+  if (is.null(copyright)) return(character())
+  if (template) {
+    copyright = list(
+      title = "SOME DESCRIPTIVE TITLE",
+      years = "YEAR",
+      holder = if (is.list(copyright)) copyright$holder else copyright,
+      additional = 'FIRST AUTHOR <EMAIL@ADDRESS>, YEAR'
+    )
+  }
+  copyright <- paste(
+    "#",
+    c(
+      copyright$title,
+      sprintf("Copyright (C) %s %s", copyright$years, copyright$holder),
+      "This file is distributed under the same license as the R package",
+      copyright$additional
+    )
+  )
+  # see https://stackoverflow.com/q/15653093/3576984
+  # not added above because #, is incongruent
+  if (template) copyright <- c(copyright, "#", "#, fuzzy")
+  copyright
 }

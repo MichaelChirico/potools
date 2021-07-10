@@ -4,7 +4,7 @@ translate_package = function(
   custom_translation_functions = list(R = NULL, src = NULL),
   max_translations = Inf,
   use_base_rules = package %chin% .potools$base_package_names,
-  copyright = NULL, bugs = NULL, verbose = FALSE
+  copyright = NULL, bugs = '', verbose = FALSE
 ) {
   result <- check_potools_sys_reqs()
   if (!isTRUE(result)) stop(result) # nocov
@@ -91,11 +91,8 @@ translate_package = function(
   }
 
   for (language in languages) {
-    metadata = KNOWN_LANGUAGES[.(language)]
-    # if the language is unknown, the right join above won't match rows in KNOWN_LANGUAGES
-    if (is.na(metadata$full_name_eng)) add_new_metadata(metadata, language)
+    metadata = get_lang_metadata(language)
     po_params$language = language
-    po_params[c('full_name_eng', 'nplurals', 'plural')] = metadata[ , c('full_name_eng', 'nplurals', 'plural')]
 
     # overwrite any existing translations written in previous translation.
     #   set blank initially (rather than deleting the column) to allow
@@ -155,9 +152,8 @@ translate_package = function(
       message("(To quit translating, press 'Esc'; progress will be saved)")
     }
 
-    author = prompt('Thanks! Who should be credited with these translations?')
-    email = prompt('And what is their email?')
-    po_params$author = sprintf("%s <%s>", author, email)
+    po_params$author = prompt('Thanks! Who should be credited with these translations?')
+    po_params$email = prompt('And what is their email?')
 
     # on.exit this to allow ESC to quit mid-translation. the intent is for the
     #   on.exit command to be overwritten on each iteration over languages --
@@ -259,14 +255,29 @@ invisible({
 # nplurals,plural info from https://l10n.gnome.org/teams/<language>
 # NB: looks may be deceiving for right-to-left scripts (e.g. Farsi), where the
 #   displayed below might not be in the order it is parsed.
-KNOWN_LANGUAGES = fread(system.file('extdata', 'language_metadata.csv', package='potools'), key='code')
+# assign to .potools, not a package env, to keep more readily mutable inside update_metadata()
+.potools$KNOWN_LANGUAGES = fread(system.file('extdata', 'language_metadata.csv', package='potools'), key='code')
 
 # the 'plural' column above is designed for computers;
 #   translate that to something human-legible here.
 # NB: 'plural' is 0-based (like in the .po file), but
 #   'plural_index' is 1-based (to match the above R-level code).
-# assign to .potools, not a package env, to keep more readily mutable inside add_new_metadata()
+# assign to .potools, not a package env, to keep more readily mutable inside update_metadata()
 .potools$PLURAL_RANGE_STRINGS = fread(
   system.file('extdata', 'plurals_metadata.csv', package='potools'),
   key = c('plural', 'plural_index')
 )
+
+# for testing; unexported
+# nocov start
+reset_language_metadata = function() {
+  .potools$KNOWN_LANGUAGES = fread(
+    system.file('extdata', 'language_metadata.csv', package='potools'),
+    key='code'
+  )
+  .potools$PLURAL_RANGE_STRINGS = fread(
+    system.file('extdata', 'plurals_metadata.csv', package='potools'),
+    key = c('plural', 'plural_index')
+  )
+}
+# nocov end

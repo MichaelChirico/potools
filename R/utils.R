@@ -146,3 +146,10 @@ build_exclusion_ranges = function(starts, ends) {
 
   ranges
 }
+
+get_lang_metadata = function(language) {
+  if (language %chin% .potools$KNOWN_LANGUAGES$code) {
+    return(.potools$KNOWN_LANGUAGES[.(language)])
+  }
+  update_metadata(language)
+}

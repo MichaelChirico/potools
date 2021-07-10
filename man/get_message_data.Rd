@@ -36,29 +36,24 @@ A \code{data.table} with the following schema:
 
 }
 \examples{
-pkg <- file.path(system.file(package = 'potools'), 'pkg')
-# copy to a temporary location to be able to read/write/update below
-tmp_pkg <- file.path(tempdir(), "pkg")
-dir.create(tmp_pkg)
-file.copy(pkg, dirname(tmp_pkg), recursive = TRUE)
+pkg <- system.file('pkg', package = 'potools')
 
-get_message_data(tmp_pkg)
+get_message_data(pkg)
 
 # includes strings provided to the custom R wrapper function catf()
-get_message_data(tmp_pkg, custom_translation_functions = list(R = "catf:fmt|1"))
+get_message_data(pkg, custom_translation_functions = list(R = "catf:fmt|1"))
 
 # includes untranslated strings provided to the custom
 #   C/C++ wrapper function ReverseTemplateMessage()
 get_message_data(
-  tmp_pkg,
+  pkg,
   custom_translation_functions = list(src = "ReverseTemplateMessage:2")
 )
 
 # cleanup
-unlink(tmp_pkg, recursive = TRUE)
-rm(pkg, tmp_pkg)
+rm(pkg)
 }
 \seealso{
-\code{\link{translate_package}}
+\code{\link{translate_package}}, \code{\link{write_po_file}}
 }
 \author{Michael Chirico}

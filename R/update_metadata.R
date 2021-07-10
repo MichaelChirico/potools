@@ -1,6 +1,8 @@
 # extend metadata so that an unrecognized language can be used for translation. also
 #   stores this metadata in the package environment so it can be reused for the session duration.
-add_new_metadata = function(metadata, language) {
+update_metadata = function(language) {
+  metadata = data.table(code = language)
+
   messagef("'%s' is not a known language. ", language, appendLF=FALSE)
   # perhaps refer to http://docs.translatehouse.org/projects/localization-guide/en/latest/l10n/pluralforms.html instead
   message("Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>")
@@ -34,7 +36,10 @@ add_new_metadata = function(metadata, language) {
     )
     setkeyv(.potools$PLURAL_RANGE_STRINGS, c("plural", "plural_index"))
   }
+  .potools$KNOWN_LANGUAGES = rbind(.potools$KNOWN_LANGUAGES, metadata)
+  setkeyv(.potools$KNOWN_LANGUAGES, "code")
   message("Thanks! Please file an issue on GitHub to get this language recognized permanently")
+  metadata
 }
 
 strip_ws = function(s) gsub(' ', '', s, fixed = TRUE)

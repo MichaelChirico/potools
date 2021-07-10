@@ -1,0 +1,110 @@
+\name{write_po_file}
+\alias{write_po_file}
+\alias{po_metadata}
+\alias{format.po_metadata}
+\alias{print.po_metadata}
+\title{
+Write a .po or .pot file corresponding to a message database
+}
+\description{
+Serialize a message database in the \file{.po} and \file{.pot} formats recognized by the gettext ecosystem.
+}
+\usage{
+write_po_file(
+  message_data, po_file, metadata,
+  width = 79L, wrap_at_newline = TRUE,
+  use_base_rules = metadata$package \%chin\% .potools$base_package_names
+)
+po_metadata(
+  package='', version='', language='',
+  author='', email='',
+  bugs='', copyright = NULL,
+  ...
+)
+
+\method{format}{po_metadata}(x, template = FALSE, use_plurals = FALSE, ...)
+\method{print}{po_metadata}(x, ...)
+}
+\arguments{
+  \item{message_data}{ \code{data.table}, as returned from \code{\link{get_message_data}}. NB: R creates separate domains for R and C/C++ code; it is recommended you do the same by filtering the \code{get_message_data} output for \code{message_source == "R"} or \code{message_source == "src"}. Other approaches are untested. }
+  \item{po_file}{ Character vector giving a destination path. Paths ending in \file{.pot} will be written with template files (e.g., \code{msgstr} entries will be blanked). }
+  \item{metadata}{ A \code{po_metadata} object as returned by \code{po_metadata()}. }
+  \item{width}{ Numeric governing the wrapping width of the output file. Default is \code{79L} to match the behavior of the \code{xgettext} utility. \code{Inf} turns off wrapping (except for file source markers comments). }
+  \item{wrap_at_newline}{ Logical, default \code{TRUE} to match the \code{xgettext} utility's behavior. If \code{TRUE}, any \code{msgid} or \code{msgstr} will always be wrapped at an internal newline (i.e., literally matching \code{\\n}). }
+  \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
+  \item{package}{ Character; the name of the package being translated. }
+  \item{version}{ Character; the version of the package being translated. }
+  \item{language}{ Character; the language of the \code{msgstr}. See \code{\link{translate_package}} for details. }
+  \item{author}{ Character; an author (combined with \code{email}) to whom to attribute the translations (as \code{Last-Translator}). }
+  \item{email}{ Character; an e-mail address associated with \code{author}. }
+  \item{bugs}{ Character; a URL where issues with the translations can be reported. }
+  \item{copyright}{ An object used to construct the initial Copyright reference in the output. If \code{NULL}, no such comment is written. If a \code{list}, it should the following structure:
+    \itemize{
+      \item{\code{year} - [Required] A year or hyphen-separated range of years}
+      \item{\code{holder} - [Required] The name of the copyright holder}
+      \item{\code{title} - [Optional] A title for the \file{.po}}
+      \item{\code{additional} - [Optional] A character vector of additional lines for the copyright comment section}
+    }
+  If a \code{character} scalar, it is interpreted as the \code{holder} and the \code{year} is set as the \code{POT-Creation-Date}'s year. }
+  \item{...}{ Additional (named) components to add to the metadata. For \code{print.po_metadata}, passed on to \code{format.po_metadata} }
+  \item{x}{ A \code{po_metadata} object. }
+  \item{template}{ Logical; format the metadata as in a \file{.pot} template? }
+  \item{use_plurals}{ Logical; should the \code{Plural-Forms} entry be included? }
+}
+\details{
+Three components are set automatically if not provided:
+
+\itemize{
+  \item{\code{pot_timestamp} - A \code{POSIXct} used to write the \code{POT-Creation-Date} entry. Defaults to the \code{\link{Sys.time}} at run time. }
+  \item{\code{po_timestamp} - A \code{POSIXct} used to write the \code{PO-Revision-Date} entry. Defaults to be the same as \code{pot_timestamp}. }
+  \item{\code{language_team} - A string used to write the \code{Language-Team} entry. Defaults to be the same as \code{language}; if provided manually, the format \code{LANGUAGE <LL@li.org>} is recommended. }
+}
+
+The \code{charset} for output is always set to \code{"UTF-8"}; this is intentional to make it more cumbersome to create non-UTF-8 files.
+}
+\value{
+For \code{po_metadata}, an object of class \code{po_metadata} that has a \code{format} method used to serialize the metadata.
+}
+\examples{
+message_data <- get_message_data(system.file('pkg', package='potools'))
+desc_data <- read.dcf(system.file('pkg', 'DESCRIPTION', package='potools'), c('Package', 'Version'))
+metadata <- po_metadata(
+  package = desc_data[, "Package"], version = desc_data[, "Version"],
+  language = 'ar_SY', author = 'R User', email = 'ruser@gmail.com',
+  bugs = 'https://github.com/ruser/potoolsExample/issues'
+)
+
+# add fake translations
+message_data[type == "singular", msgstr := "<arabic translation>"]
+# Arabic has 6 plural forms
+message_data[type == "plural", msgstr_plural := .(as.list(sprintf("<\%d translation>", 0:5)))]
+
+# Preview metadata
+print(metadata)
+# write .po file
+write_po_file(
+  message_data[message_source == "R"],
+  tmp_po <- tempfile(fileext = '.po'),
+  metadata
+)
+writeLines(readLines(tmp_po))
+
+# write .pot template
+write_po_file(
+  message_data[message_source == "R"],
+  tmp_pot <- tempfile(fileext = '.pot'),
+  metadata
+)
+writeLines(readLines(tmp_pot))
+
+# cleanup
+file.remove(tmp_po, tmp_pot)
+rm(message_data, desc_data, metadata, tmp_po, tmp_pot)
+}
+\references{
+\url{https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html} \cr
+}
+\seealso{
+\code{\link{translate_package}}, \code{\link{get_message_data}}, \code{\link[tools]{xgettext2pot}}, \code{\link[tools]{update_pkg_po}}
+}
+\author{Michael Chirico}

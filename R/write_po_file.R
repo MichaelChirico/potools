@@ -77,10 +77,13 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     params$bugs <- "bugs.r-project.org"
   }
 
-  params$template = template
+  metadata = po_metadata(
+    package = params$package, version = params$version
+  )
   write_po_file(
     po_data[message_source == "R"],
     file.path(po_dir, r_file),
+    metadata,
     wrap_at_newline = !use_base_rules,
     use_base_rules = use_base_rules
   )
@@ -93,14 +96,14 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   write_po_file(
     po_data[message_source == "src"],
     file.path(po_dir, src_file),
+    metadata,
     width = width,
   )
   return(invisible())
 }
 
 write_po_file <- function(
-  message_data, po_file, package, author,
-  copyright = NULL, bugs = NULL, language_team = NULL, is_template = FALSE,
+  message_data, po_file, metadata,
   width = Inf, wrap_at_newline = TRUE, use_base_rules = FALSE
 ) {
   if (!nrow(message_data)) return(invisible())
@@ -110,10 +113,11 @@ write_po_file <- function(
   po_conn = file(po_file, "wb")
   on.exit(close(po_conn))
 
-  params = list(
-    has_plural = any(message_data$type == "plural")
+  po_header = format(
+    metadata,
+    template = endsWith(po_file, ".pot"),
+    use_plurals = any(message_data$type == "plural")
   )
-  po_header = build_po_header(params, use_base_rules)
 
   writeLines(con=po_conn, useBytes=TRUE, po_header)
 
@@ -157,80 +161,6 @@ write_po_file <- function(
 
     writeLines(con=po_conn, useBytes=TRUE, out_lines)
   }]
-}
-
-build_po_header = function(params, use_base_rules = FALSE) {
-  params$timestamp <- format(Sys.time(), tz = 'UTC')
-
-  if (is.null(params$bugs)) {
-    params$bugs <- ''
-  } else {
-    params$bugs <- sprintf('\n"Report-Msgid-Bugs-To: %s\\n"', params$bugs)
-  }
-
-  if (params$template) {
-    # TODO: this is confusing... revisit?
-    if (params$base_copyright) {
-      params$copyright_template <- with(params, sprintf(COPYRIGHT_TEMPLATE, copyright, package))
-      params$copyright <- ''
-      params$fuzzy_header <- "#, fuzzy\n"
-    } else if (use_base_rules) {
-      params$copyright_template <- params$copyright <- params$fuzzy_header <- ''
-    } else if (is.null(params$copyright)) {
-      params$copyright_template <- NO_COPYRIGHT_TEMPLATE
-      params$copyright <- ''
-      params$fuzzy_header <- "#, fuzzy\n"
-    } else {
-      params$copyright_template <- with(params, sprintf(COPYRIGHT_TEMPLATE, copyright, package))
-      params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
-      params$fuzzy_header <- "#, fuzzy\n"
-    }
-    params$po_revision_date <- 'YEAR-MO-DA HO:MI+ZONE'
-    params$author <- 'FULL NAME <EMAIL@ADDRESS>'
-    params$lang_team <- 'LANGUAGE <LL@li.org>'
-    params$lang_name <- if (use_base_rules) '' else '\n"Language: \\n"'
-    params$charset <- "CHARSET"
-    params$plural_forms <- if (!use_base_rules && params$has_plural) {
-      '\n"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"'
-    } else {
-      ''
-    }
-  } else {
-    # TODO(#76): don't do this
-    params$copyright_template <- NO_COPYRIGHT_TEMPLATE
-    if (is.null(params$copyright)) {
-      params$copyright <- ''
-    } else {
-      params$copyright <- sprintf('\n"Copyright: %s\\n"', params$copyright)
-    }
-    # get a warning from msgfmt: PO file header fuzzy; older versions of msgfmt will give an error on this
-    params$fuzzy_header <- ''
-    params$po_revision_date <- params$timestamp
-    params$lang_team <- params$full_name_eng
-    # must write Language: in the .po file
-    params$lang_name <- sprintf('\n"Language: %s\\n"', params$lang_team)
-    params$charset <- "UTF-8"
-    params$plural_forms <- if (params$has_plural) {
-      with(params, sprintf('\n"Plural-Forms: nplurals=%s; plural=%s;\\n"', nplurals, plural))
-    } else {
-      ''
-    }
-  }
-
-  with(params, sprintf(
-    PO_HEADER_TEMPLATE,
-    copyright_template, fuzzy_header,
-    package, version,
-    bugs,
-    timestamp,
-    po_revision_date,
-    author,
-    lang_team,
-    lang_name,
-    copyright,
-    charset,
-    plural_forms
-  ))
 }
 
 wrap_msg = function(key, value, width=Inf, wrap_at_newline = TRUE) {
@@ -352,7 +282,7 @@ po_metadata = function(package='', version='', language='', author='', email='',
   pm
 }
 
-format.po_metadata = function(x, template = FALSE, is_fuzzy = FALSE, use_plurals = FALSE, ...) {
+format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   # see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c for the copyright construction
   copyright = x$copyright
   if (template) {
@@ -389,7 +319,9 @@ format.po_metadata = function(x, template = FALSE, is_fuzzy = FALSE, use_plurals
       )
     )
   }
-  if (is_fuzzy) copyright <- c(copyright, if (length(copyright)) "#", "#, fuzzy")
+  # see https://stackoverflow.com/q/15653093/3576984
+  # not added above because #, is incongruent
+  if (template) copyright <- c(copyright, "#", "#, fuzzy")
   keys = with(x, c(
     `Project-Id-Version` = sprintf("%s %s", package, version),
     `Report-Msgid-Bugs-To` = bugs,

@@ -269,6 +269,7 @@ invisible({
 )
 
 # for testing; unexported
+# nocov start
 reset_language_metadata = function() {
   .potools$KNOWN_LANGUAGES = fread(
     system.file('extdata', 'language_metadata.csv', package='potools'),
@@ -279,3 +280,4 @@ reset_language_metadata = function() {
     key = c('plural', 'plural_index')
   )
 }
+# nocov end

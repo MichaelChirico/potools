@@ -9,6 +9,7 @@ importFrom(utils, getParseData, globalVariables, head, tail, type.convert)
 
 export(translate_package)
 export(get_message_data)
+export(write_po_file, po_metadata)
 
 export(check_cracked_messages, check_untranslated_cat, check_untranslated_src)
 
@@ -16,3 +17,6 @@ export(check_potools_sys_reqs)
 
 S3method(format, specials_metadata)
 S3method(all.equal, specials_metadata)
+
+S3method(format, po_metadata)
+S3method(print, po_metadata)

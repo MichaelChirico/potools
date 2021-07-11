@@ -15,11 +15,11 @@ get_directory = function(dir) {
 get_desc_data = function(dir) {
   desc_file <- file.path(dir, 'DESCRIPTION')
   if (!file.exists(desc_file)) {
-    stopf('%s is not a package (missing DESCRIPTION)', dir)
+    stopf('%s is not a package (missing DESCRIPTION)', normalizePath(dir))
   }
   desc_data <- read.dcf(desc_file, c('Package', 'Version'))
   if (nrow(desc_data) != 1L || anyNA(desc_data)) {
-    stopf('%s is not a package (missing Package and/or Version field in DESCRIPTION)', dir)
+    stopf('%s is not a package (missing Package and/or Version field in DESCRIPTION)', normalizePath(dir))
   }
   return(desc_data[1L, ])
 }

@@ -6,17 +6,6 @@
 # note also that the gettext manual says we shouldn't write these ourselves... for now i'm
 #   going to go ahead and try to anyway until it breaks something :)
 write_po_files <- function(message_data, po_dir, params, template = FALSE, use_base_rules = FALSE) {
-  # drop untranslated strings, collapse duplicates, drop unneeded data.
-  #   for now, treating R & src separately so they can be treated differently; eventually this should
-  #   be removed, or at least controlled by an option.
-  # also considered:
-  #   * rbind() each {R,src}x{singular,plural} combination together, but was getting quite lengthy/verbose/repetitive.
-  #     also won't work for src because plural messages are interwoven there, not tucked at the end.
-  #   * split(,by='message_source,type') but missing levels (e.g., src.plural) need to be handled separately
-  # also drop empty strings. these are kept until now in case they are needed for diagnostics, but can't be
-  #   written to the .po/.pot files (msgid "" is reserved for the metadata header). Related: #83.
-  po_data = message_data[is_marked_for_translation & (type == "plural" | nzchar(msgid, keepNA = TRUE))]
-
   if (template) {
     r_file <- sprintf("R-%s.pot", params$package)
     src_file <- sprintf("%s.pot", if (params$package == 'base') 'R' else params$package)
@@ -44,7 +33,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     ))
   }
   write_po_file(
-    po_data[message_source == "R"],
+    message_data[message_source == "R"],
     file.path(po_dir, r_file),
     metadata,
     width = if (use_base_rules) Inf else 79L,
@@ -56,7 +45,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     metadata$copyright$holder <- "The R Core Team"
   }
   write_po_file(
-    po_data[message_source == "src"],
+    message_data[message_source == "src"],
     file.path(po_dir, src_file),
     metadata,
     use_base_rules = use_base_rules
@@ -86,17 +75,16 @@ write_po_file <- function(
 
   writeLines(con=po_conn, useBytes=TRUE, po_header)
 
-  if (use_base_rules) {
-    plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
-    msgstr_fmt <- 'msgstr[%d]    "%s"'
-  } else {
-    plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
-    msgstr_fmt <- 'msgstr[%d] "%s"'
-  }
-
-  # since this is exported, don't overwrite user's table with temp column.
-  #   could also consider some on.exit() magic or using shallow() to avoid this, but the message tables aren't large
-  po_data = copy(message_data)
+  # drop untranslated strings, collapse duplicates, drop unneeded data.
+  #   for now, treating R & src separately so they can be treated differently; eventually this should
+  #   be removed, or at least controlled by an option.
+  # also considered:
+  #   * rbind() each {R,src}x{singular,plural} combination together, but was getting quite lengthy/verbose/repetitive.
+  #     also won't work for src because plural messages are interwoven there, not tucked at the end.
+  #   * split(,by='message_source,type') but missing levels (e.g., src.plural) need to be handled separately
+  # also drop empty strings. these are kept until now in case they are needed for diagnostics, but can't be
+  #   written to the .po/.pot files (msgid "" is reserved for the metadata header). Related: #83.
+  po_data = message_data[is_marked_for_translation & (type == "plural" | nzchar(msgid, keepNA = TRUE))]
   if (template) {
     po_data[type == "plural", 'msgid_plural_str' := vapply(msgid_plural, paste, character(1L), collapse="|||")]
     po_data = po_data[,
@@ -139,6 +127,15 @@ write_po_file <- function(
     po_data[(is_templated), 'c_fmt_tag' := "#, c-format\n"]
   }
   po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
+
+  # tools::xgettext2pot() tries to make the entries' whitespace align, which xgettext doesn't do
+  if (use_base_rules & po_data$message_source[1L] == "R") {
+    plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
+    msgstr_fmt <- 'msgstr[%d]    "%s"'
+  } else {
+    plural_fmt <- '\n%s%smsgid "%s"\nmsgid_plural "%s"\n%s'
+    msgstr_fmt <- 'msgstr[%d] "%s"'
+  }
 
   po_data[ , {
     out_lines = character(.N)

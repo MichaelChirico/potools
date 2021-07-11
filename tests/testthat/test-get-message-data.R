@@ -3,14 +3,18 @@ test_that("Packages with src code & C syntax errors fail gracefully", {
     get_message_data(test_package("r_src_err_1")),
     "Parsing error: found an odd number (3)", fixed = TRUE
   )
-  expect_error(
-    get_message_data(test_package("r_src_err_2")),
-    "Parsing error: unmatched parentheses", fixed = TRUE
-  )
-  expect_error(
-    get_message_data(test_package("r_src_err_3")),
-    "Parsing error: unmatched parentheses", fixed = TRUE
-  )
+  # TODO(#209): reactivate these. See discussion in #199 -- for now, the simplest
+  #   way forward is to accept some misbehavior on erroneous C files that won't parse,
+  #   and leave it to users to get their C files compiling first before running
+  #   get_message_data().
+  # expect_error(
+  #   get_message_data(test_package("r_src_err_2")),
+  #   "Parsing error: unmatched parentheses", fixed = TRUE
+  # )
+  # expect_error(
+  #   get_message_data(test_package("r_src_err_3")),
+  #   "Parsing error: unmatched parentheses", fixed = TRUE
+  # )
 })
 
 test_that("Partially named messaging arguments are an error", {
@@ -118,4 +122,9 @@ test_that("Message exclusions are respected", {
     get_message_data(test_package("r_err_2")),
     "Invalid # notranslate start/end.*Unmatched"
   )
+})
+
+test_that("Pre-processor macros don't break parentheses matching", {
+  # solution is hacky, but this test at least helps prevent regression going forward
+  expect_equal(get_message_data(test_package("unusual_msg"))[file == 'z.c']$msgid, "You found me!")
 })

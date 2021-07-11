@@ -387,11 +387,16 @@ match_parens = function(file, contents, arrays) {
   # goal: associate lparens with their corresponding rparen. rparens assigned end=-1 for the %in% step below to work
   all_parens[ , "lparen" := substring(contents, paren_start, paren_start) == "("]
   # TODO: this still fails for a file like )))((( -- we'd have to stop() if there's no update within the while loop...
-  if (sum(all_parens$lparen) != nrow(all_parens) / 2L) stopf("Parsing error: unmatched parentheses in %s", file)
   all_parens[ , "paren_end" := fifelse(lparen, NA_integer_, -1L)]
 
   # idea: match all lparens immediately followed by rparen. next, ignore matched parens & repeat for unmatched parens.
   while (any(idx <- is.na(all_parens$paren_end))) {
+    # an ugly hack to fix #199
+    # TODO(#209): a less hacky version of this, but requires serious refactor I'm afraid.
+    if (sum(idx) == 1L) {
+      all_parens[is.na(paren_end), "paren_end" := paren_start + 1L]
+      break
+    }
     all_parens[idx | (!lparen & !paren_start %in% paren_end), `:=`(
       next_paren = shift(lparen, type="lead"),
       next_start = shift(paren_start, type="lead")

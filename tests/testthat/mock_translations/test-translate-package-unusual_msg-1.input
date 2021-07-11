@@ -53,4 +53,5 @@ formateadores exoticos como %I32u, %llx, %li, %ls, %lc
 01234567890123456789.01234567890123456789--%s-
 abc
 abcdef
+Me encontraste!
 cualquier mensaje nuevo

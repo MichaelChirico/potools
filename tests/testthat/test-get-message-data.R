@@ -126,5 +126,5 @@ test_that("Message exclusions are respected", {
 
 test_that("Pre-processor macros don't break parentheses matching", {
   # solution is hacky, but this test at least helps prevent regression going forward
-  expect_equal(get_message_data(test_package("unusual_message"))[file == 'z.c']$msgid, "You found me!")
+  expect_equal(get_message_data(test_package("unusual_msg"))[file == 'z.c']$msgid, "You found me!")
 })

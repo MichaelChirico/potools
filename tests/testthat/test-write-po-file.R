@@ -5,6 +5,7 @@ test_that("po_metadata constructor & methods work", {
 
   expect_match(format(metadata), '"Project-Id-Version: test 0.0.1\\n"', fixed=TRUE)
   expect_match(format(metadata, template=TRUE), '"Language-Team: LANGUAGE <LL@li.org>\\n"', fixed=TRUE)
+  expect_match(format(metadata, template=TRUE), '"Content-Type: text/plain; charset=CHARSET\\n"', fixed=TRUE)
   expect_match(format(metadata, use_plurals=TRUE), '"Plural-Forms: nplurals=2; plural=(n!=1);\\n"', fixed=TRUE)
 
   expect_output(print(metadata), '"Project-Id-Version: test 0.0.1\\n"', fixed=TRUE)

@@ -123,3 +123,8 @@ test_that("Message exclusions are respected", {
     "Invalid # notranslate start/end.*Unmatched"
   )
 })
+
+test_that("Pre-processor macros don't break parentheses matching", {
+  # solution is hacky, but this test at least helps prevent regression going forward
+  expect_equal(get_message_data(test_package("unusual_message"))[file == 'z.c']$msgid, "You found me!")
+})

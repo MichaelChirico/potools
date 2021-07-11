@@ -392,7 +392,7 @@ match_parens = function(file, contents, arrays) {
   # idea: match all lparens immediately followed by rparen. next, ignore matched parens & repeat for unmatched parens.
   while (any(idx <- is.na(all_parens$paren_end))) {
     # an ugly hack to fix #199
-    # TODO: a less hacky version of this, but requires serious refactor I'm afraid.
+    # TODO(#209): a less hacky version of this, but requires serious refactor I'm afraid.
     if (sum(idx) == 1L) {
       all_parens[is.na(paren_end), "paren_end" := paren_start + 1L]
       break

@@ -12,6 +12,16 @@ test_that("po_metadata constructor & methods work", {
 })
 
 # TODO: migrate some tests from test-translate-package to here
-# test_that("write_po_file works", {
-#
-# })
+test_that("write_po_file works", {
+  message_data <- get_message_data(test_package("r-devel/src/library/base"))[message_source == 'src']
+  metadata <- po_metadata(package = "base", version = '0.0.1')
+
+  tmp <- tempfile(fileext = '.pot')
+  on.exit(unlink(tmp))
+  write_po_file(message_data, tmp, metadata)
+  expect_all_match(
+    readLines(tmp),
+    c('msgid "A string"', 'msgid_plural "Some strings"', 'msgstr[0] ""', 'msgstr[1] ""'),
+    fixed = TRUE
+  )
+})

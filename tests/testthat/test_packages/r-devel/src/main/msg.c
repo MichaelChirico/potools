@@ -27,3 +27,8 @@ static void ziggy(SEXP y, SEXP z) {
 "warning: %s\n"), stardust(z));
   return;
 }
+
+static void plural() {
+  ngettext("A string", "Some strings", 1);
+  return;
+}

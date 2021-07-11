@@ -3,7 +3,7 @@ test_that("Packages with src code & C syntax errors fail gracefully", {
     get_message_data(test_package("r_src_err_1")),
     "Parsing error: found an odd number (3)", fixed = TRUE
   )
-  # TODO(209): reactivate these. See discussion in #199 -- for now, the simplest
+  # TODO(#209): reactivate these. See discussion in #199 -- for now, the simplest
   #   way forward is to accept some misbehavior on erroneous C files that won't parse,
   #   and leave it to users to get their C files compiling first before running
   #   get_message_data().

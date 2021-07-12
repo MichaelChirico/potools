@@ -306,8 +306,8 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   keys = with(x, c(
     `Project-Id-Version` = sprintf("%s %s", package, version),
     `Report-Msgid-Bugs-To` = bugs,
-    `POT-Creation-Date` = format(pot_timestamp),
-    `PO-Revision-Date` = format(po_timestamp),
+    `POT-Creation-Date` = maybe_make_time(pot_timestamp),
+    `PO-Revision-Date` = maybe_make_time(po_timestamp),
     `Last-Translator` = if (nzchar(author) && nzchar(email)) sprintf("%s <%s>", author, email) else '',
     `Language-Team` = language_team,
     `Language` = language,
@@ -347,6 +347,9 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
 }
 
 print.po_metadata = function(x, ...) writeLines(format(x, ...))
+
+# apply format(), if the input is a timestamp. to flexibly allow po_timestamp to be a string or a POSIXct
+maybe_make_time = function(x) if (inherits(x, 'POSIXt')) format(x, '%F %T%z') else x
 
 # see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c for the copyright construction
 build_copyright = function(copyright, template) {

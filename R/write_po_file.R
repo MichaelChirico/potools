@@ -353,10 +353,10 @@ build_copyright = function(copyright, template) {
   if (is.null(copyright)) return(character())
   if (template) {
     copyright = list(
-      title = "SOME DESCRIPTIVE TITLE",
+      title = "SOME DESCRIPTIVE TITLE.",
       years = "YEAR",
       holder = if (is.list(copyright)) copyright$holder else copyright,
-      additional = 'FIRST AUTHOR <EMAIL@ADDRESS>, YEAR'
+      additional = 'FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.'
     )
   }
   copyright <- paste(
@@ -364,7 +364,7 @@ build_copyright = function(copyright, template) {
     c(
       copyright$title,
       sprintf("Copyright (C) %s %s", copyright$years, copyright$holder),
-      "This file is distributed under the same license as the R package",
+      "This file is distributed under the same license as the R package.",
       copyright$additional
     )
   )

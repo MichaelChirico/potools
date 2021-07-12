@@ -1,6 +1,6 @@
 ### v0.2.1 (in development)
 
- * Skip tests on machines where `gettext` is unavailable, #187
+ * Skip tests on machines where `gettext` is unavailable, #187; also alter the `msgfmt` command executed to create .mo files to skip options unavailable on Solaris, #218
  * Faster parsing of src messages (e.g. `get_message_data()` for the `base` package reduced from 14 to 7 seconds), #119
  * [New feature] New argument `max_translations` for `translate_package()` to limit the number of translations done, #188
  * When adding metadata for a new language, added tolerance for whitespace differences in specifying `plurals`, #183

@@ -235,7 +235,21 @@ test_that("Packages with src code work correctly", {
       expect_true("po/rSrcMsg.pot" %in% pkg_files)
       expect(
         any(grepl("inst/po/zh_CN/LC_MESSAGES/rSrcMsg.mo", pkg_files, fixed = TRUE)),
-        "Didn't find rSrcMsg.mo; found %s", toString(pkg_files)
+        sprintf(
+          "Didn't find rSrcMsg.mo; found %s.\n**Sysreq paths: %s.\n**po/zh_CN contents:\n%s\n**Direct msgfmt output:\n%s**Session info:\n%s",
+          toString(pkg_files), toString(Sys.which(potools:::SYSTEM_REQUIREMENTS)),
+          paste(readLines(file.path(pkg, 'po/zh_CN.po')), collapse='\n'),
+          {
+            out <- tempfile()
+            system2(
+              "msgfmt",
+              c("-o", tempfile(fileext = '.mo'), file.path(pkg, "po/zh_CN.po")),
+              stdout = out, stdin = out, stderr = out
+            )
+            paste(readLines(out), collapse='\n')
+          },
+          paste(capture.output(print(sessionInfo())), collapse = '\n')
+        )
       )
 
       # NB: paste(readLines(), collapse="\n") instead of readChar() for platform robustness

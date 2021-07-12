@@ -70,3 +70,40 @@ update_en_quot_mo_files <- function(dir, verbose) {
   }
   return(invisible())
 }
+
+
+
+#' Add a new translation
+#'
+#' This creates `po/{lang}.po` containing the messages to be translated.
+#'
+#' @param lang Language identifiers. These are typically two letters (e.g.
+#'   "en" = English, "fr" = French, "es" = Spanish, "zh" = Chinese), but
+#'   can include an additional suffix for languages that have regional
+#'   variations (e.g. "fr_CN" = French Canadian, "zh_CN" = simplified
+#'   characters as used in mainland China, "zh_TW" = traditional characters
+#'   as used in Taiwan.)
+#' @param dir Path to package root.
+tr_add <- function(lang, dir = ".") {
+  package <- get_desc_data(dir)[["Package"]]
+
+  pot_path <- file.path(dir, "po", paste0("R-", package, ".pot"))
+  po_path <- file.path(dir, "po", paste0("R-", lang, ".po"))
+  run_msginit(pot_path, po_path, lang)
+}
+
+# https://www.gnu.org/software/gettext/manual/html_node/msginit-Invocation.html
+run_msginit <- function(pot_path, po_path, locale, width = 80) {
+  cmd <- paste("msginit",
+    "-i", shQuote(path.expand(pot_path)),
+    "-o", shQuote(path.expand(po_path)),
+    "-l", shQuote(locale),
+    "-w", width,
+    "--no-translator" # don't consult user-email etc
+  )
+  if (system(cmd) != 0L) {
+    stop(sprintf("running msginit on '%s' failed", pot_path))
+  }
+  return(invisible())
+}
+

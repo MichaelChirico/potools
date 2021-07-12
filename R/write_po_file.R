@@ -306,8 +306,8 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   keys = with(x, c(
     `Project-Id-Version` = sprintf("%s %s", package, version),
     `Report-Msgid-Bugs-To` = bugs,
-    `POT-Creation-Date` = format(pot_timestamp),
-    `PO-Revision-Date` = format(po_timestamp),
+    `POT-Creation-Date` = format(pot_timestamp, '%F %T%z'),
+    `PO-Revision-Date` = format(po_timestamp, '%F %T%z'),
     `Last-Translator` = if (nzchar(author) && nzchar(email)) sprintf("%s <%s>", author, email) else '',
     `Language-Team` = language_team,
     `Language` = language,

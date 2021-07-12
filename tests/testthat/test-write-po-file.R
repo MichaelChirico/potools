@@ -7,6 +7,7 @@ test_that("po_metadata constructor & methods work", {
   expect_s3_class(metadata, "po_metadata")
 
   expect_match(format(metadata), '"Project-Id-Version: test 0.0.1\\n"', fixed=TRUE)
+  expect_match(format(metadata), '"PO-Revision-Date: [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}[-+][0-9]{4}')
   expect_all_match(
     format(metadata, template = TRUE),
     c(

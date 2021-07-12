@@ -349,7 +349,7 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
 print.po_metadata = function(x, ...) writeLines(format(x, ...))
 
 # apply format(), if the input is a timestamp. to flexibly allow po_timestamp to be a string or a POSIXct
-maybe_make_time = function(x) if (inherits(x, 'POSIXt')) format(x, '%F %T%z') else x
+maybe_make_time = function(x) if (inherits(x, 'POSIXt')) format(x, '%F %H:%M%z') else x
 
 # see circa lines 2036-2046 of gettext/gettext-tools/src/xgettext.c for the copyright construction
 build_copyright = function(copyright, template) {

@@ -17,7 +17,7 @@ run_msgfmt = function(po_file, mo_file, verbose) {
   use_stats <- if (verbose) '--statistics' else ''
   # See #218. Solaris msgfmt doesn't support -c or --statistics
   if (Sys.info()[["sysname"]] == "SunOS") {
-    cmd = sprintf("msgfmt -o %s %s", shQuote(mo_file), shQuote(po_file))
+    cmd = sprintf("msgfmt -o %s %s", shQuote(mo_file), shQuote(po_file)) # nocov
   } else {
     cmd = sprintf("msgfmt -c %s -o %s %s", use_stats, shQuote(mo_file), shQuote(po_file))
   }

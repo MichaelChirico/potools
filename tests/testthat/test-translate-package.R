@@ -69,7 +69,7 @@ test_that("translate_package works on a simple package", {
     {
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
-        c("Beginning new translations", "BEGINNING TRANSLATION", '"Installing" translations with msgfmt'),
+        c("Beginning new translations", "BEGINNING TRANSLATION", "Generating en@quot translations"),
         fixed = TRUE
       )
 

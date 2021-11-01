@@ -15,6 +15,10 @@ run_msgmerge = function(po_file, pot_file) {
 
 run_msgfmt = function(po_file, mo_file, verbose) {
   use_stats <- if (verbose) '--statistics' else ''
+
+  po_file <- path.expand(po_file)
+  mo_file <- path.expand(mo_file)
+
   # See #218. Solaris msgfmt doesn't support -c or --statistics
   if (Sys.info()[["sysname"]] == "SunOS") {
     cmd = sprintf("msgfmt -o %s %s", shQuote(mo_file), shQuote(po_file)) # nocov
@@ -31,21 +35,43 @@ run_msgfmt = function(po_file, mo_file, verbose) {
   return(invisible())
 }
 
-update_mo_files = function(dir, package, verbose) {
-  inst_dir <- file.path(dir, "inst", "po")
+#' Compile `.po` files to `.mo`
+#'
+#' This function compiles the plain text `.po` files that translators work
+#' to the binary `.mo` files that are installed with packages. In order for
+#' translations to be accessible to R, you must re-compile every time the `.po`
+#' files are changed.
+#'
+#' @param dir Path to package root directory.
+#' @param package Name of package. If not supplied, read from `DESCRIPTION`.
+#' @param verbose If `TRUE`, print information as it goes.
+#' @param lazy If `TRUE`, only `.mo` functions that are older than `.po`
+#'   files be updated
+dev_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
+  if (is.null(package)) {
+    package <- get_desc_data(dir)[["Package"]]
+  }
+
+  po_paths <- list.files(file.path(dir, "po"), pattern = "\\.po$", full.names = TRUE)
+
   lang_regex <- "^(R-)?([a-zA-Z_]+)\\.po$"
+  languages <- gsub(lang_regex, "\\2", basename(po_paths))
+  mo_names <- gsub(lang_regex, sprintf("\\1%s.mo", package), basename(po_paths))
+  mo_paths <- file.path(dir, "inst", "po", languages, "LC_MESSAGES", mo_names)
+  dir_create(dirname(mo_paths))
 
-  po_files <- list.files(file.path(dir, "po"), pattern = "\\.po$")
-  languages <- gsub(lang_regex, "\\2", po_files)
-  mo_files <- gsub(lang_regex, sprintf("\\1%s.mo", package), po_files)
-  mo_dirs <- file.path(inst_dir, languages, "LC_MESSAGES")
-  # NB: dir.create() only accepts one directory at a time...
-  for (mo_dir in unique(mo_dirs)) dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
+  if (lazy) {
+    outdated <- is_outdated(po_paths, mo_paths)
+    po_paths <- po_paths[outdated]
+    mo_paths <- mo_paths[outdated]
+    languages <- languages[outdated]
+  }
 
-  for (ii in seq_along(po_files)) {
+  for (ii in seq_along(po_paths)) {
+    if (verbose) message("Recompiling ", languages[ii], " translation")
     run_msgfmt(
-      po_file = file.path(dir, "po", po_files[ii]),
-      mo_file = file.path(mo_dirs[ii], mo_files[ii]),
+      po_file = po_paths[ii],
+      mo_file = mo_paths[ii],
       verbose = verbose
     )
   }

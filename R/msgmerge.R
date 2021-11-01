@@ -93,7 +93,7 @@ update_en_quot_mo_files <- function(dir, verbose) {
 #'   characters as used in mainland China, "zh_TW" = traditional characters
 #'   as used in Taiwan.)
 #' @param dir Path to package root.
-#' @param Verbose If `TRUE`, explain what's happening.
+#' @param verbose If `TRUE`, explain what's happening.
 tr_add <- function(lang, dir = ".", verbose = TRUE) {
   package <- get_desc_data(dir)[["Package"]]
 

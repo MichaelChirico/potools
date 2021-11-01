@@ -16,7 +16,7 @@ as used in Taiwan.)}
 
 \item{dir}{Path to package root.}
 
-\item{Verbose}{If `TRUE`, explain what's happening.}
+\item{verbose}{If `TRUE`, explain what's happening.}
 }
 \description{
 This creates `po/{lang}.po` containing the messages to be translated.

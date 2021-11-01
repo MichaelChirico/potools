@@ -1,10 +1,10 @@
 # split off from tools::update_pkg_po() to only run the msgmerge & checkPoFile steps
 
 # https://www.gnu.org/software/gettext/manual/html_node/msgmerge-Invocation.html
-run_msgmerge = function(po_file, pot_file) {
+run_msgmerge = function(po_file, pot_file, previous = FALSE) {
   cmd <- paste("msgmerge",
     "--update",
-    "--previous", # show previous match for fuzzy matches
+    if (previous) "--previous", # show previous match for fuzzy matches
     shQuote(path.expand(po_file)),
     shQuote(path.expand(pot_file))
   )
@@ -105,7 +105,7 @@ tr_add <- function(lang, dir = ".", verbose = TRUE) {
     run_msginit(pot_path, po_path, lang)
   } else {
     if (verbose) message(sprintf("Updating existing %s translation", lang))
-    run_msgmerge(po_path, pot_path)
+    run_msgmerge(po_path, pot_path, previous = TRUE)
   }
 }
 

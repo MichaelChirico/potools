@@ -1,6 +1,15 @@
 # split off from tools::update_pkg_po() to only run the msgmerge & checkPoFile steps
+
+# https://www.gnu.org/software/gettext/manual/html_node/msgmerge-Invocation.html
 run_msgmerge = function(po_file, pot_file) {
-  if (system(sprintf("msgmerge --update %s %s", po_file, shQuote(pot_file))) != 0L) {
+  cmd <- paste("msgmerge",
+    "--update",
+    "--previous", # show previous match for fuzzy matches
+    shQuote(path.expand(po_file)),
+    shQuote(path.expand(pot_file))
+  )
+
+  if (system(cmd) != 0L) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
     warningf("Running msgmerge on '%s' failed.", po_file)
   }
@@ -84,12 +93,20 @@ update_en_quot_mo_files <- function(dir, verbose) {
 #'   characters as used in mainland China, "zh_TW" = traditional characters
 #'   as used in Taiwan.)
 #' @param dir Path to package root.
-tr_add <- function(lang, dir = ".") {
+#' @param Verbose If `TRUE`, explain what's happening.
+tr_add <- function(lang, dir = ".", verbose = TRUE) {
   package <- get_desc_data(dir)[["Package"]]
 
   pot_path <- file.path(dir, "po", paste0("R-", package, ".pot"))
   po_path <- file.path(dir, "po", paste0("R-", lang, ".po"))
-  run_msginit(pot_path, po_path, lang)
+
+  if (!file.exists(po_path)) {
+    if (verbose) message(sprintf("Adding new %s translation", lang))
+    run_msginit(pot_path, po_path, lang)
+  } else {
+    if (verbose) message(sprintf("Updating existing %s translation", lang))
+    run_msgmerge(po_path, pot_path)
+  }
 }
 
 # https://www.gnu.org/software/gettext/manual/html_node/msginit-Invocation.html

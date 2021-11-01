@@ -4,7 +4,7 @@
 \alias{tr_add}
 \title{Add a new translation}
 \usage{
-tr_add(lang, dir = ".")
+tr_add(lang, dir = ".", verbose = TRUE)
 }
 \arguments{
 \item{lang}{Language identifiers. These are typically two letters (e.g.
@@ -15,6 +15,8 @@ characters as used in mainland China, "zh_TW" = traditional characters
 as used in Taiwan.)}
 
 \item{dir}{Path to package root.}
+
+\item{Verbose}{If `TRUE`, explain what's happening.}
 }
 \description{
 This creates `po/{lang}.po` containing the messages to be translated.

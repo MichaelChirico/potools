@@ -1,4 +1,4 @@
-# potools: Tools for Portability and Internationalization of R packages
+# potools: Tools for Portability and Internationalization of R packages <img src='man/figures/logo.png' align="right" height="138" />
 
 ## Overview
 

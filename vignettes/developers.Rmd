@@ -22,7 +22,7 @@ This documentation, and the underlying tooling, assume that the error messages i
 Most of the advice will apply to other languages as well, although you're more likely to be aware of variation between languages than a mono-lingual English speaker.
 
 There's two approaches to declaring which strings to translate --- automatic or manual.
-I'll usual manual in many of the examples here, just to make it crystal clear what needs to be translated.
+I'll use manual in many of the examples here, just to make it crystal clear what needs to be translated.
 
 ```{r}
 tr_ <- function(x) {

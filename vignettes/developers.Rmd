@@ -1,0 +1,253 @@
+---
+title: "developers"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(potools)
+```
+
+Basic process
+
+This vignette outlines the process of translating a package from the developer's perspective.
+Please also see `vignette("translator")` which discusses the process from the translator's perspective.
+
+This documentation, and the underlying tooling, assume that the error messages including in your source code are in English.
+Most of the advice will apply to other languages as well, although you're more likely to be aware of variation between languages than a mono-lingual English speaker.
+
+There's two approaches to declaring which strings to translate --- automatic or manual.
+I'll usual manual in many of the examples here, just to make it crystal clear what needs to be translated.
+
+```{r}
+tr_ <- function(x) {
+  gettext(x, domain = "R-potools")
+}
+library(glue)
+```
+
+## Writing translatable error messages
+
+The following advice is inspired by the "[Preparing translatable strings](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20))" of the gettext manual.
+
+### Write full sentences
+
+Generally, you want to make sure that each message is a single string.
+Instead of:
+
+```{r}
+name <- "Hadley"
+paste0(tr_("Good"), " ", tr_("morning"), " ", name, "!")
+```
+
+You want to write:
+
+```{r}
+glue(tr_("Good morning {name}"))
+```
+
+(We'll cover alternatives to `glue()` shortly)
+
+There are two reasons for this.
+Firstly, when working with `.po` files, translators see each individual string without context:
+
+    msgid "Good"
+    msgstr ""
+
+    msgid "morning"
+    msgstr ""
+
+    msgid "!"
+    msgstr ""
+
+And that can lead to either a poor translation or an expensive journey to the source code to get more context.
+
+More importantly, prose is not like code: you can't flexibly build up sentences from small fragments.
+If you're a native English speaker, you might have a false sense of security about this, because as a language English relies primarily on positional cues, so in many case you can combine smaller pieces together into a grammatically correct sentences.
+
+A complete sentence give translators much more freedom to change words and word order to make a grammatically correct sentence:
+
+    msgid "Good morning {name}!"
+    msgstr ""
+
+### Parameterisation
+
+```{r}
+greet <- function(name, time_of_day) {
+  paste0(tr_("Good"), " ", time_of_day, " ", name, "!")
+}
+greet("Hadley", tr_("morning"))
+greet("Hadley", tr_("afternoon"))
+greet("Hadley", tr_("evening"))
+```
+
+This formulation doesn't even work for French, a language that's relatively close to English.
+Good morning and good afternoon both use "Bonjour" which has two challenges: the space between "bon" (good) and "jour" (day) is elided, and it's not the case that in general French doesn't have different words for day and afternoon.
+
+A better approach would be to define a fixed number of time points and accompanying messages:
+
+```{r}
+greet <- function(name, time_of_day) {
+  switch(time_of_day,
+    morning = glue(tr_("Good morning {name}")),
+    afternoon = glue(tr_("Good afternoon {name}")),
+    evening = glue(tr_("Good evening {name}"))
+  )
+}
+```
+
+    msgstr: "Good morning {name}!"
+    msgid: "Bonjour {name}!"
+
+    msgstr: "Good afternoon {name}!"
+    msgid: "Bonjour {name}!"
+
+    msgstr: "Good evening {name}!"
+    msgid: "Bonsoir {name}!"
+
+(And even here the context is important; you can use Bonjour only as a greeting, can be used as both a greeting and a farewell, and you might use Bon aprém as a farewell in the afternoon)
+
+Greetings are particularly challenging to translate because they're so fundamentally social.
+Different languages break the day up differently, or the time of day might not even be the most important factor in forming the greeting.
+Fortunately most of the messages that you generate for R packages will not have this level of nuance.
+
+### `sprintf()` vs `glue()`
+
+I've used `glue()` in the examples above, but it does require an additional, if very lightweight, dependency for your package.
+If you want to eliminate that dependency any only use base R, you can instead use `sprintf()`:
+
+```{r}
+sprintf(tr_("Good morning %s"), name)
+```
+
+Bringing the name of the variable out of the translated string is both a curse and a blessing.
+On the downside, it gives the translator less context, but on the plus side it means that you can rename variables without worrying that the translated code will break.
+
+I think `glue()` is particularly advantageous when there are multiple interpolated strings, because the syntax for rearranging them is easier:
+
+    msgid "{first} {second} {third}"
+    msgstr "{third} {first} {second}"
+
+With `sprintf()` you need to use a special `1$` syntax:
+
+    msgid "%s %s %s"
+    msgstr "%3$s %1$s %2$s"
+
+### Un-translatable content
+
+Avoiding embedding large non-translatable components like URLs or email addresses.
+Makes it harder for translator to see changes.
+Easy to introduce typos.
+Instead use `sprintf()` or `glue()`.
+
+```{r}
+url <- "https://r-project.org" sprintf("See <%s> to learn more", url)
+glue("See <{url}> to learn more")
+```
+
+Similarly, if you're generating strings to include in HTML, avoid including the html in the string:
+
+```{r}
+"<a href='/index.html'>Home page</a>"
+paste0("<a href='/index.html'>", tr_("Home page"), "</a>")
+```
+
+Generally, you want to help the translator spend as much time as possible helping you out.
+
+### Plurals
+
+In English, nouns are inflected for grammatical number in singulars (used when one thing) and plurals (used when many things).
+
+English uses the singular for when there's exactly one item, and the plural for every other case.
+And often you can construct the plural from the singular just by adding s: zero cows, one cow, two cows, three cows, ...
+
+So you might write:
+
+```{r}
+cows <- function(n) {
+  if (n == 1) "1 cow" else paste0(n, " cows")
+}
+cows(0)
+cows(1)
+cows(2)
+```
+
+But not all languages have the same rules, so R provides `ngettext()` which interops with tranlsation in a way you'll see shortly.
+
+```{r}
+cows <- function(n) {
+  paste(n, ngettext(n, "cow", "cows"))
+}
+cows(0)
+cows(1)
+cows(2)
+```
+
+It's tempting to use this function to assemble a string piece by piece:
+
+```{r}
+paste0("I have ", cows(0))
+paste0("I have ", cows(1))
+```
+
+But this doesn't always work, even in English:
+
+```{r}
+paste0("There are ", cows(0), " in the field")
+paste0("There are ", cows(1), " in the field")
+```
+
+As per our advice above we don't want to translate sentence fragments since they usually can't be re-combined into a grammatical sentence.
+So typically you'll want to combine `ngettext()` with `sprintf()` or `glue()`:
+
+```{r}
+cows <- function(n) {
+  fmt <- ngettext(n, 
+    "There is %i cow in the field", 
+    "There are %i cows in the field"
+  )
+  sprintf(fmt, n)  
+}
+cows <- function(n) {
+  fmt <- ngettext(n, 
+    "There is {n} cow in the field", 
+    "There are {n} cows in the field"
+  )
+  glue(fmt)  
+}
+
+cows(0)
+cows(1)
+cows(2)
+```
+
+`ngettext()` generates a special form in the `.po` file, which shows both singular and plural forms:
+
+    msgid "There is %i cow"
+    msgid_plural "There are %d cows"
+
+What happens next depends on the number of plural forms that a language has.
+Languages that don't have plurals (e.g. Chinese) only need to supply a single translation:
+
+```{r}
+msgid "There is %i cow in the field"
+msgid_plural "There are %d cows in the field"
+msgstr[0] "田裡有%i頭牛"
+```
+
+Russian has forms, so it gets three entries (roughly 1, 2-4, everything else)
+
+```{r}
+msgid "There is %i cow"
+msgid_plural "There are %i cows"
+msgstr[0] "В поле %i коров"
+msgstr[1] "В поле %i корова"
+msgstr[2] "В поле %i коровы"
+```
+
+The rules that define which number get which message are quite complex and encoded in the "plural form" that's recorded at the top of the `.po` file and looks something like `(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2).` However, this is something the translators need to worry about not you, and as speakers of the language they should find it easier to puzzle out the rules.

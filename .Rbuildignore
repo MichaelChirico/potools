@@ -5,3 +5,4 @@
 ^\.Rproj\.user$
 
 ^\.sandbox$
+^vignettes/articles$

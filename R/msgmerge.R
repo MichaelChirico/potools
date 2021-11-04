@@ -47,6 +47,22 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 #' @param lazy If `TRUE`, only `.mo` functions that are older than `.po`
 #'   files be updated
 po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
+  po_files <- po_files(dir = dir, package = package, lazy = lazy)
+  dir_create(dirname(po_files$mo))
+
+  for (ii in seq_len(nrow(po_files))) {
+    if (verbose) messagef("Recompiling %s translation", po_files$language[ii])
+    run_msgfmt(
+      po_file = po_files$po[ii],
+      mo_file = po_files$mo[ii],
+      verbose = verbose
+    )
+  }
+
+  return(invisible())
+}
+
+po_files <- function(dir = ".", package = NULL, lazy = TRUE) {
   if (is.null(package)) {
     package <- get_desc_data(dir)[["Package"]]
   }
@@ -57,25 +73,19 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   languages <- gsub(lang_regex, "\\2", basename(po_paths))
   mo_names <- gsub(lang_regex, sprintf("\\1%s.mo", package), basename(po_paths))
   mo_paths <- file.path(dir, "inst", "po", languages, "LC_MESSAGES", mo_names)
-  dir_create(dirname(mo_paths))
+
+  out <- data.frame(
+    language = languages,
+    po = po_paths,
+    mo = mo_paths,
+    stringsAsFactors = FALSE
+  )
 
   if (lazy) {
-    outdated <- is_outdated(po_paths, mo_paths)
-    po_paths <- po_paths[outdated]
-    mo_paths <- mo_paths[outdated]
-    languages <- languages[outdated]
+    out <- out[is_outdated(out$po, out$mo), , drop = FALSE]
   }
 
-  for (ii in seq_along(po_paths)) {
-    if (verbose) message("Recompiling ", languages[ii], " translation")
-    run_msgfmt(
-      po_file = po_paths[ii],
-      mo_file = mo_paths[ii],
-      verbose = verbose
-    )
-  }
-
-  return(invisible())
+  out
 }
 
 update_en_quot_mo_files <- function(dir, verbose) {

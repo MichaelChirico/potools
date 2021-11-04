@@ -37,17 +37,16 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 
 #' Compile `.po` files to `.mo`
 #'
-#' This function compiles the plain text `.po` files that translators work
-#' to the binary `.mo` files that are installed with packages. In order for
-#' translations to be accessible to R, you must re-compile every time the `.po`
-#' files are changed.
+#' This function compiles the plain text `.po` files that translators work with
+#' in to the binary `.mo` files that are installed with packages and used for
+#' live translations.
 #'
 #' @param dir Path to package root directory.
 #' @param package Name of package. If not supplied, read from `DESCRIPTION`.
 #' @param verbose If `TRUE`, print information as it goes.
 #' @param lazy If `TRUE`, only `.mo` functions that are older than `.po`
 #'   files be updated
-dev_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
+po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   if (is.null(package)) {
     package <- get_desc_data(dir)[["Package"]]
   }

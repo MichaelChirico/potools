@@ -212,7 +212,7 @@ translate_package = function(
   }
 
   # TODO: reinstate source marker tags, at least for src .pot file & maybe for R .pot file too?
-  dev_compile(dir, package, verbose = verbose)
+  po_compile(dir, package, verbose = verbose)
   return(invisible())
 }
 

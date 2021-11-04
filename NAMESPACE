@@ -11,7 +11,7 @@ export(translate_package)
 export(get_message_data)
 export(write_po_file, po_metadata)
 
-export(dev_compile)
+export(po_compile)
 
 export(check_cracked_messages, check_untranslated_cat, check_untranslated_src)
 

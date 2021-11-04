@@ -14,6 +14,8 @@ The core function of `potools`, `translate_package`, is a one-stop-shop for inte
 
 `potools` is a UTF-8 package -- all `.po` and `.pot` files it produces will be treated as UTF-8.
 
+The potool logo features a [potoo](https://en.wikipedia.org/wiki/Potoo) and was designed by [Allison Horst](https://www.allisonhorst.com).
+
 ### Translating your package interactively with `translate_package()`
 
 The primary feature of `potools` is the `translate_package()` function, which is designed to be your first & only stop for typical experience internationalizing a package

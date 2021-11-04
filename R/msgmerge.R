@@ -50,6 +50,17 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   po_files <- po_files(dir = dir, package = package, lazy = lazy)
   dir_create(dirname(po_files$mo))
 
+  if (!lazy) {
+    # Clear out all older translations
+    mo_dirs <- dir(file.path(dir, "inst", "po"), full.names = TRUE)
+    to_delete <- mo_dirs[!basename(mo_dirs) %in% c(po_files$language, "en@quot")]
+
+    for (dir in to_delete) {
+      if (verbose) messagef("Deleting unmatched %s translation", basename(dir))
+      unlink(dir, recursive = TRUE)
+    }
+  }
+
   for (ii in seq_len(nrow(po_files))) {
     if (verbose) messagef("Recompiling %s translation", po_files$language[ii])
     run_msgfmt(

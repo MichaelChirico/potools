@@ -1,5 +1,6 @@
 ### v0.2.1 (in development)
 
+* potools gains a logo featuring a [potoo](https://en.wikipedia.org/wiki/Potoo) thanks to the artistic skills of @allisonhorst
  * Skip tests on machines where `gettext` is unavailable, #187; also alter the `msgfmt` command executed to create .mo files to skip options unavailable on Solaris, #218
  * Faster parsing of src messages (e.g. `get_message_data()` for the `base` package reduced from 14 to 7 seconds), #119
  * [New feature] New argument `max_translations` for `translate_package()` to limit the number of translations done, #188

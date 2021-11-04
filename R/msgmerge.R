@@ -82,9 +82,15 @@ update_en_quot_mo_files <- function(dir, verbose) {
 
 
 
-#' Add a new translation
+#' Create or update a `.po` file containing translations
 #'
-#' This creates `po/{lang}.po` containing the messages to be translated.
+#' @description
+#' * `po_create()` creates a new `po/{lang}.po` containing the messages to be
+#'   translated.
+#' * `po_update()` updates an existing `.po` file after the messages in a
+#'   package have changed. The translations for existing messages are preserved;
+#'   new messages are added; and translations for deleted message are marked
+#'   as deprecated and moved to the bottom of the file.
 #'
 #' @param lang Language identifiers. These are typically two letters (e.g.
 #'   "en" = English, "fr" = French, "es" = Spanish, "zh" = Chinese), but
@@ -94,19 +100,31 @@ update_en_quot_mo_files <- function(dir, verbose) {
 #'   as used in Taiwan.)
 #' @param dir Path to package root.
 #' @param verbose If `TRUE`, explain what's happening.
-tr_add <- function(lang, dir = ".", verbose = TRUE) {
+po_create <- function(lang, dir = ".", verbose = TRUE) {
+  package <- get_desc_data(dir)[["Package"]]
+  po_path <- po_path(dir, lang)
+  if (file.exists(po_path)) {
+    po_update(lang, dir = dir, verbose = verbose)
+    return(invisible())
+  }
+
+  if (verbose) messagef("Adding new %s translation", lang)
+  run_msginit(pot_path(dir, package), po_path, lang)
+}
+
+#' @rdname po_create
+po_update <- function(lang, dir = ".", verbose = TRUE) {
   package <- get_desc_data(dir)[["Package"]]
 
-  pot_path <- file.path(dir, "po", paste0("R-", package, ".pot"))
-  po_path <- file.path(dir, "po", paste0("R-", lang, ".po"))
+  if (verbose) messagef("Updating existing %s translation", lang)
+  run_msgmerge(po_path(dir, lang), pot_path(dir, package), previous = TRUE)
+}
 
-  if (!file.exists(po_path)) {
-    if (verbose) message(sprintf("Adding new %s translation", lang))
-    run_msginit(pot_path, po_path, lang)
-  } else {
-    if (verbose) message(sprintf("Updating existing %s translation", lang))
-    run_msgmerge(po_path, pot_path, previous = TRUE)
-  }
+po_path <- function(dir, lang) {
+  file.path(dir, "po", paste0("R-", lang, ".po"))
+}
+pot_path <- function(dir, package) {
+  file.path(dir, "po", paste0("R-", package, ".pot"))
 }
 
 # https://www.gnu.org/software/gettext/manual/html_node/msginit-Invocation.html
@@ -119,7 +137,7 @@ run_msginit <- function(pot_path, po_path, locale, width = 80) {
     "--no-translator" # don't consult user-email etc
   )
   if (system(cmd) != 0L) {
-    stop(sprintf("running msginit on '%s' failed", pot_path))
+    stopf("running msginit on '%s' failed", pot_path)
   }
   return(invisible())
 }

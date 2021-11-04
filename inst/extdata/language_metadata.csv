@@ -19,6 +19,7 @@ nn,Dutch,Nederlands,2,(n!=1)
 pl,Polish,Polski,3,(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
 pt_BR,Brazilian Portugese,Português Brasileiro,2,(n>1)
 ru,Russian,Русский,3,(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2)
+sv,Swedith,Svenska,2,(n!=1)
 tr,Turkish,Türkçe,1,0
 ur,Urdu,اُردُو,2,(n!=1)
 zh_CN,Mainland Chinese,普通话,1,0

@@ -73,7 +73,6 @@ translate_package = function(
     if (tolower(prompt('Exit now to repair any of these? [y/N]')) %chin% c('y', 'yes')) return(invisible())
   }
 
-  if (verbose) message('Generating .pot files...')
   po_params = list(package = package, version = version, copyright = copyright, bugs = bugs)
   write_po_files(message_data, po_dir, po_params, template = TRUE, use_base_rules = use_base_rules)
 

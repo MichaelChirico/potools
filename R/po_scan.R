@@ -4,8 +4,8 @@ po_scan <- function(dir = ".", custom_translation_functions = list(), verbose = 
   message_data <- get_message_data(dir,
     custom_translation_functions = custom_translation_functions,
     verbose = verbose,
-    include_conditions = style == "base",
-    include_conditions_f = style == "base",
+    use_conditions = style == "base",
+    use_conditions_f = style == "base",
     use_tr = style == "explicit"
   )
 

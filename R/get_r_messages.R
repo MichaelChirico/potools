@@ -1,6 +1,6 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, include_conditions = TRUE, include_conditions_f = FALSE, use_tr = FALSE) {
+get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, use_conditions = TRUE, use_conditions_f = FALSE, use_tr = FALSE) {
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
@@ -37,8 +37,8 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   <!-- mix and match those two types indefinitely -->
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
-  dots_funs <- domain_dots_funs(include_conditions)
-  fmt_funs <- domain_fmt_funs(include_conditions_f)
+  dots_funs <- domain_dots_funs(use_conditions)
+  fmt_funs <- domain_fmt_funs(use_conditions_f)
 
   singular_strings = rbind(
     get_dots_strings(expr_data, dots_funs, NON_DOTS_ARGS),
@@ -281,17 +281,17 @@ exclude_untranslated = function(expr_data, comments) {
 #     if (is.null(f_args <- args(f))) next
 #     if (any(names(formals(f_args)) == 'domain')) cat(obj, '\n')
 # }
-domain_dots_funs <- function(include_conditions = TRUE) {
+domain_dots_funs <- function(use_conditions = TRUE) {
   c(
     "gettext",
-    if (include_conditions) c("stop", "warning", "message", "packageStartupMessage")
+    if (use_conditions) c("stop", "warning", "message", "packageStartupMessage")
   )
 }
 
-domain_fmt_funs <- function(include_conditions = TRUE) {
+domain_fmt_funs <- function(use_conditions = TRUE) {
   c(
     "gettextf",
-    if (include_conditions) c("stopf", "warningf", "messagef")
+    if (use_conditions) c("stopf", "warningf", "messagef")
   )
 }
 

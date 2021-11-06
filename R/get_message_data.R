@@ -1,8 +1,8 @@
 get_message_data = function(
   dir = ".",
   custom_translation_functions = list(R = NULL, src = NULL),
-  include_conditions = TRUE,
-  include_conditions_f = TRUE,
+  use_conditions = TRUE,
+  use_conditions_f = TRUE,
   use_tr = FALSE,
   verbose = FALSE
 ) {
@@ -13,8 +13,8 @@ get_message_data = function(
   r_message_data = get_r_messages(
     dir,
     custom_translation_functions = custom_translation_functions$R,
-    include_conditions = include_conditions,
-    include_conditions_f = include_conditions_f,
+    use_conditions = use_conditions,
+    use_conditions_f = use_conditions_f,
     use_tr = use_tr,
     is_base
   )

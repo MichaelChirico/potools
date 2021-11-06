@@ -80,20 +80,19 @@ po_files <- function(dir = ".", package = NULL, lazy = TRUE) {
 
   po_paths <- list.files(file.path(dir, "po"), pattern = "\\.po$", full.names = TRUE)
 
-  lang_regex <- "^(R-)?([a-zA-Z_]+)\\.po$"
+  lang_regex <- "^(R-)?([a-z]{2}(?:_[A-Z]{2})?)\\.po$"
   languages <- gsub(lang_regex, "\\2", basename(po_paths))
   mo_names <- gsub(lang_regex, sprintf("\\1%s.mo", package), basename(po_paths))
   mo_paths <- file.path(dir, "inst", "po", languages, "LC_MESSAGES", mo_names)
 
-  out <- data.frame(
+  out <- data.table(
     language = languages,
     po = po_paths,
-    mo = mo_paths,
-    stringsAsFactors = FALSE
+    mo = mo_paths
   )
 
   if (lazy) {
-    out <- out[is_outdated(out$po, out$mo), , drop = FALSE]
+    out <- out[is_outdated(po, mo)]
   }
 
   out

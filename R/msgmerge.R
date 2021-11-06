@@ -85,14 +85,14 @@ update_en_quot_mo_files <- function(dir, verbose) {
 #' Create or update a `.po` file containing translations
 #'
 #' @description
-#' * `po_create()` creates a new `po/{lang}.po` containing the messages to be
+#' * `po_create()` creates a new `po/{languages}.po` containing the messages to be
 #'   translated.
 #' * `po_update()` updates an existing `.po` file after the messages in a
 #'   package have changed. The translations for existing messages are preserved;
 #'   new messages are added; and translations for deleted message are marked
 #'   as deprecated and moved to the bottom of the file.
 #'
-#' @param lang Language identifiers. These are typically two letters (e.g.
+#' @param languages Language identifiers. These are typically two letters (e.g.
 #'   "en" = English, "fr" = French, "es" = Spanish, "zh" = Chinese), but
 #'   can include an additional suffix for languages that have regional
 #'   variations (e.g. "fr_CN" = French Canadian, "zh_CN" = simplified
@@ -100,24 +100,24 @@ update_en_quot_mo_files <- function(dir, verbose) {
 #'   as used in Taiwan.)
 #' @param dir Path to package root.
 #' @param verbose If `TRUE`, explain what's happening.
-po_create <- function(lang, dir = ".", verbose = TRUE) {
+po_create <- function(languages, dir = ".", verbose = TRUE) {
   package <- get_desc_data(dir)[["Package"]]
-  po_path <- po_path(dir, lang)
+  po_path <- po_path(dir, languages)
   if (file.exists(po_path)) {
-    po_update(lang, dir = dir, verbose = verbose)
+    po_update(languages, dir = dir, verbose = verbose)
     return(invisible())
   }
 
-  if (verbose) messagef("Adding new %s translation", lang)
-  run_msginit(pot_path(dir, package), po_path, lang)
+  if (verbose) messagef("Adding new %s translation", languages)
+  run_msginit(pot_path(dir, package), po_path, languages)
 }
 
 #' @rdname po_create
-po_update <- function(lang, dir = ".", verbose = TRUE) {
+po_update <- function(languages, dir = ".", verbose = TRUE) {
   package <- get_desc_data(dir)[["Package"]]
 
-  if (verbose) messagef("Updating existing %s translation", lang)
-  run_msgmerge(po_path(dir, lang), pot_path(dir, package), previous = TRUE)
+  if (verbose) messagef("Updating existing %s translation", languages)
+  run_msgmerge(po_path(dir, languages), pot_path(dir, package), previous = TRUE)
 }
 
 po_path <- function(dir, lang) {

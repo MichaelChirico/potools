@@ -1,6 +1,7 @@
 ### v0.2.3 (in development)
 
  * [Bugfix] `translate_package()` works in batch mode, [#224](https://github.com/MichaelChirico/potools/issues/224). Thanks @HenrikBengtsson for the report.
+ * potools has a new hex logo! Thanks to @hadley for coordinating and @allisonhorst for the drawing!
 
 ## New languages/locales supported out of the box:
 

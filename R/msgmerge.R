@@ -47,13 +47,13 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 #'   files be updated
 #' @param verbose If `TRUE`, print information as it goes.
 po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
-  po_files <- po_files(dir = dir, package = package, lazy = lazy)
-  dir_create(dirname(po_files$mo))
+  po_metadata <- get_po_metadata(dir = dir, package = package, lazy = lazy)
+  dir_create(dirname(po_metadata$mo))
 
   if (!lazy) {
     # Clear out all older translations
     mo_dirs <- dir(file.path(dir, "inst", "po"), full.names = TRUE)
-    to_delete <- mo_dirs[!basename(mo_dirs) %in% c(po_files$language, "en@quot")]
+    to_delete <- mo_dirs[!basename(mo_dirs) %in% c(po_metadata$language, "en@quot")]
 
     for (dir in to_delete) {
       if (verbose) messagef(
@@ -64,11 +64,11 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
     }
   }
 
-  for (ii in seq_len(nrow(po_files))) {
-    if (verbose) messagef("Recompiling %s translation", po_files$language[ii])
+  for (ii in seq_len(nrow(po_metadata))) {
+    if (verbose) messagef("Recompiling %s translation", po_metadata$language[ii])
     run_msgfmt(
-      po_file = po_files$po[ii],
-      mo_file = po_files$mo[ii],
+      po_file = po_metadata$po[ii],
+      mo_file = po_metadata$mo[ii],
       verbose = verbose
     )
   }
@@ -76,7 +76,7 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   return(invisible())
 }
 
-po_files <- function(dir = ".", package = NULL, lazy = TRUE) {
+get_po_metadata <- function(dir = ".", package = NULL, lazy = TRUE) {
   if (is.null(package)) {
     package <- get_desc_data(dir)[["Package"]]
   }

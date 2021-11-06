@@ -1,6 +1,6 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, include_conditions = TRUE) {
+get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, include_conditions = TRUE, use_tr = FALSE) {
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
@@ -41,12 +41,16 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
     get_dots_strings(expr_data, domain_dots_funs(include_conditions), NON_DOTS_ARGS),
     # treat gettextf separately since it takes a named argument, and we ignore ...
     get_named_arg_strings(expr_data, 'gettextf', c(fmt = 1L), recursive = TRUE),
+    if (use_tr) get_named_arg_strings(expr_data, 'tr_', c(string = 1L), recursive = TRUE),
     # TODO: drop recursive=FALSE option now that exclude= is available? main purpose of recursive=
     #   was to block cat(gettextf(...)) usage right?
     get_dots_strings(expr_data, 'cat', c("file", "sep", "fill", "labels", "append"), recursive = FALSE)
   )
 
-  plural_strings = get_named_arg_strings(expr_data, 'ngettext', c(msg1 = 2L, msg2 = 3L), plural = TRUE)
+  plural_strings = rbind(
+    get_named_arg_strings(expr_data, 'ngettext', c(msg1 = 2L, msg2 = 3L), plural = TRUE),
+    if (use_tr) get_named_arg_strings(expr_data, 'tr_n', c(singular = 2L, plural = 3L), plural = TRUE)
+  )
   # for plural strings, the ordering within lines doesn't really matter since there's only one .pot entry,
   #   so just use the parent's location to get the line number
   plural_strings[ , id := parent]

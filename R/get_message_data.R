@@ -2,6 +2,7 @@ get_message_data = function(
   dir = ".",
   custom_translation_functions = list(R = NULL, src = NULL),
   include_conditions = TRUE,
+  use_tr = FALSE,
   verbose = FALSE
 ) {
   package = get_desc_data(dir)['Package']
@@ -12,6 +13,7 @@ get_message_data = function(
     dir,
     custom_translation_functions = custom_translation_functions$R,
     include_conditions = include_conditions,
+    use_tr = use_tr,
     is_base
   )
 

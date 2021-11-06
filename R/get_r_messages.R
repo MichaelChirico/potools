@@ -153,7 +153,7 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  known_translators = c(dots_funs, 'ngettext', fmt_funs, get_fnames(custom_params))
+  known_translators = c(dots_funs, 'ngettext', fmt_funs, get_fnames(custom_params), if (use_tr) c("tr", "tr_"))
   msg[ , 'is_marked_for_translation' := fname %chin% known_translators]
 
   # TODO: assume custom translators are translated? or maybe just check the regex?

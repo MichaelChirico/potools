@@ -1,6 +1,6 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, include_conditions = TRUE, use_tr = FALSE) {
+get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, include_conditions = TRUE, include_conditions_f = FALSE, use_tr = FALSE) {
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
@@ -37,10 +37,13 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   <!-- mix and match those two types indefinitely -->
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
+  dots_funs <- domain_dots_funs(include_conditions)
+  fmt_funs <- domain_fmt_funs(include_conditions_f)
+
   singular_strings = rbind(
-    get_dots_strings(expr_data, domain_dots_funs(include_conditions), NON_DOTS_ARGS),
+    get_dots_strings(expr_data, dots_funs, NON_DOTS_ARGS),
     # treat gettextf separately since it takes a named argument, and we ignore ...
-    get_named_arg_strings(expr_data, 'gettextf', c(fmt = 1L), recursive = TRUE),
+    get_named_arg_strings(expr_data, fmt_funs, c(fmt = 1L), recursive = TRUE),
     if (use_tr) get_named_arg_strings(expr_data, 'tr_', c(string = 1L), recursive = TRUE),
     # TODO: drop recursive=FALSE option now that exclude= is available? main purpose of recursive=
     #   was to block cat(gettextf(...)) usage right?
@@ -150,11 +153,11 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  known_translators = c(domain_dots_funs(include_conditions), 'ngettext', 'gettextf', get_fnames(custom_params))
+  known_translators = c(dots_funs, 'ngettext', fmt_funs, get_fnames(custom_params))
   msg[ , 'is_marked_for_translation' := fname %chin% known_translators]
 
   # TODO: assume custom translators are translated? or maybe just check the regex?
-  msg[ , "is_templated" := fname == "gettextf"]
+  msg[ , "is_templated" := fname %in% fmt_funs]
   msg[ , "fname" := NULL]
 
   msg[]
@@ -284,6 +287,14 @@ domain_dots_funs <- function(include_conditions = TRUE) {
     if (include_conditions) c("stop", "warning", "message", "packageStartupMessage")
   )
 }
+
+domain_fmt_funs <- function(include_conditions = TRUE) {
+  c(
+    "gettextf",
+    if (include_conditions) c("stopf", "warningf", "messagef")
+  )
+}
+
 #
 NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
 

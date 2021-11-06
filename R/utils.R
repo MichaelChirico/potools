@@ -162,5 +162,5 @@ dir_create <- function(dirs) {
 }
 
 is_outdated <- function(src, dst) {
-  ifelse(!file.exists(dst), TRUE, file.mtime(src) > file.mtime(dst))
+  !file.exists(dst) | (file.mtime(src) > file.mtime(dst))
 }

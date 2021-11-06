@@ -56,7 +56,10 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
     to_delete <- mo_dirs[!basename(mo_dirs) %in% c(po_files$language, "en@quot")]
 
     for (dir in to_delete) {
-      if (verbose) messagef("Deleting unmatched %s translation", basename(dir))
+      if (verbose) messagef(
+        "Found a compiled translation for %s at %s, but no corresponding .po; deleting",
+        basename(dir), dirname(dir)
+      )
       unlink(dir, recursive = TRUE)
     }
   }

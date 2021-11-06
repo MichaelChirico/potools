@@ -6,14 +6,14 @@ get_message_data = function(
   package = get_desc_data(dir)['Package']
   is_base = package == 'base'
 
-  if (verbose) message('Getting R-level messages...')
+  if (verbose && dir.exists(file.path(dir, "R"))) message('Getting R-level messages...')
   r_message_data = get_r_messages(
     dir,
     custom_translation_functions = custom_translation_functions$R,
     is_base
   )
 
-  if (verbose) message('Getting src-level messages...')
+  if (verbose && dir.exists(file.path(dir, "src"))) message('Getting src-level messages...')
   src_message_data = get_src_messages(
     dir,
     custom_translation_functions = custom_translation_functions$src,

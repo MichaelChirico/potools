@@ -5,12 +5,12 @@
 \alias{po_update}
 \title{Create or update a `.po` file containing translations}
 \usage{
-po_create(lang, dir = ".", verbose = TRUE)
+po_create(languages, dir = ".", verbose = TRUE)
 
-po_update(lang, dir = ".", verbose = TRUE)
+po_update(languages, dir = ".", verbose = TRUE)
 }
 \arguments{
-\item{lang}{Language identifiers. These are typically two letters (e.g.
+\item{languages}{Language identifiers. These are typically two letters (e.g.
 "en" = English, "fr" = French, "es" = Spanish, "zh" = Chinese), but
 can include an additional suffix for languages that have regional
 variations (e.g. "fr_CN" = French Canadian, "zh_CN" = simplified
@@ -22,7 +22,7 @@ as used in Taiwan.)}
 \item{verbose}{If `TRUE`, explain what's happening.}
 }
 \description{
-* `po_create()` creates a new `po/{lang}.po` containing the messages to be
+* `po_create()` creates a new `po/{languages}.po` containing the messages to be
   translated.
 * `po_update()` updates an existing `.po` file after the messages in a
   package have changed. The translations for existing messages are preserved;

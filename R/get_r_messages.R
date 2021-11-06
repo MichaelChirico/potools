@@ -1,6 +1,6 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE) {
+get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, include_conditions = TRUE) {
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
@@ -38,7 +38,7 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
   singular_strings = rbind(
-    get_dots_strings(expr_data, DOMAIN_DOTS_FUNS, NON_DOTS_ARGS),
+    get_dots_strings(expr_data, domain_dots_funs(include_conditions), NON_DOTS_ARGS),
     # treat gettextf separately since it takes a named argument, and we ignore ...
     get_named_arg_strings(expr_data, 'gettextf', c(fmt = 1L), recursive = TRUE),
     # TODO: drop recursive=FALSE option now that exclude= is available? main purpose of recursive=
@@ -146,7 +146,7 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  known_translators = c(DOMAIN_DOTS_FUNS, 'ngettext', 'gettextf', get_fnames(custom_params))
+  known_translators = c(domain_dots_funs(include_conditions), 'ngettext', 'gettextf', get_fnames(custom_params))
   msg[ , 'is_marked_for_translation' := fname %chin% known_translators]
 
   # TODO: assume custom translators are translated? or maybe just check the regex?
@@ -274,10 +274,16 @@ exclude_untranslated = function(expr_data, comments) {
 #     if (is.null(f_args <- args(f))) next
 #     if (any(names(formals(f_args)) == 'domain')) cat(obj, '\n')
 # }
-DOMAIN_DOTS_FUNS = c("warning", "stop", "message", "packageStartupMessage", "gettext")
+domain_dots_funs <- function(include_conditions = TRUE) {
+  c(
+    "gettext",
+    if (include_conditions) c("stop", "warning", "message", "packageStartupMessage")
+  )
+}
+#
 NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
 
-# for functions (e.g. DOMAIN_DOTS_FUNS) where we extract strings from ... arguments
+# for functions (e.g. domain_dots_funs) where we extract strings from ... arguments
 get_dots_strings = function(expr_data, funs, arg_names, exclude = c('gettext', 'gettextf', 'ngettext'), recursive = TRUE) {
   call_neighbors = get_call_args(expr_data, funs)
   call_neighbors = drop_suppressed_and_named(call_neighbors, expr_data, arg_names)

@@ -38,7 +38,7 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 #' Compile `.po` files to `.mo`
 #'
 #' This function compiles the plain text `.po` files that translators work with
-#' in to the binary `.mo` files that are installed with packages and used for
+#' into the binary `.mo` files that are installed with packages and used for
 #' live translations.
 #'
 #' @param dir Path to package root directory.

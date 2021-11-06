@@ -43,9 +43,9 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 #'
 #' @param dir Path to package root directory.
 #' @param package Name of package. If not supplied, read from `DESCRIPTION`.
-#' @param verbose If `TRUE`, print information as it goes.
 #' @param lazy If `TRUE`, only `.mo` functions that are older than `.po`
 #'   files be updated
+#' @param verbose If `TRUE`, print information as it goes.
 po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   po_files <- po_files(dir = dir, package = package, lazy = lazy)
   dir_create(dirname(po_files$mo))

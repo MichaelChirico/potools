@@ -63,7 +63,6 @@ jobs:
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
-          sudo apt install libcurl3 libcurl-openssl1.0-dev
           while read -r cmd
           do
             eval sudo $cmd

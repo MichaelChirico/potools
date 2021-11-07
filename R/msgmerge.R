@@ -47,10 +47,12 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 #'   files be updated
 #' @param verbose If `TRUE`, print information as it goes.
 po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
-  po_metadata <- get_po_metadata(dir = dir, package = package, lazy = lazy)
+  po_metadata <- get_po_metadata(dir = dir, package = package)
   dir_create(dirname(po_metadata$mo))
 
-  if (!lazy) {
+  if (lazy) {
+    po_metadata <- po_metadata[is_outdated(po, mo)]
+  } else {
     # Clear out all older translations
     mo_dirs <- dir(file.path(dir, "inst", "po"), full.names = TRUE)
     to_delete <- mo_dirs[!basename(mo_dirs) %in% c(po_metadata$language, "en@quot")]
@@ -76,29 +78,26 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   return(invisible())
 }
 
-get_po_metadata <- function(dir = ".", package = NULL, lazy = TRUE) {
+get_po_metadata <- function(dir = ".", package = NULL) {
   if (is.null(package)) {
     package <- get_desc_data(dir)[["Package"]]
   }
 
-  po_paths <- list.files(file.path(dir, "po"), pattern = "\\.po$", full.names = TRUE)
-
   lang_regex <- "^(R-)?([a-z]{2}(?:_[A-Z]{2})?)\\.po$"
+  po_paths <- list.files(file.path(dir, "po"), pattern = lang_regex, full.names = TRUE)
+
   languages <- gsub(lang_regex, "\\2", basename(po_paths))
+  type <- ifelse(grepl("^(R-)", basename(po_paths)), "R", "src")
+
   mo_names <- gsub(lang_regex, sprintf("\\1%s.mo", package), basename(po_paths))
   mo_paths <- file.path(dir, "inst", "po", languages, "LC_MESSAGES", mo_names)
 
-  out <- data.table(
+  data.table(
     language = languages,
+    type = type,
     po = po_paths,
     mo = mo_paths
   )
-
-  if (lazy) {
-    out <- out[is_outdated(po, mo)]
-  }
-
-  out
 }
 
 update_en_quot_mo_files <- function(dir, verbose) {

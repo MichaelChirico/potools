@@ -67,10 +67,11 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   }
 
   for (ii in seq_len(nrow(po_metadata))) {
-    if (verbose) messagef("Recompiling %s translation", po_metadata$language[ii])
+    row <- po_metadata[ii]
+    if (verbose) messagef("Recompiling '%s' %s translation", row$language, row$type)
     run_msgfmt(
-      po_file = po_metadata$po[ii],
-      mo_file = po_metadata$mo[ii],
+      po_file = row$po,
+      mo_file = row$mo,
       verbose = verbose
     )
   }

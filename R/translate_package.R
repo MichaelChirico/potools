@@ -70,7 +70,9 @@ translate_package = function(
     result <- diagnostic(message_data)
     if (!nrow(result)) next
     show_diagnostic_results(result, diagnostic)
-    if (tolower(prompt('Exit now to repair any of these? [y/N]')) %chin% c('y', 'yes')) return(invisible())
+    responded_yes = tolower(prompt('Exit now to repair any of these? [y/N]')) %chin% c('y', 'yes')
+    # length() required for use in batch mode
+    if (length(responded_yes) && responded_yes) return(invisible())
   }
 
   if (verbose) message('Generating .pot files...')

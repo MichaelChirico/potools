@@ -14,7 +14,7 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   dir_create(dirname(po_metadata$mo))
 
   if (lazy) {
-    po_metadata <- po_metadata[is_outdated(po, mo)]
+    po_metadata <- po_metadata[is_outdated(po_metadata$po, po_metadata$mo)]
   } else {
     # Clear out all older translations
     mo_dirs <- dir(file.path(dir, "inst", "po"), full.names = TRUE)
@@ -32,11 +32,7 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   for (ii in seq_len(nrow(po_metadata))) {
     row <- po_metadata[ii]
     if (verbose) messagef("Recompiling '%s' %s translation", row$language, row$type)
-    run_msgfmt(
-      po_file = row$po,
-      mo_file = row$mo,
-      verbose = verbose
-    )
+    run_msgfmt(row$po, row$mo, verbose = verbose)
   }
 
   return(invisible())

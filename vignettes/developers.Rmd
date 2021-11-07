@@ -13,21 +13,21 @@ This vignette outlines the process of translating a package from the developer's
 Please also see `vignette("translator")` which discusses the process from the translator's perspective.
 Before we get into the details lets review the basic process:
 
--   You run `po_extract()` to extract all translatable messages from your R and C code.
+-   Run `po_extract()` to extract all translatable messages from your R and C code.
     This creates a `.pot` (po template) file that contains every translatable message.
 
--   You use `po_create()` to generate a `.po` file for each language that your messages will be translated to.
+-   Use `po_create()` to generate a `.po` file for each language that your messages will be translated to.
     A `.po` file consists of pair of lines like:
 
         msgid "This is the message in English"
         msgstr ""
 
--   You pass the `.po` file on to translators who replace the `msgstr` line with the appropriate translation:
+-   Pass the `.po` file on to translators who replace each `msgstr` line with the appropriate translation:
 
         msgid "This is the message in English"
         msgstr "This is the message in another language"
 
--   You use `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with your package.
+-   Use `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with your package.
 
 In this vignette, while you'll learn how to use the `po_` functions to generate the various files needed for translation, the focus will be on writing messages that can be effectively translated.
 
@@ -47,7 +47,7 @@ There are two primary styles for describing which messages should be translated,
 
 In this vignette, I'll primarily use the explicit style because it makes it very clear what manual.
 I'll use manual in many of the examples here, just to make it crystal clear what needs to be translated.
-I'll use of glue, since it's style of interpolation provides additional context that's useful for translators.
+I'll use of glue, since its style of interpolation provides additional context that's useful for translators.
 
 ```{r}
 tr_ <- function(...) {
@@ -64,22 +64,13 @@ Most of the advice will apply to other languages as well, although you're more l
 
 ### Write full sentences
 
-Generally, you should strive to make sure that each message is a single string.
+Generally, you should strive to make sure that each message comes from a single string (i.e. lives within a single "").
 Instead of building up a message from small fragment using `paste()` or friends:
 
 ```{r}
 name <- "Hadley"
 paste0(tr_("Good"), " ", tr_("morning"), " ", name, "!")
 ```
-
-You're better off generate a complete string with `glue()` or `sprintf()`:
-
-```{r}
-glue(tr_("Good morning {name}"))
-sprintf(tr_("Good morning %s"), name)
-```
-
-For now I'll focus on `glue()` and we'll come back to `sprintf()` shortly.
 
 There are two reasons that you should try to write complete sentences.
 Firstly, when working with `.po` files, translators see each individual string without context, and they may be in a different order to the original source:
@@ -97,34 +88,41 @@ This can lead either to a poor translation or an expensive journey to the source
 More importantly, prose is not like code: you can't reliably build up sentences from small fragments of text.
 And even if you can do figure out how to do it in English, it's unlikely the same form will work for other languages.
 
-By instead giving the translator a complete sentence, they have the context to create a good translation and a the freedom to change words and word order to make a grammatically correct sentence in their language.
+Instead it's better to build the complete message in a single string with `glue()` or `sprintf()`:
+
+```{r}
+glue(tr_("Good morning {name}"))
+sprintf(tr_("Good morning %s"), name)
+```
+
+This gives the translator the context to create a good translation and the freedom to change word order to make a grammatically correct sentence in their language.
 
     msgid "Good morning {name}!"
     msgstr ""
 
 ### `sprintf()` vs `glue()`
 
-I've used `glue()` in the examples above, but it does require an additional, if very lightweight, dependency for your package.
-If you want to eliminate that dependency and only use base R, you can instead use `sprintf()`:
+In R, there are two common ways to interpolate variables into a string: `sprinf()` and `glue()`.
+The are pros and cons of each:
 
-```{r}
-sprintf(tr_("Good morning %s"), name)
-```
+-   Using `glue()` requires an addition, if lightweight, dependency, but gives the translator more context (assuming you use informative names for local variables), and makes it easy to rearrange interpolated components:
 
-Bringing the name of the variable out of the translated string is both a curse and a blessing.
-On the downside, it gives the translator less context, but on the plus side it means that you can rename variables without worrying that the translated code will break.
+        msgid "{first} {second} {third}"
+        msgstr "{third} {first} {second}"
 
-`glue()` is particularly advantageous when there are multiple interpolated strings, because the syntax for rearranging them is easier:
+    Bringing the name of the variable out of the translated string is both a curse and a blessing.
+    On the downside, it gives the translator less context, but on the plus side it means that you can rename variables without worrying that the translated code will break.
 
-    msgid "{first} {second} {third}"
-    msgstr "{third} {first} {second}"
+-   `sprintf()` is built into base R, so is always available.
+    The downside is that it can be hard to figure out what `%d` or `%s` refers to and it's a little harder to rearrange components because the syntax uses `1$`, `2$`, etc which is a little harder to visually parse.
 
-With `sprintf()` you need to use a special `1$` syntax that denotes the position of the original argument:
-
-    msgid "%s %s %s"
-    msgstr "%3$s %1$s %2$s"
+        msgid "%s %s %s"
+        msgstr "%3$s %1$s %2$s"
 
 ### Multi-component sentences
+
+What happens if your translation requires interleaving multiple pieces of data?
+Take, for example, this seemingly simple greeting function:
 
 ```{r}
 greet <- function(name, time_of_day) {
@@ -135,17 +133,18 @@ greet("Hadley", tr_("afternoon"))
 greet("Hadley", tr_("evening"))
 ```
 
-This formulation doesn't even work for French, a language that's relatively close to English.
-Good morning and good afternoon both use "Bonjour" which has two challenges: the space between "bon" (good) and "jour" (day) is elided, and it's not the case that in general French doesn't have different words for day and afternoon.
+It doesn't even work for French, a language that's relatively close to English.
+There are two related challenges: in French, both good morning and good afternoon translate to "bonjour" (literally "good day") even though in French has different words for morning and afternoon.
+By translating individual components there's no way to capture the vagaries of language for greetings.
 
 A better approach would be to define a fixed number of time points and accompanying messages:
 
 ```{r}
 greet <- function(name, time_of_day) {
   switch(time_of_day,
-    morning = glue(tr_("Good morning {name}")),
-    afternoon = glue(tr_("Good afternoon {name}")),
-    evening = glue(tr_("Good evening {name}"))
+    morning = glue(tr_("Good morning {name}!")),
+    afternoon = glue(tr_("Good afternoon {name}!")),
+    evening = glue(tr_("Good evening {name}!"))
   )
 }
 ```
@@ -159,28 +158,30 @@ greet <- function(name, time_of_day) {
     msgstr: "Good evening {name}!"
     msgid: "Bonsoir {name}!"
 
-(And even here the context is important; you can use Bonjour only as a greeting, can be used as both a greeting and a farewell, and you might use Bon aprém as a farewell in the afternoon)
+(And even here the context is important; you can use bonjour only as a greeting, bonsoir can be used as both a greeting and a farewell, and you might use bon aprém as a farewell in the afternoon.)
 
-Greetings are particularly challenging to translate because they're so fundamentally social.
-Different languages break the day up differently, or the time of day might not even be the most important factor in forming the greeting.
-Fortunately most of the messages that you generate for R packages will not have this level of nuance.
+Greetings are particularly challenging to translate: different languages break the day up differently, or the time of day might not even be the most important factor in forming the greeting.
+Fortunately most of the messages that you generate for R packages will not require this level of nuance.
 
 ### Un-translatable content
 
-Avoiding embedding large non-translatable components like URLs or email addresses.
-Makes it harder for translator to see changes.
-Easy to introduce typos.
-Instead use `sprintf()` or `glue()`.
+You can also use interpolation to avoid including un-translatable components like URLs or email addresses into a message.
+This is good practice because it saves work for the translators, makes it easier for them to see changes to the text, and avoids the chance of a translator accidentally introducing a typo.
 
 ```{r}
-url <- "https://r-project.org" sprintf("See <%s> to learn more", url)
-glue("See <{url}> to learn more")
+# Instead of this:
+tr_("See <https://r-project.org> to learn more")
+# Try this:
+url <- "https://r-project.org"
+glue(tr_("See <{url}> to learn more"))
 ```
 
-Similarly, if you're generating strings to include in HTML, avoid including the html in the string:
+Similarly, if you're generating strings to include in HTML, avoid including the html in the string, and instead translate just the words:
 
 ```{r}
-"<a href='/index.html'>Home page</a>"
+# Instead of this:
+tr_("<a href='/index.html'>Home page</a>")
+# Try this:
 paste0("<a href='/index.html'>", tr_("Home page"), "</a>")
 ```
 
@@ -188,38 +189,20 @@ Generally, you want to help the translator spend as much time as possible helpin
 
 ### Plurals
 
-In English, nouns are inflected for grammatical number in singulars (used when one thing) and plurals (used when many things).
-
-English uses the singular for when there's exactly one item, and the plural for every other case.
-And often you can construct the plural from the singular just by adding s: zero cows, one cow, two cows, three cows, ...
-
-So you might write:
+In English, we use a different form for most nouns depending on whether there's one item (the singular) or more than one item (the plural, also use for zero items).
+So you might be tempted to construct a sentence like this:
 
 ```{r}
 cows <- function(n) {
-  if (n == 1) "1 cow" else paste0(n, " cows")
+  if (n == 1) {
+    paste0(n, " cow") 
+  } else { 
+    paste0(n, " cows")
+  }
 }
-cows(0)
-cows(1)
-cows(2)
-```
-
-But not all languages have the same rules, so R provides `ngettext()` which interops with tranlsation in a way you'll see shortly.
-
-```{r}
-cows <- function(n) {
-  paste(n, ngettext(n, "cow", "cows"))
-}
-cows(0)
-cows(1)
-cows(2)
-```
-
-It's tempting to use this function to assemble a string piece by piece:
-
-```{r}
-paste0("I have ", cows(0))
-paste0("I have ", cows(1))
+paste("I have ", cows(0))
+paste("I have ", cows(1))
+paste("I have ", cows(2))
 ```
 
 But this doesn't always work, even in English:
@@ -229,52 +212,49 @@ paste0("There are ", cows(0), " in the field")
 paste0("There are ", cows(1), " in the field")
 ```
 
-As per our advice above we don't want to translate sentence fragments since they usually can't be re-combined into a grammatical sentence.
-So typically you'll want to combine `ngettext()` with `sprintf()` or `glue()`:
+So really we want to follow the advice above and construct a full sentence:
 
 ```{r}
-cows <- function(n) {
-  fmt <- ngettext(n, 
-    "There is %i cow in the field", 
-    "There are %i cows in the field"
-  )
-  sprintf(fmt, n)  
+field_cows <- function(n) {
+  if (n == 1) {
+    fmt <- tr_("There is {n} cow in the field")
+  } else {
+    fmt <- tr_("There are {n} cows in the field")
+  }
+  glue(fmt)
 }
-cows <- function(n) {
-  fmt <- ngettext(n, 
-    "There is {n} cow in the field", 
-    "There are {n} cows in the field"
-  )
-  glue(fmt)  
-}
+```
 
-cows(0)
-cows(1)
-cows(2)
+But there's an additional wrinkle here: while English has singular and plural, other languages have different forms.
+So we need to use a different helper: `ngettext(n, singular, plural)`:
+
+```{r}
+field_cows <- function(n) {
+  glue(ngettxt(n,
+    "There is {n} cow in the field",
+    "There are {n} cows in the field"
+  ))
+}
 ```
 
 `ngettext()` generates a special form in the `.po` file, which shows both singular and plural forms:
 
-    msgid "There is %i cow"
-    msgid_plural "There are %d cows"
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
 
-What happens next depends on the number of plural forms that a language has.
+Then the translator can supply any number of translations.
 Languages that don't have plurals (e.g. Chinese) only need to supply a single translation:
 
-```{r}
-msgid "There is %i cow in the field"
-msgid_plural "There are %d cows in the field"
-msgstr[0] "田裡有%i頭牛"
-```
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
+    msgstr[0] "田裡有{n}頭牛"
 
-Russian has forms, so it gets three entries (roughly 1, 2-4, everything else)
+Russian has forms, so it gets three entries (roughly 1, 2-4, and everything else):
 
-```{r}
-msgid "There is %i cow"
-msgid_plural "There are %i cows"
-msgstr[0] "В поле %i коров"
-msgstr[1] "В поле %i корова"
-msgstr[2] "В поле %i коровы"
-```
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
+    msgstr[0] "В поле {n} коров"
+    msgstr[1] "В поле {n} корова"
+    msgstr[2] "В поле {n} коровы"
 
 The rules that define which number get which message are quite complex and encoded in the "plural form" that's recorded at the top of the `.po` file and looks something like `(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2).` However, this is something the translators need to worry about not you, and as speakers of the language they should find it easier to puzzle out the rules.

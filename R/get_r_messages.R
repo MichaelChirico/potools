@@ -293,10 +293,7 @@ domain_dots_funs <- function(use_conditions = TRUE) {
 }
 
 domain_fmt_funs <- function(use_conditions = TRUE) {
-  c(
-    "gettextf",
-    if (use_conditions) c("stopf", "warningf", "messagef")
-  )
+  paste0(domain_dots_funs(use_conditions), "f")
 }
 
 #

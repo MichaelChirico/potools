@@ -44,16 +44,20 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
     get_dots_strings(expr_data, dots_funs, NON_DOTS_ARGS),
     # treat gettextf separately since it takes a named argument, and we ignore ...
     get_named_arg_strings(expr_data, fmt_funs, c(fmt = 1L), recursive = TRUE),
-    if (use_tr) get_dots_strings(expr_data, 'tr_', character(), recursive = TRUE),
     # TODO: drop recursive=FALSE option now that exclude= is available? main purpose of recursive=
     #   was to block cat(gettextf(...)) usage right?
     get_dots_strings(expr_data, 'cat', c("file", "sep", "fill", "labels", "append"), recursive = FALSE)
   )
+  plural_strings = get_named_arg_strings(expr_data, 'ngettext', c(msg1 = 2L, msg2 = 3L), plural = TRUE)
 
-  plural_strings = rbind(
-    get_named_arg_strings(expr_data, 'ngettext', c(msg1 = 2L, msg2 = 3L), plural = TRUE),
-    if (use_tr) get_named_arg_strings(expr_data, 'tr_n', c(singular = 2L, plural = 3L), plural = TRUE)
-  )
+  if (use_tr) {
+    tr_ <- get_dots_strings(expr_data, 'tr_', character(), recursive = TRUE)
+    tr_n <- get_named_arg_strings(expr_data, 'tr_n', c(singular = 2L, plural = 3L), plural = TRUE)
+
+    singular_strings <- rbind(singular_strings, tr_)
+    plural_strings <- rbind(plural_strings, tr_n)
+  }
+
   # for plural strings, the ordering within lines doesn't really matter since there's only one .pot entry,
   #   so just use the parent's location to get the line number
   plural_strings[ , id := parent]

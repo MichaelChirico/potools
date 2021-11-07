@@ -9,73 +9,122 @@ knitr::opts_chunk$set(
 )
 ```
 
+This vignette outlines the process of translating a package from the developer's perspective.
+Please also see `vignette("translator")` which discusses the process from the translator's perspective.
+Before we get into the details lets review the basic process:
+
+-   You run `po_extract()` to extract all translatable messages from your R and C code.
+    This creates a `.pot` (po template) file that contains every translatable message.
+
+-   You use `po_create()` to generate a `.po` file for each language that your messages will be translated to.
+    A `.po` file consists of pair of lines like:
+
+        msgid "This is the message in English"
+        msgstr ""
+
+-   You pass the `.po` file on to translators who replace the `msgstr` line with the appropriate translation:
+
+        msgid "This is the message in English"
+        msgstr "This is the message in another language"
+
+-   You use `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with your package.
+
+In this vignette, while you'll learn how to use the `po_` functions to generate the various files needed for translation, the focus will be on writing messages that can be effectively translated.
+
 ```{r setup}
 library(potools)
 ```
 
-Basic process
+## Extraction
 
-This vignette outlines the process of translating a package from the developer's perspective.
-Please also see `vignette("translator")` which discusses the process from the translator's perspective.
+There are two primary styles for describing which messages should be translated, as defined by the style argument to `po_extract()`:
 
-This documentation, and the underlying tooling, assume that the error messages including in your source code are in English.
-Most of the advice will apply to other languages as well, although you're more likely to be aware of variation between languages than a mono-lingual English speaker.
+-   `base`: the base style assumes that every call to `message()`, `warning()`, and `error()` should be translated.
+    The advantage of this style is that it's fast to get up and going with your existing code.
 
-There's two approaches to declaring which strings to translate --- automatic or manual.
+-   `explicit`: the explicit style requires you to flag any string to be translated with `gettext()` or `tr_()`.
+    The advantage of this style is that it lets you explicitly flag whether or not you've reviewed a message and deemed it ready for translation.
+
+In this vignette, I'll primarily use the explicit style because it makes it very clear what manual.
 I'll use manual in many of the examples here, just to make it crystal clear what needs to be translated.
+I'll use of glue, since it's style of interpolation provides additional context that's useful for translators.
 
 ```{r}
-tr_ <- function(x) {
-  gettext(x, domain = "R-potools")
+tr_ <- function(...) {
+  gettext(paste0(...), domain = "R-potools")
 }
 library(glue)
 ```
 
-## Writing translatable error messages
+## Writing good messages
 
 The following advice is inspired by the "[Preparing translatable strings](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20))" of the gettext manual.
+This advice, and the underlying tooling, assume that the error messages including in your source code are in English.
+Most of the advice will apply to other languages as well, although you're more likely to be aware of variation between languages than a mono-lingual English speaker.
 
 ### Write full sentences
 
-Generally, you want to make sure that each message is a single string.
-Instead of:
+Generally, you should strive to make sure that each message is a single string.
+Instead of building up a message from small fragment using `paste()` or friends:
 
 ```{r}
 name <- "Hadley"
 paste0(tr_("Good"), " ", tr_("morning"), " ", name, "!")
 ```
 
-You want to write:
+You're better off generate a complete string with `glue()` or `sprintf()`:
 
 ```{r}
 glue(tr_("Good morning {name}"))
+sprintf(tr_("Good morning %s"), name)
 ```
 
-(We'll cover alternatives to `glue()` shortly)
+For now I'll focus on `glue()` and we'll come back to `sprintf()` shortly.
 
-There are two reasons for this.
-Firstly, when working with `.po` files, translators see each individual string without context:
+There are two reasons that you should try to write complete sentences.
+Firstly, when working with `.po` files, translators see each individual string without context, and they may be in a different order to the original source:
 
-    msgid "Good"
+    msgid "!"
     msgstr ""
 
     msgid "morning"
     msgstr ""
 
-    msgid "!"
+    msgid "Good"
     msgstr ""
 
-And that can lead to either a poor translation or an expensive journey to the source code to get more context.
+This can lead either to a poor translation or an expensive journey to the source code to get more context.
+More importantly, prose is not like code: you can't reliably build up sentences from small fragments of text.
+And even if you can do figure out how to do it in English, it's unlikely the same form will work for other languages.
 
-More importantly, prose is not like code: you can't flexibly build up sentences from small fragments.
-If you're a native English speaker, you might have a false sense of security about this, because as a language English relies primarily on positional cues, so in many case you can combine smaller pieces together into a grammatically correct sentences.
-
-A complete sentence give translators much more freedom to change words and word order to make a grammatically correct sentence:
+By instead giving the translator a complete sentence, they have the context to create a good translation and a the freedom to change words and word order to make a grammatically correct sentence in their language.
 
     msgid "Good morning {name}!"
     msgstr ""
 
-### Parameterisation
+### `sprintf()` vs `glue()`
+
+I've used `glue()` in the examples above, but it does require an additional, if very lightweight, dependency for your package.
+If you want to eliminate that dependency and only use base R, you can instead use `sprintf()`:
+
+```{r}
+sprintf(tr_("Good morning %s"), name)
+```
+
+Bringing the name of the variable out of the translated string is both a curse and a blessing.
+On the downside, it gives the translator less context, but on the plus side it means that you can rename variables without worrying that the translated code will break.
+
+`glue()` is particularly advantageous when there are multiple interpolated strings, because the syntax for rearranging them is easier:
+
+    msgid "{first} {second} {third}"
+    msgstr "{third} {first} {second}"
+
+With `sprintf()` you need to use a special `1$` syntax that denotes the position of the original argument:
+
+    msgid "%s %s %s"
+    msgstr "%3$s %1$s %2$s"
+
+### Multi-component sentences
 
 ```{r}
 greet <- function(name, time_of_day) {
@@ -115,28 +164,6 @@ greet <- function(name, time_of_day) {
 Greetings are particularly challenging to translate because they're so fundamentally social.
 Different languages break the day up differently, or the time of day might not even be the most important factor in forming the greeting.
 Fortunately most of the messages that you generate for R packages will not have this level of nuance.
-
-### `sprintf()` vs `glue()`
-
-I've used `glue()` in the examples above, but it does require an additional, if very lightweight, dependency for your package.
-If you want to eliminate that dependency any only use base R, you can instead use `sprintf()`:
-
-```{r}
-sprintf(tr_("Good morning %s"), name)
-```
-
-Bringing the name of the variable out of the translated string is both a curse and a blessing.
-On the downside, it gives the translator less context, but on the plus side it means that you can rename variables without worrying that the translated code will break.
-
-I think `glue()` is particularly advantageous when there are multiple interpolated strings, because the syntax for rearranging them is easier:
-
-    msgid "{first} {second} {third}"
-    msgstr "{third} {first} {second}"
-
-With `sprintf()` you need to use a special `1$` syntax:
-
-    msgid "%s %s %s"
-    msgstr "%3$s %1$s %2$s"
 
 ### Un-translatable content
 

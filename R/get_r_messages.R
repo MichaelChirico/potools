@@ -44,7 +44,7 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
     get_dots_strings(expr_data, dots_funs, NON_DOTS_ARGS),
     # treat gettextf separately since it takes a named argument, and we ignore ...
     get_named_arg_strings(expr_data, fmt_funs, c(fmt = 1L), recursive = TRUE),
-    if (use_tr) get_named_arg_strings(expr_data, 'tr_', c(string = 1L), recursive = TRUE),
+    if (use_tr) get_dots_strings(expr_data, 'tr_', character(), recursive = TRUE),
     # TODO: drop recursive=FALSE option now that exclude= is available? main purpose of recursive=
     #   was to block cat(gettextf(...)) usage right?
     get_dots_strings(expr_data, 'cat', c("file", "sep", "fill", "labels", "append"), recursive = FALSE)

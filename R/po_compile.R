@@ -48,7 +48,7 @@ get_po_metadata <- function(dir = ".", package = NULL) {
   po_paths <- list.files(file.path(dir, "po"), pattern = lang_regex, full.names = TRUE)
 
   languages <- gsub(lang_regex, "\\2", basename(po_paths))
-  type <- ifelse(grepl("^(R-)", basename(po_paths)), "R", "src")
+  type <- ifelse(startsWith(basename(po_paths), "R-"), "R", "src")
 
   mo_names <- gsub(lang_regex, sprintf("\\1%s.mo", package), basename(po_paths))
   mo_paths <- file.path(dir, "inst", "po", languages, "LC_MESSAGES", mo_names)

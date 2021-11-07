@@ -34,7 +34,4 @@ f5 <- function(x) {
   message("me too")
   message("me three")
   # notranslate end
-
-  # example from #227
-  stop("Can't find article called ", src_path(name), call. = FALSE)
 }

@@ -45,7 +45,6 @@ get_po_metadata <- function(dir = ".", package = NULL) {
   }
 
   lang_regex <- "^(R-)?([a-z]{2}(?:_[A-Z]{2})?)\\.po$"
-  lang_regex <- "^(R-)?([a-z]{2}(?:_[A-Z]{2})?)\\.po$"
   po_paths <- list.files(file.path(dir, "po"), pattern = lang_regex, full.names = TRUE)
 
   languages <- gsub(lang_regex, "\\2", basename(po_paths))

@@ -14,7 +14,7 @@ po_scan <- function(dir = ".", custom_translation_functions = list(), verbose = 
     if (verbose) message('No messages to translate')
     return(invisible())
   }
-  if (verbose) messagef(ngettext(n, "Found %i message", "Found %i messsages"), n)
+  if (verbose) messagef(ngettext(n, "Found %i message", "Found %i messages"), n)
 
   po_dir <- file.path(dir, 'po')
   dir.create(po_dir, showWarnings = FALSE)

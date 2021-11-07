@@ -14,8 +14,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette outlines the process of translating a package from the developer's perspective.
-Please also see `vignette("translator")` which discusses the process from the translator's perspective.
+This vignette is aimed at package developer; if you're the translator of a package (or just want to understand how it looks from their site), you start with `vignette("translators")`.
+
 Before we get into the details lets review the basic process:
 
 -   Run `po_extract()` to extract all translatable messages from your R and C code.

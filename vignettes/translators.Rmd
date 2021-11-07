@@ -1,0 +1,33 @@
+---
+title: "Translation for package translators"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Translation for package translators}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(potools)
+```
+
+This vignette is aimed at package translators; if you're the developer of a package (or just want to understand how it looks from their site), you start with `vignette("developers")`.
+
+First of all, thank you!
+Providing translations for a package is a fantastic way to contribute and I know that your work is appreciated by the developer.
+Next, check that the package has started the process of providing translations.
+The easiest way to check is to see if there's a `po/` directory in the package source.
+If not, you might want to start by opening an issue to see if the developer is interested in providing translations.
+
+As a translator, you'll work primarily with `.po` files.
+`.po` files start with some metadata, but mostly consist of pairs of `msgid` and `msgstring` that look like this:
+
+    msgid "Original message"
+    msgstr ""

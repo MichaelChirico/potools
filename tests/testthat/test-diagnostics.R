@@ -4,7 +4,11 @@
 test_that("translate_package works on package with 'cracked' messages needing templates", {
   message_data <- get_message_data(test_package("r_non_template"))
   cracked_messages <- check_cracked_messages(message_data)
-  expect_equal(nrow(cracked_messages), 2L)
+  expect_equal(nrow(cracked_messages), 3L)
+  expect_equal(
+    cracked_messages$replacement[2L],
+    'stop(domain=NA, gettextf("Can\'t find article called %s", src_path(name)), call. = FALSE)'
+  )
 })
 
 test_that("check_cracked_messages works", {

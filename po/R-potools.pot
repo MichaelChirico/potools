@@ -1,0 +1,265 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: potools 0.2.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-11-06 13:03-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: find_fuzzy_messages.R:6
+msgid ""
+"Typically, this means the corresponding error messages have been refactored."
+msgstr ""
+
+#: find_fuzzy_messages.R:7
+msgid ""
+"Reproducing these messages here for your reference since they might still "
+"provide some utility."
+msgstr ""
+
+#: find_fuzzy_messages.R:12
+msgid "** SINGULAR MESSAGES **"
+msgstr ""
+
+#: find_fuzzy_messages.R:18
+msgid "** PLURAL MESSAGES **"
+msgstr ""
+
+#: get_message_data.R:9
+msgid "Getting R-level messages..."
+msgstr ""
+
+#: get_message_data.R:16
+msgid "Getting src-level messages..."
+msgstr ""
+
+#: read_translation.R:33 read_translation.R:55
+#, c-format
+msgid ""
+"**Note: a similar message was previously translated as: **\n"
+"%s"
+msgstr ""
+
+#: read_translation.R:40
+#, c-format
+msgid ""
+"File: %s\n"
+"Call: %s\n"
+"Plural message: %s%s\n"
+"How would you translate this message into %s %s?%s"
+msgstr ""
+
+#: read_translation.R:62
+#, c-format
+msgid ""
+"File: %s\n"
+"Call: %s\n"
+"Message: %s%s\n"
+"How would you translate this message into %s?%s"
+msgstr ""
+
+#: read_translation.R:128
+#, c-format
+msgid "** Oops! Invalid translation -- %s. Retrying... **"
+msgstr ""
+
+#: show_diagnostic_results.R:6
+#, c-format
+msgid ""
+"Problematic call:\n"
+"%s\n"
+"< File:%s, Line:%s >\n"
+"%s"
+msgstr ""
+
+#: specials_metadata.R:101
+#, c-format
+msgid "received %d unique templated arguments but there are %d in the original"
+msgstr ""
+
+#: specials_metadata.R:110
+#, c-format
+msgid ""
+"received the same set of templates, but in incorrect order (%s vs %s). "
+"Recall that you can use %%$N to do redirect, e.g. to swap the order of '%%d %"
+"%s' to be translated more naturally, your translation can use '%%1$s %%2$d'"
+msgstr ""
+
+#: specials_metadata.R:115
+#, c-format
+msgid "received templates not present in the original: %s"
+msgstr ""
+
+#: translate_package.R:55
+msgid "No messages to translate; finishing"
+msgstr ""
+
+#: translate_package.R:66
+msgid "Running message diagnostics..."
+msgstr ""
+
+#: translate_package.R:76
+msgid "Generating .pot files..."
+msgstr ""
+
+#: translate_package.R:83
+msgid "Generating en@quot translations"
+msgstr ""
+
+#: translate_package.R:89
+msgid "No languages provided; finishing"
+msgstr ""
+
+#: translate_package.R:152
+msgid "(To quit translating, press 'Esc'; progress will be saved)"
+msgstr ""
+
+#: translate_package.R:170 translate_package.R:172
+msgid "***************************"
+msgstr ""
+
+#: translate_package.R:171
+msgid "** BEGINNING TRANSLATION **"
+msgstr ""
+
+#: translate_package.R:173
+msgid "Some helpful reminders:"
+msgstr ""
+
+#: translate_package.R:174
+msgid "* You can skip a translation by entering nothing (just press RETURN)"
+msgstr ""
+
+#: translate_package.R:175
+msgid ""
+"* Special characters (like newlines, \\n, or tabs, \\t) should be written "
+"just like that (with an escape)"
+msgstr ""
+
+#: translate_package.R:176
+msgid ""
+"* Be sure to match message templates. The count of templates (%s, %d, etc.) "
+"must match in all languages, as must initial and terminal newlines (\\n)"
+msgstr ""
+
+#: translate_package.R:177
+msgid ""
+"* While the count of templates must match, the _order_ can be changed by "
+"using e.g. %2$s to mean 'use the second input as a string here'"
+msgstr ""
+
+#: translate_package.R:178
+msgid ""
+"* Whenever templates or escaping is happening in a string, these will be "
+"'highlighted' by carets (^) in the line below"
+msgstr ""
+
+#: translate_package.R:214
+msgid "\"Installing\" translations with msgfmt"
+msgstr ""
+
+#: translate_package.R:232
+msgid "independently of n"
+msgstr ""
+
+#: translate_package.R:233
+msgid "when n = 0"
+msgstr ""
+
+#: translate_package.R:234
+msgid "when n = 0, 5-20, 25-30, 35-40, ..."
+msgstr ""
+
+#: translate_package.R:235
+msgid "when n = 0, 5-21, 25-31, 35-41, ..."
+msgstr ""
+
+#: translate_package.R:236
+msgid "when n = 1"
+msgstr ""
+
+#: translate_package.R:237
+msgid "when n = 1, 21, 31, 41, ..."
+msgstr ""
+
+#: translate_package.R:238
+msgid "when n = 100-102, 200-202, 300-302, ..."
+msgstr ""
+
+#: translate_package.R:239
+msgid "when n = 11-99, 111-199, 211-299, ..."
+msgstr ""
+
+#: translate_package.R:240
+msgid "when n = 2"
+msgstr ""
+
+#: translate_package.R:241
+msgid "when n = 2-4, 22-24, 32-34, ..."
+msgstr ""
+
+#: translate_package.R:242
+msgid "when n = 3-10, 103-110, 203-210, ..."
+msgstr ""
+
+#: translate_package.R:243
+msgid "when n is 0 or 1"
+msgstr ""
+
+#: translate_package.R:244
+msgid "when n is at bigger than 1"
+msgstr ""
+
+#: translate_package.R:245
+msgid "when n is not 1"
+msgstr ""
+
+#: update_metadata.R:8
+msgid ""
+"Please help supply some metadata about it. You can check https://l10n.gnome."
+"org/teams/<language>"
+msgstr ""
+
+#: update_metadata.R:41
+msgid ""
+"Thanks! Please file an issue on GitHub to get this language recognized "
+"permanently"
+msgstr ""
+
+#: utils.R:39
+#, c-format
+msgid "These tools are available as an Rtools goodie, check %s"
+msgstr ""
+
+#: utils.R:43
+msgid ""
+"These GNU tools are commonly available, try installing from brew or apt-get"
+msgstr ""
+
+#: utils.R:46
+msgid ""
+"These GNU tools are commonly available from the Linux package manager for "
+"your system"
+msgstr ""
+
+#: utils.R:50
+#, c-format
+msgid ""
+"Missing (or not on PATH) system requirements %s.\n"
+"%s"
+msgstr ""
+
+#: utils.R:135
+#, c-format
+msgid "File %s: %d start(s) / %d end(s)"
+msgstr ""
+
+#: utils.R:143
+#, c-format
+msgid "Unmatched start/end pairs in files: %s"
+msgstr ""

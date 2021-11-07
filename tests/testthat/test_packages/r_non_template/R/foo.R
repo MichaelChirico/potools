@@ -12,6 +12,9 @@ c <- function(x) {
 	cat(sprintf(
 		ngettext(length(x), "small fail\n", "big fail\n")
 	))
+
+  # example from #227
+  stop("Can't find article called ", src_path(name), call. = FALSE)
 }
 
 # add some duplication of the messages to stress test logic

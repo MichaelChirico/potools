@@ -1,5 +1,10 @@
 ---
-title: "developers"
+title: "Translation for package developers"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Translation for package developers}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}

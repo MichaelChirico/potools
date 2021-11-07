@@ -161,7 +161,7 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   msg[ , 'is_marked_for_translation' := fname %chin% known_translators]
 
   # TODO: assume custom translators are translated? or maybe just check the regex?
-  msg[ , "is_templated" := fname %in% fmt_funs]
+  msg[ , "is_templated" := fname %chin% fmt_funs]
   msg[ , "fname" := NULL]
 
   msg[]

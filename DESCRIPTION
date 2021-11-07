@@ -5,7 +5,7 @@ Version: 0.2.3
 Author: Michael Chirico
 Depends: R (>= 4.0.0)
 Imports: data.table
-Suggests: crayon, knitr, rmarkdown, testthat
+Suggests: crayon, knitr, rmarkdown, testthat, withr
 SystemRequirements: gettext
 Maintainer: Michael Chirico <MichaelChirico4@gmail.com>
 Description: Translating messages in R packages is managed using the po top-level directory and the 'gettext' program. This package provides some helper functions for building this support in R packages, e.g. common validation & I/O tasks.

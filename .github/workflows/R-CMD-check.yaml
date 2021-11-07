@@ -11,6 +11,9 @@ name: R-CMD-check
 jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
+    # accidentally committed an infinite loop that ran
+    # for 6 hours in #208, so set a reasonable conservative upper bound.
+    timeout-minutes: 40
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 

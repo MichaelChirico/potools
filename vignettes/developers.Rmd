@@ -254,7 +254,7 @@ Languages that don't have plurals (e.g. Chinese) only need to supply a single tr
     msgid_plural "There are {n} cows in the field"
     msgstr[0] "田裡有{n}頭牛"
 
-Russian has forms, so it gets three entries (roughly 1, 2-4, and everything else):
+Russian has three forms, so it gets three entries (roughly 1, 2-4, and everything else):
 
     msgid "There is {n} cow in the field"
     msgid_plural "There are {n} cows in the field"
@@ -262,4 +262,5 @@ Russian has forms, so it gets three entries (roughly 1, 2-4, and everything else
     msgstr[1] "В поле {n} корова"
     msgstr[2] "В поле {n} коровы"
 
+Slovenian and Serbian have four forms, Irish has five forms (learn more at [bitesize Irish](https://t.co/8f7BsTnlJ7?amp=1)) and Arabic has six forms.
 The rules that define which number get which message are quite complex and encoded in the "plural form" that's recorded at the top of the `.po` file and looks something like `(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2).` However, this is something the translators need to worry about not you, and as speakers of the language they should find it easier to puzzle out the rules.

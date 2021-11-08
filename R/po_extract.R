@@ -5,6 +5,8 @@
 #' file by hand; instead modify the underlying source code and re-run
 #' `po_extract()`.
 #'
+#' @returns The extracted messages as computed by [get_message_data()],
+#'   invisibly.
 po_extract <- function(
     dir = ".",
     custom_translation_functions = list(),
@@ -38,5 +40,5 @@ po_extract <- function(
   )
 
   write_po_files(message_data, po_dir, po_params, template = TRUE, verbose = verbose)
-  invisible()
+  invisible(message_data)
 }

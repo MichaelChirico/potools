@@ -11,6 +11,10 @@ po_extract(
   style = c("base", "explicit")
 )
 }
+\value{
+The extracted messages as computed by [get_message_data()],
+  invisibly.
+}
 \description{
 `po_extract()` scans your package for strings to be translated and
 saves them in to `.pot` template file. You should never modify this

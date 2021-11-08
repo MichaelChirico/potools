@@ -315,9 +315,9 @@ Russian has three forms, so it gets three entries (roughly 1, 2-4, and everythin
 
     msgid "There is {n} cow in the field"
     msgid_plural "There are {n} cows in the field"
-    msgstr[0] "В поле {n} коров"
-    msgstr[1] "В поле {n} корова"
-    msgstr[2] "В поле {n} коровы"
+    msgstr[0] "В поле {xn} корова"
+    msgstr[1] "В поле {n} коровы"
+    msgstr[2] "В поле {n} коров"
 
 Slovenian and Serbian have four forms, Irish has five forms (learn more at [bitesize Irish](https://www.bitesize.irish/blog/counting/)) and Arabic has six forms.
 The rules that define which number get which message are quite complex and encoded in the "plural form" that's recorded at the top of the `.po` file and looks something like `(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2).` However, this is something the translators need to worry about not you, and as speakers of the language they should find it easier to puzzle out the rules.

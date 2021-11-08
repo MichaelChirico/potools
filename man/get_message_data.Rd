@@ -10,6 +10,7 @@ This function looks in the R and src directories of a package for user-visible m
 get_message_data(
   dir=".",
   custom_translation_functions = list(R = NULL, src = NULL),
+  style = c("base", "explicit"),
   verbose=!is_testing()
 )
 }

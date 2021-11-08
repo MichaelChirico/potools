@@ -2,7 +2,7 @@
 % Please edit documentation in R/po_extract.R
 \name{po_extract}
 \alias{po_extract}
-\title{Extract messages for translation into a `.pot` file}
+\title{Extract messages for translation into a \code{.pot} file}
 \usage{
 po_extract(
   dir = ".",
@@ -12,12 +12,12 @@ po_extract(
 )
 }
 \value{
-The extracted messages as computed by [get_message_data()],
-  invisibly.
+The extracted messages as computed by \code{\link[=get_message_data]{get_message_data()}},
+invisibly.
 }
 \description{
-`po_extract()` scans your package for strings to be translated and
-saves them in to `.pot` template file. You should never modify this
+\code{po_extract()} scans your package for strings to be translated and
+saves them in to \code{.pot} template file. You should never modify this
 file by hand; instead modify the underlying source code and re-run
-`po_extract()`.
+\code{po_extract()}.
 }

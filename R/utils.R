@@ -153,3 +153,5 @@ get_lang_metadata = function(language) {
   }
   update_metadata(language)
 }
+
+is_testing = function() identical(Sys.getenv("TESTTHAT"), "true")

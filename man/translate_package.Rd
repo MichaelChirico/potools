@@ -21,7 +21,7 @@ translate_package(
   custom_translation_functions = list(R = NULL, src = NULL),
   max_translations = Inf,
   use_base_rules = package \%chin\% .potools$base_package_names,
-  copyright = NULL, bugs = '', verbose=FALSE
+  copyright = NULL, bugs = '', verbose=!is_testing()
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ translate_package(
   \item{use_base_rules}{ Logical; Should internal behavior match base behavior as strictly as possible? \code{TRUE} if being run on a base package (i.e., \code{base} or one of the default packages like \code{utils}, \code{graphics}, etc.). See Details. }
   \item{copyright}{ Character; passed on to \code{\link{write_po_file}}. }
   \item{bugs}{ Character; passed on to \code{\link{write_po_file}}. }
-  \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
+  \item{verbose}{ Logical, default \code{TRUE} (except during testing). Should extra information about progress, etc. be reported? }
 }
 \details{
 \code{translate_package} goes through roughly three "phases" of translation.

@@ -8,7 +8,7 @@ po_extract(
   dir = ".",
   custom_translation_functions = list(),
   verbose = TRUE,
-  style = c("base", "explicit")
+  style = NULL
 )
 }
 \value{

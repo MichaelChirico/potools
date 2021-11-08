@@ -24,28 +24,26 @@ with_restoration_test_that("translate_package handles empty packages", "no_msg",
   expect_snapshot(translate_package(verbose=TRUE))
 })
 
-with_restoration_test_that("translate_package handles a data package (no R dir)", "r_data_package", {
+with_restoration_test_that("translate_package handles a data package (no R dir)", "r_data_pkg", {
   expect_snapshot(translate_package(verbose=TRUE))
 })
 
 with_restoration_test_that("translate_package works on a simple package w/o translating", "r_msg", {
-  expect_snapshot({
-    expect_snapshot(translate_package(verbose = TRUE))
+  expect_snapshot(translate_package(verbose = TRUE))
 
-    pkg_files <- list.files(recursive=TRUE)
+  pkg_files <- list.files(recursive=TRUE)
 
-    pot_file <- "po/R-rMsg.pot"
-    expect_true(pot_file %in% pkg_files)
-    # testing gettextf's ... arguments are skipped
-    expect_all_match(readLines(file.path(pot_file)), "don't translate me", invert=TRUE, fixed=TRUE)
+  pot_file <- "po/R-rMsg.pot"
+  expect_true(pot_file %in% pkg_files)
+  # testing gettextf's ... arguments are skipped
+  expect_all_match(readLines(file.path(pot_file)), "don't translate me", invert=TRUE, fixed=TRUE)
 
-    # Non-UTF-8 machines don't run en@quot translations by default.
-    #   Mostly applies to Windows, but can also apply to Unix
-    #   (e.g. r-devel-linux-x86_64-debian-clang on CRAN), #191
-    if (l10n_info()[["UTF-8"]]) {
-      expect_match(pkg_files, "inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", all = FALSE)
-    }
-  })
+  # Non-UTF-8 machines don't run en@quot translations by default.
+  #   Mostly applies to Windows, but can also apply to Unix
+  #   (e.g. r-devel-linux-x86_64-debian-clang on CRAN), #191
+  if (l10n_info()[["UTF-8"]]) {
+    expect_match(pkg_files, "inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", all = FALSE)
+  }
 })
 
 with_restoration_test_that(
@@ -108,7 +106,7 @@ with_restoration_test_that(
   pkg = "r_msg",
   conn = "test-translate-package-r_msg-5.input",
   # Catalan -- romance language with >1 plural
-  code = expect_snapshot(translate_package('ca', diagnostics=NULL))
+  code = expect_snapshot(translate_package(languages='ca', diagnostics=NULL))
 )
 
 with_restoration_test_that(
@@ -179,7 +177,7 @@ with_restoration_test_that(
   "Packages with src code & fuzzy messages work",
   pkg = "r_src_fuzzy",
   conn = 'test-translate-package-r_src_fuzzy-1.input',
-  code = expect_snapshot(translate_package(langauges="zh_CN", verbose=TRUE))
+  code = expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
 )
 
 # TODO: separate get_message_data() tests from write_po_files() tests here
@@ -260,7 +258,7 @@ with_restoration_test_that(
   pkg = "unusual_msg",
   conn = "test-translate-package-unusual_msg-1.input",
   {
-    translate_package(languages="es", copyright="Mata Hari", diagnostics=NULL)
+    expect_snapshot(translate_package(languages="es", copyright="Mata Hari", diagnostics=NULL))
 
     r_pot_lines <- readLines(file.path("po", "R-rMsgUnusual.pot"))
     src_pot_lines <- readLines(file.path("po", "rMsgUnusual.pot"))
@@ -300,7 +298,7 @@ with_restoration_test_that(
   pkg = "unusual_msg",
   conn = "test-translate-package-unusual_msg-1.input",
   {
-    translate_package(languages = "es", use_base_rules = TRUE, diagnostics = NULL)
+    expect_snapshot(translate_package(languages = "es", use_base_rules = TRUE, diagnostics = NULL))
     r_pot_lines <- readLines(file.path("po", "R-rMsgUnusual.pot"))
     src_pot_lines <- readLines(file.path("po", "rMsgUnusual.pot"))
 
@@ -381,7 +379,7 @@ with_restoration_test_that(
 )
 
 # NB: this is _mostly_ about get_message_data(), but we also test the correct R.pot file is created
-test_that(
+with_restoration_test_that(
   "translation of 'base' works correctly",
   pkg = "r-devel",
   {

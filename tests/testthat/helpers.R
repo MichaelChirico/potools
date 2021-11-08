@@ -11,9 +11,9 @@ with_package <- function(dir, expr, msg_conn = NULL) {
   expr
 }
 
-with_restoration_test_that <- function(pkg, desc, code, conn = NULL) {
+with_restoration_test_that <- function(desc, pkg, code, conn = NULL) {
   pkg <- test_package(pkg)
-  conn <- mock_translation(conn)
+  if (!is.null(conn)) conn <- mock_translation(conn)
   with_package(pkg, code, conn)
 }
 
@@ -45,4 +45,4 @@ expect_messages = function(expr, msgs, ..., invert=FALSE) {
 }
 
 test_package = function(pkg) test_path(file.path("test_packages", pkg))
-mock_translation = function(mocks) test_path(file.path("mock_translations", mocks))
+mock_translation = function(mocks) normalizePath(test_path(file.path("mock_translations", mocks)))

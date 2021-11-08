@@ -41,7 +41,7 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
 
 get_po_metadata <- function(dir = ".", package = NULL) {
   if (is.null(package)) {
-    package <- get_desc_data(dir)[["Package"]]
+    package <- get_desc_data(dir, "Package")
   }
 
   lang_regex <- "^(R-)?([a-z]{2}(?:_[A-Z]{2})?)\\.po$"

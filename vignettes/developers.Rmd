@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+library(glue)
 ```
 
 This vignette is aimed at package developer; if you're the translator of a package (or just want to understand how it looks from their site), you start with `vignette("translators")`.
@@ -21,7 +22,7 @@ Before we get into the details lets review the basic process:
 -   You run `po_extract()` to extract all translatable messages from your R and C code.
     This creates a `.pot` (po template) file that contains every translatable message.
 
--   A translator calls `po_create()` to generate a `.po` file for each language that your messages will be translated to.
+-   A translator calls `po_create()` to generate a `.po` file for their language.
     A `.po` file consists of pair of lines like:
 
         msgid "This is the message in English"
@@ -34,7 +35,7 @@ Before we get into the details lets review the basic process:
 
 -   Either you or the translator uses `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with your package.
 
-This vignette will show you have to use the `po_` functions to generate the various files needed for translation and help to you write messages that can be effectively translated.
+This vignette will show you how to use the `po_extract()` and teach you how write messages that can be effectively translated.
 
 ```{r setup}
 library(potools)
@@ -44,26 +45,78 @@ library(potools)
 
 There are two primary styles for describing which messages should be translated, as defined by the style argument to `po_extract()`:
 
--   `base`: the base style assumes that every call to `message()`, `warning()`, and `error()` should be translated.
-    The advantage of this style is that it's fast to get up and going with your existing code.
+-   The `base` style assumes that all call to `message()`, `warning()`, and `error()` should be translated.
+    The advantage of this style is that it's fast to get up and going with minimal changes to existing code.
 
--   `explicit`: the explicit style requires you to flag any string to be translated with `gettext()` or `tr_()`.
+-   The `explicit` style only translates calls to `gettext()`, `ngettext()`, and `tr_()`.
     The advantage of this style is that it lets you explicitly flag whether or not you've reviewed a message and deemed it ready for translation.
-
-In this vignette, I'll primarily use the explicit style because it makes it very clear what manual.
-I'll use manual in many of the examples here, just to make it crystal clear what needs to be translated.
-I'll use of glue, since its style of interpolation provides additional context that's useful for translators.
-
-```{r}
-tr_ <- function(...) {
-  gettext(paste0(...), domain = "R-potools")
-}
-library(glue)
-```
+    It's also easy to use with other packages like glue.
 
 ### Base style
 
+The base style captures messages the base functions that include built-in translation capabilities: `message()`, `warning()`, and `stop()`.
+It does not, however, translate `cat()`, which is commonly used to print to the console.
+It also captures messages from generic translation functions `gettext()` and `ngettext().`
+
+`message()`, `warning()` and `stop()` concatenate the components of `…`:
+
+```{r, error = TRUE}
+message("This", " is", " a", " message")
+warning("This", " is", " a", " warning")
+stop("This", " is", " an", " error")
+```
+
+However, as you'll learn shortly, this style is unlikely to generate messages that are easily translated, so `po_extract(style = "base")` will also capture messages from `messagef()`, `warningf()`, and `stopf`().
+These are equivalents to `message()`, `warnings()`, and `stop()` that use `sprintf()` style (hence the `f` suffix).
+If you want to use these functions, you'll need to copy their definitions from below:
+
+```{r}
+messagef <- function(fmt, ..., appendLF = TRUE) {
+  msg <- gettextf(fmt, ..., domain = "R-{mypackage}")
+  message(msg, domain = NA, appendLF = appendLF)
+}
+
+warningf <- function(fmt, ..., immediate. = FALSE, noBreaks. = FALSE) {
+  msg <- gettextf(fmt, ..., domain = "R-{mypackage}")
+  warning(msg, 
+    domain = NA, 
+    call. = FALSE, 
+    immediate. = immediate., 
+    noBreaks. = noBreaks.
+  )
+}
+
+stopf <- function(fmt, ...) {
+  msg <- gettextf(fmt, ..., domain = "R-{mypackage}")
+  stop(msg, domain = NA, call. = FALSE)
+}
+```
+
 ### Explicit style
+
+The explicit style only captures messsages that explicitly flagged for translation.
+This includes the base functions `gettext()` and `ngettext()`, but also a `tr_()` function that you'll need to define yourself:
+
+```{r}
+tr_ <- function(...) {
+  enc2utf(gettext(paste0(...), domain = "R-{mypackage}"))
+}
+```
+
+In the future, we will provide automated ways to identify strings that haven't been translated and probably should be.
+
+I'll use the explicit style in this vignette because it makes it very clear what is being translated.
+I'll use of glue, since its style of interpolation provides additional context that's useful for translators.
+
+### Next steps
+
+Once you've decided which style to use, record it in your description:
+
+    Config/potools/style: explicit
+
+And then run `po_extract()` to generate the `.pot` file.
+It's a good idea to take a look at this file and read through some of the extract messages --- particularly if you've use base style, you're likely to discover a bunch of messages that are hard to understand without more context.
+Now it's time to learn how to write messages that can be easily translated.
 
 ## Writing good messages
 

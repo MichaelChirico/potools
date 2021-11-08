@@ -26,6 +26,27 @@ Providing translations for a package is a fantastic way to contribute and I know
 Before you go any further, make sure the that the package has started the process of providing translations by checking that it has `po/` directory in the package root.
 If you don't see that package, you might want to start by opening an issue to see if the developer is interested in providing translations.
 
+### Creating translations
+
+Before we get into the details lets review the basic process of creating translations:
+
+-   The package developer runs `po_extract()` to extract all translatable messages from their R and C code.
+
+-   You call `po_create()` to generate a `.po` file for the language you're translating.
+    A `.po` file consists of pairs of lines like:
+
+        msgid "This is the message in English"
+        msgstr ""
+
+    You then replace each `msgstr` with the appropriate translation:
+
+        msgid "This is the message in English"
+        msgstr "This is the message in another language"
+
+-   Finally, either you or the package developer uses `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with the package.
+
+The process for updating translations is slightly different, and we'll come back to it later in the doc.
+
 ## Translation basics
 
 As a translator, you'll work primarily with `.po` files.

@@ -1,4 +1,16 @@
-po_extract <- function(dir = ".", custom_translation_functions = list(), verbose = TRUE, style = c("base", "explicit")) {
+#' Extract messages for translation into a `.pot` file
+#'
+#' `po_extract()` scans your package for strings to be translated and
+#' saves them in to `.pot` template file. You should never modify this
+#' file by hand; instead modify the underlying source code and re-run
+#' `po_extract()`.
+#'
+po_extract <- function(
+    dir = ".",
+    custom_translation_functions = list(),
+    verbose = TRUE,
+    style = c("base", "explicit")) {
+
   style <- match.arg(style)
 
   message_data <- get_message_data(dir,

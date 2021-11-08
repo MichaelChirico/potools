@@ -7,6 +7,7 @@
 #'
 #' @returns The extracted messages as computed by [get_message_data()],
 #'   invisibly.
+#' @inheritParams get_message_data
 po_extract <- function(
     dir = ".",
     custom_translation_functions = list(),

@@ -1,6 +1,9 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, use_conditions = TRUE, use_conditions_f = FALSE, use_tr = FALSE) {
+get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, style = c("base", "explicit")) {
+
+  style <- match.arg(style)
+
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
   # R-free package (e.g. a data package) fails, #56
   if (!nrow(expr_data)) return(r_message_schema())
@@ -37,8 +40,8 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   <!-- mix and match those two types indefinitely -->
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
-  dots_funs <- domain_dots_funs(use_conditions)
-  fmt_funs <- domain_fmt_funs(use_conditions_f)
+  dots_funs <- domain_dots_funs(style == "base")
+  fmt_funs <- domain_fmt_funs(style == "base")
 
   singular_strings = rbind(
     get_dots_strings(expr_data, dots_funs, NON_DOTS_ARGS),
@@ -50,7 +53,7 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   )
   plural_strings = get_named_arg_strings(expr_data, 'ngettext', c(msg1 = 2L, msg2 = 3L), plural = TRUE)
 
-  if (use_tr) {
+  if (style == "explicit") {
     tr_ <- get_dots_strings(expr_data, 'tr_', character(), recursive = TRUE)
     tr_n <- get_named_arg_strings(expr_data, 'tr_n', c(singular = 2L, plural = 3L), plural = TRUE)
 
@@ -157,7 +160,10 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  known_translators = c(dots_funs, 'ngettext', fmt_funs, get_fnames(custom_params), if (use_tr) c("tr", "tr_"))
+  known_translators = c(dots_funs, 'ngettext', fmt_funs, get_fnames(custom_params))
+  if (style == "explicit") {
+    known_translators <- c(known_translators, "tr", "tr_")
+  }
   msg[ , 'is_marked_for_translation' := fname %chin% known_translators]
 
   # TODO: assume custom translators are translated? or maybe just check the regex?

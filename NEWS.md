@@ -1,4 +1,17 @@
-### v0.2.1 (in development)
+### v0.2.3 (in development)
+
+ * [Bugfix] `translate_package()` works in batch mode, [#224](https://github.com/MichaelChirico/potools/issues/224). Thanks @HenrikBengtsson for the report.
+ * potools has a new hex logo! Thanks to @hadley for coordinating and @allisonhorst for the drawing!
+ * [Bugfix] `check_cracked_messages()` recognizes named arguments (e.g. `call.` to `stop()` or `appendLF` to `message()`) and keeps them in the original call, [#227](https://github.com/MichaelChirico/potools/issues/227). Thanks @hadley for the report.
+ * [Note] The test suite now relies on the 3rd edition of `testthat`, meaning a version requirement in the Suggested dependency.
+ * [Note] The default value of `verbose` has been changed to `TRUE` in `translate_package()` and `get_message_data()`.
+
+
+## New languages/locales supported out of the box:
+
+ * Swedish (svenska)
+
+### v0.2.2 (July 2021)
 
 * potools gains a logo featuring a [potoo](https://en.wikipedia.org/wiki/Potoo) thanks to the artistic skills of @allisonhorst
  * Skip tests on machines where `gettext` is unavailable, #187; also alter the `msgfmt` command executed to create .mo files to skip options unavailable on Solaris, #218
@@ -9,6 +22,6 @@
  * [New function] `write_po_file()` to convert a message database to a `.po` or `.pot` file manually (previously this was handled internally by `translate_package()`), #203. Also a constructor for the associated `po_metadata` class, `po_metadata()`. See `?po_metadata`.
  * [Bugfix] `get_message_data()` does a better job on files with unmatched parentheses inside preprocessor macros (`#define`s) in C/C++ files, #199
 
-### v0.2.0 (June 2202)
+### v0.2.0 (June 2021)
 
  * Landed on CRAN!

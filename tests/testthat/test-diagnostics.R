@@ -4,7 +4,11 @@
 test_that("translate_package works on package with 'cracked' messages needing templates", {
   message_data <- get_message_data(test_package("r_non_template"))
   cracked_messages <- check_cracked_messages(message_data)
-  expect_equal(nrow(cracked_messages), 2L)
+  expect_identical(nrow(cracked_messages), 3L)
+  expect_identical(
+    cracked_messages$replacement[2L],
+    'stop(domain=NA, gettextf("Can\'t find article called %s", src_path(name)), call. = FALSE)'
+  )
 })
 
 test_that("check_cracked_messages works", {
@@ -20,7 +24,7 @@ test_that("check_cracked_messages works", {
     is_marked_for_translation = TRUE
   )
 
-  expect_equal(
+  expect_identical(
     check_cracked_messages(message_data),
     data.table::data.table(
       call = c('message("farewell", "sir")', 'warning("found ", nn, " problems")'),
@@ -34,7 +38,7 @@ test_that("check_cracked_messages works", {
   )
 
   # input that can be converted to data.table is OK
-  expect_equal(check_cracked_messages(as.data.frame(message_data)), check_cracked_messages(message_data))
+  expect_identical(check_cracked_messages(as.data.frame(message_data)), check_cracked_messages(message_data))
 })
 
 test_that("check_untranslated_cat works", {
@@ -50,7 +54,7 @@ test_that("check_untranslated_cat works", {
     is_marked_for_translation = FALSE
   )
 
-  expect_equal(
+  expect_identical(
     check_untranslated_cat(message_data),
     data.table::data.table(
       call = c('cat("hello")', 'cat("farewell", "sir")'),
@@ -61,7 +65,7 @@ test_that("check_untranslated_cat works", {
   )
 
   # input that can be converted to data.table is OK
-  expect_equal(check_untranslated_cat(as.data.frame(message_data)), check_untranslated_cat(message_data))
+  expect_identical(check_untranslated_cat(as.data.frame(message_data)), check_untranslated_cat(message_data))
 
   # edge case: exit early after filtering translated sub-calls
   message_data = data.table::data.table(
@@ -75,14 +79,14 @@ test_that("check_untranslated_cat works", {
     is_repeat = FALSE,
     is_marked_for_translation = FALSE
   )
-  expect_equal(nrow(check_untranslated_cat(message_data)), 0L)
+  expect_identical(nrow(check_untranslated_cat(message_data)), 0L)
 })
 
 test_that("Diagnostic for unmarked src translations works", {
   message_data <- get_message_data(test_package("r_src_untranslated"))
   untranslated_src <- check_untranslated_src(message_data)
 
-  expect_equal(nrow(untranslated_src), 2L)
+  expect_identical(nrow(untranslated_src), 2L)
   expect_all_match(
     untranslated_src$call,
     c('an untranslated string', 'an untranslated error'),
@@ -103,7 +107,7 @@ test_that("check_untranslated_src works", {
     is_marked_for_translation = c(FALSE, TRUE)
   )
 
-  expect_equal(
+  expect_identical(
     check_untranslated_src(message_data),
     data.table::data.table(
       call = c('Rprintf("Found an issue", s)'),
@@ -114,5 +118,5 @@ test_that("check_untranslated_src works", {
   )
 
   # input that can be converted to data.table is OK
-  expect_equal(check_untranslated_src(as.data.frame(message_data)), check_untranslated_src(message_data))
+  expect_identical(check_untranslated_src(as.data.frame(message_data)), check_untranslated_src(message_data))
 })

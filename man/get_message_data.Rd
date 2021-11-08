@@ -10,14 +10,14 @@ This function looks in the R and src directories of a package for user-visible m
 get_message_data(
   dir=".",
   custom_translation_functions = list(R = NULL, src = NULL),
-  verbose=FALSE
+  verbose=!is_testing()
 )
 }
 \arguments{
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
   \item{custom_translation_functions}{ A \code{list} with either/both of two components, \code{R} and \code{src}, together governing how to extract any non-standard strings from the package. See Details in \code{\link{translate_package}}. }
   \item{style}{ Translation style, either \code{"base"} or \code{"explict"}. Both styles extract strings  explicitly flagged for translation with \code{gettext()} or \code{ngettext()}. The base style additionally extracts strings in calls to \code{stop()}, \code{warning()}, and \code{message()}, and to \code{stopf()}, \code{warningf()}, and \code{messagef()} if you have added those helpers to your package. The explicit style also accepts \code{tr_()} as a short hand for \code{gettext()}. See \code{vignette("developer")} for more details.}
-  \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
+  \item{verbose}{ Logical, default \code{TRUE} (except during testing). Should extra information about progress, etc. be reported? }
 }
 \value{
 A \code{data.table} with the following schema:

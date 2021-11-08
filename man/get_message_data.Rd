@@ -10,13 +10,13 @@ This function looks in the R and src directories of a package for user-visible m
 get_message_data(
   dir=".",
   custom_translation_functions = list(R = NULL, src = NULL),
-  verbose=FALSE
+  verbose=!is_testing()
 )
 }
 \arguments{
   \item{dir}{ Character, default the present directory; a directory in which an R package is stored. }
   \item{custom_translation_functions}{ A \code{list} with either/both of two components, \code{R} and \code{src}, together governing how to extract any non-standard strings from the package. See Details in \code{\link{translate_package}}. }
-  \item{verbose}{ Logical, default \code{FALSE}. Should extra information about progress, etc. be reported? }
+  \item{verbose}{ Logical, default \code{TRUE} (except during testing). Should extra information about progress, etc. be reported? }
 }
 \value{
 A \code{data.table} with the following schema:

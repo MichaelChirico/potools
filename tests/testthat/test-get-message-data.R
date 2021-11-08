@@ -33,7 +33,7 @@ test_that("Custom translation functions work in R and src", {
       src = 'MySrcTranslator:1'
     )
   )
-  expect_equal(
+  expect_identical(
     message_data$msgid,
     c(
       "A default message", "you found me!", "a translated", "argument",
@@ -48,14 +48,14 @@ test_that("Custom translation functions work in R and src", {
       src = 'MyArg4Translator:4'
     )
   )
-  expect_equal(
+  expect_identical(
     message_data$msgid,
     c(
       "A default message", "A default message", "you found me too!", "found by position",
       NA_character_, NA_character_, "a standard src message", "Another untranslated string"
     )
   )
-  expect_equal(
+  expect_identical(
     message_data$msgid_plural,
     list(NULL, NULL, NULL, NULL, c("singular", "plural"), c("another singular", "another plural"), NULL, NULL)
   )
@@ -126,5 +126,5 @@ test_that("Message exclusions are respected", {
 
 test_that("Pre-processor macros don't break parentheses matching", {
   # solution is hacky, but this test at least helps prevent regression going forward
-  expect_equal(get_message_data(test_package("unusual_msg"))[file == 'z.c']$msgid, "You found me!")
+  expect_identical(get_message_data(test_package("unusual_msg"))[file == 'z.c']$msgid, "You found me!")
 })

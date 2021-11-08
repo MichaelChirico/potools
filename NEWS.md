@@ -3,6 +3,9 @@
  * [Bugfix] `translate_package()` works in batch mode, [#224](https://github.com/MichaelChirico/potools/issues/224). Thanks @HenrikBengtsson for the report.
  * potools has a new hex logo! Thanks to @hadley for coordinating and @allisonhorst for the drawing!
  * [Bugfix] `check_cracked_messages()` recognizes named arguments (e.g. `call.` to `stop()` or `appendLF` to `message()`) and keeps them in the original call, [#227](https://github.com/MichaelChirico/potools/issues/227). Thanks @hadley for the report.
+ * [Note] The test suite now relies on the 3rd edition of `testthat`, meaning a version requirement in the Suggested dependency.
+ * [Note] The default value of `verbose` has been changed to `TRUE` in `translate_package()` and `get_message_data()`.
+
 
 ## New languages/locales supported out of the box:
 

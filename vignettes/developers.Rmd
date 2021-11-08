@@ -18,23 +18,23 @@ This vignette is aimed at package developer; if you're the translator of a packa
 
 Before we get into the details lets review the basic process:
 
--   Run `po_extract()` to extract all translatable messages from your R and C code.
+-   You run `po_extract()` to extract all translatable messages from your R and C code.
     This creates a `.pot` (po template) file that contains every translatable message.
 
--   Use `po_create()` to generate a `.po` file for each language that your messages will be translated to.
+-   A translator calls `po_create()` to generate a `.po` file for each language that your messages will be translated to.
     A `.po` file consists of pair of lines like:
 
         msgid "This is the message in English"
         msgstr ""
 
--   Pass the `.po` file on to translators who replace each `msgstr` line with the appropriate translation:
+    They then replace each `msgstr` line with the appropriate translation:
 
         msgid "This is the message in English"
         msgstr "This is the message in another language"
 
--   Use `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with your package.
+-   Either you or the translator uses `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with your package.
 
-In this vignette, while you'll learn how to use the `po_` functions to generate the various files needed for translation, the focus will be on writing messages that can be effectively translated.
+This vignette will show you have to use the `po_` functions to generate the various files needed for translation and help to you write messages that can be effectively translated.
 
 ```{r setup}
 library(potools)
@@ -60,6 +60,10 @@ tr_ <- function(...) {
 }
 library(glue)
 ```
+
+### Base style
+
+### Explicit style
 
 ## Writing good messages
 

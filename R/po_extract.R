@@ -1,4 +1,4 @@
-po_scan <- function(dir = ".", custom_translation_functions = list(), verbose = TRUE, style = c("base", "explicit")) {
+po_extract <- function(dir = ".", custom_translation_functions = list(), verbose = TRUE, style = c("base", "explicit")) {
   style <- match.arg(style)
 
   message_data <- get_message_data(dir,

@@ -12,16 +12,17 @@ get_directory = function(dir) {
 }
 
 # check dir is a package & return its name & version
-get_desc_data = function(dir) {
+get_desc_data = function(dir, fields = c('Package', 'Version')) {
+  stopifnot(length(fields) > 0L)
   desc_file <- file.path(dir, 'DESCRIPTION')
   if (!file.exists(desc_file)) {
     stopf('%s is not a package (missing DESCRIPTION)', normalizePath(dir))
   }
-  desc_data <- read.dcf(desc_file, c('Package', 'Version'))
+  desc_data <- read.dcf(desc_file, fields)
   if (nrow(desc_data) != 1L || anyNA(desc_data)) {
     stopf('%s is not a package (missing Package and/or Version field in DESCRIPTION)', normalizePath(dir))
   }
-  return(desc_data[1L, ])
+  return(drop(desc_data))
 }
 
 # msgmerge | msgmerge.R | run_msgmerge()
@@ -164,3 +165,5 @@ dir_create <- function(dirs) {
 is_outdated <- function(src, dst) {
   !file.exists(dst) | (file.mtime(src) > file.mtime(dst))
 }
+
+is_testing = function() identical(Sys.getenv("TESTTHAT"), "true")

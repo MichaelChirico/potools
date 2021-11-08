@@ -1,9 +1,9 @@
 get_message_data = function(
   dir = ".",
   custom_translation_functions = list(R = NULL, src = NULL),
-  verbose = FALSE
+  verbose = !is_testing()
 ) {
-  package = get_desc_data(dir)['Package']
+  package = get_desc_data(dir, 'Package')
   is_base = package == 'base'
 
   if (verbose) message('Getting R-level messages...')

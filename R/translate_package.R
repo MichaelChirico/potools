@@ -1,10 +1,13 @@
 translate_package = function(
-  dir = '.', languages,
+  dir = '.',
+  languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   custom_translation_functions = list(R = NULL, src = NULL),
   max_translations = Inf,
   use_base_rules = package %chin% .potools$base_package_names,
-  copyright = NULL, bugs = '', verbose = FALSE
+  copyright = NULL,
+  bugs = '',
+  verbose = !is_testing()
 ) {
   result <- check_potools_sys_reqs()
   if (!isTRUE(result)) stop(result) # nocov

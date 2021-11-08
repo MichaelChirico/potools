@@ -66,9 +66,8 @@ argument in \code{\link[=stop]{stop()}} are so marked)
 }
 \description{
 This function looks in the R and src directories of a package for
-user-visible messages and compiles them as a
-\code{\link[data.table:data.table]{data.table::data.table()}} to facilitate analyzing this corpus as
-such.
+user-visible messages and compiles them as a \code{\link[data.table:data.table]{data.table::data.table()}}
+to facilitate analyzing this corpus as such.
 }
 \examples{
 pkg <- system.file('pkg', package = 'potools')

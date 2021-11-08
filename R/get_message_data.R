@@ -1,9 +1,8 @@
 #' Extract user-visible messages from a package
 #'
 #' This function looks in the R and src directories of a package for
-#' user-visible messages and compiles them as a
-#' [data.table::data.table()] to facilitate analyzing this corpus as
-#' such.
+#' user-visible messages and compiles them as a [data.table::data.table()]
+#' to facilitate analyzing this corpus as such.
 #'
 #' @param dir Character, default the present directory; a directory in which
 #'   an R package is stored.
@@ -25,7 +24,7 @@
 #'   `tr_()` as a short hand for `gettext()`. See
 #'   `vignette("developer")` for more details.
 #' @param verbose Logical, default `TRUE` (except during testing). Should
-#' extra information about progress, etc. be reported?
+#'   extra information about progress, etc. be reported?
 #' @return A `data.table` with the following schema:
 #'
 #' * `message_source`, `character`, either `"R"`

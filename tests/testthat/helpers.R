@@ -1,22 +1,20 @@
-# copy a package to tmp, then overwrite any changes on exit
-restore_package <- function(dir, expr, tmp_conn) {
-  # this is way uglier than it should be. i'm missing something.
-  tdir <- tempdir()
-
+# copy a package to tmp, deleting on exit
+with_package <- function(dir, expr, msg_conn = NULL) {
+  tdir <- withr::local_tempdir()
   file.copy(dir, tdir, recursive = TRUE)
-  on.exit({
-    unlink(dir, recursive = TRUE)
-    dir.create(dir)
-    file.copy(file.path(tdir, basename(dir)), dirname(dir), recursive = TRUE)
-    unlink(file.path(tdir, basename(dir)), recursive = TRUE)
-  })
+  withr::local_dir(file.path(tdir, basename(dir)))
 
-  if (!missing(tmp_conn)) {
-    old = options("__potools_testing_prompt_connection__" = tmp_conn)
-    on.exit(options(old), add = TRUE)
+  if (!is.null(msg_conn)) {
+    withr::local_options("__potools_testing_prompt_connection__" = msg_conn)
   }
 
-  invisible(capture.output(expr))
+  expr
+}
+
+with_restoration_test_that <- function(pkg, desc, code, conn = NULL) {
+  pkg <- test_package(pkg)
+  conn <- mock_translation(conn)
+  with_package(pkg, code, conn)
 }
 
 # TODO: I think this can just be replaced by expect_match and expect_no_match in current testthat dev

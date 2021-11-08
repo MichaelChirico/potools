@@ -13,6 +13,7 @@ wrong-template-2:%.02f ac yna%s ac yna%s.
 wrong-template-3:%1$.02f ac yna%3$d ac yna%2$s.
 wrong-template-4:%d ac yna%d.
 wrong-template-5:%.02f ac yna%d ac yna%s ac yna%s.
+\nwrong-newlines:%.02f ac yna%d ac yna%s.\n
 %.02f ac yna%d ac yna%s.
 neges 0
 neges 1

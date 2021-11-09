@@ -29,6 +29,7 @@ with_restoration_test_that("translate_package handles a data package (no R dir)"
 })
 
 with_restoration_test_that("translate_package works on a simple package w/o translating", "r_msg", {
+  mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
   expect_snapshot(translate_package(verbose = TRUE))
 
   pkg_files <- list.files(recursive=TRUE)
@@ -51,6 +52,7 @@ with_restoration_test_that(
   pkg = "r_msg",
   conn = "test-translate-package-r_msg-1.input",
   {
+    mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
     expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
 
     pkg_files <- list.files(recursive = TRUE)
@@ -70,14 +72,20 @@ with_restoration_test_that(
 with_restoration_test_that(
   "translate package works for up-to-date translations",
   pkg = "r_msg",
-  code = expect_snapshot(translate_package(languages="fa", verbose=TRUE))
+  code = {
+    mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
+    expect_snapshot(translate_package(languages="fa", verbose=TRUE))
+  }
 )
 
 with_restoration_test_that(
   "translate_package works on package with outdated (fuzzy) translations",
   pkg = "r_fuzzy",
   conn = "test-translate-package-r_fuzzy-1.input",
-  code = expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
+  code = {
+    mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
+    expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
+  }
 )
 
 # NB: keep this test here (not in test-diagnostics) to keep coverage of the diagnostic flow in translate_package()
@@ -177,7 +185,10 @@ with_restoration_test_that(
   "Packages with src code & fuzzy messages work",
   pkg = "r_src_fuzzy",
   conn = 'test-translate-package-r_src_fuzzy-1.input',
-  code = expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
+  code = {
+    mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
+    expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
+  }
 )
 
 # TODO: separate get_message_data() tests from write_po_files() tests here

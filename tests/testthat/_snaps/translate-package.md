@@ -34,7 +34,7 @@
     Code
       translate_package(verbose = TRUE)
     Message <simpleMessage>
-      Updating translation template for package 'rMsg' (last updated 2021-11-07 23:42:57)
+      Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
     Message <simpleMessage>
       Getting R-level messages...
     Message <simpleMessage>
@@ -45,6 +45,9 @@
       Generating .pot files...
     Message <simpleMessage>
       Generating en@quot translations
+    Message <simpleMessage>
+      running msgfmt on R-en@quot.po succeeded; output:
+        5 translated messages.
     Message <simpleMessage>
       No languages provided; finishing
 
@@ -53,7 +56,7 @@
     Code
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
-      Updating translation template for package 'rMsg' (last updated 2021-11-07 23:42:58)
+      Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
     Message <simpleMessage>
       Getting R-level messages...
     Message <simpleMessage>
@@ -64,6 +67,9 @@
       Generating .pot files...
     Message <simpleMessage>
       Generating en@quot translations
+    Message <simpleMessage>
+      running msgfmt on R-en@quot.po succeeded; output:
+        5 translated messages.
     Message <simpleMessage>
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 6 untranslated messages
     Message <simpleMessage>
@@ -115,13 +121,19 @@
       How would you translate this message into [36mMainland Chinese[39m [33mindependently of n[39m?
     Message <simpleMessage>
       "Installing" translations with msgfmt
+    Message <simpleMessage>
+      running msgfmt on R-fa.po succeeded; output:
+        5 translated messages.
+    Message <simpleMessage>
+      running msgfmt on R-zh_CN.po succeeded; output:
+        5 translated messages.
 
 ---
 
     Code
       translate_package(languages = "fa", verbose = TRUE)
     Message <simpleMessage>
-      Updating translation template for package 'rMsg' (last updated 2021-11-07 23:42:58)
+      Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
     Message <simpleMessage>
       Getting R-level messages...
     Message <simpleMessage>
@@ -133,18 +145,27 @@
     Message <simpleMessage>
       Generating en@quot translations
     Message <simpleMessage>
-      Found existing R translations for fa (Farsi/فارسی) in /tmp/RtmpoWfRHo/file775e716e91bb/r_msg/po/R-fa.po. Running msgmerge...
+      running msgfmt on R-en@quot.po succeeded; output:
+        5 translated messages.
+    Message <simpleMessage>
+      Found existing R translations for fa (Farsi/فارسی) in ./po/R-fa.po. Running msgmerge...
+    Message <simpleMessage>
+      Running msgmerge on './po/R-fa.po' succeeded:
+        ...... done.
     Message <simpleMessage>
       Translations for fa are up to date! Skipping.
     Message <simpleMessage>
       "Installing" translations with msgfmt
+    Message <simpleMessage>
+      running msgfmt on R-fa.po succeeded; output:
+        5 translated messages.
 
 ---
 
     Code
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
-      Updating translation template for package 'rFuzzyMsg' (last updated 2021-11-07 23:42:59)
+      Updating translation template for package 'rFuzzyMsg' (last updated 0000-01-01 00:00:00)
     Message <simpleMessage>
       Getting R-level messages...
     Message <simpleMessage>
@@ -156,9 +177,15 @@
     Message <simpleMessage>
       Generating en@quot translations
     Message <simpleMessage>
-      Found existing R translations for zh_CN (Mainland Chinese/普通话) in /tmp/RtmpoWfRHo/file775e707d4657/r_fuzzy/po/R-zh_CN.po. Running msgmerge...
+      running msgfmt on R-en@quot.po succeeded; output:
+        3 translated messages.
     Message <simpleMessage>
-      Found 2 translations marked as deprecated in /tmp/RtmpoWfRHo/file775e707d4657/r_fuzzy/po/R-zh_CN.po.
+      Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge...
+    Message <simpleMessage>
+      Running msgmerge on './po/R-zh_CN.po' succeeded:
+        ..... done.
+    Message <simpleMessage>
+      Found 2 translations marked as deprecated in ./po/R-zh_CN.po.
     Message <simpleMessage>
       Typically, this means the corresponding error messages have been refactored.
     Message <simpleMessage>
@@ -219,6 +246,9 @@
       How would you translate this message into [36mMainland Chinese[39m [33mindependently of n[39m?
     Message <simpleMessage>
       "Installing" translations with msgfmt
+    Message <simpleMessage>
+      running msgfmt on R-zh_CN.po succeeded; output:
+        3 translated messages.
 
 ---
 
@@ -259,6 +289,32 @@
       translate_package(languages = "cy")
     Message <simpleMessage>
       Generating en@quot translations
+    Message <simpleMessage>
+      'cy' is not a known language. 
+    Message <simpleMessage>
+      Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
+    Output
+      How would you refer to this language in English?
+      How would you refer to this language in the language itself?
+      How many pluralizations are there for this language [nplurals]?
+    Message <simpleMessage>
+      Input must be of type 'integer', but received 'character'. Trying again.
+    Output
+      How many pluralizations are there for this language [nplurals]?
+      What is the rule for deciding which plural applies as a function of n [plural]?
+    Message <simpleMessage>
+      Supplied 'plural':
+      (n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3
+      Did not match any known 'plural's:
+      (n!=1)
+      (n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
+      (n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)
+      (n>1)
+      0
+      n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5
+      Using generic description of cases instead.
+    Message <simpleMessage>
+      Thanks! Please file an issue on GitHub to get this language recognized permanently
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -280,51 +336,6 @@
       Message: [31mHi there[39m
                
       How would you translate this message into [36mWelsh[39m?
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mWelsh[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mWelsh[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mWelsh[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mWelsh[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mWelsh[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
       
       File: [37mfoo.R[39m
       Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
@@ -416,6 +427,17 @@
       translate_package(languages = "ca", diagnostics = NULL)
     Message <simpleMessage>
       Generating en@quot translations
+    Message <simpleMessage>
+      'ca' is not a known language. 
+    Message <simpleMessage>
+      Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
+    Output
+      How would you refer to this language in English?
+      How would you refer to this language in the language itself?
+      How many pluralizations are there for this language [nplurals]?
+      What is the rule for deciding which plural applies as a function of n [plural]?
+    Message <simpleMessage>
+      Thanks! Please file an issue on GitHub to get this language recognized permanently
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -437,42 +459,6 @@
       Message: [31mHi there[39m
                
       How would you translate this message into [36mCatalan[39m?
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mCatalan[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mCatalan[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mCatalan[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
-      
-      File: [37mfoo.R[39m
-      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
-      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
-                                   ^---^              ^^           ^^
-      How would you translate this message into [36mCatalan[39m?
-      
-      
-      ** Oops! Invalid translation -- received 0 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
       
       File: [37mfoo.R[39m
       Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
@@ -624,7 +610,7 @@
     Code
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
-      Updating translation template for package 'rSrcFuzzyMsg' (last updated 2021-11-07 23:43:01)
+      Updating translation template for package 'rSrcFuzzyMsg' (last updated 0000-01-01 00:00:00)
     Message <simpleMessage>
       Getting R-level messages...
     Message <simpleMessage>
@@ -636,9 +622,21 @@
     Message <simpleMessage>
       Generating en@quot translations
     Message <simpleMessage>
-      Found existing R translations for zh_CN (Mainland Chinese/普通话) in /tmp/RtmpoWfRHo/file775e4758b448/r_src_fuzzy/po/R-zh_CN.po. Running msgmerge...
+      running msgfmt on R-en@quot.po succeeded; output:
+        1 translated message.
     Message <simpleMessage>
-      Found existing src translations for zh_CN (Mainland Chinese/普通话) in /tmp/RtmpoWfRHo/file775e4758b448/r_src_fuzzy/po/zh_CN.po. Running msgmerge...
+      running msgfmt on en@quot.po succeeded; output:
+        2 translated messages.
+    Message <simpleMessage>
+      Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge...
+    Message <simpleMessage>
+      Running msgmerge on './po/R-zh_CN.po' succeeded:
+        .. done.
+    Message <simpleMessage>
+      Found existing src translations for zh_CN (Mainland Chinese/普通话) in ./po/zh_CN.po. Running msgmerge...
+    Message <simpleMessage>
+      Running msgmerge on './po/zh_CN.po' succeeded:
+        ..... done.
     Message <simpleMessage>
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 2 untranslated messages
     Message <simpleMessage>
@@ -676,6 +674,12 @@
       当然%s %s\n
     Message <simpleMessage>
       "Installing" translations with msgfmt
+    Message <simpleMessage>
+      running msgfmt on R-zh_CN.po succeeded; output:
+        1 translated message.
+    Message <simpleMessage>
+      running msgfmt on zh_CN.po succeeded; output:
+        2 translated messages.
 
 ---
 

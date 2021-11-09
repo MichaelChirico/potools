@@ -8,7 +8,6 @@ with_package <- function(dir, expr, msg_conn = NULL) {
     withr::local_options("__potools_testing_prompt_connection__" = msg_conn)
   }
 
-  mockery::stub(translate_package, "get_atime", function(...) "0000-01-01 00:00:00")
   expr
 }
 

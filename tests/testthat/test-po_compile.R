@@ -10,6 +10,7 @@ test_that("can find R and src translations", {
 })
 
 test_that("get_po_metadata() returns 0 rows if no .po fles", {
+  temp <- local_test_package()
   meta <- get_po_metadata(temp)
   expect_equal(nrow(meta), 0)
 })

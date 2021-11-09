@@ -9,11 +9,8 @@
       translate_package(verbose = TRUE)
     Message <simpleMessage>
       Starting translations for package 'noMsg'
-    Message <simpleMessage>
       Getting R-level messages...
-    Message <simpleMessage>
       Getting src-level messages...
-    Message <simpleMessage>
       No messages to translate; finishing
 
 ---
@@ -22,11 +19,8 @@
       translate_package(verbose = TRUE)
     Message <simpleMessage>
       Starting translations for package 'rDataPkg'
-    Message <simpleMessage>
       Getting R-level messages...
-    Message <simpleMessage>
       Getting src-level messages...
-    Message <simpleMessage>
       No messages to translate; finishing
 
 ---
@@ -35,20 +29,13 @@
       translate_package(verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
-    Message <simpleMessage>
       Getting R-level messages...
-    Message <simpleMessage>
       Getting src-level messages...
-    Message <simpleMessage>
       Running message diagnostics...
-    Message <simpleMessage>
       Generating .pot files...
-    Message <simpleMessage>
       Generating en@quot translations
-    Message <simpleMessage>
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
-    Message <simpleMessage>
       No languages provided; finishing
 
 ---
@@ -57,22 +44,14 @@
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
-    Message <simpleMessage>
       Getting R-level messages...
-    Message <simpleMessage>
       Getting src-level messages...
-    Message <simpleMessage>
       Running message diagnostics...
-    Message <simpleMessage>
       Generating .pot files...
-    Message <simpleMessage>
       Generating en@quot translations
-    Message <simpleMessage>
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
-    Message <simpleMessage>
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 6 untranslated messages
-    Message <simpleMessage>
       (To quit translating, press 'Esc'; progress will be saved)
     Output
       Thanks! Who should be credited with these translations?
@@ -121,10 +100,8 @@
       How would you translate this message into Mainland Chinese independently of n?
     Message <simpleMessage>
       "Installing" translations with msgfmt
-    Message <simpleMessage>
       running msgfmt on R-fa.po succeeded; output:
         5 translated messages.
-    Message <simpleMessage>
       running msgfmt on R-zh_CN.po succeeded; output:
         5 translated messages.
 
@@ -134,29 +111,18 @@
       translate_package(languages = "fa", verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
-    Message <simpleMessage>
       Getting R-level messages...
-    Message <simpleMessage>
       Getting src-level messages...
-    Message <simpleMessage>
       Running message diagnostics...
-    Message <simpleMessage>
       Generating .pot files...
-    Message <simpleMessage>
       Generating en@quot translations
-    Message <simpleMessage>
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
-    Message <simpleMessage>
       Found existing R translations for fa (Farsi/فارسی) in ./po/R-fa.po. Running msgmerge...
-    Message <simpleMessage>
       Running msgmerge on './po/R-fa.po' succeeded:
         ...... done.
-    Message <simpleMessage>
       Translations for fa are up to date! Skipping.
-    Message <simpleMessage>
       "Installing" translations with msgfmt
-    Message <simpleMessage>
       running msgfmt on R-fa.po succeeded; output:
         5 translated messages.
 
@@ -166,48 +132,35 @@
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rFuzzyMsg' (last updated 0000-01-01 00:00:00)
-    Message <simpleMessage>
       Getting R-level messages...
-    Message <simpleMessage>
       Getting src-level messages...
-    Message <simpleMessage>
       Running message diagnostics...
-    Message <simpleMessage>
       Generating .pot files...
-    Message <simpleMessage>
       Generating en@quot translations
-    Message <simpleMessage>
       running msgfmt on R-en@quot.po succeeded; output:
         3 translated messages.
-    Message <simpleMessage>
       Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge...
-    Message <simpleMessage>
       Running msgmerge on './po/R-zh_CN.po' succeeded:
         ..... done.
-    Message <simpleMessage>
       Found 2 translations marked as deprecated in ./po/R-zh_CN.po.
-    Message <simpleMessage>
       Typically, this means the corresponding error messages have been refactored.
-    Message <simpleMessage>
       Reproducing these messages here for your reference since they might still provide some utility.
-    Message <simpleMessage>
        ** SINGULAR MESSAGES **
     Output
-      ----------------------------------------------------------------------------------
+      ------------------------------------------------------------------------
       Oh no you don't!
       当然不会！
     Message <simpleMessage>
        ** PLURAL MESSAGES **
     Output
-      ----------------------------------------------------------------------------------
+      ------------------------------------------------------------------------
       small fail\n
       失败了\n
-      ----------------------------------------------------------------------------------
+      ------------------------------------------------------------------------
       big fail\n
       失败了\n
     Message <simpleMessage>
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 3 untranslated messages
-    Message <simpleMessage>
       (To quit translating, press 'Esc'; progress will be saved)
     Output
       Thanks! Who should be credited with these translations?
@@ -246,7 +199,6 @@
       How would you translate this message into Mainland Chinese independently of n?
     Message <simpleMessage>
       "Installing" translations with msgfmt
-    Message <simpleMessage>
       running msgfmt on R-zh_CN.po succeeded; output:
         3 translated messages.
 
@@ -289,9 +241,7 @@
       translate_package(languages = "cy")
     Message <simpleMessage>
       Generating en@quot translations
-    Message <simpleMessage>
       'cy' is not a known language. 
-    Message <simpleMessage>
       Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
     Output
       How would you refer to this language in English?
@@ -313,7 +263,6 @@
       0
       n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5
       Using generic description of cases instead.
-    Message <simpleMessage>
       Thanks! Please file an issue on GitHub to get this language recognized permanently
     Output
       Thanks! Who should be credited with these translations?
@@ -427,9 +376,7 @@
       translate_package(languages = "ca", diagnostics = NULL)
     Message <simpleMessage>
       Generating en@quot translations
-    Message <simpleMessage>
       'ca' is not a known language. 
-    Message <simpleMessage>
       Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
     Output
       How would you refer to this language in English?
@@ -611,35 +558,22 @@
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rSrcFuzzyMsg' (last updated 0000-01-01 00:00:00)
-    Message <simpleMessage>
       Getting R-level messages...
-    Message <simpleMessage>
       Getting src-level messages...
-    Message <simpleMessage>
       Running message diagnostics...
-    Message <simpleMessage>
       Generating .pot files...
-    Message <simpleMessage>
       Generating en@quot translations
-    Message <simpleMessage>
       running msgfmt on R-en@quot.po succeeded; output:
         1 translated message.
-    Message <simpleMessage>
       running msgfmt on en@quot.po succeeded; output:
         2 translated messages.
-    Message <simpleMessage>
       Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge...
-    Message <simpleMessage>
       Running msgmerge on './po/R-zh_CN.po' succeeded:
         .. done.
-    Message <simpleMessage>
       Found existing src translations for zh_CN (Mainland Chinese/普通话) in ./po/zh_CN.po. Running msgmerge...
-    Message <simpleMessage>
       Running msgmerge on './po/zh_CN.po' succeeded:
         ..... done.
-    Message <simpleMessage>
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 2 untranslated messages
-    Message <simpleMessage>
       (To quit translating, press 'Esc'; progress will be saved)
     Output
       Thanks! Who should be credited with these translations?
@@ -674,10 +608,8 @@
       当然%s %s\n
     Message <simpleMessage>
       "Installing" translations with msgfmt
-    Message <simpleMessage>
       running msgfmt on R-zh_CN.po succeeded; output:
         1 translated message.
-    Message <simpleMessage>
       running msgfmt on zh_CN.po succeeded; output:
         2 translated messages.
 

@@ -1,6 +1,6 @@
 library(withr)
 library(testthat)
-old = options(potools.use_colors = FALSE)
+old = options(potools.use_colors = FALSE, width = 80L)
 library(potools)
 
 # Failed on Solaris because the command-line tools are missing there (which means tools doesn't work there), #186

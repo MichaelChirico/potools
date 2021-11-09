@@ -11,7 +11,7 @@
 po_extract <- function(
     dir = ".",
     custom_translation_functions = list(),
-    verbose = TRUE,
+    verbose = !is_testing(),
     style = NULL) {
 
   message_data <- get_message_data(dir,

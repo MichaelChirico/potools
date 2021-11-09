@@ -24,10 +24,10 @@ po_create <- function(languages, dir = ".", verbose = !is_testing()) {
     row <- po_files[ii]
     if (file.exists(row$po_path)) {
       if (verbose) messagef("Updating '%s' %s translation", row$language, row$type)
-      run_msgmerge(row$po_path, row$pot_path, previous = TRUE)
+      run_msgmerge(row$po_path, row$pot_path, previous = TRUE, verbose = verbose)
     } else {
       if (verbose) messagef("Creating '%s' %s translation", row$language, row$type)
-      run_msginit(row$po_path, row$pot_path, locale = row$language)
+      run_msginit(row$po_path, row$pot_path, locale = row$language, verbose = verbose)
     }
   }
 

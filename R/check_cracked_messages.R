@@ -1,5 +1,45 @@
 # check for calls like stop("a", i, "b", j) that are better suited for
 #   translation as calls like gettextf("a%db%d", i, j)
+
+
+#' Check for cracked messages more suitable for templating
+#' 
+#' Diagnose the R messages in a package to discover the presence of "cracked"
+#' messages better served for translation by templating. See Details.
+#' 
+#' 
+#' Error messages built like \code{stop("You gave ", n, " arguments, but ", m,
+#' " are needed.")} are in general hard for translators -- the correct
+#' translation may be in a totally different order (e.g., this is often the
+#' case for Japanese). It is preferable instead to use
+#' \code{\link[base]{gettextf}} to build a templated message like
+#' \code{stop(gettextf("You gave %d arguments but %d are needed.", n, m))}.
+#' Translators are then free to rearrange the template to put the numeric
+#' pattern where it fits most naturally in the target language.
+#' 
+#' @param message_data A \code{data.table}, or object convertible to one.
+#' @return A \code{data.table} with columns \code{call}, \code{file},
+#' \code{line_number}, and \code{replacement} summarizing the results.
+#' @author Michael Chirico
+#' @seealso \code{\link{translate_package}}, \code{\link{update_pkg_po}}
+#' @examples
+#' 
+#' pkg <- file.path(system.file(package = 'potools'), 'pkg')
+#' # copy to a temporary location to be able to read/write/update below
+#' tmp_pkg <- file.path(tempdir(), "pkg")
+#' dir.create(tmp_pkg)
+#' file.copy(pkg, dirname(tmp_pkg), recursive = TRUE)
+#' 
+#' # first, extract message data
+#' message_data = get_message_data(tmp_pkg)
+#' 
+#' # now, diagnose the messages for any "cracked" ones
+#' check_cracked_messages(message_data)
+#' 
+#' # cleanup
+#' unlink(tmp_pkg, recursive = TRUE)
+#' rm(pkg, tmp_pkg, message_data)
+#' 
 check_cracked_messages = function(message_data) {
   if (!is.data.table(message_data)) message_data = as.data.table(message_data)
 

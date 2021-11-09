@@ -1,7 +1,6 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
 get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, style = c("base", "explicit")) {
-
   style <- match.arg(style)
 
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')

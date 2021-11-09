@@ -8,20 +8,20 @@
 #' messages better served for translation by templating. See Details.
 #' 
 #' 
-#' Error messages built like \code{stop("You gave ", n, " arguments, but ", m,
-#' " are needed.")} are in general hard for translators -- the correct
+#' Error messages built like `stop("You gave ", n, " arguments, but ", m,
+#' " are needed.")` are in general hard for translators -- the correct
 #' translation may be in a totally different order (e.g., this is often the
 #' case for Japanese). It is preferable instead to use
-#' \code{\link[base]{gettextf}} to build a templated message like
-#' \code{stop(gettextf("You gave %d arguments but %d are needed.", n, m))}.
+#' [base::gettextf()] to build a templated message like
+#' `stop(gettextf("You gave %d arguments but %d are needed.", n, m))`.
 #' Translators are then free to rearrange the template to put the numeric
 #' pattern where it fits most naturally in the target language.
 #' 
-#' @param message_data A \code{data.table}, or object convertible to one.
-#' @return A \code{data.table} with columns \code{call}, \code{file},
-#' \code{line_number}, and \code{replacement} summarizing the results.
+#' @param message_data A `data.table`, or object convertible to one.
+#' @return A `data.table` with columns `call`, `file`,
+#' `line_number`, and `replacement` summarizing the results.
 #' @author Michael Chirico
-#' @seealso \code{\link{translate_package}}, \code{\link{update_pkg_po}}
+#' @seealso [translate_package()], [update_pkg_po()]
 #' @examples
 #' 
 #' pkg <- file.path(system.file(package = 'potools'), 'pkg')

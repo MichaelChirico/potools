@@ -7,19 +7,19 @@
 #' Diagnose the C/C++ messages in a package to discover untranslated messages
 #' 
 #' 
-#' This diagnostic looks for literal \code{char} arrays passed to messaging
-#' functions (as identified by \code{\link{translate_package}}) which are not
-#' marked for translation (by tagging them for translation with \code{_} or
-#' \code{N_} macros). These strings cannot be translated until they are so
+#' This diagnostic looks for literal `char` arrays passed to messaging
+#' functions (as identified by [translate_package()]) which are not
+#' marked for translation (by tagging them for translation with `_` or
+#' `N_` macros). These strings cannot be translated until they are so
 #' marked.
 #' 
-#' @param message_data A \code{data.table}, or object convertible to one.
-#' @return A \code{data.table} with columns \code{call}, \code{file},
-#' \code{line_number}, and \code{replacement} summarizing the results.
-#' \code{replacement} is \code{NA} at this time, i.e., no replacement is
+#' @param message_data A `data.table`, or object convertible to one.
+#' @return A `data.table` with columns `call`, `file`,
+#' `line_number`, and `replacement` summarizing the results.
+#' `replacement` is `NA` at this time, i.e., no replacement is
 #' provided.
 #' @author Michael Chirico
-#' @seealso \code{\link{translate_package}}, \code{\link{update_pkg_po}}
+#' @seealso [translate_package()], [update_pkg_po()]
 #' @examples
 #' 
 #' pkg <- file.path(system.file(package = 'potools'), 'pkg')

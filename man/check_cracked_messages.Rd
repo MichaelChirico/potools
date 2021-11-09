@@ -18,11 +18,10 @@ Diagnose the R messages in a package to discover the presence of "cracked"
 messages better served for translation by templating. See Details.
 }
 \details{
-Error messages built like \code{stop("You gave ", n, " arguments, but ", m,
-" are needed.")} are in general hard for translators -- the correct
+Error messages built like \code{stop("You gave ", n, " arguments, but ", m, " are needed.")} are in general hard for translators -- the correct
 translation may be in a totally different order (e.g., this is often the
 case for Japanese). It is preferable instead to use
-\code{\link[base]{gettextf}} to build a templated message like
+\code{\link[base:sprintf]{base::gettextf()}} to build a templated message like
 \code{stop(gettextf("You gave \%d arguments but \%d are needed.", n, m))}.
 Translators are then free to rearrange the template to put the numeric
 pattern where it fits most naturally in the target language.
@@ -47,7 +46,7 @@ rm(pkg, tmp_pkg, message_data)
 
 }
 \seealso{
-\code{\link{translate_package}}, \code{\link{update_pkg_po}}
+\code{\link[=translate_package]{translate_package()}}, \code{\link[=update_pkg_po]{update_pkg_po()}}
 }
 \author{
 Michael Chirico

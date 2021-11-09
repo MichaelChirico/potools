@@ -20,8 +20,8 @@ Diagnose the C/C++ messages in a package to discover untranslated messages
 }
 \details{
 This diagnostic looks for literal \code{char} arrays passed to messaging
-functions (as identified by \code{\link{translate_package}}) which are not
-marked for translation (by tagging them for translation with \code{_} or
+functions (as identified by \code{\link[=translate_package]{translate_package()}}) which are not
+marked for translation (by tagging them for translation with \verb{_} or
 \code{N_} macros). These strings cannot be translated until they are so
 marked.
 }
@@ -48,7 +48,7 @@ rm(pkg, tmp_pkg, message_data)
 
 }
 \seealso{
-\code{\link{translate_package}}, \code{\link{update_pkg_po}}
+\code{\link[=translate_package]{translate_package()}}, \code{\link[=update_pkg_po]{update_pkg_po()}}
 }
 \author{
 Michael Chirico

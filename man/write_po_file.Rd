@@ -18,7 +18,7 @@ write_po_file(
 }
 \arguments{
 \item{message_data}{\code{data.table}, as returned from
-\code{\link{get_message_data}}. NB: R creates separate domains for R and
+\code{\link[=get_message_data]{get_message_data()}}. NB: R creates separate domains for R and
 C/C++ code; it is recommended you do the same by filtering the
 \code{get_message_data} output for \code{message_source == "R"} or
 \code{message_source == "src"}. Other approaches are untested.}
@@ -37,7 +37,7 @@ Default is \code{79L} to match the behavior of the \code{xgettext} utility.
 \item{wrap_at_newline}{Logical, default \code{TRUE} to match the
 \code{xgettext} utility's behavior. If \code{TRUE}, any \code{msgid} or
 \code{msgstr} will always be wrapped at an internal newline (i.e., literally
-matching \code{\n}).}
+matching \verb{\\n}).}
 
 \item{use_base_rules}{Logical; Should internal behavior match base behavior
 as strictly as possible? \code{TRUE} if being run on a base package (i.e.,
@@ -49,7 +49,7 @@ as strictly as possible? \code{TRUE} if being run on a base package (i.e.,
 \item{version}{Character; the version of the package being translated.}
 
 \item{language}{Character; the language of the \code{msgstr}. See
-\code{\link{translate_package}} for details.}
+\code{\link[=translate_package]{translate_package()}} for details.}
 
 \item{author}{Character; an author (combined with \code{email}) to whom to
 attribute the translations (as \code{Last-Translator}).}
@@ -91,12 +91,12 @@ recognized by the gettext ecosystem.
 Three components are set automatically if not provided:
 
 \itemize{ \item\code{pot_timestamp} - A \code{POSIXct} used to write the
-\code{POT-Creation-Date} entry. Defaults to the \code{\link{Sys.time}} at
+\code{POT-Creation-Date} entry. Defaults to the \code{\link[=Sys.time]{Sys.time()}} at
 run time.  \item\code{po_timestamp} - A \code{POSIXct} used to write the
 \code{PO-Revision-Date} entry. Defaults to be the same as
 \code{pot_timestamp}.  \item\code{language_team} - A string used to write
 the \code{Language-Team} entry. Defaults to be the same as \code{language};
-if provided manually, the format \code{LANGUAGE <LL@li.org>} is recommended.
+if provided manually, the format \verb{LANGUAGE <LL@li.org>} is recommended.
 }
 
 The \code{charset} for output is always set to \code{"UTF-8"}; this is
@@ -145,8 +145,8 @@ rm(message_data, desc_data, metadata, tmp_po, tmp_pot)
 \cr
 }
 \seealso{
-\code{\link{translate_package}}, \code{\link{get_message_data}},
-\code{\link[tools]{xgettext2pot}}, \code{\link[tools]{update_pkg_po}}
+\code{\link[=translate_package]{translate_package()}}, \code{\link[=get_message_data]{get_message_data()}},
+\code{\link[tools:xgettext]{tools::xgettext2pot()}}, \code{\link[tools:update_pkg_po]{tools::update_pkg_po()}}
 }
 \author{
 Michael Chirico

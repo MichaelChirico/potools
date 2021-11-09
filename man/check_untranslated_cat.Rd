@@ -15,9 +15,9 @@ A \code{data.table} with columns \code{call}, \code{file},
 }
 \description{
 Diagnose the R messages in a package to discover the presence of messages
-emitted by \code{\link{cat}} which haven't been translated (i.e., passed
-through \code{\link{gettext}}, \code{\link{gettextf}}, or
-\code{\link{ngettext}}).
+emitted by \code{\link[=cat]{cat()}} which haven't been translated (i.e., passed
+through \code{\link[=gettext]{gettext()}}, \code{\link[=gettextf]{gettextf()}}, or
+\code{\link[=ngettext]{ngettext()}}).
 }
 \details{
 The function \code{cat} is commonly used to emit messages to users (e.g.,
@@ -29,9 +29,9 @@ flagged by this function.
 For flagged calls, a potential replacement is offered, built using
 \code{gettext} or \code{gettextf} (depending on whether one or more
 \code{...} arguments are supplied to \code{cat}). For the \code{gettextf}
-case, the suggested template is always \code{\%s} (string) since this works
+case, the suggested template is always \verb{\%s} (string) since this works
 for all inputs; the author should tighten this to the appropriate
-\code{\link{sprintf}} template marker as appropriate.
+\code{\link[=sprintf]{sprintf()}} template marker as appropriate.
 
 NB: not all \code{cat} calls are included -- in particular, no \code{cat}
 call specifying a non-default \code{file} are flagged, nor are any where the
@@ -58,7 +58,7 @@ rm(pkg, tmp_pkg, message_data)
 
 }
 \seealso{
-\code{\link{translate_package}}, \code{\link{update_pkg_po}}
+\code{\link[=translate_package]{translate_package()}}, \code{\link[=update_pkg_po]{update_pkg_po()}}
 }
 \author{
 Michael Chirico

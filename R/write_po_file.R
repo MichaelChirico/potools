@@ -65,71 +65,71 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 #' 
 #' Three components are set automatically if not provided:
 #' 
-#' \itemize{ \item\code{pot_timestamp} - A \code{POSIXct} used to write the
-#' \code{POT-Creation-Date} entry. Defaults to the \code{\link{Sys.time}} at
-#' run time.  \item\code{po_timestamp} - A \code{POSIXct} used to write the
-#' \code{PO-Revision-Date} entry. Defaults to be the same as
-#' \code{pot_timestamp}.  \item\code{language_team} - A string used to write
-#' the \code{Language-Team} entry. Defaults to be the same as \code{language};
-#' if provided manually, the format \code{LANGUAGE <LL@li.org>} is recommended.
+#' \itemize{ \item`pot_timestamp` - A `POSIXct` used to write the
+#' `POT-Creation-Date` entry. Defaults to the [Sys.time()] at
+#' run time.  \item`po_timestamp` - A `POSIXct` used to write the
+#' `PO-Revision-Date` entry. Defaults to be the same as
+#' `pot_timestamp`.  \item`language_team` - A string used to write
+#' the `Language-Team` entry. Defaults to be the same as `language`;
+#' if provided manually, the format `LANGUAGE <LL@li.org>` is recommended.
 #' }
 #' 
-#' The \code{charset} for output is always set to \code{"UTF-8"}; this is
+#' The `charset` for output is always set to `"UTF-8"`; this is
 #' intentional to make it more cumbersome to create non-UTF-8 files.
 #' 
 #' @aliases write_po_file po_metadata format.po_metadata print.po_metadata
-#' @param message_data \code{data.table}, as returned from
-#' \code{\link{get_message_data}}. NB: R creates separate domains for R and
+#' @param message_data `data.table`, as returned from
+#' [get_message_data()]. NB: R creates separate domains for R and
 #' C/C++ code; it is recommended you do the same by filtering the
-#' \code{get_message_data} output for \code{message_source == "R"} or
-#' \code{message_source == "src"}. Other approaches are untested.
+#' `get_message_data` output for `message_source == "R"` or
+#' `message_source == "src"`. Other approaches are untested.
 #' @param po_file Character vector giving a destination path. Paths ending in
-#' \file{.pot} will be written with template files (e.g., \code{msgstr} entries
+#' \file{.pot} will be written with template files (e.g., `msgstr` entries
 #' will be blanked).
-#' @param metadata A \code{po_metadata} object as returned by
-#' \code{po_metadata()}.
+#' @param metadata A `po_metadata` object as returned by
+#' `po_metadata()`.
 #' @param width Numeric governing the wrapping width of the output file.
-#' Default is \code{79L} to match the behavior of the \code{xgettext} utility.
-#' \code{Inf} turns off wrapping (except for file source markers comments).
-#' @param wrap_at_newline Logical, default \code{TRUE} to match the
-#' \code{xgettext} utility's behavior. If \code{TRUE}, any \code{msgid} or
-#' \code{msgstr} will always be wrapped at an internal newline (i.e., literally
-#' matching \code{\n}).
+#' Default is `79L` to match the behavior of the `xgettext` utility.
+#' `Inf` turns off wrapping (except for file source markers comments).
+#' @param wrap_at_newline Logical, default `TRUE` to match the
+#' `xgettext` utility's behavior. If `TRUE`, any `msgid` or
+#' `msgstr` will always be wrapped at an internal newline (i.e., literally
+#' matching `\n`).
 #' @param use_base_rules Logical; Should internal behavior match base behavior
-#' as strictly as possible? \code{TRUE} if being run on a base package (i.e.,
-#' \code{base} or one of the default packages like \code{utils},
-#' \code{graphics}, etc.). See Details.
+#' as strictly as possible? `TRUE` if being run on a base package (i.e.,
+#' `base` or one of the default packages like `utils`,
+#' `graphics`, etc.). See Details.
 #' @param package Character; the name of the package being translated.
 #' @param version Character; the version of the package being translated.
-#' @param language Character; the language of the \code{msgstr}. See
-#' \code{\link{translate_package}} for details.
-#' @param author Character; an author (combined with \code{email}) to whom to
-#' attribute the translations (as \code{Last-Translator}).
-#' @param email Character; an e-mail address associated with \code{author}.
+#' @param language Character; the language of the `msgstr`. See
+#' [translate_package()] for details.
+#' @param author Character; an author (combined with `email`) to whom to
+#' attribute the translations (as `Last-Translator`).
+#' @param email Character; an e-mail address associated with `author`.
 #' @param bugs Character; a URL where issues with the translations can be
 #' reported.
 #' @param copyright An object used to construct the initial Copyright reference
-#' in the output. If \code{NULL}, no such comment is written. If a \code{list},
-#' it should the following structure: \itemize{ \item\code{year} - [Required] A
-#' year or hyphen-separated range of years \item\code{holder} - [Required] The
-#' name of the copyright holder \item\code{title} - [Optional] A title for the
-#' \file{.po} \item\code{additional} - [Optional] A character vector of
-#' additional lines for the copyright comment section } If a \code{character}
-#' scalar, it is interpreted as the \code{holder} and the \code{year} is set as
-#' the \code{POT-Creation-Date}'s year.
+#' in the output. If `NULL`, no such comment is written. If a `list`,
+#' it should the following structure: \itemize{ \item`year` - [Required] A
+#' year or hyphen-separated range of years \item`holder` - [Required] The
+#' name of the copyright holder \item`title` - [Optional] A title for the
+#' \file{.po} \item`additional` - [Optional] A character vector of
+#' additional lines for the copyright comment section } If a `character`
+#' scalar, it is interpreted as the `holder` and the `year` is set as
+#' the `POT-Creation-Date`'s year.
 #' @param ...  Additional (named) components to add to the metadata. For
-#' \code{print.po_metadata}, passed on to \code{format.po_metadata}
-#' @param x A \code{po_metadata} object.
+#' `print.po_metadata`, passed on to `format.po_metadata`
+#' @param x A `po_metadata` object.
 #' @param template Logical; format the metadata as in a \file{.pot} template?
-#' @param use_plurals Logical; should the \code{Plural-Forms} entry be
+#' @param use_plurals Logical; should the `Plural-Forms` entry be
 #' included?
-#' @return For \code{po_metadata}, an object of class \code{po_metadata} that
-#' has a \code{format} method used to serialize the metadata.
+#' @return For `po_metadata`, an object of class `po_metadata` that
+#' has a `format` method used to serialize the metadata.
 #' @author Michael Chirico
-#' @seealso \code{\link{translate_package}}, \code{\link{get_message_data}},
-#' \code{\link[tools]{xgettext2pot}}, \code{\link[tools]{update_pkg_po}}
+#' @seealso [translate_package()], [get_message_data()],
+#' [tools::xgettext2pot()], [tools::update_pkg_po()]
 #' @references
-#' \url{https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html}
+#' <https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html>
 #' \cr
 #' @examples
 #' 

@@ -24,7 +24,7 @@ Specifically, potools relies on these command-line utilities
 \item \code{msgconv} }
 }
 \seealso{
-\code{\link[tools]{update_pkg_po}}
+\code{\link[tools:update_pkg_po]{tools::update_pkg_po()}}
 }
 \author{
 Michael Chirico

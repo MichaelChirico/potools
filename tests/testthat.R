@@ -1,4 +1,6 @@
+library(withr)
 library(testthat)
+old = options(potools.use_colors = FALSE)
 library(potools)
 
 # Failed on Solaris because the command-line tools are missing there (which means tools doesn't work there), #186
@@ -8,3 +10,4 @@ if (isTRUE(check_potools_sys_reqs())) {
 } else {
   writeLines("Skipping tests on system without gettext installed")
 }
+options(old)

@@ -20,20 +20,18 @@ globalVariables(
 )
 
 .potools = new.env()
-
-if (requireNamespace('crayon', quietly = TRUE)) {
-  call_color = getOption('potools.call_color', crayon::green)
-  file_color = getOption('potools.file_color', crayon::white)
-  msgid_color = getOption('potools.msgid_color', crayon::red)
-  language_color = getOption('potools.language_color', crayon::cyan)
-  replacement_color = getOption('potools.replacement_color', crayon::blue)
-  plural_range_color = getOption('potools.plural_range_color', crayon::yellow)
-} else {
-  call_color = file_color = msgid_color = language_color = replacement_color = plural_range_color = identity
-}
+call_color = file_color = msgid_color = language_color = replacement_color = plural_range_color = identity
 
 # nocov start
 .onLoad = function(libname, pkgname) {
   .potools$base_package_names = get(".get_standard_package_names", envir=asNamespace("tools"), mode="function")()$base
+  if (getOption('potools.use_colors', requireNamespace('crayon', quietly = TRUE))) {
+    utils::assignInMyNamespace("call_color", getOption('potools.call_color', crayon::green))
+    utils::assignInMyNamespace("file_color", getOption('potools.file_color', crayon::white))
+    utils::assignInMyNamespace("msgid_color", getOption('potools.msgid_color', crayon::red))
+    utils::assignInMyNamespace("language_color", getOption('potools.language_color', crayon::cyan))
+    utils::assignInMyNamespace("replacement_color", getOption('potools.replacement_color', crayon::blue))
+    utils::assignInMyNamespace("plural_range_color", getOption('potools.plural_range_color', crayon::yellow))
+  }
 }
 # nocov end

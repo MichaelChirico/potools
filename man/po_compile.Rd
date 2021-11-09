@@ -12,7 +12,7 @@ po_compile(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE)
 \item{package}{Name of package. If not supplied, read from \code{DESCRIPTION}.}
 
 \item{lazy}{If \code{TRUE}, only \code{.mo} files that are older than their
-corresponding\code{.po} file will be updated.}
+corresponding \code{.po} file will be updated.}
 
 \item{verbose}{If \code{TRUE}, print information as it goes.}
 }

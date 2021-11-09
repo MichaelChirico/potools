@@ -15,10 +15,7 @@
 #'   `.pot`.
 po_create <- function(languages, dir = ".", verbose = !is_testing()) {
   package <- get_desc_data(dir, "Package")
-
-  po_files <- data.table::CJ(type = pot_types(dir), language = languages)
-  po_files[, "po_path" := file.path(dir, "po", paste0(po_prefix(po_files$type), po_files$language, ".po"))]
-  po_files[, "pot_path" := pot_paths(dir, po_files$type)]
+  po_files <- po_language_files(languages, dir)
 
   for (ii in seq_along(nrow(po_files))) {
     row <- po_files[ii]
@@ -32,6 +29,13 @@ po_create <- function(languages, dir = ".", verbose = !is_testing()) {
   }
 
   invisible(po_files)
+}
+
+po_language_files <- function(languages, dir = ".") {
+  po_files <- data.table::CJ(type = pot_types(dir), language = languages)
+  po_files[, "po_path" := file.path(dir, "po", paste0(po_prefix(po_files$type), po_files$language, ".po"))]
+  po_files[, "pot_path" := pot_paths(dir, po_files$type)]
+  po_files[]
 }
 
 pot_paths <- function(dir, type, package = NULL) {

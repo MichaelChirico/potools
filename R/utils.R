@@ -168,10 +168,18 @@ is_outdated <- function(src, dst) {
 
 is_testing = function() identical(Sys.getenv("TESTTHAT"), "true")
 
-local_test_package <- function(.envir = parent.frame()) {
+local_test_package <- function(..., .envir = parent.frame()) {
   temp <- withr::local_tempdir(.local_envir = .envir)
-  dir.create(file.path(temp, "po"))
-  writeLines("Package: test", file.path(temp, "DESCRIPTION"))
+  writeLines(con = file.path(temp, "DESCRIPTION"), c(
+    "Package: test",
+    "Version: 1.0.0"
+  ))
+  dir_create(file.path(temp, c("po", "R")))
+
+  files <- list(...)
+  for (i in seq_along(files)) {
+    writeLines(files[[i]], file.path(temp, names(files)[[i]]))
+  }
 
   temp
 }

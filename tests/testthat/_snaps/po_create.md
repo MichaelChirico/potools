@@ -1,4 +1,4 @@
-# multiplication works
+# the user is told what's happening
 
     Code
       po_create("jp", verbose = TRUE)

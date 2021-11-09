@@ -15,6 +15,21 @@ write_po_file(
   wrap_at_newline = TRUE,
   use_base_rules = metadata$package \%chin\% .potools$base_package_names
 )
+
+po_metadata(
+  package = "",
+  version = "",
+  language = "",
+  author = "",
+  email = "",
+  bugs = "",
+  copyright = NULL,
+  ...
+)
+
+\method{format}{po_metadata}(x, template = FALSE, use_plurals = FALSE, ...)
+
+\method{print}{po_metadata}(x, ...)
 }
 \arguments{
 \item{message_data}{\code{data.table}, as returned from

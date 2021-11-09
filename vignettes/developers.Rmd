@@ -117,30 +117,28 @@ The following sections give some advice about how to write good messages, as ins
 ### Write full sentences
 
 Generally, you should strive to make sure that each message comes from a single string (i.e. lives within a single "").
-Code like this is hard to translate for two reasons:
+Take this simple greeting where I translate "good" and "morning" individually:
 
 ```{r}
 name <- "Hadley"
 paste0(tr_("Good"), " ", tr_("morning"), " ", name, "!")
 ```
 
-Firstly, when working with `.po` files, translators see each individual string without context, and they may be in a different order to the original source:
+This will pose two challenges for translators:
 
-    msgid "!"
-    msgstr ""
+-   When working with `.po` files, translators see each individual string without context, and they may be in a different order to the original source.
+    This can lead either to a poor translation or an expensive journey to the source code to get more context.
 
-    msgid "morning"
-    msgstr ""
+        msgid "morning"
+        msgstr ""
 
-    msgid "Good"
-    msgstr ""
+        msgid "Good"
+        msgstr ""
 
-This can lead either to a poor translation or an expensive journey to the source code to get more context.
+-   Prose is not like code: you can't reliably build up sentences from small fragments of text.
+    Even if you can figure out how to do it in English, it's unlikely the same form will work for other languages.
 
-Secondly, and more importantly, prose is not like code: you can't reliably build up sentences from small fragments of text.
-Even if you can figure out how to do it in English, it's unlikely the same form will work for other languages.
-
-Instead it's better to build the complete message in a single string with `glue()` or `sprintf()`:
+Instead it's better to generate the complete message in a single string using `glue()` or `sprintf()` to interpolate in the parts that vary:
 
 ```{r}
 glue(tr_("Good morning {name}"))
@@ -153,7 +151,6 @@ Then the translator sees something like this:
     msgstr ""
 
 This gives the translator enough context to create a good translation and the freedom to change word order to make a grammatically correct sentence in their language.
-
 We can make the problem more challenging by making our greeting more flexible:
 
 ```{r}
@@ -179,16 +176,15 @@ This would generate the following sequence of translations for French:
     msgid "evening"
     msgstr "soirée"
 
-Unfortunately this breakdown doesn't work because the three greetings in French should be:
-
--   Good morning: Bonjour
--   Good afternoon: Bonjour
--   Good evening: Bonsoir
-
+Unfortunately this breakdown won't generate correct French.
+The three greetings should be "Bonjour" for morning and afternoon, and "Bonsoir" for evening.
 There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon aprés midi is used as a farewell), and the two word English phrases turn into single French words.
-There's no way to generate the correct greetings by combining individual words:
 
-A better approach would be to define a fixed number of time points so we can generate a full greeting for each:
+If you were translating to [Mongolian](https://twitter.com/khorloobatpurev/status/1458044704130437124) you'd face a different problem.
+While Mongolian uses the same times of day, it arranges the words in the opposite order: "Ogloonii mend" is literally morning greetings, "Odriin mend" is afternoon greetings and "Oroin mend" is evening greetings.
+
+Again, we need to resolve this problem by moving away from translating fragments and towards translating complete sentences.
+One way to do that here would be to restrict ourselves to a fixed set of time points and use `switch()` to specify the greeting:
 
 ```{r}
 greet <- function(name, time_of_day) {
@@ -200,7 +196,7 @@ greet <- function(name, time_of_day) {
 }
 ```
 
-This allows us the translator to generate three correct translations:
+This works for French (and Mongolian):
 
     msgstr: "Good morning {name}!"
     msgid: "Bonjour {name}!"
@@ -211,7 +207,14 @@ This allows us the translator to generate three correct translations:
     msgstr: "Good evening {name}!"
     msgid: "Bonsoir {name}!"
 
-Greetings are particularly challenging to translate because of their great cultural variation; fortunately most of messages that you generate for R packages will not require this level of nuance.
+However, it's still not a fully general solution as it assumes that the time of day is the most important characteristic of a greeting, and that the day is broken down into at most three components.
+Neither is true in general:
+
+-   [Danish](https://twitter.com/T_Norin/status/1457975164008898560) breaks the time of day in two six parts: ("morgen"), pre-noon ("formiddag"), noon ("middag"), afternoon ("eftermiddag"), evening ("aften"), and night ("nat").
+
+-   In [Swahili](https://twitter.com/larsplus/status/1457963302982672386), the greeting varies based on the relationship between the people: "Shikamoo" is for young to old, "Hujambo" is for old to young, and "Mambo" is for young to young.
+
+Greetings are particularly challenging to translate because of their great cultural variation; fortunately most messages in R packages won't require such nuance.
 
 ### `sprintf()` vs `glue()`
 

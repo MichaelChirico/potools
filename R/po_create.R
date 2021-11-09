@@ -24,18 +24,20 @@ po_create <- function(languages, dir = ".", verbose = !is_testing()) {
     row <- po_files[ii]
     if (file.exists(row$po_path)) {
       if (verbose) messagef("Updating '%s' %s translation", row$language, row$type)
-      run_msgmerge(row$pot_path, row$po_path, previous = TRUE)
+      run_msgmerge(row$po_path, row$pot_path, previous = TRUE)
     } else {
       if (verbose) messagef("Creating '%s' %s translation", row$language, row$type)
-      run_msginit(row$pot_path, row$po_path, locale = row$language)
+      run_msginit(row$po_path, row$pot_path, locale = row$language)
     }
   }
 
   invisible(po_files)
 }
 
-pot_paths <- function(dir, type) {
-  package <- get_desc_data(dir, "Package")
+pot_paths <- function(dir, type, package = NULL) {
+  if (is.null(package)) {
+    package <- get_desc_data(dir, "Package")
+  }
   file.path(dir, "po", paste0(po_prefix(type), package, ".pot"))
 }
 po_prefix <- function(type = c("R", "src")) {

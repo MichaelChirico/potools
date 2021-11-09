@@ -12,7 +12,7 @@ test_that("po_metadata constructor & methods work", {
     format(metadata, template = TRUE),
     c(
       '"Language-Team: LANGUAGE <LL@li.org>\\n"',
-      '"Content-Type: text/plain; charset=CHARSET\\n"',
+      '"Content-Type: text/plain; charset=UTF-8\\n"',
       '# SOME DESCRIPTIVE TITLE.',
       '# This file is distributed under the same license as the R package.',
       '# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.'

@@ -39,8 +39,8 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   #   <!-- mix and match those two types indefinitely -->
   #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
   # </expr>
-  dots_funs <- domain_dots_funs(style == "base")
-  fmt_funs <- domain_fmt_funs(style == "base")
+  dots_funs <- domain_dots_funs(use_conditions = style == "base")
+  fmt_funs <- domain_fmt_funs(use_conditions = style == "base")
 
   singular_strings = rbind(
     get_dots_strings(expr_data, dots_funs, NON_DOTS_ARGS),

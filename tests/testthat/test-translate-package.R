@@ -43,7 +43,7 @@ test_that("translate_package works on a simple package", {
     {
       expect_messages(
         translate_package(pkg, verbose=TRUE),
-        c("Generating .pot files", "No languages provided"),
+        c("No languages provided"),
         fixed = TRUE
       )
 

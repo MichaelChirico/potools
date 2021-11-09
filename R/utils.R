@@ -19,7 +19,7 @@ get_desc_data = function(dir, fields = c('Package', 'Version')) {
     stopf('%s is not a package (missing DESCRIPTION)', normalizePath(dir))
   }
   desc_data <- read.dcf(desc_file, fields)
-  if (nrow(desc_data) != 1L || anyNA(desc_data)) {
+  if (missing(fields) && (nrow(desc_data) != 1L || anyNA(desc_data))) {
     stopf('%s is not a package (missing Package and/or Version field in DESCRIPTION)', normalizePath(dir))
   }
   return(drop(desc_data))

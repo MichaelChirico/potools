@@ -5,7 +5,7 @@
 #   default by xgettext, etc (unless --no-location is set, or if --add-location=never).
 # note also that the gettext manual says we shouldn't write these ourselves... for now i'm
 #   going to go ahead and try to anyway until it breaks something :)
-write_po_files <- function(message_data, po_dir, params, template = FALSE, use_base_rules = FALSE) {
+write_po_files <- function(message_data, po_dir, params, template = FALSE, use_base_rules = FALSE, verbose = TRUE) {
   if (template) {
     r_file <- sprintf("R-%s.pot", params$package)
     src_file <- sprintf("%s.pot", if (params$package == 'base') 'R' else params$package)
@@ -32,6 +32,9 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
       `X-Generator` = sprintf("potools %s", packageVersion("potools"))
     ))
   }
+
+  if (verbose) messagef('Writing %s', r_file)
+
   write_po_file(
     message_data[message_source == "R"],
     file.path(po_dir, r_file),

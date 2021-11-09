@@ -15,7 +15,14 @@ knitr::opts_chunk$set(
 library(glue)
 ```
 
-This vignette is aimed at package developer; if you're the translator of a package (or just want to understand how it looks from their site), you start with `vignette("translators")`.
+In this vignette you'll learn how to set up your package for translation.
+It's aimed at a package developers; if you're translating an existing package, you might want to start with `vignette("translators")`.
+
+```{r setup}
+library(potools)
+```
+
+## Basic process
 
 Before we get into the details lets review the basic process:
 
@@ -35,28 +42,20 @@ Before we get into the details lets review the basic process:
 
 -   Either you or the translator uses `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with your package.
 
-This vignette will show you how to use the `po_extract()` and teach you how write messages that can be effectively translated.
-
-```{r setup}
-library(potools)
-```
-
 ## Extraction
 
-There are two primary styles for describing which messages should be translated, as defined by the style argument to `po_extract()`:
+potools provides two styles for extracting messages for translation: `base` and `explicit`, as described below.
+Once you've decided which style you want to use, record it in the `DESCRIPTION`:
 
--   The `base` style assumes that all call to `message()`, `warning()`, and `error()` should be translated.
-    The advantage of this style is that it's fast to get up and going with minimal changes to existing code.
+    Config/potools/style: explicit
 
--   The `explicit` style only translates calls to `gettext()`, `ngettext()`, and `tr_()`.
-    The advantage of this style is that it lets you explicitly flag whether or not you've reviewed a message and deemed it ready for translation.
-    It's also easy to use with other packages like glue.
+And then run `po_extract()` to generate the `.pot` file.
 
 ### Base style
 
 The base style captures messages the base functions that include built-in translation capabilities: `message()`, `warning()`, and `stop()`.
-It does not, however, translate `cat()`, which is commonly used to print to the console.
-It also captures messages from generic translation functions `gettext()` and `ngettext().`
+It also captures messages from the explicit translation functions `gettext()` and `ngettext().` (It does **not**, however, not translate `cat()`).
+The advantage of the base style, is that it's very quick to get started with.
 
 `message()`, `warning()` and `stop()` concatenate the components of `…`:
 
@@ -68,7 +67,8 @@ stop("This", " is", " an", " error")
 
 However, as you'll learn shortly, this style is unlikely to generate messages that are easily translated, so `po_extract(style = "base")` will also capture messages from `messagef()`, `warningf()`, and `stopf`().
 These are equivalents to `message()`, `warnings()`, and `stop()` that use `sprintf()` style (hence the `f` suffix).
-If you want to use these functions, you'll need to copy their definitions from below:
+
+These functions are not included in base R, so if you want to use them, you'll need to copy the definitions from below:
 
 ```{r}
 messagef <- function(fmt, ..., appendLF = TRUE) {
@@ -94,47 +94,36 @@ stopf <- function(fmt, ...) {
 
 ### Explicit style
 
-The explicit style only captures messsages that explicitly flagged for translation.
-This includes the base functions `gettext()` and `ngettext()`, but also a `tr_()` function that you'll need to define yourself:
+The explicit style only captures messages that explicitly flagged for translation by `gettext()`, `ngettext()`, or `tr_()`.
+Like `messagef()` and friends, `tr_()` is not provided by R, so you'll need to define it yourself:
 
 ```{r}
 tr_ <- function(...) {
-  enc2utf(gettext(paste0(...), domain = "R-{mypackage}"))
+  enc2utf8(gettext(paste0(...), domain = "R-{mypackage}"))
 }
 ```
 
-In the future, we will provide automated ways to identify strings that haven't been translated and probably should be.
+The advantage of the explicit style is that it's very clear which messges are ready for translated.
+The disadvantage is that it's easy to miss string, so in the future we'll provide automated ways to identify strings that haven't been translated and probably should be.
 
-I'll use the explicit style in this vignette because it makes it very clear what is being translated.
-I'll use of glue, since its style of interpolation provides additional context that's useful for translators.
-
-### Next steps
-
-Once you've decided which style to use, record it in your description:
-
-    Config/potools/style: explicit
-
-And then run `po_extract()` to generate the `.pot` file.
-It's a good idea to take a look at this file and read through some of the extract messages --- particularly if you've use base style, you're likely to discover a bunch of messages that are hard to understand without more context.
-Now it's time to learn how to write messages that can be easily translated.
+I'll use the explicit style in the rest of this vignette because it makes it very clear what is being translated.
 
 ## Writing good messages
 
-The following advice is inspired by the "[Preparing translatable strings](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20))" of the gettext manual.
-This advice, and the underlying tooling, assume that the error messages including in your source code are in English.
-Most of the advice will apply to other languages as well, although you're more likely to be aware of variation between languages than a mono-lingual English speaker.
+The mechanics of translating your package are quite straightforward.
+The bigger challenge is writing messages that are easy to translate.
+The following sections give some advice about how to write good messages, as inspired by the "[Preparing translatable strings](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20))" section of the gettext manual.
 
 ### Write full sentences
 
 Generally, you should strive to make sure that each message comes from a single string (i.e. lives within a single "").
-Instead of building up a message from small fragment using `paste()` or friends:
+Code like this is hard to translate for two reasons:
 
 ```{r}
 name <- "Hadley"
 paste0(tr_("Good"), " ", tr_("morning"), " ", name, "!")
 ```
 
-There are two reasons that you should try to write complete sentences.
 Firstly, when working with `.po` files, translators see each individual string without context, and they may be in a different order to the original source:
 
     msgid "!"
@@ -147,8 +136,9 @@ Firstly, when working with `.po` files, translators see each individual string w
     msgstr ""
 
 This can lead either to a poor translation or an expensive journey to the source code to get more context.
-More importantly, prose is not like code: you can't reliably build up sentences from small fragments of text.
-And even if you can do figure out how to do it in English, it's unlikely the same form will work for other languages.
+
+Secondly, and more importantly, prose is not like code: you can't reliably build up sentences from small fragments of text.
+Even if you can figure out how to do it in English, it's unlikely the same form will work for other languages.
 
 Instead it's better to build the complete message in a single string with `glue()` or `sprintf()`:
 
@@ -157,34 +147,14 @@ glue(tr_("Good morning {name}"))
 sprintf(tr_("Good morning %s"), name)
 ```
 
-This gives the translator the context to create a good translation and the freedom to change word order to make a grammatically correct sentence in their language.
+Then the translator sees something like this:
 
     msgid "Good morning {name}!"
     msgstr ""
 
-### `sprintf()` vs `glue()`
+This gives the translator enough context to create a good translation and the freedom to change word order to make a grammatically correct sentence in their language.
 
-In R, there are two common ways to interpolate variables into a string: `sprinf()` and `glue()`.
-The are pros and cons of each:
-
--   Using `glue()` requires an addition, if lightweight, dependency, but gives the translator more context (assuming you use informative names for local variables), and makes it easy to rearrange interpolated components:
-
-        msgid "{first} {second} {third}"
-        msgstr "{third} {first} {second}"
-
-    Bringing the name of the variable out of the translated string is both a curse and a blessing.
-    On the downside, it gives the translator less context, but on the plus side it means that you can rename variables without worrying that the translated code will break.
-
--   `sprintf()` is built into base R, so is always available.
-    The downside is that it can be hard to figure out what `%d` or `%s` refers to and it's a little harder to rearrange components because the syntax uses `1$`, `2$`, etc which is a little harder to visually parse.
-
-        msgid "%s %s %s"
-        msgstr "%3$s %1$s %2$s"
-
-### Multi-component sentences
-
-What happens if your translation requires interleaving multiple pieces of data?
-Take, for example, this seemingly simple greeting function:
+We can make the problem more challenging by making our greeting more flexible:
 
 ```{r}
 greet <- function(name, time_of_day) {
@@ -195,11 +165,30 @@ greet("Hadley", tr_("afternoon"))
 greet("Hadley", tr_("evening"))
 ```
 
-It doesn't even work for French, a language that's relatively close to English.
-There are two related challenges: in French, both good morning and good afternoon translate to "bonjour" (literally "good day") even though in French has different words for morning and afternoon.
-By translating individual components there's no way to capture the vagaries of language for greetings.
+This would generate the following sequence of translations for French:
 
-A better approach would be to define a fixed number of time points and accompanying messages:
+    msgid "Good"
+    msgstr "Bon"
+
+    msgid "morning"
+    msgstr "matin"
+
+    msgid "afternoon"
+    msgstr "après midi"
+
+    msgid "evening"
+    msgstr "soirée"
+
+Unfortunately this breakdown doesn't work because the three greetings in French should be:
+
+-   Good morning: Bonjour
+-   Good afternoon: Bonjour
+-   Good evening: Bonsoir
+
+There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon aprés midi is used as a farewell), and the two word English phrases turn into single French words.
+There's no way to generate the correct greetings by combining individual words:
+
+A better approach would be to define a fixed number of time points so we can generate a full greeting for each:
 
 ```{r}
 greet <- function(name, time_of_day) {
@@ -211,6 +200,8 @@ greet <- function(name, time_of_day) {
 }
 ```
 
+This allows us the translator to generate three correct translations:
+
     msgstr: "Good morning {name}!"
     msgid: "Bonjour {name}!"
 
@@ -220,29 +211,47 @@ greet <- function(name, time_of_day) {
     msgstr: "Good evening {name}!"
     msgid: "Bonsoir {name}!"
 
-(And even here the context is important; you can use bonjour only as a greeting, bonsoir can be used as both a greeting and a farewell, and you might use bon aprém as a farewell in the afternoon.)
+Greetings are particularly challenging to translate because of their great cultural variation; fortunately most of messages that you generate for R packages will not require this level of nuance.
 
-Greetings are particularly challenging to translate: different languages break the day up differently, or the time of day might not even be the most important factor in forming the greeting.
-Fortunately most of the messages that you generate for R packages will not require this level of nuance.
+### `sprintf()` vs `glue()`
+
+In R, there are two common ways to interpolate variables into a string: `sprintf()` and `glue()`.
+There are pros and cons to each:
+
+-   Using `glue()` requires an additional, if lightweight, dependency, but gives the translator more context (assuming you use informative names for local variables), and makes it easy to rearrange interpolated components:
+
+        msgid "{first} {second} {third}"
+        msgstr "{third} {first} {second}"
+
+    On the other hand, putting the name of the variable in the translated string means that you can't change it without updating all your translations, and there's a small risk of it also getting translated.
+
+-   `sprintf()` is built into base R, so is always available.
+    The downside is that it can be hard to figure out the sentinels refer to and the syntax for rearranging components (which uses `1$`, `2$`) is somewhat arcane.
+
+        msgid "%s %s %s"
+        msgstr "%3$s %1$s %2$s"
 
 ### Un-translatable content
 
-You can also use interpolation to avoid including un-translatable components like URLs or email addresses into a message.
+You can use interpolation to avoid including un-translatable components like URLs or email addresses into a message.
 This is good practice because it saves work for the translators, makes it easier for them to see changes to the text, and avoids the chance of a translator accidentally introducing a typo.
+It works something like this:
 
-```{r}
+```{r, results = FALSE}
 # Instead of this:
 tr_("See <https://r-project.org> to learn more")
+
 # Try this:
 url <- "https://r-project.org"
 glue(tr_("See <{url}> to learn more"))
 ```
 
-Similarly, if you're generating strings to include in HTML, avoid including the html in the string, and instead translate just the words:
+Similarly, if you're generating strings that include in HTML, avoid including the HTML in the translated string, and instead translate just the words:
 
-```{r}
+```{r, results = FALSE}
 # Instead of this:
 tr_("<a href='/index.html'>Home page</a>")
+
 # Try this:
 paste0("<a href='/index.html'>", tr_("Home page"), "</a>")
 ```
@@ -251,7 +260,7 @@ Generally, you want to help the translator spend as much time as possible helpin
 
 ### Plurals
 
-In English, we use a different form for most nouns depending on whether there's one item (the singular) or more than one item (the plural, also use for zero items).
+In English, most nouns have different forms for one item (the singular) or more than one item (the plural, also used for zero items).
 So you might be tempted to construct a sentence like this:
 
 ```{r}
@@ -274,7 +283,7 @@ paste0("There are ", cows(0), " in the field")
 paste0("There are ", cows(1), " in the field")
 ```
 
-So really we want to follow the advice above and construct a full sentence:
+Again, we always want to construct a complete sentence:
 
 ```{r}
 field_cows <- function(n) {
@@ -319,7 +328,7 @@ Russian has three forms, so it gets three entries (roughly 1, 2-4, and everythin
     msgstr[1] "В поле {n} коровы"
     msgstr[2] "В поле {n} коров"
 
-Slovenian and Serbian have four forms, Irish has five forms (learn more at [bitesize Irish](https://www.bitesize.irish/blog/counting/)) and Arabic has six forms.
+Slovenian and Serbian have four forms, Irish has five forms (learn more at [bitesize Irish](https://www.bitesize.irish/blog/counting/)), and Arabic has six forms.
 The rules that define which number get which message are quite complex and encoded in the "plural form" that's recorded at the top of the `.po` file and looks something like `(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2).` However, this is something the translators need to worry about not you, and as speakers of the language they should find it easier to puzzle out the rules.
 
 ### Collapsed lists
@@ -338,9 +347,9 @@ or(values, lang = "fr")
 #> [1] "first, middle ou last"
 ```
 
-You might use this with glue:
+Which works will in glue:
 
 ```{r, eval = FALSE}
-glue(tr_("`x` must be or of {and(values)}"))
-#> `x` must be or of first, middle and last
+glue(tr_("`x` must be one of {and(values)}"))
+#> `x` must be one of first, middle and last
 ```

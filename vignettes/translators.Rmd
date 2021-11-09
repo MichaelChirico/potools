@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 library(potools)
 ```
 
-This vignette is aimed at package translators; if you're the developer of a package (or just want to understand how it looks from their site), you start with `vignette("developers")`.
+This vignette discusses translation from the perspective of a translator; if you're a package developer, you might want to start with `vignette("developers")`.
 
 First of all, thank you for helping out!
 Providing translations for a package is a fantastic way to contribute and I know that your work is deeply appreciated by the package developer.
@@ -26,7 +26,7 @@ Providing translations for a package is a fantastic way to contribute and I know
 Before you go any further, make sure the that the package has started the process of providing translations by checking that it has `po/` directory in the package root.
 If you don't see that package, you might want to start by opening an issue to see if the developer is interested in providing translations.
 
-### Creating translations
+### Basic process
 
 Before we get into the details lets review the basic process of creating translations:
 

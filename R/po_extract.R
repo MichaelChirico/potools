@@ -25,6 +25,8 @@ po_extract <- function(
     if (verbose) message('No messages to translate')
     return(invisible())
   }
+  # TODO: messagef() is double-translating the ngettext() result...
+  #   it needs an escape valve
   if (verbose) messagef(ngettext(n, "Found %i message", "Found %i messages"), n)
 
   po_dir <- file.path(dir, 'po')

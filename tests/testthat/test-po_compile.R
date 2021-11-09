@@ -8,3 +8,8 @@ test_that("can find R and src translations", {
   expect_equal(meta$language, c("en", "en"))
   expect_setequal(meta$type, c("R", "src"))
 })
+
+test_that("get_po_metadata() returns 0 rows if no .po fles", {
+  meta <- get_po_metadata(temp)
+  expect_equal(nrow(meta), 0)
+})

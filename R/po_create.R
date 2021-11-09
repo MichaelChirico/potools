@@ -17,7 +17,7 @@ po_create <- function(languages, dir = ".", verbose = !is_testing()) {
   package <- get_desc_data(dir, "Package")
   po_files <- po_language_files(languages, dir)
 
-  for (ii in seq_along(nrow(po_files))) {
+  for (ii in seq_len(nrow(po_files))) {
     row <- po_files[ii]
     if (file.exists(row$po_path)) {
       if (verbose) messagef("Updating '%s' %s translation", row$language, row$type)
@@ -42,7 +42,12 @@ pot_paths <- function(dir, type, package = NULL) {
   if (is.null(package)) {
     package <- get_desc_data(dir, "Package")
   }
-  file.path(dir, "po", paste0(po_prefix(type), package, ".pot"))
+  if (length(type) == 0) {
+    character()
+  } else {
+    file.path(dir, "po", paste0(po_prefix(type), package, ".pot"))
+  }
+
 }
 po_prefix <- function(type = c("R", "src")) {
   ifelse(type == "R", "R-", "")

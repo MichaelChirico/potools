@@ -1,11 +1,11 @@
 # split off from tools::update_pkg_po() to only run the msgmerge & checkPoFile steps
 run_msgmerge = function(po_file, pot_file, verbose) {
-  val = system2("msgmerge", c("--update", shQuote(po_file), shQuote(pot_file)), stderr = TRUE)
+  val = system2("msgmerge", c("--update", shQuote(po_file), shQuote(pot_file)), stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
-    warningf("Running msgmerge on '%s' failed:\n  %s", po_file, paste(val, collapse = "\n"))
+    warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
   } else if (verbose) {
-    messagef("Running msgmerge on '%s' succeeded:\n  %s", po_file, paste(val, collapse = "\n"))
+    messagef("Running msgmerge on './po/%s' succeeded:\n  %s", basename(po_file), paste(val, collapse = "\n"))
   }
 
   res <- tools::checkPoFile(po_file, strictPlural = TRUE)
@@ -23,7 +23,7 @@ run_msgfmt = function(po_file, mo_file, verbose) {
   if (is_gnu_gettext()) {
     args = c("--check", if (verbose) '--statistics')
   }
-  val = system2("msgfmt", c(args, "-o", shQuote(mo_file), shQuote(po_file)), stderr = TRUE)
+  val = system2("msgfmt", c(args, "-o", shQuote(mo_file), shQuote(po_file)), stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     warningf(
       "running msgfmt on %s failed; output:\n  %s\nHere is the po file:\n%s",
@@ -66,7 +66,9 @@ update_en_quot_mo_files <- function(dir, verbose) {
   mo_dir <- file.path(dir, "inst", "po", "en@quot", "LC_MESSAGES")
   dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
   for (pot_file in pot_files) {
-    po_file <- tempfile()
+    # don't use tempfile() -- want a static basename() to keep verbose output non-random
+    po_file <- file.path(tempdir(), if (startsWith(basename(pot_file), "R-")) "R-en@quot.po" else "en@quot.po")
+    on.exit(unlink(po_file))
     # tools:::en_quote is blocked, but we still need it for now
     get("en_quote", envir=asNamespace("tools"))(pot_file, po_file)
     run_msgfmt(
@@ -74,7 +76,6 @@ update_en_quot_mo_files <- function(dir, verbose) {
       mo_file = file.path(mo_dir, gsub("\\.pot$", ".mo", basename(pot_file))),
       verbose = verbose
     )
-    unlink(po_file)
   }
   return(invisible())
 }

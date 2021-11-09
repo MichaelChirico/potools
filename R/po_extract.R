@@ -1,9 +1,9 @@
 #' Extract messages for translation into a `.pot` file
 #'
 #' `po_extract()` scans your package for strings to be translated and
-#' saves them in to `.pot` template file. You should never modify this
-#' file by hand; instead modify the underlying source code and re-run
-#' `po_extract()`.
+#' saves them into a `.pot` template file (in the package's `po` directory).
+#' You should never modify this file by hand; instead modify the underlying
+#' source code and re-run `po_extract()`.
 #'
 #' @returns The extracted messages as computed by [get_message_data()],
 #'   invisibly.

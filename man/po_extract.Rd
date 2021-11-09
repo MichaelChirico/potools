@@ -7,7 +7,7 @@
 po_extract(
   dir = ".",
   custom_translation_functions = list(),
-  verbose = TRUE,
+  verbose = !is_testing(),
   style = NULL
 )
 }

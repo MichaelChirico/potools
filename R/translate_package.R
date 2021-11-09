@@ -44,7 +44,7 @@ translate_package = function(
       messagef(
         "Updating translation template for package '%s' (last updated %s)",
         package,
-        format(file.info(r_potfile)$atime)
+        get_atime(r_potfile)
       )
     } else {
       messagef("Starting translations for package '%s'", package)
@@ -110,11 +110,11 @@ translate_package = function(
     if (update && file.exists(lang_file)) {
       if (verbose) {
         messagef(
-          'Found existing R translations for %s (%s/%s) in %s. Running msgmerge...',
-          language, metadata$full_name_eng, metadata$full_name_native, lang_file
+          'Found existing R translations for %s (%s/%s) in ./po/%s. Running msgmerge...',
+          language, metadata$full_name_eng, metadata$full_name_native, basename(lang_file)
         )
       }
-      run_msgmerge(lang_file, r_potfile)
+      run_msgmerge(lang_file, r_potfile, verbose)
 
       find_fuzzy_messages(message_data, lang_file)
     } else {
@@ -125,11 +125,11 @@ translate_package = function(
     if (update && file.exists(lang_file)) {
       if (verbose) {
         messagef(
-          'Found existing src translations for %s (%s/%s) in %s. Running msgmerge...',
-          language, metadata$full_name_eng, metadata$full_name_native, lang_file
+          'Found existing src translations for %s (%s/%s) in ./po/%s. Running msgmerge...',
+          language, metadata$full_name_eng, metadata$full_name_native, basename(lang_file)
         )
       }
-      run_msgmerge(lang_file, src_potfile)
+      run_msgmerge(lang_file, src_potfile, verbose)
 
       find_fuzzy_messages(message_data, lang_file)
     } else {

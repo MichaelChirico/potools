@@ -46,4 +46,7 @@ invisibly.
 saves them into a \code{.pot} template file (in the package's \code{po} directory).
 You should never modify this file by hand; instead modify the underlying
 source code and re-run \code{po_extract()}.
+
+If you have existing translations, call \code{\link[=po_update]{po_update()}} after \code{\link[=po_extract]{po_extract()}}
+to update them with the changes.
 }

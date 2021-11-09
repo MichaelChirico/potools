@@ -6,8 +6,8 @@
 #'
 #' @param dir Path to package root directory.
 #' @param package Name of package. If not supplied, read from `DESCRIPTION`.
-#' @param lazy If `TRUE`, only `.mo` functions that are older than `.po`
-#'   files be updated
+#' @param lazy If `TRUE`, only `.mo` files that are older than their
+#'   corresponding`.po` file will be updated.
 #' @param verbose If `TRUE`, print information as it goes.
 po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   po_metadata <- get_po_metadata(dir = dir, package = package)
@@ -57,6 +57,7 @@ get_po_metadata <- function(dir = ".", package = NULL) {
     language = languages,
     type = type,
     po = po_paths,
+    pot = pot_paths(dir, type),
     mo = mo_paths
   )
 }

@@ -1,7 +1,7 @@
 # split off from tools::update_pkg_po() to only run the msgmerge & checkPoFile steps
 
 # https://www.gnu.org/software/gettext/manual/html_node/msgmerge-Invocation.html
-run_msgmerge = function(po_file, pot_file, previous = FALSE) {
+run_msgmerge = function(pot_file, po_file, previous = FALSE) {
   cmd <- paste("msgmerge",
     "--update",
     if (previous) "--previous", # show previous match for fuzzy matches

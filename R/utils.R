@@ -167,3 +167,11 @@ is_outdated <- function(src, dst) {
 }
 
 is_testing = function() identical(Sys.getenv("TESTTHAT"), "true")
+
+local_test_package <- function(.envir = parent.frame()) {
+  temp <- withr::local_tempdir(.local_envir = .envir)
+  dir.create(file.path(temp, "po"))
+  writeLines("Package: test", file.path(temp, "DESCRIPTION"))
+
+  temp
+}

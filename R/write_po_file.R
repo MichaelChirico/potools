@@ -59,24 +59,25 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 
 
 #' Write a .po or .pot file corresponding to a message database
-#' 
+#'
 #' Serialize a message database in the \file{.po} and \file{.pot} formats
 #' recognized by the gettext ecosystem.
-#' 
+#'
 #' Three components are set automatically if not provided:
-#' 
-#' \itemize{ \item`pot_timestamp` - A `POSIXct` used to write the
-#' `POT-Creation-Date` entry. Defaults to the [Sys.time()] at
-#' run time.  \item`po_timestamp` - A `POSIXct` used to write the
-#' `PO-Revision-Date` entry. Defaults to be the same as
-#' `pot_timestamp`.  \item`language_team` - A string used to write
-#' the `Language-Team` entry. Defaults to be the same as `language`;
-#' if provided manually, the format `LANGUAGE <LL@li.org>` is recommended.
-#' }
-#' 
+#'
+#' * `pot_timestamp` - A `POSIXct` used to write the
+#'   `POT-Creation-Date` entry. Defaults to the [Sys.time()] at
+#'   run time.
+#' * `po_timestamp` - A `POSIXct` used to write the
+#'   `PO-Revision-Date` entry. Defaults to be the same as
+#'   `pot_timestamp`.
+#' *  `language_team` - A string used to write
+#'    the `Language-Team` entry. Defaults to be the same as `language`;
+#'    if provided manually, the format `LANGUAGE <LL@li.org>` is recommended.
+#'
 #' The `charset` for output is always set to `"UTF-8"`; this is
 #' intentional to make it more cumbersome to create non-UTF-8 files.
-#' 
+#'
 #' @aliases write_po_file po_metadata format.po_metadata print.po_metadata
 #' @param message_data `data.table`, as returned from
 #' [get_message_data()]. NB: R creates separate domains for R and
@@ -110,13 +111,16 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 #' reported.
 #' @param copyright An object used to construct the initial Copyright reference
 #' in the output. If `NULL`, no such comment is written. If a `list`,
-#' it should the following structure: \itemize{ \item`year` - [Required] A
-#' year or hyphen-separated range of years \item`holder` - [Required] The
-#' name of the copyright holder \item`title` - [Optional] A title for the
-#' \file{.po} \item`additional` - [Optional] A character vector of
-#' additional lines for the copyright comment section } If a `character`
-#' scalar, it is interpreted as the `holder` and the `year` is set as
-#' the `POT-Creation-Date`'s year.
+#' it should the following structure:
+#'
+#'   * `year`: Required, A year or hyphen-separated range of years
+#'   * `holder`: Required, The name of the copyright holder
+#'   * `title`: Optional, A title for the \file{.po}
+#'   * `additional`: Optional, A character vector of additional lines for the
+#'      copyright comment section
+#'
+#' If a `character` scalar, it is interpreted as the `holder` and the `year`
+#' is set as the `POT-Creation-Date`'s year.
 #' @param ...  Additional (named) components to add to the metadata. For
 #' `print.po_metadata`, passed on to `format.po_metadata`
 #' @param x A `po_metadata` object.
@@ -132,7 +136,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 #' <https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html>
 #' \cr
 #' @examples
-#' 
+#'
 #' message_data <- get_message_data(system.file('pkg', package='potools'))
 #' desc_data <- read.dcf(system.file('pkg', 'DESCRIPTION', package='potools'), c('Package', 'Version'))
 #' metadata <- po_metadata(
@@ -140,12 +144,12 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 #'   language = 'ar_SY', author = 'R User', email = 'ruser@gmail.com',
 #'   bugs = 'https://github.com/ruser/potoolsExample/issues'
 #' )
-#' 
+#'
 #' # add fake translations
 #' message_data[type == "singular", msgstr := "<arabic translation>"]
 #' # Arabic has 6 plural forms
 #' message_data[type == "plural", msgstr_plural := .(as.list(sprintf("<%d translation>", 0:5)))]
-#' 
+#'
 #' # Preview metadata
 #' print(metadata)
 #' # write .po file
@@ -155,7 +159,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 #'   metadata
 #' )
 #' writeLines(readLines(tmp_po))
-#' 
+#'
 #' # write .pot template
 #' write_po_file(
 #'   message_data[message_source == "R"],
@@ -163,11 +167,11 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 #'   metadata
 #' )
 #' writeLines(readLines(tmp_pot))
-#' 
+#'
 #' # cleanup
 #' file.remove(tmp_po, tmp_pot)
 #' rm(message_data, desc_data, metadata, tmp_po, tmp_pot)
-#' 
+#'
 write_po_file <- function(
   message_data, po_file, metadata,
   width = 79L, wrap_at_newline = TRUE,

@@ -37,18 +37,20 @@ RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 
 #' Check if the proper system utilities for running package translation are
 #' installed
-#' 
+#'
 #' potools uses the same gettext command line tools that R itself does to run
 #' translation. These are required for translation to work properly; this
 #' function is mainly for testing use & checks whether the current environment
 #' is equipped for translation.
-#' 
-#' 
-#' Specifically, potools relies on these command-line utilities
-#' 
-#' \enumerate{ \item `msgmerge` \item `msgfmt` \item `msginit`
-#' \item `msgconv` }
-#' 
+#'
+#'
+#' Specifically, potools relies on these command-line utilities:
+#'
+#' * `msgmerge`
+#' * `msgfmt`
+#' * `msginit`
+#' * `msgconv`
+#'
 #' @return `TRUE` if the system is ready for translation, otherwise a
 #' message suggesting how to proceed.
 #' @author Michael Chirico

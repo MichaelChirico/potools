@@ -18,10 +18,13 @@ function is mainly for testing use & checks whether the current environment
 is equipped for translation.
 }
 \details{
-Specifically, potools relies on these command-line utilities
-
-\enumerate{ \item \code{msgmerge} \item \code{msgfmt} \item \code{msginit}
-\item \code{msgconv} }
+Specifically, potools relies on these command-line utilities:
+\itemize{
+\item \code{msgmerge}
+\item \code{msgfmt}
+\item \code{msginit}
+\item \code{msgconv}
+}
 }
 \seealso{
 \code{\link[tools:update_pkg_po]{tools::update_pkg_po()}}

@@ -38,29 +38,32 @@ added those helpers to your package. The explicit style also accepts
 extra information about progress, etc. be reported?}
 }
 \value{
-A \code{data.table} with the following schema: \itemize{ \item
-\code{message_source}, \code{character}, either \code{"R"} or \code{"src"},
+A \code{data.table} with the following schema:
+\itemize{
+\item \code{message_source}: \code{character}, either \code{"R"} or \code{"src"},
 saying whether the string was found in the R or the src folder of the
-package \item \code{type}, \code{character}, either \code{"singular"} or
+package
+\item \code{type}: \code{character}, either \code{"singular"} or
 \code{"plural"}; \code{"plural"} means the string came from
-\code{\link[=ngettext]{ngettext()}} and can be pluralized \item \code{file},
-\code{character}, the file where the string was found \item \code{msgid},
-\code{character}, the string (character literal or \code{char} array as
-found in the source); missing for all \code{type == "plural"} strings \item
-\code{msgid_plural}, \code{list(character, character)}, the strings
+\code{\link[=ngettext]{ngettext()}} and can be pluralized
+\item \code{file}: \code{character}, the file where the string was found
+\item \code{msgid}: \code{character}, the string (character literal or \code{char} array as
+found in the source); missing for all \code{type == "plural"} strings
+\item \code{msgid_plural}: \code{list(character, character)}, the strings
 (character literals or \code{char} arrays as found in the source); the first
 applies in English for \code{n=1} (see \code{ngettext}), while the second
 applies for \code{n!=1}; missing for all \code{type == "singular"} strings
-\item \code{call}, \code{character}, the full call containing the string
-that was found \item \code{line_number}, \code{integer}, the line in
-\code{file} where the string was found \item \code{is_repeat},
-\code{logical}, whether the \code{msgid} is a duplicate within this
-\code{message_source} \item \code{is_marked_for_translation},
-\code{logical}, whether the string is marked for translation (e.g., in R,
-all character literals supplied to a \code{...} argument in
-\code{\link[=stop]{stop()}} are so marked) \item \code{is_templated},
-\code{logical},whether the string is templatable (e.g., uses \verb{%s} or
-other formatting markers) }
+\item \code{call}: \code{character}, the full call containing the string
+that was found
+\item \code{line_number}: \code{integer}, the line in \code{file} where the string was found
+\item \code{is_repeat}: \code{logical}, whether the \code{msgid} is a duplicate within this
+\code{message_source}
+\item \code{is_marked_for_translation}:\code{logical}, whether the string is marked for
+translation (e.g., in R, all character literals supplied to a \code{...} argument in
+\code{\link[=stop]{stop()}} are so marked)
+\item \code{is_templated}, \code{logical}, whether the string is templatable (e.g., uses
+\verb{\%s} or other formatting markers)
+}
 }
 \description{
 This function looks in the R and src directories of a package for

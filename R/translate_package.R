@@ -116,11 +116,11 @@
 #'
 #' The output diagnostic result has the following schema:
 #'
-#' \enumerate{ \item `call`, `character`, the call identified as
-#' problematic \item `file`, `character`, the file where `call`
-#' was found \item `line_number`, `integer`, the line in `file`
-#' where `call` was found \item `replacement`, `character`,
-#' *optional*, a suggested fix to make the call "healthy" }
+#' * `call`: `character`, the call identified as problematic
+#' * `file`: `character`, the file where `call` was found
+#' * `line_number`: `integer`, the line in `file` where `call` was found
+#' * `replacement`: `character`, *optional*, a suggested fix to make the call
+#'   "healthy"
 #'
 #' See [check_cracked_messages()],
 #' [check_untranslated_cat()], and

@@ -168,12 +168,13 @@ that describes what the diagnostic does; it is reproduced in the format
 \code{\link[=check_untranslated_cat]{check_untranslated_cat()}} has \code{diagnostic_tag = "untranslated messaging calls passed through cat()"}.
 
 The output diagnostic result has the following schema:
-
-\enumerate{ \item \code{call}, \code{character}, the call identified as
-problematic \item \code{file}, \code{character}, the file where \code{call}
-was found \item \code{line_number}, \code{integer}, the line in \code{file}
-where \code{call} was found \item \code{replacement}, \code{character},
-\emph{optional}, a suggested fix to make the call "healthy" }
+\itemize{
+\item \code{call}: \code{character}, the call identified as problematic
+\item \code{file}: \code{character}, the file where \code{call} was found
+\item \code{line_number}: \code{integer}, the line in \code{file} where \code{call} was found
+\item \code{replacement}: \code{character}, \emph{optional}, a suggested fix to make the call
+"healthy"
+}
 
 See \code{\link[=check_cracked_messages]{check_cracked_messages()}},
 \code{\link[=check_untranslated_cat]{check_untranslated_cat()}}, and

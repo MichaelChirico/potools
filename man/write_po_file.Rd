@@ -61,13 +61,17 @@ reported.}
 
 \item{copyright}{An object used to construct the initial Copyright reference
 in the output. If \code{NULL}, no such comment is written. If a \code{list},
-it should the following structure: \itemize{ \item\code{year} - \link{Required} A
-year or hyphen-separated range of years \item\code{holder} - \link{Required} The
-name of the copyright holder \item\code{title} - \link{Optional} A title for the
-\file{.po} \item\code{additional} - \link{Optional} A character vector of
-additional lines for the copyright comment section } If a \code{character}
-scalar, it is interpreted as the \code{holder} and the \code{year} is set as
-the \code{POT-Creation-Date}'s year.}
+it should the following structure:
+\itemize{
+\item \code{year}: Required, A year or hyphen-separated range of years
+\item \code{holder}: Required, The name of the copyright holder
+\item \code{title}: Optional, A title for the \file{.po}
+\item \code{additional}: Optional, A character vector of additional lines for the
+copyright comment section
+}
+
+If a \code{character} scalar, it is interpreted as the \code{holder} and the \code{year}
+is set as the \code{POT-Creation-Date}'s year.}
 
 \item{...}{Additional (named) components to add to the metadata. For
 \code{print.po_metadata}, passed on to \code{format.po_metadata}}
@@ -89,12 +93,14 @@ recognized by the gettext ecosystem.
 }
 \details{
 Three components are set automatically if not provided:
-
-\itemize{ \item\code{pot_timestamp} - A \code{POSIXct} used to write the
+\itemize{
+\item \code{pot_timestamp} - A \code{POSIXct} used to write the
 \code{POT-Creation-Date} entry. Defaults to the \code{\link[=Sys.time]{Sys.time()}} at
-run time.  \item\code{po_timestamp} - A \code{POSIXct} used to write the
+run time.
+\item \code{po_timestamp} - A \code{POSIXct} used to write the
 \code{PO-Revision-Date} entry. Defaults to be the same as
-\code{pot_timestamp}.  \item\code{language_team} - A string used to write
+\code{pot_timestamp}.
+\item \code{language_team} - A string used to write
 the \code{Language-Team} entry. Defaults to be the same as \code{language};
 if provided manually, the format \verb{LANGUAGE <LL@li.org>} is recommended.
 }

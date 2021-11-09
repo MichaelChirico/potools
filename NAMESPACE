@@ -12,6 +12,7 @@ export(get_message_data)
 export(write_po_file, po_metadata)
 
 export(po_extract)
+export(po_compile)
 
 export(check_cracked_messages, check_untranslated_cat, check_untranslated_src)
 

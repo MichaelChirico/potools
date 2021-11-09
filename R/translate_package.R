@@ -215,9 +215,8 @@ translate_package = function(
     INCOMPLETE = FALSE
   }
 
-  if (verbose) message('"Installing" translations with msgfmt')
   # TODO: reinstate source marker tags, at least for src .pot file & maybe for R .pot file too?
-  update_mo_files(dir, package, verbose = verbose)
+  po_compile(dir, package, verbose = verbose)
   return(invisible())
 }
 

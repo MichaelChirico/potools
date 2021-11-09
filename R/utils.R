@@ -155,4 +155,15 @@ get_lang_metadata = function(language) {
   update_metadata(language)
 }
 
+# Vectorised version of dir.create
+dir_create <- function(dirs) {
+  for (dir in unique(dirs)) {
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  }
+}
+
+is_outdated <- function(src, dst) {
+  !file.exists(dst) | (file.mtime(src) > file.mtime(dst))
+}
+
 is_testing = function() identical(Sys.getenv("TESTTHAT"), "true")

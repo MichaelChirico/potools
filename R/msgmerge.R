@@ -15,6 +15,10 @@ run_msgmerge = function(po_file, pot_file) {
 
 run_msgfmt = function(po_file, mo_file, verbose) {
   use_stats <- if (verbose) '--statistics' else ''
+
+  po_file <- path.expand(po_file)
+  mo_file <- path.expand(mo_file)
+
   # See #218. Solaris msgfmt doesn't support -c or --statistics
   if (Sys.info()[["sysname"]] == "SunOS") {
     cmd = sprintf("msgfmt -o %s %s", shQuote(mo_file), shQuote(po_file)) # nocov
@@ -31,27 +35,7 @@ run_msgfmt = function(po_file, mo_file, verbose) {
   return(invisible())
 }
 
-update_mo_files = function(dir, package, verbose) {
-  inst_dir <- file.path(dir, "inst", "po")
-  lang_regex <- "^(R-)?([a-zA-Z_]+)\\.po$"
 
-  po_files <- list.files(file.path(dir, "po"), pattern = "\\.po$")
-  languages <- gsub(lang_regex, "\\2", po_files)
-  mo_files <- gsub(lang_regex, sprintf("\\1%s.mo", package), po_files)
-  mo_dirs <- file.path(inst_dir, languages, "LC_MESSAGES")
-  # NB: dir.create() only accepts one directory at a time...
-  for (mo_dir in unique(mo_dirs)) dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
-
-  for (ii in seq_along(po_files)) {
-    run_msgfmt(
-      po_file = file.path(dir, "po", po_files[ii]),
-      mo_file = file.path(mo_dirs[ii], mo_files[ii]),
-      verbose = verbose
-    )
-  }
-
-  return(invisible())
-}
 
 update_en_quot_mo_files <- function(dir, verbose) {
   pot_files <- list.files(file.path(dir, "po"), pattern = "\\.pot$", full.names = TRUE)

@@ -1,10 +1,13 @@
 translate_package = function(
-  dir = '.', languages,
+  dir = '.',
+  languages,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   custom_translation_functions = list(R = NULL, src = NULL),
   max_translations = Inf,
   use_base_rules = package %chin% .potools$base_package_names,
-  copyright = NULL, bugs = '', verbose = FALSE
+  copyright = NULL,
+  bugs = '',
+  verbose = !is_testing()
 ) {
   result <- check_potools_sys_reqs()
   if (!isTRUE(result)) stop(result) # nocov
@@ -70,10 +73,11 @@ translate_package = function(
     result <- diagnostic(message_data)
     if (!nrow(result)) next
     show_diagnostic_results(result, diagnostic)
-    if (tolower(prompt('Exit now to repair any of these? [y/N]')) %chin% c('y', 'yes')) return(invisible())
+    responded_yes = tolower(prompt('Exit now to repair any of these? [y/N]')) %chin% c('y', 'yes')
+    # length() required for use in batch mode
+    if (length(responded_yes) && responded_yes) return(invisible())
   }
 
-  if (verbose) message('Generating .pot files...')
   po_params = list(package = package, version = version, copyright = copyright, bugs = bugs)
   write_po_files(message_data, po_dir, po_params, template = TRUE, use_base_rules = use_base_rules)
 
@@ -211,9 +215,8 @@ translate_package = function(
     INCOMPLETE = FALSE
   }
 
-  if (verbose) message('"Installing" translations with msgfmt')
   # TODO: reinstate source marker tags, at least for src .pot file & maybe for R .pot file too?
-  update_mo_files(dir, package, verbose = verbose)
+  po_compile(dir, package, verbose = verbose)
   return(invisible())
 }
 

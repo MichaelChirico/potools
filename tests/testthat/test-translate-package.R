@@ -43,7 +43,7 @@ test_that("translate_package works on a simple package", {
     {
       expect_messages(
         translate_package(pkg, verbose=TRUE),
-        c("Generating .pot files", "No languages provided"),
+        c("No languages provided"),
         fixed = TRUE
       )
 
@@ -69,7 +69,7 @@ test_that("translate_package works on a simple package", {
     {
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
-        c("Beginning new translations", "BEGINNING TRANSLATION", '"Installing" translations with msgfmt'),
+        c("Beginning new translations", "BEGINNING TRANSLATION", "Recompiling 'zh_CN' R translation"),
         fixed = TRUE
       )
 
@@ -173,7 +173,8 @@ test_that('Unknown language flow works correctly', {
       'How would you refer to this language in English?',
       'received the same set of templates',
       'received 2 unique templated arguments',
-      'received 4 unique templated arguments'
+      'received 4 unique templated arguments',
+      'received 5 unique templated arguments'
     ),
     fixed=TRUE
   )

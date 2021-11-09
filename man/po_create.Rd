@@ -3,7 +3,7 @@
 \name{po_create}
 \alias{po_create}
 \alias{po_update}
-\title{Create or update a `.po` file containing translations}
+\title{Create or update a \code{.po} file containing translations}
 \usage{
 po_create(languages, dir = ".", verbose = TRUE)
 
@@ -19,13 +19,15 @@ as used in Taiwan.)}
 
 \item{dir}{Path to package root.}
 
-\item{verbose}{If `TRUE`, explain what's happening.}
+\item{verbose}{If \code{TRUE}, explain what's happening.}
 }
 \description{
-* `po_create()` creates a new `po/{languages}.po` containing the messages to be
-  translated.
-* `po_update()` updates an existing `.po` file after the messages in a
-  package have changed. The translations for existing messages are preserved;
-  new messages are added; and translations for deleted message are marked
-  as deprecated and moved to the bottom of the file.
+\itemize{
+\item \code{po_create()} creates a new \verb{po/\{languages\}.po} containing the messages to be
+translated.
+\item \code{po_update()} updates an existing \code{.po} file after the messages in a
+package have changed. The translations for existing messages are preserved;
+new messages are added; and translations for deleted message are marked
+as deprecated and moved to the bottom of the file.
+}
 }

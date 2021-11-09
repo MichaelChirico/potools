@@ -1,4 +1,4 @@
-# potools: Tools for Portability and Internationalization of R packages
+# potools: Tools for Portability and Internationalization of R packages <img src='man/figures/logo.png' align="right" height="138" />
 
 ## Overview
 
@@ -13,6 +13,8 @@ Unfortunately, to do so has some tedious aspects, namely, learning the gettext s
 The core function of `potools`, `translate_package`, is a one-stop-shop for interactively setting your package up for translation and providing those translations, all without ever having to touch a `.po` file yourself.
 
 `potools` is a UTF-8 package -- all `.po` and `.pot` files it produces will be treated as UTF-8.
+
+The potool logo features a [potoo](https://en.wikipedia.org/wiki/Potoo) and was designed by [Allison Horst](https://www.allisonhorst.com).
 
 ### Translating your package interactively with `translate_package()`
 

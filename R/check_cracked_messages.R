@@ -32,11 +32,20 @@ attr(check_cracked_messages, "diagnostic_tag") =
 # take a call like stop("a", i, "b", j) and suggest
 #   stop(domain=NA, gettextf("a%sb%s", i, j))
 build_gettextf_call = function(e) {
-  sprintf(
-    '%s(domain=NA, %s)',
-    as.character(e[[1L]]),
-    gettextify(e[-1L])
-  )
+  call <- as.character(e[[1L]])
+  rest <- e[-1L]
+  arg_names <- names(rest)
+  if (is.null(arg_names) || all(keep_args <- arg_names %chin% c("", "domain"))) {
+    sprintf('%s(domain=NA, %s)', call, gettextify(rest))
+  } else {
+    # if other arguments, e.g. call., appendLF, immediate. are present, keep them with the right call (#227)
+    sprintf(
+      '%s(domain=NA, %s, %s)',
+      call,
+      gettextify(rest[keep_args]),
+      toString(paste(names(rest[!keep_args]), "=", vapply(rest[!keep_args], deparse1, character(1L))))
+    )
+  }
 }
 
 # count the number of ... arguments by excluding named arguments; uses a match.call()

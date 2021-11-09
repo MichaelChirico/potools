@@ -2,22 +2,22 @@
 % Please edit documentation in R/po_compile.R
 \name{po_compile}
 \alias{po_compile}
-\title{Compile `.po` files to `.mo`}
+\title{Compile \code{.po} files to \code{.mo}}
 \usage{
 po_compile(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{dir}{Path to package root directory.}
 
-\item{package}{Name of package. If not supplied, read from `DESCRIPTION`.}
+\item{package}{Name of package. If not supplied, read from \code{DESCRIPTION}.}
 
-\item{lazy}{If `TRUE`, only `.mo` functions that are older than `.po`
+\item{lazy}{If \code{TRUE}, only \code{.mo} functions that are older than \code{.po}
 files be updated}
 
-\item{verbose}{If `TRUE`, print information as it goes.}
+\item{verbose}{If \code{TRUE}, print information as it goes.}
 }
 \description{
-This function compiles the plain text `.po` files that translators work with
-into the binary `.mo` files that are installed with packages and used for
+This function compiles the plain text \code{.po} files that translators work with
+into the binary \code{.mo} files that are installed with packages and used for
 live translations.
 }

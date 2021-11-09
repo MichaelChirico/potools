@@ -1,8 +1,11 @@
 # split off from tools::update_pkg_po() to only run the msgmerge & checkPoFile steps
-run_msgmerge = function(po_file, pot_file) {
-  if (system(sprintf("msgmerge --update %s %s", po_file, shQuote(pot_file))) != 0L) {
+run_msgmerge = function(po_file, pot_file, verbose) {
+  val = system2("msgmerge", c("--update", shQuote(po_file), shQuote(pot_file)), stderr = TRUE)
+  if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
-    warningf("Running msgmerge on '%s' failed.", po_file)
+    warningf("Running msgmerge on '%s' failed:\n  %s", po_file, paste(val, collapse = "\n"))
+  } else if (verbose) {
+    messagef("Running msgmerge on '%s' succeeded:\n  %s", po_file, paste(val, collapse = "\n"))
   }
 
   res <- tools::checkPoFile(po_file, strictPlural = TRUE)
@@ -14,18 +17,23 @@ run_msgmerge = function(po_file, pot_file) {
 }
 
 run_msgfmt = function(po_file, mo_file, verbose) {
-  use_stats <- if (verbose) '--statistics' else ''
-  # See #218. Solaris msgfmt doesn't support -c or --statistics
-  if (Sys.info()[["sysname"]] == "SunOS") {
-    cmd = sprintf("msgfmt -o %s %s", shQuote(mo_file), shQuote(po_file)) # nocov
-  } else {
-    cmd = sprintf("msgfmt -c %s -o %s %s", use_stats, shQuote(mo_file), shQuote(po_file))
+  # See #218. Solaris msgfmt (non-GNU on CRAN) doesn't support --check or --statistics;
+  #   see also https://bugs.r-project.org/show_bug.cgi?id=18150
+  args = character()
+  if (is_gnu_gettext()) {
+    args = c("--check", if (verbose) '--statistics')
   }
-  if (system(cmd) != 0L) {
+  val = system2("msgfmt", c(args, "-o", shQuote(mo_file), shQuote(po_file)), stderr = TRUE)
+  if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     warningf(
-      "running msgfmt on %s failed.\nHere is the po file:\n%s",
-      basename(po_file), paste(readLines(po_file), collapse = "\n"),
+      "running msgfmt on %s failed; output:\n  %s\nHere is the po file:\n%s",
+      basename(po_file), paste(val, collapse = "\n"), paste(readLines(po_file), collapse = "\n"),
       immediate. = TRUE
+    )
+  } else if (verbose) {
+    messagef(
+      "running msgfmt on %s succeeded; output:\n  %s",
+      basename(po_file), paste(val, collapse = "\n")
     )
   }
   return(invisible())

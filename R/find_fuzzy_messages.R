@@ -2,7 +2,7 @@ find_fuzzy_messages <- function(message_data, lang_file) {
   old_message_data = get_po_messages(lang_file)
 
   if (any(idx <- old_message_data$fuzzy == 2L)) {
-    messagef('Found %d translations marked as deprecated in %s.', sum(idx), lang_file)
+    messagef('Found %d translations marked as deprecated in ./po/%s.', sum(idx), basename(lang_file))
     message('Typically, this means the corresponding error messages have been refactored.')
     message('Reproducing these messages here for your reference since they might still provide some utility.')
 

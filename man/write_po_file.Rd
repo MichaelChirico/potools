@@ -159,7 +159,6 @@ writeLines(readLines(tmp_pot))
 # cleanup
 file.remove(tmp_po, tmp_pot)
 rm(message_data, desc_data, metadata, tmp_po, tmp_pot)
-
 }
 \references{
 \url{https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html}

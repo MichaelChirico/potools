@@ -74,7 +74,7 @@
 #' # cleanup
 #' rm(pkg)
 #'
-#' @export get_message_data
+#' @export
 get_message_data = function(
   dir = ".",
   custom_translation_functions = list(R = NULL, src = NULL),

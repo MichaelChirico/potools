@@ -55,7 +55,7 @@ RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 #' message suggesting how to proceed.
 #' @author Michael Chirico
 #' @seealso [tools::update_pkg_po()]
-#' @export check_potools_sys_reqs
+#' @export
 check_potools_sys_reqs = function() {
   if (any(is_missing <- !nzchar(Sys.which(SYSTEM_REQUIREMENTS)))) {
     if (.Platform$OS.type == 'windows') {

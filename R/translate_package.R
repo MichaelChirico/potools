@@ -227,7 +227,7 @@
 #' unlink(tmp_pkg, recursive = TRUE)
 #' rm(pkg, tmp_pkg)
 #'
-#' @export translate_package
+#' @export
 translate_package = function(
   dir = '.',
   languages,

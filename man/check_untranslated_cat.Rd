@@ -55,7 +55,6 @@ check_untranslated_cat(message_data)
 # cleanup
 unlink(tmp_pkg, recursive = TRUE)
 rm(pkg, tmp_pkg, message_data)
-
 }
 \seealso{
 \code{\link[=translate_package]{translate_package()}}, \code{\link[=update_pkg_po]{update_pkg_po()}}

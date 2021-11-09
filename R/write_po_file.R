@@ -171,7 +171,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 #' # cleanup
 #' file.remove(tmp_po, tmp_pot)
 #' rm(message_data, desc_data, metadata, tmp_po, tmp_pot)
-#'
+#' @export
 write_po_file <- function(
   message_data, po_file, metadata,
   width = 79L, wrap_at_newline = TRUE,
@@ -396,6 +396,7 @@ make_src_location <- function(files, lines, message_source, use_base_rules) {
 
 # See https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html
 #' @rdname write_po_file
+#' @export
 po_metadata = function(package='', version='', language='', author='', email='', bugs='', copyright = NULL, ...) {
   stopifnot(
     "copyright should be empty, a single name, or a list of components" =
@@ -411,6 +412,7 @@ po_metadata = function(package='', version='', language='', author='', email='',
 }
 
 #' @rdname write_po_file
+#' @export
 format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   if (template) {
     x$po_timestamp = "YEAR-MO-DA HO:MI+ZONE"
@@ -468,6 +470,7 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
 }
 
 #' @rdname write_po_file
+#' @export
 print.po_metadata = function(x, ...) writeLines(format(x, ...))
 
 # apply format(), if the input is a timestamp. to flexibly allow po_timestamp to be a string or a POSIXct

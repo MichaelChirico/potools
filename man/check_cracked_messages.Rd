@@ -18,7 +18,9 @@ Diagnose the R messages in a package to discover the presence of "cracked"
 messages better served for translation by templating. See Details.
 }
 \details{
-Error messages built like \code{stop("You gave ", n, " arguments, but ", m, " are needed.")} are in general hard for translators -- the correct
+Error messages built like
+\code{stop("You gave ", n, " arguments, but ", m, " are needed.")} are
+in general hard for translators -- the correct
 translation may be in a totally different order (e.g., this is often the
 case for Japanese). It is preferable instead to use
 \code{\link[base:sprintf]{base::gettextf()}} to build a templated message like

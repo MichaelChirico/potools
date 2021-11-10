@@ -18,4 +18,8 @@ Useful links:
 }
 
 }
+\author{
+\strong{Maintainer}: Michael Chirico \email{MichaelChirico4@gmail.com} (Hadley Wickham [aut])
+
+}
 \keyword{internal}

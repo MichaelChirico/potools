@@ -31,7 +31,8 @@ For flagged calls, a potential replacement is offered, built using
 \code{...} arguments are supplied to \code{cat}). For the \code{gettextf}
 case, the suggested template is always \verb{\%s} (string) since this works
 for all inputs; the author should tighten this to the appropriate
-\code{\link[=sprintf]{sprintf()}} template marker as appropriate.
+\code{\link[=sprintf]{sprintf()}} template marker as appropriate, for example if the author
+knows the input is an integer, use \verb{\%d} or \verb{\%i} instead of \verb{\%s}.
 
 NB: not all \code{cat} calls are included -- in particular, no \code{cat}
 call specifying a non-default \code{file} are flagged, nor are any where the

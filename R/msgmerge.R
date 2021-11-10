@@ -14,7 +14,7 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
     warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
   } else if (verbose) {
-    messagef("Running msgmerge on './po/%s' succeeded:\n  %s", basename(po_file), paste(val, collapse = "\n"))
+    messagef(paste(val, collapse = "\n"))
   }
 
   res <- tools::checkPoFile(po_file, strictPlural = TRUE)
@@ -81,7 +81,7 @@ run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     stopf("Running msginit on '%s' failed", pot_path)
   } else if (verbose) {
-    messagef("Running msgint on './po/%s' succeeded:\n  %s", basename(po_path), paste(val, collapse = "\n"))
+    messagef(paste(val, collapse = "\n"))
   }
   return(invisible())
 }

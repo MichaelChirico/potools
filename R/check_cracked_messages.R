@@ -8,8 +8,9 @@
 #' messages better served for translation by templating. See Details.
 #'
 #'
-#' Error messages built like `stop("You gave ", n, " arguments, but ", m,
-#' " are needed.")` are in general hard for translators -- the correct
+#' Error messages built like
+#' `stop("You gave ", n, " arguments, but ", m, " are needed.")` are
+#' in general hard for translators -- the correct
 #' translation may be in a totally different order (e.g., this is often the
 #' case for Japanese). It is preferable instead to use
 #' [base::gettextf()] to build a templated message like

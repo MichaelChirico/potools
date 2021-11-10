@@ -1,8 +1,12 @@
 #' Create a new `.po` file
 #'
+#' @description
 #' `po_create()` creates a new `po/{languages}.po` containing the messages to be
-#' translated. If a translation already exists, it'll be updated with any
-#' changes to the `.pot` since it was last touched.
+#' translated.
+#'
+#' Generally, we expect you to use `po_create()` to create new `.po` files
+#' but if you call it with an existing translation, it will update it with any
+#' changes from the `.pot`. See [po_update()] for details.
 #'
 #' @param languages Language identifiers. These are typically two letters (e.g.
 #'   "en" = English, "fr" = French, "es" = Spanish, "zh" = Chinese), but
@@ -11,8 +15,6 @@
 #'   characters as used in mainland China, "zh_TW" = traditional characters
 #'   as used in Taiwan.)
 #' @inheritParams po_extract
-#' @seealso [po_update()] to update all `.po` files with changes from the
-#'   `.pot`.
 #' @export
 po_create <- function(languages, dir = ".", verbose = !is_testing()) {
   package <- get_desc_data(dir, "Package")

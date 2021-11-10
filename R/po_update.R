@@ -4,15 +4,13 @@
 #' `po_update()` updates existing `.po` file after the `.pot` file has changed.
 #' There are four cases:
 #'
-#' * New messages are added with blank `msgstr`.
+#' * New messages: added with blank `msgstr`.
 #'
-#' * Delete messages are marked as deprecated and moved to the bottom
-#'   of the file.
+#' * Deleted messages: marked as deprecated and moved to the bottom of the file.
 #'
-#' * Major changes to existing messages will appear as a addition and a
-#'   deletion.
+#' * Major changes to existing messages: appear as a addition and a deletion.
 #'
-#' * Minor changes will be preserved and flagged as fuzzy:
+#' * Minor changes to existing messages: will be flagged as fuzzy.
 #'
 #'     ```
 #'     #, fuzzy, c-format
@@ -21,14 +19,13 @@
 #'     msgstr "en@quot翻訳生成中。。。"
 #'     ```
 #'
-#'     The old message is given after the `#|`. Translators need to update the
-#'     message as necessary, then delete the old translation and the `fuzzy`
-#'     comment.
+#'     The previous message is given after the `#|`. Translators need to update
+#'     `msgstr` based changed from the old message and the new `msgid`, then
+#'     delete the old translation and the `fuzzy` comment.
 #'
 #' @inheritParams po_extract
 #' @param lazy If `TRUE`, only `.po` files that are older than their
-#'   corresponding `.pot` file will be updated
-#' @rdname po_create
+#'   corresponding `.pot` file will be updated.
 #' @export
 po_update <- function(dir = ".", lazy = TRUE, verbose = !is_testing()) {
   meta <- get_po_metadata(dir)

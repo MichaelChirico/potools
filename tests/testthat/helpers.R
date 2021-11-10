@@ -64,3 +64,7 @@ local_test_package <- function(..., .envir = parent.frame()) {
 
   temp
 }
+
+standardise_dots <- function(x) {
+  gsub("\\.+", ".", x)
+}

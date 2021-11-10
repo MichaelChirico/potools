@@ -5,5 +5,8 @@ test_that("user is told what's happening", {
   po_extract()
   po_create(c("ja", "fr"))
 
-  expect_snapshot(po_update(verbose = TRUE, lazy = FALSE))
+  expect_snapshot(
+    po_update(verbose = TRUE, lazy = FALSE),
+    transform = standardise_dots
+  )
 })

@@ -11,7 +11,7 @@ po_update(dir = ".", lazy = TRUE, verbose = !is_testing())
 R package is stored.}
 
 \item{lazy}{If \code{TRUE}, only \code{.po} files that are older than their
-corresponding \code{.pot} file will be updated}
+corresponding \code{.pot} file will be updated.}
 
 \item{verbose}{Logical, default \code{TRUE} (except during testing). Should
 extra information about progress, etc. be reported?}

@@ -1,8 +1,9 @@
 #' @keywords internal
-#' @importFrom data.table data.table foverlaps fread rbindlist uniqueN chmatch
-#'   "%chin%" is.data.table as.data.table copy set setattr setcolorder setDT
-#'   setindexv setkeyv setnafill setnames setorderv `:=` .BY .N .SD
-#'   fcase fifelse shift tstrsplit
+#' @importFrom data.table data.table foverlaps fread rbindlist uniqueN chmatch "%chin%"
+#' @importFrom data.table is.data.table as.data.table
+#' @importFrom data.table copy set setattr setcolorder setDT setindexv setkeyv setnafill setnames setorderv
+#' @importFrom data.table `:=` .BY .N .SD
+#' @importFrom data.table fcase fifelse shift tstrsplit
 #' @importFrom stats setNames
 #' @importFrom utils getParseData globalVariables head tail type.convert
 "_PACKAGE"

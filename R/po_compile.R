@@ -1,14 +1,17 @@
 #' Compile `.po` files to `.mo`
 #'
-#' This function compiles the plain text `.po` files that translators work with
-#' into the binary `.mo` files that are installed with packages and used for
-#' live translations.
+#' This function compiles the plain text `.po` files that translators work
+#' with into the binary `.mo` files that are installed with packages and
+#' used for live translations.
+#'
 #'
 #' @param dir Path to package root directory.
-#' @param package Name of package. If not supplied, read from `DESCRIPTION`.
-#' @param lazy If `TRUE`, only `.mo` functions that are older than `.po`
-#'   files be updated
+#' @param package Name of package. If not supplied, read from
+#' `DESCRIPTION`.
+#' @param lazy If `TRUE`, only `.mo` functions that are older than
+#' `.po` files be updated
 #' @param verbose If `TRUE`, print information as it goes.
+#' @export
 po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
   po_metadata <- get_po_metadata(dir = dir, package = package)
   dir_create(dirname(po_metadata$mo))

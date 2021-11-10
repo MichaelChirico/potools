@@ -12,8 +12,8 @@ po_extract(
 )
 }
 \arguments{
-\item{dir}{Character, default the present directory; a directory in which
-an R package is stored.}
+\item{dir}{Character, default the present directory; a directory in which an
+R package is stored.}
 
 \item{custom_translation_functions}{A \code{list} with either/both of two
 components, \code{R} and \code{src}, together governing how to extract any
@@ -38,12 +38,12 @@ added those helpers to your package. The explicit style also accepts
 \code{vignette("developer")} for more details.}
 }
 \value{
-The extracted messages as computed by \code{\link[=get_message_data]{get_message_data()}},
-invisibly.
+The extracted messages as computed by
+\code{\link[=get_message_data]{get_message_data()}}, invisibly.
 }
 \description{
 \code{po_extract()} scans your package for strings to be translated and
-saves them into a \code{.pot} template file (in the package's \code{po} directory).
-You should never modify this file by hand; instead modify the underlying
-source code and re-run \code{po_extract()}.
+saves them into a \code{.pot} template file (in the package's \code{po}
+directory). You should never modify this file by hand; instead modify the
+underlying source code and re-run \code{po_extract()}.
 }

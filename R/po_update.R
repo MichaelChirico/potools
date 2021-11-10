@@ -9,6 +9,7 @@
 #' @param lazy If `TRUE`, only `.po` files that are older than their
 #'   corresponding `.pot` file will be updated
 #' @rdname po_create
+#' @export
 po_update <- function(dir = ".", lazy = TRUE, verbose = !is_testing()) {
   meta <- get_po_metadata(dir)
   if (lazy) {

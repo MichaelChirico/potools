@@ -17,7 +17,7 @@ corresponding \code{.po} file will be updated.}
 \item{verbose}{If \code{TRUE}, print information as it goes.}
 }
 \description{
-This function compiles the plain text \code{.po} files that translators work with
-into the binary \code{.mo} files that are installed with packages and used for
-live translations.
+This function compiles the plain text \code{.po} files that translators work
+with into the binary \code{.mo} files that are installed with packages and
+used for live translations.
 }

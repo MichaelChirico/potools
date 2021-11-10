@@ -17,8 +17,8 @@ variations (e.g. "fr_CN" = French Canadian, "zh_CN" = simplified
 characters as used in mainland China, "zh_TW" = traditional characters
 as used in Taiwan.)}
 
-\item{dir}{Character, default the present directory; a directory in which
-an R package is stored.}
+\item{dir}{Character, default the present directory; a directory in which an
+R package is stored.}
 
 \item{verbose}{Logical, default \code{TRUE} (except during testing). Should
 extra information about progress, etc. be reported?}

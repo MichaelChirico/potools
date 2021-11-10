@@ -2,9 +2,9 @@
 #'
 #' @description
 #' `po_extract()` scans your package for strings to be translated and
-#' saves them into a `.pot` template file (in the package's `po` directory).
-#' You should never modify this file by hand; instead modify the underlying
-#' source code and re-run `po_extract()`.
+#' saves them into a `.pot` template file (in the package's `po`
+#' directory). You should never modify this file by hand; instead modify the
+#' underlying source code and re-run `po_extract()`.
 #'
 #' If you have existing translations, call [po_update()] after [po_extract()]
 #' to update them with the changes.
@@ -12,6 +12,7 @@
 #' @returns The extracted messages as computed by [get_message_data()],
 #'   invisibly.
 #' @inheritParams get_message_data
+#' @export
 po_extract <- function(
     dir = ".",
     custom_translation_functions = list(),

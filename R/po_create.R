@@ -13,6 +13,7 @@
 #' @inheritParams po_extract
 #' @seealso [po_update()] to update all `.po` files with changes from the
 #'   `.pot`.
+#' @export
 po_create <- function(languages, dir = ".", verbose = !is_testing()) {
   package <- get_desc_data(dir, "Package")
   po_files <- po_language_files(languages, dir)

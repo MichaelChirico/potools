@@ -12,8 +12,8 @@ po_extract(
 )
 }
 \arguments{
-\item{dir}{Character, default the present directory; a directory in which
-an R package is stored.}
+\item{dir}{Character, default the present directory; a directory in which an
+R package is stored.}
 
 \item{custom_translation_functions}{A \code{list} with either/both of two
 components, \code{R} and \code{src}, together governing how to extract any
@@ -43,9 +43,9 @@ invisibly.
 }
 \description{
 \code{po_extract()} scans your package for strings to be translated and
-saves them into a \code{.pot} template file (in the package's \code{po} directory).
-You should never modify this file by hand; instead modify the underlying
-source code and re-run \code{po_extract()}.
+saves them into a \code{.pot} template file (in the package's \code{po}
+directory). You should never modify this file by hand; instead modify the
+underlying source code and re-run \code{po_extract()}.
 
 If you have existing translations, call \code{\link[=po_update]{po_update()}} after \code{\link[=po_extract]{po_extract()}}
 to update them with the changes.

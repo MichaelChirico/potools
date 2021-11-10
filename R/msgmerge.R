@@ -17,8 +17,12 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
     messagef("Running msgmerge on './po/%s' succeeded:\n  %s", basename(po_file), paste(val, collapse = "\n"))
   }
 
-  tools::checkPoFile(po_file, strictPlural = TRUE)
-  invisible()
+  res <- tools::checkPoFile(po_file, strictPlural = TRUE)
+  if (nrow(res)) {
+    warningf("tools::checkPoFile() found some issues in %s", po_file)
+    print(res)
+  }
+  return(invisible())
 }
 
 run_msgfmt = function(po_file, mo_file, verbose) {

@@ -21,7 +21,8 @@
 #' `...` arguments are supplied to `cat`). For the `gettextf`
 #' case, the suggested template is always `%s` (string) since this works
 #' for all inputs; the author should tighten this to the appropriate
-#' [sprintf()] template marker as appropriate.
+#' [sprintf()] template marker as appropriate, for example if the author
+#' knows the input is an integer, use `%d` or `%i` instead of `%s`.
 #'
 #' NB: not all `cat` calls are included -- in particular, no `cat`
 #' call specifying a non-default `file` are flagged, nor are any where the

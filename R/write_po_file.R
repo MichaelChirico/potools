@@ -300,7 +300,7 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
     x$email = "EMAIL@ADDRESS"
     x$language = ''
     x$language_team = "LANGUAGE <LL@li.org>"
-    x$charset = 'UTF-8'
+    x$charset = 'CHARSET'
   }
   if (is.character(x$copyright)) {
     x$copyright = list(years = format(x$pot_timestamp, "%Y"), holder = x$copyright)

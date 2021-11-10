@@ -50,7 +50,7 @@ pot_paths <- function(dir, type, package = NULL) {
 
 }
 po_prefix <- function(type = c("R", "src")) {
-  ifelse(type == "R", "R-", "")
+  data.table::fifelse(type == "R", "R-", "")
 }
 pot_types <- function(dir = ".") {
   types <- c("R", "src")

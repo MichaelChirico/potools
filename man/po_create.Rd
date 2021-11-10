@@ -32,9 +32,23 @@ translated. If a translation already exists, it'll be updated with any
 changes to the \code{.pot} since it was last touched.
 
 \code{po_update()} updates existing \code{.po} file after the \code{.pot} file has changed.
-The translations for existing messages are preserved; new messages are added;
-and translations for deleted message are marked as deprecated and moved to
-the bottom of the file.
+There are four cases:
+\itemize{
+\item New messages are added with blank \code{msgstr}.
+\item Delete messages are marked as deprecated and moved to the bottom
+of the file.
+\item Major changes to existing messages will appear as a addition and a
+deletion.
+\item Minor changes will be preserved and flagged as fuzzy:\preformatted{#, fuzzy, c-format
+#| msgid "Generating en@quot translations"
+msgid "Updating '\%s' \%s translation"
+msgstr "en@quot翻訳生成中。。。"
+}
+
+The old message is given after the \verb{#|}. Translators need to update the
+message as necessary, then delete the old translation and the \code{fuzzy}
+comment.
+}
 }
 \seealso{
 \code{\link[=po_update]{po_update()}} to update all \code{.po} files with changes from the

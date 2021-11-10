@@ -1,6 +1,7 @@
 # split off from tools::update_pkg_po() to only run the msgmerge & checkPoFile steps
 
 # https://www.gnu.org/software/gettext/manual/html_node/msgmerge-Invocation.html
+# https://docs.oracle.com/cd/E36784_01/html/E36870/msgmerge-1.html#scrolltoc
 run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
   args <- c(
     "--update", shQuote(path.expand(po_file)),
@@ -63,6 +64,7 @@ update_en_quot_mo_files <- function(dir, verbose) {
 }
 
 # https://www.gnu.org/software/gettext/manual/html_node/msginit-Invocation.html
+# https://docs.oracle.com/cd/E36784_01/html/E36870/msginit-1.html#scrolltoc
 run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
   args <- c(
     "-i", shQuote(path.expand(pot_path)),

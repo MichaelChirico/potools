@@ -43,6 +43,7 @@ po_language_files <- function(languages, dir = ".") {
   po_files[]
 }
 
+# TODO: should this be po_paths, with a template=TRUE/FALSE argument?
 pot_paths <- function(dir, type, package = NULL) {
   if (is.null(package)) {
     package <- get_desc_data(dir, "Package")

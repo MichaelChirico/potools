@@ -38,12 +38,15 @@ added those helpers to your package. The explicit style also accepts
 \code{vignette("developer")} for more details.}
 }
 \value{
-The extracted messages as computed by
-\code{\link[=get_message_data]{get_message_data()}}, invisibly.
+The extracted messages as computed by \code{\link[=get_message_data]{get_message_data()}},
+invisibly.
 }
 \description{
 \code{po_extract()} scans your package for strings to be translated and
 saves them into a \code{.pot} template file (in the package's \code{po}
 directory). You should never modify this file by hand; instead modify the
 underlying source code and re-run \code{po_extract()}.
+
+If you have existing translations, call \code{\link[=po_update]{po_update()}} after \code{\link[=po_extract]{po_extract()}}
+to update them with the changes.
 }

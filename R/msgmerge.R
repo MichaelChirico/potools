@@ -1,8 +1,20 @@
 # split off from tools::update_pkg_po() to only run the msgmerge & checkPoFile steps
-run_msgmerge = function(po_file, pot_file) {
-  if (system(sprintf("msgmerge --update %s %s", po_file, shQuote(pot_file))) != 0L) {
+
+# https://www.gnu.org/software/gettext/manual/html_node/msgmerge-Invocation.html
+# https://docs.oracle.com/cd/E36784_01/html/E36870/msgmerge-1.html#scrolltoc
+run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
+  args <- c(
+    "--update", shQuote(path.expand(po_file)),
+    if (previous) "--previous", #show previous match for fuzzy matches
+    shQuote(path.expand(pot_file))
+  )
+
+  val <- system2("msgmerge", args, stdout = TRUE, stderr = TRUE)
+  if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
-    warningf("Running msgmerge on '%s' failed.", po_file)
+    warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
+  } else if (verbose) {
+    messagef(paste(val, collapse = "\n"))
   }
 
   res <- tools::checkPoFile(po_file, strictPlural = TRUE)
@@ -54,3 +66,23 @@ update_en_quot_mo_files <- function(dir, verbose) {
   }
   return(invisible())
 }
+
+# https://www.gnu.org/software/gettext/manual/html_node/msginit-Invocation.html
+# https://docs.oracle.com/cd/E36784_01/html/E36870/msginit-1.html#scrolltoc
+run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
+  args <- c(
+    "-i", shQuote(path.expand(pot_path)),
+    "-o", shQuote(path.expand(po_path)),
+    "-l", shQuote(locale),
+    "-w", width,
+    "--no-translator" # don't consult user-email etc
+  )
+  val <- system2("msginit", args, stdout = TRUE, stderr = TRUE)
+  if (!identical(attr(val, "status", exact = TRUE), NULL)) {
+    stopf("Running msginit on '%s' failed", pot_path)
+  } else if (verbose) {
+    messagef(paste(val, collapse = "\n"))
+  }
+  return(invisible())
+}
+

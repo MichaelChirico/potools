@@ -34,6 +34,8 @@ po_create <- function(languages, dir = ".", verbose = !is_testing()) {
   invisible(po_files)
 }
 
+# TODO: make sure this works with translating/updating base, which
+#   has the anti-pattern that src translations are in R.pot, not base.pot.
 po_language_files <- function(languages, dir = ".") {
   po_files <- data.table::CJ(type = pot_types(dir), language = languages)
   po_files[, "po_path" := file.path(dir, "po", paste0(po_prefix(po_files$type), po_files$language, ".po"))]

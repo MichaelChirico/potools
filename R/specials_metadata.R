@@ -85,6 +85,7 @@ get_specials_metadata = function(x) {
 }
 
 # convert to a tag as described above
+#' @export
 format.specials_metadata = function(x, ...) {
   if (!nrow(x)) return('')
 
@@ -97,6 +98,7 @@ format.specials_metadata = function(x, ...) {
 
 # target: msgid [template translation]
 # current: msgstr [received translation]
+#' @export
 all.equal.specials_metadata = function(target, current, ...) {
   if (nrow(target) != nrow(current)) return(gettextf(
     "received %d unique templated arguments + bordering newlines but there are %d in the original",

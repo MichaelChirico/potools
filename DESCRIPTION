@@ -1,17 +1,32 @@
-Package: potools
 Type: Package
+Package: potools
 Title: Tools for Internationalization and Portability in R Packages
 Version: 0.2.3
-Author: Michael Chirico
-Depends: R (>= 4.0.0)
-Imports: data.table
-Suggests: crayon, knitr, mockery, rmarkdown, testthat (>= 3.0.0)
-SystemRequirements: gettext
-Maintainer: Michael Chirico <MichaelChirico4@gmail.com>
-Description: Translating messages in R packages is managed using the po top-level directory and the 'gettext' program. This package provides some helper functions for building this support in R packages, e.g. common validation & I/O tasks.
+Authors@R: 
+    person("Michael", "Chirico", , "MichaelChirico4@gmail.com", role = c("cre", "aut"),
+    person("Hadley", "Wickham", role = "aut"))
+Description: Translating messages in R packages is managed using the po
+    top-level directory and the 'gettext' program. This package provides
+    some helper functions for building this support in R packages, e.g.
+    common validation & I/O tasks.
 License: GPL-3
 URL: https://github.com/MichaelChirico/potools
 BugReports: https://github.com/MichaelChirico/potools/issues
-Encoding: UTF-8
+Depends: 
+    R (>= 4.0.0)
+Imports: 
+    data.table
+Suggests: 
+    crayon,
+    knitr,
+    mockery,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    withr
+VignetteBuilder: 
+    knitr
 Config/testthat/edition: 3
-VignetteBuilder: knitr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+SystemRequirements: gettext

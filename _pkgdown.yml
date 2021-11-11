@@ -1,3 +1,27 @@
 url: https://michaelchirico.github.io/potools
 template:
   bootstrap: 5
+  bslib:
+    primary: "#605246"
+
+reference:
+- title: Translate a package
+  contents:
+  - translate_package
+  - po_extract
+  - po_create
+  - po_compile
+  - po_update
+
+- title: Check messages
+  contents:
+  - starts_with("check_")
+
+- title: Internal helpers
+  contents:
+  - get_message_data
+  - write_po_file
+
+authors:
+  Michael Chirico:
+    href: https://github.com/MichaelChirico

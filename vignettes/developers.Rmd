@@ -181,7 +181,7 @@ The three greetings should be "Bonjour" for morning and afternoon, and "Bonsoir"
 There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon aprés midi is used as a farewell), and the two word English phrases turn into single French words.
 
 If you were translating to [Mongolian](https://twitter.com/khorloobatpurev/status/1458044704130437124) you'd face a different problem.
-While Mongolian uses the same times of day, it arranges the words in the opposite order: "Ogloonii mend" is literally morning greetings, "Odriin mend" is afternoon greetings and "Oroin mend" is evening greetings.
+While Mongolian uses the same times of day, it arranges the words in the opposite order to English: "Ogloonii mend" is morning greetings, "Odriin mend" is afternoon greetings, and "Oroin mend" is evening greetings.
 
 Again, we need to resolve this problem by moving away from translating fragments and towards translating complete sentences.
 One way to do that here would be to restrict ourselves to a fixed set of time points and use `switch()` to specify the greeting:

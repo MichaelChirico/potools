@@ -65,6 +65,8 @@ local_test_package <- function(..., .envir = parent.frame()) {
   temp
 }
 
-standardise_dots <- function(x) {
-  gsub("\\.+", ".", x)
+# different platforms/installations of gettext apparently
+#   produce a different number of "." in "progress" output; normalize
+standardize_dots <- standardise_dots <- function(x) {
+  gsub("\\.{2,}", ".", x)
 }

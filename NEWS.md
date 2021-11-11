@@ -1,4 +1,4 @@
-### v0.2.3 (in development)
+# potools 0.2.3 (in development)
 
  * [Bugfix] `translate_package()` works in batch mode, [#224](https://github.com/MichaelChirico/potools/issues/224). Thanks @HenrikBengtsson for the report.
  * potools has a new hex logo! Thanks to @hadley for coordinating and @allisonhorst for the drawing!
@@ -11,7 +11,7 @@
 
  * Swedish (svenska)
 
-### v0.2.2 (July 2021)
+# potools 0.2.2 (July 2021)
 
 * potools gains a logo featuring a [potoo](https://en.wikipedia.org/wiki/Potoo) thanks to the artistic skills of @allisonhorst
  * Skip tests on machines where `gettext` is unavailable, #187; also alter the `msgfmt` command executed to create .mo files to skip options unavailable on Solaris, #218
@@ -22,6 +22,6 @@
  * [New function] `write_po_file()` to convert a message database to a `.po` or `.pot` file manually (previously this was handled internally by `translate_package()`), #203. Also a constructor for the associated `po_metadata` class, `po_metadata()`. See `?po_metadata`.
  * [Bugfix] `get_message_data()` does a better job on files with unmatched parentheses inside preprocessor macros (`#define`s) in C/C++ files, #199
 
-### v0.2.0 (June 2021)
+# potools 0.2.0 (June 2021)
 
  * Landed on CRAN!

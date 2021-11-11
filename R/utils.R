@@ -194,4 +194,4 @@ is_testing = function() identical(Sys.getenv("TESTTHAT"), "true")
 is_gnu_gettext = function() any(grepl("GNU gettext", system('gettext --version', intern=TRUE)))
 
 # wrapper function to facilitate mocking, else tests --> stochastic output
-get_atime <- function(f) format(file.info(f, extra_cols = FALSE)$atime)
+get_atime <- function(f) format(file.info(f, extra_cols = FALSE)$atime) # nocov. Always mocked in tests.

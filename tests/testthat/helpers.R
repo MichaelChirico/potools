@@ -69,12 +69,12 @@ normalize_output <- function(x) {
   x <- gsub("\\.{2,}", ".", x)
 
   # en@quot translations are not produced on Windows (as of now)
-  idx <- grep("Generating en@quot translations", x, fixed = TRUE)
+  x <- grep("Generating en@quot translations", x, fixed = TRUE, invert = TRUE, value = TRUE)
+
+  # this is produced alongside the previous message, but in a different iteration of transform()
+  idx <- grep("running msgfmt on (?:R-)?en@quot\\.po", x)
   if (length(idx)) {
-    if (grepl("running msgfmt.*en@quot\\.po", x[idx + 1L])) {
-      idx <- idx + 0:2
-    }
-    x <- x[-idx]
+    x <- x[-(idx + 0:1)]
   }
   x
 }

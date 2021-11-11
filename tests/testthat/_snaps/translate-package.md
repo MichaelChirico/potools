@@ -30,8 +30,7 @@
       Running message diagnostics.
       Writing R-rMsg.pot
       
-      running msgfmt on R-en@quot.po succeeded; output:
-        5 translated messages.
+      
       No languages provided; finishing
 
 ---
@@ -44,8 +43,7 @@
       Running message diagnostics.
       Writing R-rMsg.pot
       
-      running msgfmt on R-en@quot.po succeeded; output:
-        5 translated messages.
+      
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 6 untranslated messages
       (To quit translating, press 'Esc'; progress will be saved)
     Output
@@ -109,8 +107,7 @@
       Running message diagnostics.
       Writing R-rMsg.pot
       
-      running msgfmt on R-en@quot.po succeeded; output:
-        5 translated messages.
+      
       Found existing R translations for fa (Farsi/فارسی) in ./po/R-fa.po. Running msgmerge.
       . done.
       Translations for fa are up to date! Skipping.
@@ -128,8 +125,7 @@
       Running message diagnostics.
       Writing R-rFuzzyMsg.pot
       
-      running msgfmt on R-en@quot.po succeeded; output:
-        3 translated messages.
+      
       Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge.
       . done.
       Found 2 translations marked as deprecated in ./po/R-zh_CN.po.
@@ -561,10 +557,8 @@
       Running message diagnostics.
       Writing R-rSrcFuzzyMsg.pot
       
-      running msgfmt on R-en@quot.po succeeded; output:
-        1 translated message.
-      running msgfmt on en@quot.po succeeded; output:
-        2 translated messages.
+      
+      
       Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge.
       . done.
       Found existing src translations for zh_CN (Mainland Chinese/普通话) in ./po/zh_CN.po. Running msgmerge.

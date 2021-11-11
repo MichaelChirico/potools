@@ -5,4 +5,7 @@
 ^\.Rproj\.user$
 
 ^\.sandbox$
-^vignettes/articles$
+^codecov\.yml$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

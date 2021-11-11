@@ -5,7 +5,7 @@
 #   default by xgettext, etc (unless --no-location is set, or if --add-location=never).
 # note also that the gettext manual says we shouldn't write these ourselves... for now i'm
 #   going to go ahead and try to anyway until it breaks something :)
-write_po_files <- function(message_data, po_dir, params, template = FALSE, use_base_rules = FALSE) {
+write_po_files <- function(message_data, po_dir, params, template = FALSE, use_base_rules = FALSE, verbose = TRUE) {
   if (template) {
     r_file <- sprintf("R-%s.pot", params$package)
     src_file <- sprintf("%s.pot", if (params$package == 'base') 'R' else params$package)
@@ -32,6 +32,9 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
       `X-Generator` = sprintf("potools %s", packageVersion("potools"))
     ))
   }
+
+  if (verbose) messagef('Writing %s', r_file)
+
   write_po_file(
     message_data[message_source == "R"],
     file.path(po_dir, r_file),
@@ -53,6 +56,122 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   return(invisible())
 }
 
+
+
+#' Write a .po or .pot file corresponding to a message database
+#'
+#' Serialize a message database in the \file{.po} and \file{.pot} formats
+#' recognized by the gettext ecosystem.
+#'
+#' Three components are set automatically if not provided:
+#'
+#' * `pot_timestamp` - A `POSIXct` used to write the
+#'   `POT-Creation-Date` entry. Defaults to the [Sys.time()] at
+#'   run time.
+#' * `po_timestamp` - A `POSIXct` used to write the
+#'   `PO-Revision-Date` entry. Defaults to be the same as
+#'   `pot_timestamp`.
+#' *  `language_team` - A string used to write
+#'    the `Language-Team` entry. Defaults to be the same as `language`;
+#'    if provided manually, the format `LANGUAGE <LL@li.org>` is recommended.
+#'
+#' The `charset` for output is always set to `"UTF-8"`; this is
+#' intentional to make it more cumbersome to create non-UTF-8 files.
+#'
+#' @aliases write_po_file po_metadata format.po_metadata print.po_metadata
+#' @param message_data `data.table`, as returned from
+#' [get_message_data()]. NB: R creates separate domains for R and
+#' C/C++ code; it is recommended you do the same by filtering the
+#' `get_message_data` output for `message_source == "R"` or
+#' `message_source == "src"`. Other approaches are untested.
+#' @param po_file Character vector giving a destination path. Paths ending in
+#' \file{.pot} will be written with template files (e.g., `msgstr` entries
+#' will be blanked).
+#' @param metadata A `po_metadata` object as returned by
+#' `po_metadata()`.
+#' @param width Numeric governing the wrapping width of the output file.
+#' Default is `79L` to match the behavior of the `xgettext` utility.
+#' `Inf` turns off wrapping (except for file source markers comments).
+#' @param wrap_at_newline Logical, default `TRUE` to match the
+#' `xgettext` utility's behavior. If `TRUE`, any `msgid` or
+#' `msgstr` will always be wrapped at an internal newline (i.e., literally
+#' matching `\n`).
+#' @param use_base_rules Logical; Should internal behavior match base behavior
+#' as strictly as possible? `TRUE` if being run on a base package (i.e.,
+#' `base` or one of the default packages like `utils`,
+#' `graphics`, etc.). See Details.
+#' @param package Character; the name of the package being translated.
+#' @param version Character; the version of the package being translated.
+#' @param language Character; the language of the `msgstr`. See
+#' [translate_package()] for details.
+#' @param author Character; an author (combined with `email`) to whom to
+#' attribute the translations (as `Last-Translator`).
+#' @param email Character; an e-mail address associated with `author`.
+#' @param bugs Character; a URL where issues with the translations can be
+#' reported.
+#' @param copyright An object used to construct the initial Copyright reference
+#' in the output. If `NULL`, no such comment is written. If a `list`,
+#' it should the following structure:
+#'
+#'   * `year`: Required, A year or hyphen-separated range of years
+#'   * `holder`: Required, The name of the copyright holder
+#'   * `title`: Optional, A title for the \file{.po}
+#'   * `additional`: Optional, A character vector of additional lines for the
+#'      copyright comment section
+#'
+#' If a `character` scalar, it is interpreted as the `holder` and the `year`
+#' is set as the `POT-Creation-Date`'s year.
+#' @param ...  Additional (named) components to add to the metadata. For
+#' `print.po_metadata`, passed on to `format.po_metadata`
+#' @param x A `po_metadata` object.
+#' @param template Logical; format the metadata as in a \file{.pot} template?
+#' @param use_plurals Logical; should the `Plural-Forms` entry be
+#' included?
+#' @return For `po_metadata`, an object of class `po_metadata` that
+#' has a `format` method used to serialize the metadata.
+#' @author Michael Chirico
+#' @seealso [translate_package()], [get_message_data()],
+#' [tools::xgettext2pot()], [tools::update_pkg_po()]
+#' @references
+#' <https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html>
+#' \cr
+#' @examples
+#'
+#' message_data <- get_message_data(system.file('pkg', package='potools'))
+#' desc_data <- read.dcf(system.file('pkg', 'DESCRIPTION', package='potools'), c('Package', 'Version'))
+#' metadata <- po_metadata(
+#'   package = desc_data[, "Package"], version = desc_data[, "Version"],
+#'   language = 'ar_SY', author = 'R User', email = 'ruser@gmail.com',
+#'   bugs = 'https://github.com/ruser/potoolsExample/issues'
+#' )
+#'
+#' # add fake translations
+#' message_data[type == "singular", msgstr := "<arabic translation>"]
+#' # Arabic has 6 plural forms
+#' message_data[type == "plural", msgstr_plural := .(as.list(sprintf("<%d translation>", 0:5)))]
+#'
+#' # Preview metadata
+#' print(metadata)
+#' # write .po file
+#' write_po_file(
+#'   message_data[message_source == "R"],
+#'   tmp_po <- tempfile(fileext = '.po'),
+#'   metadata
+#' )
+#' writeLines(readLines(tmp_po))
+#'
+#' # write .pot template
+#' write_po_file(
+#'   message_data[message_source == "R"],
+#'   tmp_pot <- tempfile(fileext = '.pot'),
+#'   metadata
+#' )
+#' writeLines(readLines(tmp_pot))
+#'
+#' # cleanup
+#' file.remove(tmp_po, tmp_pot)
+#' rm(message_data, desc_data, metadata, tmp_po, tmp_pot)
+#' @export
 write_po_file <- function(
   message_data, po_file, metadata,
   width = 79L, wrap_at_newline = TRUE,
@@ -276,6 +395,8 @@ make_src_location <- function(files, lines, message_source, use_base_rules) {
 }
 
 # See https://www.gnu.org/software/gettext/manual/html_node/Header-Entry.html
+#' @rdname write_po_file
+#' @export
 po_metadata = function(package='', version='', language='', author='', email='', bugs='', copyright = NULL, ...) {
   stopifnot(
     "copyright should be empty, a single name, or a list of components" =
@@ -290,6 +411,8 @@ po_metadata = function(package='', version='', language='', author='', email='',
   pm
 }
 
+#' @rdname write_po_file
+#' @export
 format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   if (template) {
     x$po_timestamp = "YEAR-MO-DA HO:MI+ZONE"
@@ -346,6 +469,8 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   )
 }
 
+#' @rdname write_po_file
+#' @export
 print.po_metadata = function(x, ...) writeLines(format(x, ...))
 
 # apply format(), if the input is a timestamp. to flexibly allow po_timestamp to be a string or a POSIXct

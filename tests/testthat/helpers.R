@@ -48,3 +48,25 @@ expect_messages = function(expr, msgs, ..., invert=FALSE) {
 
 test_package = function(pkg) test_path(file.path("test_packages", pkg))
 mock_translation = function(mocks) test_path(file.path("mock_translations", mocks))
+
+local_test_package <- function(..., .envir = parent.frame()) {
+  temp <- withr::local_tempdir(.local_envir = .envir)
+  writeLines(con = file.path(temp, "DESCRIPTION"), c(
+    "Package: test",
+    "Version: 1.0.0"
+  ))
+  dir_create(file.path(temp, c("po", "R")))
+
+  files <- list(...)
+  for (i in seq_along(files)) {
+    writeLines(files[[i]], file.path(temp, names(files)[[i]]))
+  }
+
+  temp
+}
+
+# different platforms/installations of gettext apparently
+#   produce a different number of "." in "progress" output; normalize
+standardize_dots <- standardise_dots <- function(x) {
+  gsub("\\.{2,}", ".", x)
+}

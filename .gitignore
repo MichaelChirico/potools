@@ -9,6 +9,5 @@ potools.Rcheck
 potools_*.tar.gz
 
 tests/testthat/testthat-problems.rds
-# vim? partial? files?
-*.po~
 inst/doc
+docs

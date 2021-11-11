@@ -43,7 +43,7 @@ test_that("translate_package works on a simple package", {
     {
       expect_messages(
         translate_package(pkg, verbose=TRUE),
-        c("Generating .pot files", "No languages provided"),
+        c("No languages provided"),
         fixed = TRUE
       )
 
@@ -69,7 +69,7 @@ test_that("translate_package works on a simple package", {
     {
       expect_messages(
         translate_package(pkg, "zh_CN", verbose=TRUE),
-        c("Beginning new translations", "BEGINNING TRANSLATION", '"Installing" translations with msgfmt'),
+        c("Beginning new translations", "BEGINNING TRANSLATION", "Recompiling 'zh_CN' R translation"),
         fixed = TRUE
       )
 

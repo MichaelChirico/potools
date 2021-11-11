@@ -20,17 +20,17 @@ test_that("translate_package arg checking errors work", {
 })
 
 with_restoration_test_that("translate_package handles empty packages", "no_msg", {
-  expect_snapshot(translate_package())
-  expect_snapshot(translate_package(verbose=TRUE))
+  expect_normalized_snapshot(translate_package())
+  expect_normalized_snapshot(translate_package(verbose=TRUE))
 })
 
 with_restoration_test_that("translate_package handles a data package (no R dir)", "r_data_pkg", {
-  expect_snapshot(translate_package(verbose=TRUE))
+  expect_normalized_snapshot(translate_package(verbose=TRUE))
 })
 
 with_restoration_test_that("translate_package works on a simple package w/o translating", "r_msg", {
   mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
-  expect_snapshot(translate_package(verbose = TRUE))
+  expect_normalized_snapshot(translate_package(verbose = TRUE))
 
   pkg_files <- list.files(recursive=TRUE)
 
@@ -53,7 +53,7 @@ with_restoration_test_that(
   conn = "test-translate-package-r_msg-1.input",
   {
     mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
-    expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
+    expect_normalized_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
 
     pkg_files <- list.files(recursive = TRUE)
 
@@ -74,7 +74,7 @@ with_restoration_test_that(
   pkg = "r_msg",
   code = {
     mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
-    expect_snapshot(translate_package(languages="fa", verbose=TRUE))
+    expect_normalized_snapshot(translate_package(languages="fa", verbose=TRUE))
   }
 )
 
@@ -84,7 +84,7 @@ with_restoration_test_that(
   conn = "test-translate-package-r_fuzzy-1.input",
   code = {
     mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
-    expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
+    expect_normalized_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
   }
 )
 
@@ -93,7 +93,7 @@ with_restoration_test_that(
   "translate_package identifies potential translations in cat() calls",
   pkg = "r_cat_msg",
   conn = "test-translate-package-r_cat_message-1.input",
-  code = expect_snapshot(translate_package(languages = "zh_CN"))
+  code = expect_normalized_snapshot(translate_package(languages = "zh_CN"))
 )
 
 # NB: this test will fail if test_that is re-run on the same R session since potools'
@@ -105,7 +105,7 @@ with_restoration_test_that(
   # earlier, did Arabic, but now that's an included language. switched two Welsh on the
   #   (perhaps naive) judgment that it's unlikely to enter our scope anytime soon
   #   and because there are still several (4) plural forms
-  code = expect_snapshot(translate_package(languages = 'cy'))
+  code = expect_normalized_snapshot(translate_package(languages = 'cy'))
 )
 
 # #183
@@ -114,21 +114,21 @@ with_restoration_test_that(
   pkg = "r_msg",
   conn = "test-translate-package-r_msg-5.input",
   # Catalan -- romance language with >1 plural
-  code = expect_snapshot(translate_package(languages='ca', diagnostics=NULL))
+  code = expect_normalized_snapshot(translate_package(languages='ca', diagnostics=NULL))
 )
 
 with_restoration_test_that(
   'Erroneous messages stop get_specials_metadata (mixed use of template redirects)',
   pkg = "r_msg",
   conn = 'test-translate-package-r_msg-3.input',
-  code = expect_snapshot(translate_package(languages='zh_CN', diagnostics=NULL), error=TRUE)
+  code = expect_normalized_snapshot(translate_package(languages='zh_CN', diagnostics=NULL), error=TRUE)
 )
 
 with_restoration_test_that(
   'Erroneous messages stop get_specials_metadata (duplicate redirects with different formatters)',
   pkg = "r_msg",
   conn = 'test-translate-package-r_msg-4.input',
-  code = expect_snapshot(translate_package(languages='zh_CN', diagnostics=NULL), error=TRUE)
+  code = expect_normalized_snapshot(translate_package(languages='zh_CN', diagnostics=NULL), error=TRUE)
 )
 
 with_restoration_test_that(
@@ -136,7 +136,7 @@ with_restoration_test_that(
   pkg = "r_src_c",
   conn = 'test-translate-package-r_src_c-1.input',
   {
-    expect_snapshot(translate_package(languages="zh_CN", diagnostics = check_untranslated_src))
+    expect_normalized_snapshot(translate_package(languages="zh_CN", diagnostics = check_untranslated_src))
 
     pkg_files <- list.files(recursive = TRUE)
     expect_true("po/R-zh_CN.po" %in% pkg_files)
@@ -187,7 +187,7 @@ with_restoration_test_that(
   conn = 'test-translate-package-r_src_fuzzy-1.input',
   code = {
     mockery::stub(translate_package, "get_atime", "0000-01-01 00:00:00")
-    expect_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
+    expect_normalized_snapshot(translate_package(languages="zh_CN", verbose=TRUE))
   }
 )
 
@@ -269,7 +269,7 @@ with_restoration_test_that(
   pkg = "unusual_msg",
   conn = "test-translate-package-unusual_msg-1.input",
   {
-    expect_snapshot(translate_package(languages="es", copyright="Mata Hari", diagnostics=NULL))
+    expect_normalized_snapshot(translate_package(languages="es", copyright="Mata Hari", diagnostics=NULL))
 
     r_pot_lines <- readLines(file.path("po", "R-rMsgUnusual.pot"))
     src_pot_lines <- readLines(file.path("po", "rMsgUnusual.pot"))
@@ -309,7 +309,7 @@ with_restoration_test_that(
   pkg = "unusual_msg",
   conn = "test-translate-package-unusual_msg-1.input",
   {
-    expect_snapshot(translate_package(languages = "es", use_base_rules = TRUE, diagnostics = NULL))
+    expect_normalized_snapshot(translate_package(languages = "es", use_base_rules = TRUE, diagnostics = NULL))
     r_pot_lines <- readLines(file.path("po", "R-rMsgUnusual.pot"))
     src_pot_lines <- readLines(file.path("po", "rMsgUnusual.pot"))
 
@@ -444,5 +444,5 @@ with_restoration_test_that(
   "max_translations works as expected",
   pkg = "r_msg",
   conn = 'test-translate-package-r_msg-1.input',
-  code = expect_snapshot(translate_package(languages='es', max_translations = 1L, diagnostics = NULL))
+  code = expect_normalized_snapshot(translate_package(languages='es', max_translations = 1L, diagnostics = NULL))
 )

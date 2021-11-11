@@ -9,8 +9,7 @@
       translate_package(verbose = TRUE)
     Message <simpleMessage>
       Starting translations for package 'noMsg'
-      Getting R-level messages...
-      Getting src-level messages...
+      Getting R-level messages.
       No messages to translate; finishing
 
 ---
@@ -19,8 +18,6 @@
       translate_package(verbose = TRUE)
     Message <simpleMessage>
       Starting translations for package 'rDataPkg'
-      Getting R-level messages...
-      Getting src-level messages...
       No messages to translate; finishing
 
 ---
@@ -29,10 +26,9 @@
       translate_package(verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
-      Getting R-level messages...
-      Getting src-level messages...
-      Running message diagnostics...
-      Generating .pot files...
+      Getting R-level messages.
+      Running message diagnostics.
+      Writing R-rMsg.pot
       Generating en@quot translations
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
@@ -44,10 +40,9 @@
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
-      Getting R-level messages...
-      Getting src-level messages...
-      Running message diagnostics...
-      Generating .pot files...
+      Getting R-level messages.
+      Running message diagnostics.
+      Writing R-rMsg.pot
       Generating en@quot translations
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
@@ -99,9 +94,8 @@
                       
       How would you translate this message into Mainland Chinese independently of n?
     Message <simpleMessage>
-      "Installing" translations with msgfmt
-      running msgfmt on R-fa.po succeeded; output:
-        5 translated messages.
+      Writing R-zh_CN.po
+      Recompiling 'zh_CN' R translation
       running msgfmt on R-zh_CN.po succeeded; output:
         5 translated messages.
 
@@ -111,18 +105,16 @@
       translate_package(languages = "fa", verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rMsg' (last updated 0000-01-01 00:00:00)
-      Getting R-level messages...
-      Getting src-level messages...
-      Running message diagnostics...
-      Generating .pot files...
+      Getting R-level messages.
+      Running message diagnostics.
+      Writing R-rMsg.pot
       Generating en@quot translations
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
-      Found existing R translations for fa (Farsi/فارسی) in ./po/R-fa.po. Running msgmerge...
-      Running msgmerge on './po/R-fa.po' succeeded:
-        ...... done.
+      Found existing R translations for fa (Farsi/فارسی) in ./po/R-fa.po. Running msgmerge.
+      . done.
       Translations for fa are up to date! Skipping.
-      "Installing" translations with msgfmt
+      Recompiling 'fa' R translation
       running msgfmt on R-fa.po succeeded; output:
         5 translated messages.
 
@@ -132,16 +124,14 @@
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rFuzzyMsg' (last updated 0000-01-01 00:00:00)
-      Getting R-level messages...
-      Getting src-level messages...
-      Running message diagnostics...
-      Generating .pot files...
+      Getting R-level messages.
+      Running message diagnostics.
+      Writing R-rFuzzyMsg.pot
       Generating en@quot translations
       running msgfmt on R-en@quot.po succeeded; output:
         3 translated messages.
-      Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge...
-      Running msgmerge on './po/R-zh_CN.po' succeeded:
-        ..... done.
+      Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge.
+      . done.
       Found 2 translations marked as deprecated in ./po/R-zh_CN.po.
       Typically, this means the corresponding error messages have been refactored.
       Reproducing these messages here for your reference since they might still provide some utility.
@@ -160,7 +150,7 @@
       big fail\n
       失败了\n
     Message <simpleMessage>
-      Beginning new translations for zh_CN (Mainland Chinese/普通话); found 3 untranslated messages
+      Beginning new translations for zh_CN (Mainland Chinese/普通话); found 2 untranslated messages
       (To quit translating, press 'Esc'; progress will be saved)
     Output
       Thanks! Who should be credited with these translations?
@@ -179,14 +169,6 @@
     Output
       
       File: foo.R
-      Call: warning("I warned you!!")
-      Message: I warned you!!
-               
-      How would you translate this message into Mainland Chinese?
-       **Note: a similar message was previously translated as: **
-      已经告诉你！
-      
-      File: foo.R
       Call: stop("I really wish you'd reconsider")
       Message: I really wish you'd reconsider
                
@@ -198,7 +180,8 @@
                       
       How would you translate this message into Mainland Chinese independently of n?
     Message <simpleMessage>
-      "Installing" translations with msgfmt
+      Writing R-zh_CN.po
+      Recompiling 'zh_CN' R translation
       running msgfmt on R-zh_CN.po succeeded; output:
         3 translated messages.
 
@@ -240,6 +223,7 @@
     Code
       translate_package(languages = "cy")
     Message <simpleMessage>
+      Writing R-rMsg.pot
       Generating en@quot translations
       'cy' is not a known language. 
       Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
@@ -293,7 +277,7 @@
       How would you translate this message into Welsh?
       
       
-      ** Oops! Invalid translation -- received the same set of templates + bordering newlines, but in incorrect order ([%.02f, %d, %s] vs [%.02f, %s, %d]). Recall that you can use %$N to do redirect, e.g. to swap the order of '%d %s' to be translated more naturally, your translation can use '%1$s %2$d'. Retrying... **
+      ** Oops! Invalid translation -- received the same set of templates + bordering newlines, but in incorrect order ([%.02f, %d, %s] vs [%.02f, %s, %d]). Recall that you can use %$N to do redirect, e.g. to swap the order of '%d %s' to be translated more naturally, your translation can use '%1$s %2$d'. Retrying. **
       
       File: foo.R
       Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
@@ -302,7 +286,7 @@
       How would you translate this message into Welsh?
       
       
-      ** Oops! Invalid translation -- received templates + bordering newlines not present in the original: %s. Retrying... **
+      ** Oops! Invalid translation -- received templates + bordering newlines not present in the original: %s. Retrying. **
       
       File: foo.R
       Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
@@ -311,7 +295,7 @@
       How would you translate this message into Welsh?
       
       
-      ** Oops! Invalid translation -- received the same set of templates + bordering newlines, but in incorrect order ([%.02f, %d, %s] vs [%1$.02f, %2$s, %3$d]). Recall that you can use %$N to do redirect, e.g. to swap the order of '%d %s' to be translated more naturally, your translation can use '%1$s %2$d'. Retrying... **
+      ** Oops! Invalid translation -- received the same set of templates + bordering newlines, but in incorrect order ([%.02f, %d, %s] vs [%1$.02f, %2$s, %3$d]). Recall that you can use %$N to do redirect, e.g. to swap the order of '%d %s' to be translated more naturally, your translation can use '%1$s %2$d'. Retrying. **
       
       File: foo.R
       Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
@@ -320,7 +304,7 @@
       How would you translate this message into Welsh?
       
       
-      ** Oops! Invalid translation -- received 2 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
+      ** Oops! Invalid translation -- received 2 unique templated arguments + bordering newlines but there are 3 in the original. Retrying. **
       
       File: foo.R
       Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
@@ -329,7 +313,7 @@
       How would you translate this message into Welsh?
       
       
-      ** Oops! Invalid translation -- received 4 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
+      ** Oops! Invalid translation -- received 4 unique templated arguments + bordering newlines but there are 3 in the original. Retrying. **
       
       File: foo.R
       Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
@@ -338,7 +322,7 @@
       How would you translate this message into Welsh?
       
       
-      ** Oops! Invalid translation -- received 5 unique templated arguments + bordering newlines but there are 3 in the original. Retrying... **
+      ** Oops! Invalid translation -- received 5 unique templated arguments + bordering newlines but there are 3 in the original. Retrying. **
       
       File: foo.R
       Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
@@ -369,12 +353,15 @@
       Plural message: small fail
                       
       How would you translate this message into Welsh for n where 'plural' resolves to 3?
+    Message <simpleMessage>
+      Writing R-cy.po
 
 ---
 
     Code
       translate_package(languages = "ca", diagnostics = NULL)
     Message <simpleMessage>
+      Writing R-rMsg.pot
       Generating en@quot translations
       'ca' is not a known language. 
       Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
@@ -424,12 +411,15 @@
       Plural message: small fail
                       
       How would you translate this message into Catalan when n is not 1?
+    Message <simpleMessage>
+      Writing R-ca.po
 
 ---
 
     Code
       translate_package(languages = "zh_CN", diagnostics = NULL)
     Message <simpleMessage>
+      Writing R-rMsg.pot
       Generating en@quot translations
     Output
       Thanks! Who should be credited with these translations?
@@ -462,12 +452,15 @@
       Invalid templated message. If any %N$ redirects are used, all templates must be redirected.
       	Redirected tempates: %1$d
       	 Un-redirected templates: %d
+    Message <simpleMessage>
+      Writing R-zh_CN.po
 
 ---
 
     Code
       translate_package(languages = "zh_CN", diagnostics = NULL)
     Message <simpleMessage>
+      Writing R-rMsg.pot
       Generating en@quot translations
     Output
       Thanks! Who should be credited with these translations?
@@ -498,12 +491,15 @@
       How would you translate this message into Mainland Chinese?
     Error <simpleError>
       Invalid templated message string with redirects -- all messages pointing to the same input must have identical formats, but received [%1$s, %1$d]
+    Message <simpleMessage>
+      Writing R-zh_CN.po
 
 ---
 
     Code
       translate_package(languages = "zh_CN", diagnostics = check_untranslated_src)
     Message <simpleMessage>
+      Writing R-rSrcMsg.pot
       Generating en@quot translations
     Output
       Thanks! Who should be credited with these translations?
@@ -551,6 +547,8 @@
       Plural message: singular %d
                                ^^
       How would you translate this message into Mainland Chinese independently of n?
+    Message <simpleMessage>
+      Writing R-zh_CN.po
 
 ---
 
@@ -558,66 +556,33 @@
       translate_package(languages = "zh_CN", verbose = TRUE)
     Message <simpleMessage>
       Updating translation template for package 'rSrcFuzzyMsg' (last updated 0000-01-01 00:00:00)
-      Getting R-level messages...
-      Getting src-level messages...
-      Running message diagnostics...
-      Generating .pot files...
+      Getting R-level messages.
+      Getting src-level messages.
+      Running message diagnostics.
+      Writing R-rSrcFuzzyMsg.pot
       Generating en@quot translations
       running msgfmt on R-en@quot.po succeeded; output:
         1 translated message.
       running msgfmt on en@quot.po succeeded; output:
         2 translated messages.
-      Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge...
-      Running msgmerge on './po/R-zh_CN.po' succeeded:
-        .. done.
-      Found existing src translations for zh_CN (Mainland Chinese/普通话) in ./po/zh_CN.po. Running msgmerge...
-      Running msgmerge on './po/zh_CN.po' succeeded:
-        ..... done.
-      Beginning new translations for zh_CN (Mainland Chinese/普通话); found 2 untranslated messages
-      (To quit translating, press 'Esc'; progress will be saved)
-    Output
-      Thanks! Who should be credited with these translations?
-      And what is their email?
-    Message <simpleMessage>
-      ***************************
-      ** BEGINNING TRANSLATION **
-      ***************************
-      
-      Some helpful reminders:
-       * You can skip a translation by entering nothing (just press RETURN)
-       * Special characters (like newlines, \n, or tabs, \t) should be written just like that (with an escape)
-       * Be sure to match message templates. The count of templates (%s, %d, etc.) must match in all languages, as must initial and terminal newlines (\n)
-       * While the count of templates must match, the _order_ can be changed by using e.g. %2$s to mean 'use the second input as a string here'
-       * Whenever templates or escaping is happening in a string, these will be 'highlighted' by carets (^) in the line below
-    Output
-      
-      File: src.c
-      Call: error(_("I really wish you'd do something else"))
-      Message: I really wish you'd do something else
-               
-      How would you translate this message into Mainland Chinese?
-       **Note: a similar message was previously translated as: **
-      失败了
-      
-      File: src.c
-      Call: Rprintf(_("Here's what is wrong: %s %s\n"), "a", "b")
-      Message: Here's what is wrong: %s %s\n
-                                     ^^ ^^^^
-      How would you translate this message into Mainland Chinese?
-       **Note: a similar message was previously translated as: **
-      当然%s %s\n
-    Message <simpleMessage>
-      "Installing" translations with msgfmt
+      Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge.
+      . done.
+      Found existing src translations for zh_CN (Mainland Chinese/普通话) in ./po/zh_CN.po. Running msgmerge.
+      . done.
+      Translations for zh_CN are up to date! Skipping.
+      Recompiling 'zh_CN' R translation
       running msgfmt on R-zh_CN.po succeeded; output:
         1 translated message.
+      Recompiling 'zh_CN' src translation
       running msgfmt on zh_CN.po succeeded; output:
-        2 translated messages.
+        0 translated messages, 2 fuzzy translations.
 
 ---
 
     Code
       translate_package(languages = "es", copyright = "Mata Hari", diagnostics = NULL)
     Message <simpleMessage>
+      Writing R-rMsgUnusual.pot
       Generating en@quot translations
     Output
       Thanks! Who should be credited with these translations?
@@ -959,12 +924,15 @@
       Message: any new message
                
       How would you translate this message into Spanish?
+    Message <simpleMessage>
+      Writing R-es.po
 
 ---
 
     Code
       translate_package(languages = "es", use_base_rules = TRUE, diagnostics = NULL)
     Message <simpleMessage>
+      Writing R-rMsgUnusual.pot
       Generating en@quot translations
     Output
       Thanks! Who should be credited with these translations?
@@ -1306,12 +1274,15 @@
       Message: any new message
                
       How would you translate this message into Spanish?
+    Message <simpleMessage>
+      Writing R-es.po
 
 ---
 
     Code
       translate_package(languages = "es", max_translations = 1L, diagnostics = NULL)
     Message <simpleMessage>
+      Writing R-rMsg.pot
       Generating en@quot translations
     Output
       Thanks! Who should be credited with these translations?
@@ -1322,4 +1293,6 @@
       Message: I warned you!
                
       How would you translate this message into Spanish?
+    Message <simpleMessage>
+      Writing R-es.po
 

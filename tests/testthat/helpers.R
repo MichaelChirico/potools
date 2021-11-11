@@ -68,3 +68,5 @@ local_test_package <- function(..., .envir = parent.frame()) {
 standardize_dots <- standardise_dots <- function(x) {
   gsub("\\.{2,}", ".", x)
 }
+
+expect_normalized_snapshot <- function(...) expect_snapshot(..., transform = standardize_dots)

@@ -16,7 +16,7 @@
 #'     #, fuzzy, c-format
 #'     #| msgid "Generating en@quot translations"
 #'     msgid "Updating '%s' %s translation"
-#'     msgstr "en@quot翻訳生成中。。。"
+#'     msgstr "memperbarui terjemahan bahasa en@quot..."
 #'     ```
 #'
 #'     The previous message is given in comments starting with `#|`.

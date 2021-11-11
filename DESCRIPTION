@@ -10,7 +10,8 @@ Description: Translating messages in R packages is managed using the po
     some helper functions for building this support in R packages, e.g.
     common validation & I/O tasks.
 License: GPL-3
-URL: https://github.com/MichaelChirico/potools
+URL: https://github.com/MichaelChirico/potools,
+    https://michaelchirico.github.io/potools
 BugReports: https://github.com/MichaelChirico/potools/issues
 Depends: 
     R (>= 4.0.0)

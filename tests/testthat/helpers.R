@@ -63,10 +63,20 @@ local_test_package <- function(..., .envir = parent.frame()) {
   temp
 }
 
-# different platforms/installations of gettext apparently
-#   produce a different number of "." in "progress" output; normalize
-standardize_dots <- standardise_dots <- function(x) {
-  gsub("\\.{2,}", ".", x)
+normalize_output <- function(x) {
+  # different platforms/installations of gettext apparently
+  #   produce a different number of "." in "progress" output; normalize
+  x <- gsub("\\.{2,}", ".", x)
+
+  # en@quot translations are not produced on Windows (as of now)
+  idx <- grep("Generating en@quot translations", x, fixed = TRUE)
+  if (length(idx)) {
+    if (grepl("running msgfmt.*en@quot\\.po", x[idx + 1L])) {
+      idx <- idx + 0:2
+    }
+    x <- x[-idx]
+  }
+  x
 }
 
-expect_normalized_snapshot <- function(...) expect_snapshot(..., transform = standardize_dots)
+expect_normalized_snapshot <- function(...) expect_snapshot(..., transform = normalize_output)

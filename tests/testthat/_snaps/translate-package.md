@@ -29,7 +29,7 @@
       Getting R-level messages.
       Running message diagnostics.
       Writing R-rMsg.pot
-      Generating en@quot translations
+      
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
       No languages provided; finishing
@@ -43,7 +43,7 @@
       Getting R-level messages.
       Running message diagnostics.
       Writing R-rMsg.pot
-      Generating en@quot translations
+      
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 6 untranslated messages
@@ -108,7 +108,7 @@
       Getting R-level messages.
       Running message diagnostics.
       Writing R-rMsg.pot
-      Generating en@quot translations
+      
       running msgfmt on R-en@quot.po succeeded; output:
         5 translated messages.
       Found existing R translations for fa (Farsi/فارسی) in ./po/R-fa.po. Running msgmerge.
@@ -127,7 +127,7 @@
       Getting R-level messages.
       Running message diagnostics.
       Writing R-rFuzzyMsg.pot
-      Generating en@quot translations
+      
       running msgfmt on R-en@quot.po succeeded; output:
         3 translated messages.
       Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge.
@@ -224,7 +224,7 @@
       translate_package(languages = "cy")
     Message <simpleMessage>
       Writing R-rMsg.pot
-      Generating en@quot translations
+      
       'cy' is not a known language. 
       Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
     Output
@@ -362,7 +362,7 @@
       translate_package(languages = "ca", diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsg.pot
-      Generating en@quot translations
+      
       'ca' is not a known language. 
       Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
     Output
@@ -420,7 +420,7 @@
       translate_package(languages = "zh_CN", diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsg.pot
-      Generating en@quot translations
+      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -461,7 +461,7 @@
       translate_package(languages = "zh_CN", diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsg.pot
-      Generating en@quot translations
+      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -500,7 +500,7 @@
       translate_package(languages = "zh_CN", diagnostics = check_untranslated_src)
     Message <simpleMessage>
       Writing R-rSrcMsg.pot
-      Generating en@quot translations
+      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -560,7 +560,7 @@
       Getting src-level messages.
       Running message diagnostics.
       Writing R-rSrcFuzzyMsg.pot
-      Generating en@quot translations
+      
       running msgfmt on R-en@quot.po succeeded; output:
         1 translated message.
       running msgfmt on en@quot.po succeeded; output:
@@ -583,7 +583,7 @@
       translate_package(languages = "es", copyright = "Mata Hari", diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsgUnusual.pot
-      Generating en@quot translations
+      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -933,7 +933,7 @@
       translate_package(languages = "es", use_base_rules = TRUE, diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsgUnusual.pot
-      Generating en@quot translations
+      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -1283,7 +1283,7 @@
       translate_package(languages = "es", max_translations = 1L, diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsg.pot
-      Generating en@quot translations
+      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?

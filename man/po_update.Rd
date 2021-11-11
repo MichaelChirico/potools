@@ -22,15 +22,17 @@ There are four cases:
 \itemize{
 \item New messages: added with blank \code{msgstr}.
 \item Deleted messages: marked as deprecated and moved to the bottom of the file.
-\item Major changes to existing messages: appear as a addition and a deletion.
+\item Major changes to existing messages: appear as an addition and a deletion.
 \item Minor changes to existing messages: will be flagged as fuzzy.\preformatted{#, fuzzy, c-format
 #| msgid "Generating en@quot translations"
 msgid "Updating '\%s' \%s translation"
-msgstr "en@quot翻訳生成中。。。"
+msgstr "memperbarui terjemahan bahasa en@quot..."
 }
 
-The previous message is given after the \verb{#|}. Translators need to update
-\code{msgstr} based changed from the old message and the new \code{msgid}, then
-delete the old translation and the \code{fuzzy} comment.
+The previous message is given in comments starting with \verb{#|}.
+Translators need to update the actual (uncommented) \code{msgstr} manually,
+using the old \code{msgid} as a potential reference, then
+delete the old translation and the \code{fuzzy} comment (c-format should
+remain, if present).
 }
 }

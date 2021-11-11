@@ -5,6 +5,7 @@
 run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
   args <- c(
     "--update", shQuote(path.expand(po_file)),
+    "--backup=off",
     if (previous) "--previous", #show previous match for fuzzy matches
     shQuote(path.expand(pot_file))
   )

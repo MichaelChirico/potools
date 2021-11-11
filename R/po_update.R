@@ -19,9 +19,11 @@
 #'     msgstr "en@quot翻訳生成中。。。"
 #'     ```
 #'
-#'     The previous message is given after the `#|`. Translators need to update
-#'     `msgstr` based changed from the old message and the new `msgid`, then
-#'     delete the old translation and the `fuzzy` comment.
+#'     The previous message is given in comments starting with `#|`.
+#'     Translators need to update the actual (uncommented) `msgstr` manually,
+#'     using the old `msgid` as a potential reference, then
+#'     delete the old translation and the `fuzzy` comment (c-format should
+#'     remain, if present).
 #'
 #' @inheritParams po_extract
 #' @param lazy If `TRUE`, only `.po` files that are older than their

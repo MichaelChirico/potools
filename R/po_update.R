@@ -8,7 +8,7 @@
 #'
 #' * Deleted messages: marked as deprecated and moved to the bottom of the file.
 #'
-#' * Major changes to existing messages: appear as a addition and a deletion.
+#' * Major changes to existing messages: appear as an addition and a deletion.
 #'
 #' * Minor changes to existing messages: will be flagged as fuzzy.
 #'

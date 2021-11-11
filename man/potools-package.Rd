@@ -8,21 +8,24 @@
 \description{
 \if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
 
-Translating messages in R packages is managed using the po
-    top-level directory and the 'gettext' program. This package provides
-    some helper functions for building this support in R packages, e.g.
-    common validation & I/O tasks.
+Translating messages in R packages is managed using the po top-level directory and the 'gettext' program. This package provides some helper functions for building this support in R packages, e.g. common validation & I/O tasks.
 }
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://github.com/MichaelChirico/potools}
+  \item \url{https://michaelchirico.github.io/potools}
   \item Report bugs at \url{https://github.com/MichaelChirico/potools/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Michael Chirico \email{MichaelChirico4@gmail.com} (Hadley Wickham [aut])
+\strong{Maintainer}: Michael Chirico \email{MichaelChirico4@gmail.com}
+
+Authors:
+\itemize{
+  \item Hadley Wickham
+}
 
 }
 \keyword{internal}

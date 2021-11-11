@@ -2,9 +2,10 @@ Type: Package
 Package: potools
 Title: Tools for Internationalization and Portability in R Packages
 Version: 0.2.3
-Authors@R: 
-    person("Michael", "Chirico", , "MichaelChirico4@gmail.com", role = c("cre", "aut"),
-    person("Hadley", "Wickham", role = "aut"))
+Authors@R: c(
+    person("Michael", "Chirico", , "MichaelChirico4@gmail.com", role = c("cre", "aut")),
+    person("Hadley", "Wickham", role = "aut")
+  )
 Description: Translating messages in R packages is managed using the po
     top-level directory and the 'gettext' program. This package provides
     some helper functions for building this support in R packages, e.g.

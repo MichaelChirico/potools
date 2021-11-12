@@ -478,39 +478,34 @@ invisible({
   gettext("when n is not 1")
 })
 
-# take from those present in r-devel:
-# ls -1 ~/svn/R-devel/src/library/*/po/*.po | \
-#   awk -F"[./]" '{print $10}' | \
-#   sed -r 's/^R(Gui)?-//g' | sort -u | \
-#   awk '{print "  ", $1, " = ,"}'
-# alternatively, a more complete list can be found on some websites:
-#   https://saimana.com/list-of-country-locale-code/
-# nplurals,plural info from https://l10n.gnome.org/teams/<language>
-# NB: looks may be deceiving for right-to-left scripts (e.g. Farsi), where the
-#   displayed below might not be in the order it is parsed.
-# assign to .potools, not a package env, to keep more readily mutable inside update_metadata()
-.potools$KNOWN_LANGUAGES = fread(system.file('extdata', 'language_metadata.csv', package='potools'), key='code')
-
-# the 'plural' column above is designed for computers;
-#   translate that to something human-legible here.
-# NB: 'plural' is 0-based (like in the .po file), but
-#   'plural_index' is 1-based (to match the above R-level code).
-# assign to .potools, not a package env, to keep more readily mutable inside update_metadata()
-.potools$PLURAL_RANGE_STRINGS = fread(
-  system.file('extdata', 'plurals_metadata.csv', package='potools'),
-  key = c('plural', 'plural_index')
-)
-
 # for testing; unexported
-# nocov start
 reset_language_metadata = function() {
+  # initially taken from those present in r-devel:
+  # ls -1 ~/svn/R-devel/src/library/*/po/*.po | \
+  #   awk -F"[./]" '{print $10}' | \
+  #   sed -r 's/^R(Gui)?-//g' | sort -u | \
+  #   awk '{print "  ", $1, " = ,"}'
+  # for extension, a more complete list can be found on some websites:
+  #   https://saimana.com/list-of-country-locale-code/
+  # nplurals,plural info from https://l10n.gnome.org/teams/<language>
+  # NB: looks may be deceiving for right-to-left scripts (e.g. Farsi), where the
+  #   displayed below might not be in the order it is parsed.
+  # assign to .potools, not a package env, to keep more readily mutable
+  #   inside update_metadata() & elsewhere
   .potools$KNOWN_LANGUAGES = fread(
     system.file('extdata', 'language_metadata.csv', package='potools'),
-    key='code'
+    encoding = "UTF-8",
+    key = 'code'
   )
+  # the 'plural' column above is designed for computers;
+  #   translate that to something human-legible here.
+  # NB: 'plural' is 0-based (like in the .po file), but
+  #   'plural_index' is 1-based (to match the above R-level code).
+  # assign to .potools, not a package env, to keep more readily mutable inside update_metadata()
   .potools$PLURAL_RANGE_STRINGS = fread(
     system.file('extdata', 'plurals_metadata.csv', package='potools'),
     key = c('plural', 'plural_index')
   )
 }
-# nocov end
+
+reset_language_metadata()

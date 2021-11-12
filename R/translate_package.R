@@ -494,6 +494,7 @@ reset_language_metadata = function() {
   #   inside update_metadata() & elsewhere
   .potools$KNOWN_LANGUAGES = fread(
     system.file('extdata', 'language_metadata.csv', package='potools'),
+    # encoding is required for the full_name_native field to display well on Windows
     encoding = "UTF-8",
     key = 'code'
   )

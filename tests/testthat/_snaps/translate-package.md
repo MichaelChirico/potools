@@ -29,8 +29,6 @@
       Getting R-level messages.
       Running message diagnostics.
       Writing R-rMsg.pot
-      
-      
       No languages provided; finishing
 
 ---
@@ -42,8 +40,6 @@
       Getting R-level messages.
       Running message diagnostics.
       Writing R-rMsg.pot
-      
-      
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 6 untranslated messages
       (To quit translating, press 'Esc'; progress will be saved)
     Output
@@ -106,8 +102,6 @@
       Getting R-level messages.
       Running message diagnostics.
       Writing R-rMsg.pot
-      
-      
       Found existing R translations for fa (Farsi/فارسی) in ./po/R-fa.po. Running msgmerge.
       . done.
       Translations for fa are up to date! Skipping.
@@ -124,8 +118,6 @@
       Getting R-level messages.
       Running message diagnostics.
       Writing R-rFuzzyMsg.pot
-      
-      
       Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge.
       . done.
       Found 2 translations marked as deprecated in ./po/R-zh_CN.po.
@@ -220,7 +212,6 @@
       translate_package(languages = "cy")
     Message <simpleMessage>
       Writing R-rMsg.pot
-      
       'cy' is not a known language. 
       Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
     Output
@@ -358,7 +349,6 @@
       translate_package(languages = "ca", diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsg.pot
-      
       'ca' is not a known language. 
       Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>
     Output
@@ -416,7 +406,6 @@
       translate_package(languages = "zh_CN", diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsg.pot
-      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -457,7 +446,6 @@
       translate_package(languages = "zh_CN", diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsg.pot
-      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -496,7 +484,6 @@
       translate_package(languages = "zh_CN", diagnostics = check_untranslated_src)
     Message <simpleMessage>
       Writing R-rSrcMsg.pot
-      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -556,9 +543,6 @@
       Getting src-level messages.
       Running message diagnostics.
       Writing R-rSrcFuzzyMsg.pot
-      
-      
-      
       Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge.
       . done.
       Found existing src translations for zh_CN (Mainland Chinese/普通话) in ./po/zh_CN.po. Running msgmerge.
@@ -577,7 +561,6 @@
       translate_package(languages = "es", copyright = "Mata Hari", diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsgUnusual.pot
-      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -927,7 +910,6 @@
       translate_package(languages = "es", use_base_rules = TRUE, diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsgUnusual.pot
-      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?
@@ -1277,7 +1259,6 @@
       translate_package(languages = "es", max_translations = 1L, diagnostics = NULL)
     Message <simpleMessage>
       Writing R-rMsg.pot
-      
     Output
       Thanks! Who should be credited with these translations?
       And what is their email?

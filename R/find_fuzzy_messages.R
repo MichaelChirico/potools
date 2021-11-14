@@ -10,13 +10,13 @@ find_fuzzy_messages <- function(message_data, lang_file) {
     old_message_data[idx & type == 'singular', {
       if (.N > 0L) {
         message(' ** SINGULAR MESSAGES **')
-        cat(rbind(dashes, msgid, msgstr), sep='\n')
+        writeLines(rbind(dashes, msgid, msgstr), useBytes=TRUE)
       }
     }]
     old_message_data[idx & type == 'plural', {
       if (.N > 0L) {
         message(' ** PLURAL MESSAGES **')
-        cat(do.call(rbind, c(list(dashes), msgid_plural, msgstr_plural)), sep='\n')
+        writeLines(do.call(rbind, c(list(dashes), msgid_plural, msgstr_plural)), useBytes=TRUE)
       }
     }]
 

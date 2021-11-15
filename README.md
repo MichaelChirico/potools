@@ -134,9 +134,9 @@ remotes::install_github("MichaelChirico/potools")
 
 One observation about offering translated messages is that non-English messages are harder to google. A few suggestions:
  
-     + You can give error messages a unique identifier (e.g. numbering). This may be harder to do for "established" packages since adding identifiers might be a breaking change.
-     + End users can switch to an English locale mid-session by running `Sys.setenv(LANGUAGE = 'en')` -- error messages will be produced in English until they set `LANGUAGE` again.
-     + You could write a custom error wrapper that produces the error both in English and as a translation.
++ You can give error messages a unique identifier (e.g. numbering). This may be harder to do for "established" packages since adding identifiers might be a breaking change.
++ End users can switch to an English locale mid-session by running `Sys.setenv(LANGUAGE = 'en')` -- error messages will be produced in English until they set `LANGUAGE` again.
++ You could write a custom error wrapper that produces the error both in English and as a translation.
      
 ### Translating technical terms
 

@@ -185,10 +185,11 @@
 <h3 id="searchable-error-messages">Searchable error messages<a class="anchor" aria-label="anchor" href="#searchable-error-messages"></a>
 </h3>
 <p>One observation about offering translated messages is that non-English messages are harder to google. A few suggestions:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a> <span class="op">+</span><span class="st"> </span>You can give error messages a unique <span class="kw">identifier</span> (e.g. numbering). This may be harder to do <span class="cf">for</span> <span class="st">"established"</span> packages since adding identifiers might be a breaking change.</span>
-<span id="cb8-2"><a href="#cb8-2"></a> <span class="op">+</span><span class="st"> </span>End users can <span class="cf">switch</span> to an English locale mid<span class="op">-</span>session by running <span class="st">`</span><span class="dt">Sys.setenv(LANGUAGE = 'en')</span><span class="st">`</span> <span class="op">--</span><span class="st"> </span>error messages will be produced <span class="cf">in</span> English until they set <span class="st">`</span><span class="dt">LANGUAGE</span><span class="st">`</span> again.</span>
-<span id="cb8-3"><a href="#cb8-3"></a> <span class="op">+</span><span class="st"> </span>You could write a custom error wrapper that produces the error both <span class="cf">in</span> English and as a translation.</span>
-<span id="cb8-4"><a href="#cb8-4"></a> </span></code></pre></div>
+<ul>
+<li>You can give error messages a unique identifier (e.g. numbering). This may be harder to do for “established” packages since adding identifiers might be a breaking change.</li>
+<li>End users can switch to an English locale mid-session by running <code>Sys.setenv(LANGUAGE = 'en')</code> – error messages will be produced in English until they set <code>LANGUAGE</code> again.</li>
+<li>You could write a custom error wrapper that produces the error both in English and as a translation.</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="translating-technical-terms">Translating technical terms<a class="anchor" aria-label="anchor" href="#translating-technical-terms"></a>

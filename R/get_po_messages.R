@@ -123,12 +123,14 @@ get_po_messages <- function(po_file) {
     msg_j = msg_j + 1L
   }
 
-  # somewhat hacky approach -- strip the comment markers & recurse
-  writeLines(
+  # somewhat hacky approach -- strip the comment markers & recurse.
+  # beware of potential encoding dragons.
+
+  tmp_conn <- write_utf8(
     gsub("^#~ ", "", grep("^#~ ", po_lines, value = TRUE)),
     tmp <- tempfile()
   )
-  on.exit(unlink(tmp))
+  on.exit({ close(tmp_conn); unlink(tmp) })
   deprecated = get_po_messages(tmp)
   if (nrow(deprecated) > 0L) {
     set(deprecated, NULL, 'fuzzy', 2L)

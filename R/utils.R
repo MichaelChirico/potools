@@ -195,3 +195,18 @@ is_gnu_gettext = function() any(grepl("GNU gettext", system('gettext --version',
 
 # wrapper function to facilitate mocking, else tests --> stochastic output
 get_atime <- function(f) format(file.info(f, extra_cols = FALSE)$atime) # nocov. Always mocked in tests.
+
+# a safer version of writeLines that's better at avoiding encoding hell
+# cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
+#   https://stackoverflow.com/q/10675360
+# "native.enc" supplied explicitly thanks to:
+#   https://kevinushey.github.io/blog/2018/02/21/string-encoding-and-r/
+write_utf8 <- function(lines, file, open = "w+") {
+  if (!inherits(file, "connection")) {
+    file <- file(file, open, encoding = "native.enc")
+  }
+
+  writeLines(lines, file, useBytes = TRUE)
+  # don't necessarily close; let calling env do so
+  return(file)
+}

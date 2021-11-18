@@ -62,35 +62,35 @@
        * Whenever templates or escaping is happening in a string, these will be 'highlighted' by carets (^) in the line below
     Output
       
-      File: foo.R
-      Call: base::warning("I warned you!")
-      Message: I warned you!
+      File: [37mfoo.R[39m
+      Call: [32mbase::warning("I warned you!")[39m
+      Message: [31mI warned you![39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: stop("Oh no you don't!")
-      Message: Oh no you don't!
+      File: [37mfoo.R[39m
+      Call: [32mstop("Oh no you don't!")[39m
+      Message: [31mOh no you don't![39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: gettext("Hi there")
-      Message: Hi there
+      File: [37mfoo.R[39m
+      Call: [32mgettext("Hi there")[39m
+      Message: [31mHi there[39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail", msg2 = "big fail")
-      Plural message: small fail
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail", msg2 = "big fail")[39m
+      Plural message: [31msmall fail[39m
                       
-      How would you translate this message into Mainland Chinese independently of n?
+      How would you translate this message into [36mMainland Chinese[39m [33mindependently of n[39m?
     Message <simpleMessage>
       Writing R-zh_CN.po
       Recompiling 'zh_CN' R translation
@@ -128,24 +128,6 @@
       
       Found existing R translations for zh_CN (Mainland Chinese/普通话) in ./po/R-zh_CN.po. Running msgmerge.
       . done.
-      Found 2 translations marked as deprecated in ./po/R-zh_CN.po.
-      Typically, this means the corresponding error messages have been refactored.
-      Reproducing these messages here for your reference since they might still provide some utility.
-       ** SINGULAR MESSAGES **
-    Output
-      ------------------------------------------------------------------------
-      Oh no you don't!
-      当然不会！
-    Message <simpleMessage>
-       ** PLURAL MESSAGES **
-    Output
-      ------------------------------------------------------------------------
-      small fail\n
-      失败了\n
-      ------------------------------------------------------------------------
-      big fail\n
-      失败了\n
-    Message <simpleMessage>
       Beginning new translations for zh_CN (Mainland Chinese/普通话); found 2 untranslated messages
       (To quit translating, press 'Esc'; progress will be saved)
     Output
@@ -164,17 +146,17 @@
        * Whenever templates or escaping is happening in a string, these will be 'highlighted' by carets (^) in the line below
     Output
       
-      File: foo.R
-      Call: stop("I really wish you'd reconsider")
-      Message: I really wish you'd reconsider
+      File: [37mfoo.R[39m
+      Call: [32mstop("I really wish you'd reconsider")[39m
+      Message: [31mI really wish you'd reconsider[39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: ngettext(length(x), "SOMEWHAT EPIC FAIL", "MAJORLY EPIC FAIL")
-      Plural message: SOMEWHAT EPIC FAIL
+      File: [37mfoo.R[39m
+      Call: [32mngettext(length(x), "SOMEWHAT EPIC FAIL", "MAJORLY EPIC FAIL")[39m
+      Plural message: [31mSOMEWHAT EPIC FAIL[39m
                       
-      How would you translate this message into Mainland Chinese independently of n?
+      How would you translate this message into [36mMainland Chinese[39m [33mindependently of n[39m?
     Message <simpleMessage>
       Writing R-zh_CN.po
       Recompiling 'zh_CN' R translation
@@ -190,28 +172,28 @@
     Output
       
       Problematic call:
-      base::cat("I warned you!", fill=TRUE, append=TRUE)
-      < File:foo.R, Line:2 >
+      [32mbase::cat("I warned you!", fill=TRUE, append=TRUE)[39m
+      < File:[37mfoo.R[39m, Line:[37m2[39m >
       Potential replacement:
-      cat(gettext("I warned you!"), fill=TRUE)
+      [34mcat(gettext("I warned you!"), fill=TRUE)[39m
       
       Problematic call:
-      cat("Oh no", "you\ndon't!")
-      < File:foo.R, Line:8 >
+      [32mcat("Oh no", "you\ndon't!")[39m
+      < File:[37mfoo.R[39m, Line:[37m8[39m >
       Potential replacement:
-      cat(gettext("Oh no you\ndon't!"))
+      [34mcat(gettext("Oh no you\ndon't!"))[39m
       
       Problematic call:
-      cat("Hi", "boss", sep="xx")
-      < File:foo.R, Line:15 >
+      [32mcat("Hi", "boss", sep="xx")[39m
+      < File:[37mfoo.R[39m, Line:[37m15[39m >
       Potential replacement:
-      cat(gettext("Hixxboss"))
+      [34mcat(gettext("Hixxboss"))[39m
       
       Problematic call:
-      cat("This costs", x, "dollars")
-      < File:foo.R, Line:22 >
+      [32mcat("This costs", x, "dollars")[39m
+      < File:[37mfoo.R[39m, Line:[37m22[39m >
       Potential replacement:
-      cat(gettextf("This costs %s dollars", x))
+      [34mcat(gettextf("This costs %s dollars", x))[39m
       Exit now to repair any of these? [y/N]
 
 ---
@@ -248,107 +230,107 @@
       Thanks! Who should be credited with these translations?
       And what is their email?
       
-      File: foo.R
-      Call: base::warning("I warned you!")
-      Message: I warned you!
+      File: [37mfoo.R[39m
+      Call: [32mbase::warning("I warned you!")[39m
+      Message: [31mI warned you![39m
                
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
-      File: foo.R
-      Call: stop("Oh no you don't!")
-      Message: Oh no you don't!
+      File: [37mfoo.R[39m
+      Call: [32mstop("Oh no you don't!")[39m
+      Message: [31mOh no you don't![39m
                
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
-      File: foo.R
-      Call: gettext("Hi there")
-      Message: Hi there
+      File: [37mfoo.R[39m
+      Call: [32mgettext("Hi there")[39m
+      Message: [31mHi there[39m
                
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
       
       ** Oops! Invalid translation -- received the same set of templates + bordering newlines, but in incorrect order ([%.02f, %d, %s] vs [%.02f, %s, %d]). Recall that you can use %$N to do redirect, e.g. to swap the order of '%d %s' to be translated more naturally, your translation can use '%1$s %2$d'. Retrying. **
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
       
       ** Oops! Invalid translation -- received templates + bordering newlines not present in the original: %s. Retrying. **
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
       
       ** Oops! Invalid translation -- received the same set of templates + bordering newlines, but in incorrect order ([%.02f, %d, %s] vs [%1$.02f, %2$s, %3$d]). Recall that you can use %$N to do redirect, e.g. to swap the order of '%d %s' to be translated more naturally, your translation can use '%1$s %2$d'. Retrying. **
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
       
       ** Oops! Invalid translation -- received 2 unique templated arguments + bordering newlines but there are 3 in the original. Retrying. **
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
       
       ** Oops! Invalid translation -- received 4 unique templated arguments + bordering newlines but there are 3 in the original. Retrying. **
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
       
       ** Oops! Invalid translation -- received 5 unique templated arguments + bordering newlines but there are 3 in the original. Retrying. **
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Welsh?
+      How would you translate this message into [36mWelsh[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail", msg2 = "big fail")
-      Plural message: small fail
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail", msg2 = "big fail")[39m
+      Plural message: [31msmall fail[39m
                       
-      How would you translate this message into Welsh for n where 'plural' resolves to 0?
+      How would you translate this message into [36mWelsh[39m [33mfor n where 'plural' resolves to 0[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail", msg2 = "big fail")
-      Plural message: small fail
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail", msg2 = "big fail")[39m
+      Plural message: [31msmall fail[39m
                       
-      How would you translate this message into Welsh for n where 'plural' resolves to 1?
+      How would you translate this message into [36mWelsh[39m [33mfor n where 'plural' resolves to 1[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail", msg2 = "big fail")
-      Plural message: small fail
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail", msg2 = "big fail")[39m
+      Plural message: [31msmall fail[39m
                       
-      How would you translate this message into Welsh for n where 'plural' resolves to 2?
+      How would you translate this message into [36mWelsh[39m [33mfor n where 'plural' resolves to 2[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail", msg2 = "big fail")
-      Plural message: small fail
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail", msg2 = "big fail")[39m
+      Plural message: [31msmall fail[39m
                       
-      How would you translate this message into Welsh for n where 'plural' resolves to 3?
+      How would you translate this message into [36mWelsh[39m [33mfor n where 'plural' resolves to 3[39m?
     Message <simpleMessage>
       Writing R-cy.po
 
@@ -372,41 +354,41 @@
       Thanks! Who should be credited with these translations?
       And what is their email?
       
-      File: foo.R
-      Call: base::warning("I warned you!")
-      Message: I warned you!
+      File: [37mfoo.R[39m
+      Call: [32mbase::warning("I warned you!")[39m
+      Message: [31mI warned you![39m
                
-      How would you translate this message into Catalan?
+      How would you translate this message into [36mCatalan[39m?
       
-      File: foo.R
-      Call: stop("Oh no you don't!")
-      Message: Oh no you don't!
+      File: [37mfoo.R[39m
+      Call: [32mstop("Oh no you don't!")[39m
+      Message: [31mOh no you don't![39m
                
-      How would you translate this message into Catalan?
+      How would you translate this message into [36mCatalan[39m?
       
-      File: foo.R
-      Call: gettext("Hi there")
-      Message: Hi there
+      File: [37mfoo.R[39m
+      Call: [32mgettext("Hi there")[39m
+      Message: [31mHi there[39m
                
-      How would you translate this message into Catalan?
+      How would you translate this message into [36mCatalan[39m?
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Catalan?
+      How would you translate this message into [36mCatalan[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail", msg2 = "big fail")
-      Plural message: small fail
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail", msg2 = "big fail")[39m
+      Plural message: [31msmall fail[39m
                       
-      How would you translate this message into Catalan when n = 1?
+      How would you translate this message into [36mCatalan[39m [33mwhen n = 1[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail", msg2 = "big fail")
-      Plural message: small fail
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail", msg2 = "big fail")[39m
+      Plural message: [31msmall fail[39m
                       
-      How would you translate this message into Catalan when n is not 1?
+      How would you translate this message into [36mCatalan[39m [33mwhen n is not 1[39m?
     Message <simpleMessage>
       Writing R-ca.po
 
@@ -421,29 +403,29 @@
       Thanks! Who should be credited with these translations?
       And what is their email?
       
-      File: foo.R
-      Call: base::warning("I warned you!")
-      Message: I warned you!
+      File: [37mfoo.R[39m
+      Call: [32mbase::warning("I warned you!")[39m
+      Message: [31mI warned you![39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: stop("Oh no you don't!")
-      Message: Oh no you don't!
+      File: [37mfoo.R[39m
+      Call: [32mstop("Oh no you don't!")[39m
+      Message: [31mOh no you don't![39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: gettext("Hi there")
-      Message: Hi there
+      File: [37mfoo.R[39m
+      Call: [32mgettext("Hi there")[39m
+      Message: [31mHi there[39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
     Error <simpleError>
       Invalid templated message. If any %N$ redirects are used, all templates must be redirected.
       	Redirected tempates: %1$d
@@ -462,29 +444,29 @@
       Thanks! Who should be credited with these translations?
       And what is their email?
       
-      File: foo.R
-      Call: base::warning("I warned you!")
-      Message: I warned you!
+      File: [37mfoo.R[39m
+      Call: [32mbase::warning("I warned you!")[39m
+      Message: [31mI warned you![39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: stop("Oh no you don't!")
-      Message: Oh no you don't!
+      File: [37mfoo.R[39m
+      Call: [32mstop("Oh no you don't!")[39m
+      Message: [31mOh no you don't![39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: gettext("Hi there")
-      Message: Hi there
+      File: [37mfoo.R[39m
+      Call: [32mgettext("Hi there")[39m
+      Message: [31mHi there[39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: foo.R
-      Call: gettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )
-      Message: Avg cat() failures: %.02f; N failures: %d; failure: %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( fmt = "Avg cat() failures: %.02f; N failures: %d; failure: %s", mean(x), length(x), "don't translate me" )[39m
+      Message: [31mAvg cat() failures: %.02f; N failures: %d; failure: %s[39m
                                    ^---^              ^^           ^^
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
     Error <simpleError>
       Invalid templated message string with redirects -- all messages pointing to the same input must have identical formats, but received [%1$s, %1$d]
     Message <simpleMessage>
@@ -501,48 +483,48 @@
       Thanks! Who should be credited with these translations?
       And what is their email?
       
-      File: foo.R
-      Call: message("a string")
-      Message: a string
+      File: [37mfoo.R[39m
+      Call: [32mmessage("a string")[39m
+      Message: [31ma string[39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: bar.c
-      Call: N_("Don't translate me now.")
-      Message: Don't translate me now.
+      File: [37mbar.c[39m
+      Call: [32mN_("Don't translate me now.")[39m
+      Message: [31mDon't translate me now.[39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: bar.c
-      Call: Rprintf(_("an translated templated string: %"  "<PRId64>"  "\n"), 10000LL)
-      Message: an translated templated string: %<PRId64>\n
+      File: [37mbar.c[39m
+      Call: [32mRprintf(_("an translated templated string: %"  "<PRId64>"  "\n"), 10000LL)[39m
+      Message: [31man translated templated string: %<PRId64>\n[39m
                                                ^-------^^^
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: bar.c
-      Call: warning(_("a translated "\
-      "warning: %s\n"), stardust(z))
-      Message: a translated warning: %s\n
+      File: [37mbar.c[39m
+      Call: [32mwarning(_("a translated "\
+      "warning: %s\n"), stardust(z))[39m
+      Message: [31ma translated warning: %s\n[39m
                                      ^^^^
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: bar.c
-      Call: snprintf(BUF, 100, _("a simple message"))
-      Message: a simple message
+      File: [37mbar.c[39m
+      Call: [32msnprintf(BUF, 100, _("a simple message"))[39m
+      Message: [31ma simple message[39m
                
-      How would you translate this message into Mainland Chinese?
+      How would you translate this message into [36mMainland Chinese[39m?
       
-      File: bar.c
-      Call: ngettext("singular", "plural", z)
-      Plural message: singular
+      File: [37mbar.c[39m
+      Call: [32mngettext("singular", "plural", z)[39m
+      Plural message: [31msingular[39m
                       
-      How would you translate this message into Mainland Chinese independently of n?
+      How would you translate this message into [36mMainland Chinese[39m [33mindependently of n[39m?
       
-      File: bar.c
-      Call: ngettext("singular %d", "plural %d", z)
-      Plural message: singular %d
+      File: [37mbar.c[39m
+      Call: [32mngettext("singular %d", "plural %d", z)[39m
+      Plural message: [31msingular %d[39m
                                ^^
-      How would you translate this message into Mainland Chinese independently of n?
+      How would you translate this message into [36mMainland Chinese[39m [33mindependently of n[39m?
     Message <simpleMessage>
       Writing R-zh_CN.po
 
@@ -582,342 +564,342 @@
       Thanks! Who should be credited with these translations?
       And what is their email?
       
-      File: copy1.R
-      Call: stop("copy one")
-      Message: copy one
+      File: [37mcopy1.R[39m
+      Call: [32mstop("copy one")[39m
+      Message: [31mcopy one[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: copy2.R
-      Call: stop("copy two")
-      Message: copy two
+      File: [37mcopy2.R[39m
+      Call: [32mstop("copy two")[39m
+      Message: [31mcopy two[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: base::warning("  I warned you!\n\n")
-      Message: I warned you!
+      File: [37mfoo.R[39m
+      Call: [32mbase::warning("  I warned you!\n\n")[39m
+      Message: [31mI warned you![39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message(r"('abc')")
-      Message: 'abc'
+      File: [37mfoo.R[39m
+      Call: [32mmessage(r"('abc')")[39m
+      Message: [31m'abc'[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message(R'("def")')
-      Message: "def"
+      File: [37mfoo.R[39m
+      Call: [32mmessage(R'("def")')[39m
+      Message: [31m"def"[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message("R('abc')")
-      Message: R('abc')
+      File: [37mfoo.R[39m
+      Call: [32mmessage("R('abc')")[39m
+      Message: [31mR('abc')[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message('r("def")')
-      Message: r("def")
+      File: [37mfoo.R[39m
+      Call: [32mmessage('r("def")')[39m
+      Message: [31mr("def")[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message(R'---[ghi]---')
-      Message: ghi
+      File: [37mfoo.R[39m
+      Call: [32mmessage(R'---[ghi]---')[39m
+      Message: [31mghi[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: gettext("Hi there")
-      Message: Hi there
+      File: [37mfoo.R[39m
+      Call: [32mgettext("Hi there")[39m
+      Message: [31mHi there[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: gettextf(fmt = "good %s ", "grief")
-      Message: good %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf(fmt = "good %s ", "grief")[39m
+      Message: [31mgood %s[39m
                     ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: "first"
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31m"first"[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: second
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31msecond[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: third
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31mthird[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: fourth
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31mfourth[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: fifth
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31mfifth[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: sixth
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31msixth[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message("\\n vs \n is OK")
-      Message: \\n vs \n is OK
+      File: [37mfoo.R[39m
+      Call: [32mmessage("\\n vs \n is OK")[39m
+      Message: [31m\\n vs \n is OK[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message("\\t vs \t is OK")
-      Message: \\t vs \t is OK
+      File: [37mfoo.R[39m
+      Call: [32mmessage("\\t vs \t is OK")[39m
+      Message: [31m\\t vs \t is OK[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message('strings with "quotes" are OK')
-      Message: strings with "quotes" are OK
+      File: [37mfoo.R[39m
+      Call: [32mmessage('strings with "quotes" are OK')[39m
+      Message: [31mstrings with "quotes" are OK[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message("strings with escaped \"quotes\" are OK")
-      Message: strings with escaped "quotes" are OK
+      File: [37mfoo.R[39m
+      Call: [32mmessage("strings with escaped \"quotes\" are OK")[39m
+      Message: [31mstrings with escaped "quotes" are OK[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: gettextf( paste("part 1 %s", "part 2"), "input" )
-      Message: part 1 %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( paste("part 1 %s", "part 2"), "input" )[39m
+      Message: [31mpart 1 %s[39m
                       ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: gettextf( paste("part 1 %s", "part 2"), "input" )
-      Message: part 2
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( paste("part 1 %s", "part 2"), "input" )[39m
+      Message: [31mpart 2[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: ngettext( 10, "singular ", "plural " )
-      Plural message: singular 
+      File: [37mfoo.R[39m
+      Call: [32mngettext( 10, "singular ", "plural " )[39m
+      Plural message: [31msingular [39m
                       
-      How would you translate this message into Spanish when n = 1?
+      How would you translate this message into [36mSpanish[39m [33mwhen n = 1[39m?
       
-      File: foo.R
-      Call: ngettext( 10, "singular ", "plural " )
-      Plural message: singular 
+      File: [37mfoo.R[39m
+      Call: [32mngettext( 10, "singular ", "plural " )[39m
+      Plural message: [31msingular [39m
                       
-      How would you translate this message into Spanish when n is not 1?
+      How would you translate this message into [36mSpanish[39m [33mwhen n is not 1[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail ", msg2 = "big fail ")
-      Plural message: small fail 
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail ", msg2 = "big fail ")[39m
+      Plural message: [31msmall fail [39m
                       
-      How would you translate this message into Spanish when n = 1?
+      How would you translate this message into [36mSpanish[39m [33mwhen n = 1[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail ", msg2 = "big fail ")
-      Plural message: small fail 
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail ", msg2 = "big fail ")[39m
+      Plural message: [31msmall fail [39m
                       
-      How would you translate this message into Spanish when n is not 1?
+      How would you translate this message into [36mSpanish[39m [33mwhen n is not 1[39m?
       
-      File: ABCDEFGHIJKLMNOPQRSTUVWXYZ.c
-      Call: _("an translated templated string: %"  "<PRId64>"  "\n")
-      Message: an translated templated string: %<PRId64>\n
+      File: [37mABCDEFGHIJKLMNOPQRSTUVWXYZ.c[39m
+      Call: [32m_("an translated templated string: %"  "<PRId64>"  "\n")[39m
+      Message: [31man translated templated string: %<PRId64>\n[39m
                                                ^-------^^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: MSGs.c
-      Call: _("any old \
-      message")
-      Message: any old message
+      File: [37mMSGs.c[39m
+      Call: [32m_("any old \
+      message")[39m
+      Message: [31many old message[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: _("a message in a macro %s")
-      Message: a message in a macro %s
+      File: [37mmsg.c[39m
+      Call: [32m_("a message in a macro %s")[39m
+      Message: [31ma message in a macro %s[39m
                                     ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: Rprintf(_("that's a mighty big %"  "<PRId64>""-sized wall over %""<PRIu64>"), 100LL, 10L)
-      Message: that's a mighty big %<PRId64>-sized wall over %<PRIu64>
+      File: [37mmsg.c[39m
+      Call: [32mRprintf(_("that's a mighty big %"  "<PRId64>""-sized wall over %""<PRIu64>"), 100LL, 10L)[39m
+      Message: [31mthat's a mighty big %<PRId64>-sized wall over %<PRIu64>[39m
                                    ^-------^                 ^-------^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: Rprintf(_("/* this is what a C comment looks like */ "))
-      Message: /* this is what a C comment looks like */ 
+      File: [37mmsg.c[39m
+      Call: [32mRprintf(_("/* this is what a C comment looks like */ "))[39m
+      Message: [31m/* this is what a C comment looks like */ [39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: Rprintf(_("// this is what a C comment looks like %s "), "abc")
-      Message: // this is what a C comment looks like %s 
+      File: [37mmsg.c[39m
+      Call: [32mRprintf(_("// this is what a C comment looks like %s "), "abc")[39m
+      Message: [31m// this is what a C comment looks like %s [39m
                                                       ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: Rprintf(_(
+      File: [37mmsg.c[39m
+      Call: [32mRprintf(_(
           "01234567890123456789.01234567890123456789"
           "01234567890123456789.01234567890123456789"
           "01234567890123456789.01234567890123456789"
           "01234567890123456789.01234567890123456789"
-        ))
-      Message: 01234567890123456789.0123456789012345678901234567890123456789.0123456789012345678901234567890123456789.0123456789012345678901234567890123456789.01234567890123456789
+        ))[39m
+      Message: [31m01234567890123456789.0123456789012345678901234567890123456789.0123456789012345678901234567890123456789.0123456789012345678901234567890123456789.01234567890123456789[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("This message\nSpans two lines"))
-      Message: This message\nSpans two lines
+      File: [37mmsg.c[39m
+      Call: [32merror(_("This message\nSpans two lines"))[39m
+      Message: [31mThis message\nSpans two lines[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("This one does not\n"))
-      Message: This one does not\n
+      File: [37mmsg.c[39m
+      Call: [32merror(_("This one does not\n"))[39m
+      Message: [31mThis one does not\n[39m
                                 ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("Exotic formatters like %I32u, %llx, %li, %ls, %lc"))
-      Message: Exotic formatters like %I32u, %llx, %li, %ls, %lc
+      File: [37mmsg.c[39m
+      Call: [32merror(_("Exotic formatters like %I32u, %llx, %li, %ls, %lc"))[39m
+      Message: [31mExotic formatters like %I32u, %llx, %li, %ls, %lc[39m
                                       ^---^  ^--^  ^-^  ^-^  ^-^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456\"890"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456\"890"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345(\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345("890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345(\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345("890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345'\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345'"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345'\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345'"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345a\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345a"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345a\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345a"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345A\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345A"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345A\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345A"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345#\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345#"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345#\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345#"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345@\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345@"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345@\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345@"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 .%s."))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 .%s.
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 .%s."))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 .%s.[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 ?%s?"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 ?%s?
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 ?%s?"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 ?%s?[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 ;%s;"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 ;%s;
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 ;%s;"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 ;%s;[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 /%s/"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 /%s/
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 /%s/"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 /%s/[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 '%s'"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 '%s'
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 '%s'"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 '%s'[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 [%s]"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 [%s]
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 [%s]"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 [%s][39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 |%s|"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 |%s|
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 |%s|"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 |%s|[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 -%s-"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 -%s-
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 -%s-"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 -%s-[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_(test ? "abc" : "def"))
-      Message: abc
+      File: [37mmsg.c[39m
+      Call: [32merror(_(test ? "abc" : "def"))[39m
+      Message: [31mabc[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_(xxx "abc" "def"))
-      Message: abcdef
+      File: [37mmsg.c[39m
+      Call: [32merror(_(xxx "abc" "def"))[39m
+      Message: [31mabcdef[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: z.c
-      Call: error(_("You found me!"))
-      Message: You found me!
+      File: [37mz.c[39m
+      Call: [32merror(_("You found me!"))[39m
+      Message: [31mYou found me![39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: cairo/bedfellows.c
-      Call: _(
-            "any new message")
-      Message: any new message
+      File: [37mcairo/bedfellows.c[39m
+      Call: [32m_(
+            "any new message")[39m
+      Message: [31many new message[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
     Message <simpleMessage>
       Writing R-es.po
 
@@ -932,342 +914,342 @@
       Thanks! Who should be credited with these translations?
       And what is their email?
       
-      File: copy1.R
-      Call: stop("copy one")
-      Message: copy one
+      File: [37mcopy1.R[39m
+      Call: [32mstop("copy one")[39m
+      Message: [31mcopy one[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: copy2.R
-      Call: stop("copy two")
-      Message: copy two
+      File: [37mcopy2.R[39m
+      Call: [32mstop("copy two")[39m
+      Message: [31mcopy two[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: base::warning("  I warned you!\n\n")
-      Message: I warned you!
+      File: [37mfoo.R[39m
+      Call: [32mbase::warning("  I warned you!\n\n")[39m
+      Message: [31mI warned you![39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message(r"('abc')")
-      Message: 'abc'
+      File: [37mfoo.R[39m
+      Call: [32mmessage(r"('abc')")[39m
+      Message: [31m'abc'[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message(R'("def")')
-      Message: "def"
+      File: [37mfoo.R[39m
+      Call: [32mmessage(R'("def")')[39m
+      Message: [31m"def"[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message("R('abc')")
-      Message: R('abc')
+      File: [37mfoo.R[39m
+      Call: [32mmessage("R('abc')")[39m
+      Message: [31mR('abc')[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message('r("def")')
-      Message: r("def")
+      File: [37mfoo.R[39m
+      Call: [32mmessage('r("def")')[39m
+      Message: [31mr("def")[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message(R'---[ghi]---')
-      Message: ghi
+      File: [37mfoo.R[39m
+      Call: [32mmessage(R'---[ghi]---')[39m
+      Message: [31mghi[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: gettext("Hi there")
-      Message: Hi there
+      File: [37mfoo.R[39m
+      Call: [32mgettext("Hi there")[39m
+      Message: [31mHi there[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: gettextf(fmt = "good %s ", "grief")
-      Message: good %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf(fmt = "good %s ", "grief")[39m
+      Message: [31mgood %s[39m
                     ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: "first"
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31m"first"[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: second
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31msecond[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: third
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31mthird[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: fourth
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31mfourth[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: fifth
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31mfifth[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: warning( '"first"', "second", "third", "fourth", "fifth", "sixth" )
-      Message: sixth
+      File: [37mfoo.R[39m
+      Call: [32mwarning( '"first"', "second", "third", "fourth", "fifth", "sixth" )[39m
+      Message: [31msixth[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message("\\n vs \n is OK")
-      Message: \\n vs \n is OK
+      File: [37mfoo.R[39m
+      Call: [32mmessage("\\n vs \n is OK")[39m
+      Message: [31m\\n vs \n is OK[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message("\\t vs \t is OK")
-      Message: \\t vs \t is OK
+      File: [37mfoo.R[39m
+      Call: [32mmessage("\\t vs \t is OK")[39m
+      Message: [31m\\t vs \t is OK[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message('strings with "quotes" are OK')
-      Message: strings with "quotes" are OK
+      File: [37mfoo.R[39m
+      Call: [32mmessage('strings with "quotes" are OK')[39m
+      Message: [31mstrings with "quotes" are OK[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: message("strings with escaped \"quotes\" are OK")
-      Message: strings with escaped "quotes" are OK
+      File: [37mfoo.R[39m
+      Call: [32mmessage("strings with escaped \"quotes\" are OK")[39m
+      Message: [31mstrings with escaped "quotes" are OK[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: gettextf( paste("part 1 %s", "part 2"), "input" )
-      Message: part 1 %s
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( paste("part 1 %s", "part 2"), "input" )[39m
+      Message: [31mpart 1 %s[39m
                       ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: gettextf( paste("part 1 %s", "part 2"), "input" )
-      Message: part 2
+      File: [37mfoo.R[39m
+      Call: [32mgettextf( paste("part 1 %s", "part 2"), "input" )[39m
+      Message: [31mpart 2[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: foo.R
-      Call: ngettext( 10, "singular ", "plural " )
-      Plural message: singular 
+      File: [37mfoo.R[39m
+      Call: [32mngettext( 10, "singular ", "plural " )[39m
+      Plural message: [31msingular [39m
                       
-      How would you translate this message into Spanish when n = 1?
+      How would you translate this message into [36mSpanish[39m [33mwhen n = 1[39m?
       
-      File: foo.R
-      Call: ngettext( 10, "singular ", "plural " )
-      Plural message: singular 
+      File: [37mfoo.R[39m
+      Call: [32mngettext( 10, "singular ", "plural " )[39m
+      Plural message: [31msingular [39m
                       
-      How would you translate this message into Spanish when n is not 1?
+      How would you translate this message into [36mSpanish[39m [33mwhen n is not 1[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail ", msg2 = "big fail ")
-      Plural message: small fail 
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail ", msg2 = "big fail ")[39m
+      Plural message: [31msmall fail [39m
                       
-      How would you translate this message into Spanish when n = 1?
+      How would you translate this message into [36mSpanish[39m [33mwhen n = 1[39m?
       
-      File: windows/bar.R
-      Call: ngettext(length(x), msg1 = "small fail ", msg2 = "big fail ")
-      Plural message: small fail 
+      File: [37mwindows/bar.R[39m
+      Call: [32mngettext(length(x), msg1 = "small fail ", msg2 = "big fail ")[39m
+      Plural message: [31msmall fail [39m
                       
-      How would you translate this message into Spanish when n is not 1?
+      How would you translate this message into [36mSpanish[39m [33mwhen n is not 1[39m?
       
-      File: ABCDEFGHIJKLMNOPQRSTUVWXYZ.c
-      Call: _("an translated templated string: %"  "<PRId64>"  "\n")
-      Message: an translated templated string: %<PRId64>\n
+      File: [37mABCDEFGHIJKLMNOPQRSTUVWXYZ.c[39m
+      Call: [32m_("an translated templated string: %"  "<PRId64>"  "\n")[39m
+      Message: [31man translated templated string: %<PRId64>\n[39m
                                                ^-------^^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: MSGs.c
-      Call: _("any old \
-      message")
-      Message: any old message
+      File: [37mMSGs.c[39m
+      Call: [32m_("any old \
+      message")[39m
+      Message: [31many old message[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: _("a message in a macro %s")
-      Message: a message in a macro %s
+      File: [37mmsg.c[39m
+      Call: [32m_("a message in a macro %s")[39m
+      Message: [31ma message in a macro %s[39m
                                     ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: Rprintf(_("that's a mighty big %"  "<PRId64>""-sized wall over %""<PRIu64>"), 100LL, 10L)
-      Message: that's a mighty big %<PRId64>-sized wall over %<PRIu64>
+      File: [37mmsg.c[39m
+      Call: [32mRprintf(_("that's a mighty big %"  "<PRId64>""-sized wall over %""<PRIu64>"), 100LL, 10L)[39m
+      Message: [31mthat's a mighty big %<PRId64>-sized wall over %<PRIu64>[39m
                                    ^-------^                 ^-------^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: Rprintf(_("/* this is what a C comment looks like */ "))
-      Message: /* this is what a C comment looks like */ 
+      File: [37mmsg.c[39m
+      Call: [32mRprintf(_("/* this is what a C comment looks like */ "))[39m
+      Message: [31m/* this is what a C comment looks like */ [39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: Rprintf(_("// this is what a C comment looks like %s "), "abc")
-      Message: // this is what a C comment looks like %s 
+      File: [37mmsg.c[39m
+      Call: [32mRprintf(_("// this is what a C comment looks like %s "), "abc")[39m
+      Message: [31m// this is what a C comment looks like %s [39m
                                                       ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: Rprintf(_(
+      File: [37mmsg.c[39m
+      Call: [32mRprintf(_(
           "01234567890123456789.01234567890123456789"
           "01234567890123456789.01234567890123456789"
           "01234567890123456789.01234567890123456789"
           "01234567890123456789.01234567890123456789"
-        ))
-      Message: 01234567890123456789.0123456789012345678901234567890123456789.0123456789012345678901234567890123456789.0123456789012345678901234567890123456789.01234567890123456789
+        ))[39m
+      Message: [31m01234567890123456789.0123456789012345678901234567890123456789.0123456789012345678901234567890123456789.0123456789012345678901234567890123456789.01234567890123456789[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("This message\nSpans two lines"))
-      Message: This message\nSpans two lines
+      File: [37mmsg.c[39m
+      Call: [32merror(_("This message\nSpans two lines"))[39m
+      Message: [31mThis message\nSpans two lines[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("This one does not\n"))
-      Message: This one does not\n
+      File: [37mmsg.c[39m
+      Call: [32merror(_("This one does not\n"))[39m
+      Message: [31mThis one does not\n[39m
                                 ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("Exotic formatters like %I32u, %llx, %li, %ls, %lc"))
-      Message: Exotic formatters like %I32u, %llx, %li, %ls, %lc
+      File: [37mmsg.c[39m
+      Call: [32merror(_("Exotic formatters like %I32u, %llx, %li, %ls, %lc"))[39m
+      Message: [31mExotic formatters like %I32u, %llx, %li, %ls, %lc[39m
                                       ^---^  ^--^  ^-^  ^-^  ^-^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456\"890"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456\"890"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345(\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345("890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345(\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345("890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345'\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345'"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345'\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345'"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345a\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345a"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345a\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345a"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345A\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345A"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345A\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345A"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345#\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345#"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345#\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345#"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("0123456789012345678901234567890123456789012345678901234567890123456789012345@\"890"))
-      Message: 0123456789012345678901234567890123456789012345678901234567890123456789012345@"890
+      File: [37mmsg.c[39m
+      Call: [32merror(_("0123456789012345678901234567890123456789012345678901234567890123456789012345@\"890"))[39m
+      Message: [31m0123456789012345678901234567890123456789012345678901234567890123456789012345@"890[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 .%s."))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 .%s.
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 .%s."))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 .%s.[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 ?%s?"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 ?%s?
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 ?%s?"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 ?%s?[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 ;%s;"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 ;%s;
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 ;%s;"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 ;%s;[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 /%s/"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 /%s/
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 /%s/"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 /%s/[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 '%s'"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 '%s'
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 '%s'"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 '%s'[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 [%s]"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 [%s]
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 [%s]"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 [%s][39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 |%s|"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 |%s|
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 |%s|"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 |%s|[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 -%s-"))
-      Message: 01234567890123456789012345678901234567890123456789012345678901234567890123456 -%s-
+      File: [37mmsg.c[39m
+      Call: [32merror(_("01234567890123456789012345678901234567890123456789012345678901234567890123456 -%s-"))[39m
+      Message: [31m01234567890123456789012345678901234567890123456789012345678901234567890123456 -%s-[39m
                                                                                               ^^
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_(test ? "abc" : "def"))
-      Message: abc
+      File: [37mmsg.c[39m
+      Call: [32merror(_(test ? "abc" : "def"))[39m
+      Message: [31mabc[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: msg.c
-      Call: error(_(xxx "abc" "def"))
-      Message: abcdef
+      File: [37mmsg.c[39m
+      Call: [32merror(_(xxx "abc" "def"))[39m
+      Message: [31mabcdef[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: z.c
-      Call: error(_("You found me!"))
-      Message: You found me!
+      File: [37mz.c[39m
+      Call: [32merror(_("You found me!"))[39m
+      Message: [31mYou found me![39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
       
-      File: cairo/bedfellows.c
-      Call: _(
-            "any new message")
-      Message: any new message
+      File: [37mcairo/bedfellows.c[39m
+      Call: [32m_(
+            "any new message")[39m
+      Message: [31many new message[39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
     Message <simpleMessage>
       Writing R-es.po
 
@@ -1282,11 +1264,11 @@
       Thanks! Who should be credited with these translations?
       And what is their email?
       
-      File: foo.R
-      Call: base::warning("I warned you!")
-      Message: I warned you!
+      File: [37mfoo.R[39m
+      Call: [32mbase::warning("I warned you!")[39m
+      Message: [31mI warned you![39m
                
-      How would you translate this message into Spanish?
+      How would you translate this message into [36mSpanish[39m?
     Message <simpleMessage>
       Writing R-es.po
 

@@ -2,7 +2,7 @@ find_fuzzy_messages <- function(message_data, lang_file) {
   old_message_data = get_po_messages(lang_file)
 
   if (any(idx <- old_message_data$fuzzy == 2L)) {
-    messagef('Found %d translations marked as deprecated in %s.', sum(idx), lang_file)
+    messagef('Found %d translations marked as deprecated in ./po/%s.', sum(idx), basename(lang_file))
     message('Typically, this means the corresponding error messages have been refactored.')
     message('Reproducing these messages here for your reference since they might still provide some utility.')
 
@@ -10,13 +10,13 @@ find_fuzzy_messages <- function(message_data, lang_file) {
     old_message_data[idx & type == 'singular', {
       if (.N > 0L) {
         message(' ** SINGULAR MESSAGES **')
-        cat(rbind(dashes, msgid, msgstr), sep='\n')
+        writeLines(rbind(dashes, msgid, msgstr), useBytes=TRUE)
       }
     }]
     old_message_data[idx & type == 'plural', {
       if (.N > 0L) {
         message(' ** PLURAL MESSAGES **')
-        cat(do.call(rbind, c(list(dashes), msgid_plural, msgstr_plural)), sep='\n')
+        writeLines(do.call(rbind, c(list(dashes), msgid_plural, msgstr_plural)), useBytes=TRUE)
       }
     }]
 

@@ -27,35 +27,36 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
 }
 
 run_msgfmt = function(po_file, mo_file, verbose) {
-  use_stats <- if (verbose) '--statistics' else ''
-
-  po_file <- path.expand(po_file)
-  mo_file <- path.expand(mo_file)
-
-  # See #218. Solaris msgfmt doesn't support -c or --statistics
-  if (Sys.info()[["sysname"]] == "SunOS") {
-    cmd = sprintf("msgfmt -o %s %s", shQuote(mo_file), shQuote(po_file)) # nocov
-  } else {
-    cmd = sprintf("msgfmt -c %s -o %s %s", use_stats, shQuote(mo_file), shQuote(po_file))
+  # See #218. Solaris msgfmt (non-GNU on CRAN) doesn't support --check or --statistics;
+  #   see also https://bugs.r-project.org/show_bug.cgi?id=18150
+  args = character()
+  if (is_gnu_gettext()) {
+    args = c("--check", if (verbose) '--statistics')
   }
-  if (system(cmd) != 0L) {
+  val = system2("msgfmt", c(args, "-o", shQuote(mo_file), shQuote(po_file)), stdout = TRUE, stderr = TRUE)
+  if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     warningf(
-      "running msgfmt on %s failed.\nHere is the po file:\n%s",
-      basename(po_file), paste(readLines(po_file), collapse = "\n"),
+      "running msgfmt on %s failed; output:\n  %s\nHere is the po file:\n%s",
+      basename(po_file), paste(val, collapse = "\n"), paste(readLines(po_file), collapse = "\n"),
       immediate. = TRUE
+    )
+  } else if (verbose) {
+    messagef(
+      "running msgfmt on %s succeeded; output:\n  %s",
+      basename(po_file), paste(val, collapse = "\n")
     )
   }
   return(invisible())
 }
-
-
 
 update_en_quot_mo_files <- function(dir, verbose) {
   pot_files <- list.files(file.path(dir, "po"), pattern = "\\.pot$", full.names = TRUE)
   mo_dir <- file.path(dir, "inst", "po", "en@quot", "LC_MESSAGES")
   dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
   for (pot_file in pot_files) {
-    po_file <- tempfile()
+    # don't use tempfile() -- want a static basename() to keep verbose output non-random
+    po_file <- file.path(tempdir(), if (startsWith(basename(pot_file), "R-")) "R-en@quot.po" else "en@quot.po")
+    on.exit(unlink(po_file))
     # tools:::en_quote is blocked, but we still need it for now
     get("en_quote", envir=asNamespace("tools"))(pot_file, po_file)
     run_msgfmt(
@@ -63,7 +64,6 @@ update_en_quot_mo_files <- function(dir, verbose) {
       mo_file = file.path(mo_dir, gsub("\\.pot$", ".mo", basename(pot_file))),
       verbose = verbose
     )
-    unlink(po_file)
   }
   return(invisible())
 }

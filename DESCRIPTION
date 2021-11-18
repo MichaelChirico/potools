@@ -21,6 +21,7 @@ Imports:
 Suggests: 
     crayon,
     knitr,
+    mockery,
     rmarkdown,
     testthat (>= 3.0.0),
     withr

@@ -1,22 +1,20 @@
-# copy a package to tmp, then overwrite any changes on exit
-restore_package <- function(dir, expr, tmp_conn) {
-  # this is way uglier than it should be. i'm missing something.
-  tdir <- tempdir()
-
+# copy a package to tmp, deleting on exit
+with_package <- function(dir, expr, msg_conn = NULL) {
+  tdir <- withr::local_tempdir()
   file.copy(dir, tdir, recursive = TRUE)
-  on.exit({
-    unlink(dir, recursive = TRUE)
-    dir.create(dir)
-    file.copy(file.path(tdir, basename(dir)), dirname(dir), recursive = TRUE)
-    unlink(file.path(tdir, basename(dir)), recursive = TRUE)
-  })
+  withr::local_dir(file.path(tdir, basename(dir)))
 
-  if (!missing(tmp_conn)) {
-    old = options("__potools_testing_prompt_connection__" = tmp_conn)
-    on.exit(options(old), add = TRUE)
+  if (!is.null(msg_conn)) {
+    withr::local_options("__potools_testing_prompt_connection__" = msg_conn)
   }
 
-  invisible(capture.output(expr))
+  expr
+}
+
+with_restoration_test_that <- function(desc, pkg, code, conn = NULL) {
+  pkg <- test_package(pkg)
+  if (!is.null(conn)) conn <- mock_translation(conn)
+  with_package(pkg, code, conn)
 }
 
 # TODO: I think this can just be replaced by expect_match and expect_no_match in current testthat dev
@@ -47,7 +45,7 @@ expect_messages = function(expr, msgs, ..., invert=FALSE) {
 }
 
 test_package = function(pkg) test_path(file.path("test_packages", pkg))
-mock_translation = function(mocks) test_path(file.path("mock_translations", mocks))
+mock_translation = function(mocks) normalizePath(test_path(file.path("mock_translations", mocks)))
 
 local_test_package <- function(..., .envir = parent.frame()) {
   temp <- withr::local_tempdir(.local_envir = .envir)
@@ -65,8 +63,20 @@ local_test_package <- function(..., .envir = parent.frame()) {
   temp
 }
 
-# different platforms/installations of gettext apparently
-#   produce a different number of "." in "progress" output; normalize
-standardize_dots <- standardise_dots <- function(x) {
-  gsub("\\.{2,}", ".", x)
+normalize_output <- function(x) {
+  # different platforms/installations of gettext apparently
+  #   produce a different number of "." in "progress" output; normalize
+  x <- gsub("\\.{2,}", ".", x)
+
+  # en@quot translations are not produced on Windows (as of now)
+  x <- grep("Generating en@quot translations", x, fixed = TRUE, invert = TRUE, value = TRUE)
+
+  # this is produced alongside the previous message, but in a different iteration of transform()
+  idx <- grep("running msgfmt on (?:R-)?en@quot\\.po", x)
+  if (length(idx)) {
+    x <- x[-(idx + 0:1)]
+  }
+  x
 }
+
+expect_normalized_snapshot <- function(...) expect_snapshot(..., transform = normalize_output)

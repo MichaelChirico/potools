@@ -24,16 +24,16 @@ First of all, thank you for helping out!
 Providing translations for a package is a fantastic way to contribute and I know that your work is deeply appreciated by the package developer.
 
 Before you go any further, make sure the that the package has started the process of providing translations by checking that it has `po/` directory in the package root.
-If you don't see that package, you might want to start by opening an issue to see if the developer is interested in providing translations.
+If you don't see that directory, you might want to start by opening an issue to see if the developer is interested in receiving translations.
 
 ### Basic process
 
-Before we get into the details lets review the basic process of creating translations:
+Before we get into the details let's review the basic process of creating translations:
 
 -   The package developer runs `po_extract()` to extract all translatable messages from their R and C code.
 
 -   You call `po_create()` to generate a `.po` file for the language you're translating.
-    A `.po` file consists of pairs of lines like:
+    A `.po` file consists of a metadata header and pairs of lines like:
 
         msgid "This is the message in English"
         msgstr ""
@@ -50,8 +50,8 @@ The process for updating translations is slightly different, and we'll come back
 ## Translation basics
 
 As a translator, you'll work primarily with `.po` files.
-There's one `.po` file for each language that lives in the `po/` directory.
-If you'll look at this directory, you'll also see a `.pot` file --- that's a template file that contains the list of all translatable strings in the package and is used to generate the `.po` files for each language.
+There's one (or two) `.po` file(s) for each language that lives in the `po/` directory.
+In the same directory, you'll also see a `.pot` file --- that's a template file that contains the list of all translatable strings in the package and is used to generate the `.po` files for each language.
 
 Get started by creating a `.po` for your language by running `potools::po_create("{language code}")`.
 Next, open that file with your favourite text editor.
@@ -88,10 +88,10 @@ The `msgstr` is the translated equivalent and it's your job as a translator to f
 
 That's basically it!
 Just work through the file filling in the translations one by one.
-If there's not quite enough context to figure out the best translation you can either look at the source code (using the line file number reference in the line above `msgid`) or contact the developer for clarification.
+If there's not quite enough context to figure out the best translation you can either look at the source code (using the file number & line reference in the line above `msgid`) or contact the developer for clarification.
 (If a message is challenging to translate, it often indicates that the English version might be suboptimal, so most developers will appreciate you reaching out).
 
-Next we'll go through the details of few message variations you might come across, show you how to try out your work, and then finish up by discussing a few extra details that arise when updating the translations for a package, rather than starting from scratch.
+Next we'll go through the details of a few message variations you might come across, show you how to try out your work, and then finish up by discussing a few extra details that arise when updating the translations for a package, rather than starting from scratch.
 
 ## Message variations
 
@@ -104,15 +104,17 @@ The following sections describe four important message variations:
 
 ### `glue()`
 
-You can tell if message uses [glue](https://glue.tidyverse.org) because it will contain a pair of braces: `{}`.
-glue evaluating any R code in between `{}` and inserting the results into the string:
+You can tell if message uses [glue](https://glue.tidyverse.org) because it will contain pairs of braces: `{}`[^1].
+glue evaluates any R code in between `{}` and inserts the results into the string:
+
+[^1]: Also, the package should have a dependency on `glue`, probably in Imports, but maybe in Depends or Suggests.
 
 ```{r}
 name <- "Michael"
 glue::glue("Hi {name}!")
 ```
 
-The code above would generate the following `.po`:
+The code above would generate the following in the `.po` file:
 
     msgid: "Hi {name}!"
     msgstr: ""
@@ -142,14 +144,14 @@ Which (if you spoke Japanese), you might translate to:
     msgid: "Hi %s!"
     msgstr: "こんにちは %s！"
 
-If there are multiple interpolated strings, and you need to change their order to make grammatical sense in your language, you can put `1$`, `2$` etc after the `%` to refer to variable in that position.
+If there are multiple interpolated strings, and you need to change their order to make grammatical sense in your language, you can put `1$`, `2$` etc. after the `%` to refer to variable in that position.
 
 ```{r}
 sprintf("%s %s %s", "first", "second", "third")
 sprintf("%2$s %1$s %3$s", "first", "second", "third")
 ```
 
-This can be hard to puzzle out, which is why we recommend that package developers use `glue()`.
+This can be hard to puzzle out and confusing to read, which is why we recommend that package developers use `glue()`.
 
 ### Multi-line messages
 
@@ -177,7 +179,7 @@ For example, Japanese only needs a single form, because the rest of the sentence
 
     msgid "There is {n} cow in the field"
     msgid_plural "There are {n} cows in the field"
-    msgstr[0]: フィールドには{n}頭の牛がいます
+    msgstr[0]: 牧草地に{n}頭牛がいます
 
 Slovenian has four forms (1, 2, 3-4, everything else) so gets four entries:
 

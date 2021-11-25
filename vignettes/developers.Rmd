@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 library(glue)
 ```
 
-In this vignette you'll learn how to set up your package for translation, focussing on translating messages in your R code.
+In this vignette you'll learn how to set up your package for translation, focusing on translating messages in your R code.
 It's aimed at a package developers; if you're translating an existing package, you might want to start with `vignette("translators")`.
 
 ```{r setup}

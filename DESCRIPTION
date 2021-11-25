@@ -20,6 +20,7 @@ Imports:
     data.table
 Suggests: 
     crayon,
+    glue,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),

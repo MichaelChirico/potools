@@ -9,4 +9,5 @@ potools.Rcheck
 potools_*.tar.gz
 
 tests/testthat/testthat-problems.rds
+inst/doc
 docs

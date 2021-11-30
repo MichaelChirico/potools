@@ -185,7 +185,7 @@ This would generate the following sequence of translations for French:
 
 Unfortunately this breakdown won't generate correct French.
 The three greetings should be "Bonjour" for morning and afternoon, and "Bonsoir" for evening.
-There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon aprés midi is used as a farewell), and the two word English phrases turn into single French words.
+There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon après-midi is used as a farewell), and the two word English phrases turn into single French words.
 
 If you were translating to [Mongolian](https://twitter.com/khorloobatpurev/status/1458044704130437124) you'd face a different problem.
 While Mongolian uses the same times of day, it arranges the words in the opposite order to English: "Өглөөний мэнд" is morning greetings, "Өдрийн мэнд" is afternoon greetings, and "Оройн мэнд" is evening greetings.

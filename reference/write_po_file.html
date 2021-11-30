@@ -5,14 +5,16 @@ recognized by the gettext ecosystem."><meta property="og:image" content="https:/
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body>
-    <a href="#container" class="visually-hidden-focusable">Skip to contents</a>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    
     <a class="navbar-brand me-2" href="../index.html">potools</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
 
+    
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -42,11 +44,12 @@ recognized by the gettext ecosystem."><meta property="og:image" content="https:/
   </a>
 </li>
       </ul></div>
+
+    
   </div>
-</nav><div class="container template-reference-topic" id="container">
+</nav><div class="container template-reference-topic">
 <div class="row">
-  <div class="col-md-9 contents">
-    <div class="page-header">
+  <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Write a .po or .pot file corresponding to a message database</h1>
       <small class="dont-index">Source: <a href="https://github.com/MichaelChirico/potools/blob/HEAD/R/write_po_file.R" class="external-link"><code>R/write_po_file.R</code></a></small>
       <div class="d-none name"><code>write_po_file.Rd</code></div>
@@ -57,9 +60,9 @@ recognized by the gettext ecosystem."><meta property="og:image" content="https:/
 recognized by the gettext ecosystem.</p>
     </div>
 
-    <div class="ref-usage section level2 sourceCode">
-    <h2>Usage</h2>
-    <pre class="sourceCode r"><code><span class="fu">write_po_file</span><span class="op">(</span>
+    <div class="section level2">
+    <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">write_po_file</span><span class="op">(</span>
   <span class="va">message_data</span>,
   <span class="va">po_file</span>,
   <span class="va">metadata</span>,
@@ -83,10 +86,9 @@ recognized by the gettext ecosystem.</p>
 <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">x</span>, template <span class="op">=</span> <span class="cn">FALSE</span>, use_plurals <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for po_metadata</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></code></pre>
+<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
-    <div id="ref-sections">
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>message_data</dt>
@@ -185,11 +187,10 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
     <p>Michael Chirico</p>
     </div>
-    </div>
 
-    <div id="examples">
-    <h2>Examples</h2>
-    <div class="ref-examples sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="va">message_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_message_data.html">get_message_data</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'pkg'</span>, package<span class="op">=</span><span class="st">'potools'</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Getting R-level messages...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Getting src-level messages...</span>
@@ -281,8 +282,8 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> msgstr ""</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Project-Id-Version: potoolsExample 0.0.1\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2021-11-25 16:23+0000\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: 2021-11-25 16:23+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2021-11-30 15:39+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: 2021-11-30 15:39+0000\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Last-Translator: R User &lt;ruser@gmail.com&gt;\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language-Team: ar_SY\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language: ar_SY\n"</span>
@@ -301,8 +302,8 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> msgstr ""</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Project-Id-Version: potoolsExample 0.0.1\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2021-11-25 16:23+0000\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: 2021-11-25 16:23+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2021-11-30 15:39+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: 2021-11-30 15:39+0000\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Last-Translator: R User &lt;ruser@gmail.com&gt;\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language-Team: ar_SY\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language: ar_SY\n"</span>
@@ -330,7 +331,7 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> msgstr ""</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Project-Id-Version: potoolsExample 0.0.1\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2021-11-25 16:23+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2021-11-30 15:39+0000\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Last-Translator: FULL NAME &lt;EMAIL@ADDRESS&gt;\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language-Team: LANGUAGE &lt;LL@li.org&gt;\n"</span>
@@ -353,11 +354,8 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">message_data</span>, <span class="va">desc_data</span>, <span class="va">metadata</span>, <span class="va">tmp_po</span>, <span class="va">tmp_pot</span><span class="op">)</span></span>
 </code></pre></div>
     </div>
-  </div>
-  <div class="col-md-3" id="pkgdown-sidebar">
-    <nav id="toc"><h2>On this page</h2>
-    </nav></div>
-</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

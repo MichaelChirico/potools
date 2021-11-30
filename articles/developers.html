@@ -26,14 +26,16 @@
 <![endif]-->
 </head>
 <body>
-    <a href="#container" class="visually-hidden-focusable">Skip to contents</a>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    
     <a class="navbar-brand me-2" href="../index.html">potools</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
 
+    
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -68,11 +70,12 @@
 </li>
       </ul>
 </div>
+
+    
   </div>
-</nav><div class="container template-article" id="container">
+</nav><div class="container template-article">
 <script src="developers_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
-  <div class="col-md-9 contents">
-    <div class="page-header">
+  <main id="main"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Translation for package developers</h1>
             
       
@@ -151,7 +154,7 @@ msgstr "This is the message in another language"</code></pre>
 <code class="sourceCode R"><span class="va">tr_</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/Encoding.html" class="external-link">enc2utf8</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
-<p>The advantage of the explicit style is that it’s very clear which messges are ready for translated. The disadvantage is that it’s easy to miss string, so in the future we’ll provide automated ways to identify strings that haven’t been translated and probably should be.</p>
+<p>The advantage of the explicit style is that it’s very clear which messages are ready for translated. The disadvantage is that it’s easy to miss string, so in the future we’ll provide automated ways to identify strings that haven’t been translated and probably should be.</p>
 <p>I’ll use the explicit style in the rest of this vignette because it makes it very clear what is being translated.</p>
 </div>
 </div>
@@ -179,7 +182,7 @@ msgstr ""</code></pre>
 </li>
 <li><p>Prose is not like code: you can’t reliably build up sentences from small fragments of text. Even if you can figure out how to do it in English, it’s unlikely the same form will work for other languages.</p></li>
 </ul>
-<p>Instead it’s better to generate the complete message in a single string using <code>glue()</code> or <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> <a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;If you’re using the “base” style, you could instead write &lt;code&gt;gettextf("Good morning %s", name)&lt;/code&gt;; &lt;code&gt;&lt;a href="https://rdrr.io/r/base/sprintf.html" class="external-link"&gt;gettextf()&lt;/a&gt;&lt;/code&gt; is a version of &lt;code&gt;&lt;a href="https://rdrr.io/r/base/sprintf.html" class="external-link"&gt;sprintf()&lt;/a&gt;&lt;/code&gt; that translates the first argument.&lt;/p&gt;'><sup>3</sup></a>to interpolate in the parts that vary:</p>
+<p>Instead it’s better to generate the complete message in a single string using <code>glue()</code> or <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> <a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;If you’re using the “base” style, you could instead write &lt;code&gt;gettextf("Good morning %s", name)&lt;/code&gt;; &lt;code&gt;&lt;a href="https://rdrr.io/r/base/sprintf.html" class="external-link"&gt;gettextf()&lt;/a&gt;&lt;/code&gt; is a version of &lt;code&gt;&lt;a href="https://rdrr.io/r/base/sprintf.html" class="external-link"&gt;sprintf()&lt;/a&gt;&lt;/code&gt; that translates the first argument.&lt;/p&gt;'><sup>3</sup></a> to interpolate in the parts that vary:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good morning {name}"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; Good morning Hadley</span>
@@ -211,7 +214,7 @@ msgstr "après midi"
 
 msgid "evening"
 msgstr "soirée"</code></pre>
-<p>Unfortunately this breakdown won’t generate correct French. The three greetings should be “Bonjour” for morning and afternoon, and “Bonsoir” for evening. There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon aprés midi is used as a farewell), and the two word English phrases turn into single French words.</p>
+<p>Unfortunately this breakdown won’t generate correct French. The three greetings should be “Bonjour” for morning and afternoon, and “Bonsoir” for evening. There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon après-midi is used as a farewell), and the two word English phrases turn into single French words.</p>
 <p>If you were translating to <a href="https://twitter.com/khorloobatpurev/status/1458044704130437124" class="external-link">Mongolian</a> you’d face a different problem. While Mongolian uses the same times of day, it arranges the words in the opposite order to English: “Өглөөний мэнд” is morning greetings, “Өдрийн мэнд” is afternoon greetings, and “Оройн мэнд” is evening greetings.</p>
 <p>Again, we need to resolve this problem by moving away from translating fragments and towards translating complete sentences. One way to do that here would be to restrict ourselves to a fixed set of time points and use <code><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch()</a></code> to specify the greeting:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
@@ -355,12 +358,8 @@ msgstr[2] "В поле {n} коров"</code></pre>
 </div>
 </div>
 
-  </div>
-  <div class="col-md-3" id="pkgdown-sidebar">
-    <nav id="toc"><h2>On this page</h2>
-    </nav>
-</div>
-  
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

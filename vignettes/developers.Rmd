@@ -143,7 +143,7 @@ This will pose two challenges for translators:
 -   Prose is not like code: you can't reliably build up sentences from small fragments of text.
     Even if you can figure out how to do it in English, it's unlikely the same form will work for other languages.
 
-Instead it's better to generate the complete message in a single string using `glue()` or `sprintf()` [^3]to interpolate in the parts that vary:
+Instead it's better to generate the complete message in a single string using `glue()` or `sprintf()` [^3] to interpolate in the parts that vary:
 
 [^3]: If you're using the "base" style, you could instead write `gettextf("Good morning %s", name)`; `gettextf()` is a version of `sprintf()` that translates the first argument.
 

@@ -104,7 +104,7 @@ tr_ <- function(...) {
 }
 ```
 
-The advantage of the explicit style is that it's very clear which messges are ready for translated.
+The advantage of the explicit style is that it's very clear which messages are ready for translated.
 The disadvantage is that it's easy to miss string, so in the future we'll provide automated ways to identify strings that haven't been translated and probably should be.
 
 I'll use the explicit style in the rest of this vignette because it makes it very clear what is being translated.
@@ -143,7 +143,7 @@ This will pose two challenges for translators:
 -   Prose is not like code: you can't reliably build up sentences from small fragments of text.
     Even if you can figure out how to do it in English, it's unlikely the same form will work for other languages.
 
-Instead it's better to generate the complete message in a single string using `glue()` or `sprintf()` [^3]to interpolate in the parts that vary:
+Instead it's better to generate the complete message in a single string using `glue()` or `sprintf()` [^3] to interpolate in the parts that vary:
 
 [^3]: If you're using the "base" style, you could instead write `gettextf("Good morning %s", name)`; `gettextf()` is a version of `sprintf()` that translates the first argument.
 
@@ -185,7 +185,7 @@ This would generate the following sequence of translations for French:
 
 Unfortunately this breakdown won't generate correct French.
 The three greetings should be "Bonjour" for morning and afternoon, and "Bonsoir" for evening.
-There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon aprés midi is used as a farewell), and the two word English phrases turn into single French words.
+There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon après-midi is used as a farewell), and the two word English phrases turn into single French words.
 
 If you were translating to [Mongolian](https://twitter.com/khorloobatpurev/status/1458044704130437124) you'd face a different problem.
 While Mongolian uses the same times of day, it arranges the words in the opposite order to English: "Өглөөний мэнд" is morning greetings, "Өдрийн мэнд" is afternoon greetings, and "Оройн мэнд" is evening greetings.

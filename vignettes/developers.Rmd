@@ -104,7 +104,7 @@ tr_ <- function(...) {
 }
 ```
 
-The advantage of the explicit style is that it's very clear which messges are ready for translated.
+The advantage of the explicit style is that it's very clear which messages are ready for translated.
 The disadvantage is that it's easy to miss string, so in the future we'll provide automated ways to identify strings that haven't been translated and probably should be.
 
 I'll use the explicit style in the rest of this vignette because it makes it very clear what is being translated.

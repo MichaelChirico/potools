@@ -200,7 +200,7 @@ It's a little tricky to go from the C code to a human description of the cases, 
 If you know how to use the package, you can try out your translations.
 There are three important steps:
 
-1.  Set the LANGUAGE environment variable to the language you're translating: `Sys.setenv(LANGUAGE "{language code"}`. (You only need to do this once per session).
+1.  Set the LANGUAGE environment variable to the language you're translating: `Sys.setenv(LANGUAGE = "{language code}")`. (You only need to do this once per session).
 2.  Compile the plain text `.po` file you've been editing to the binary `.mo` file that R uses by running `potools::po_compile()`.
 3.  Re-load (with `devtools::load_all()`) or re-install the package (e.g. using RStudio's "Install and restart" button).
 

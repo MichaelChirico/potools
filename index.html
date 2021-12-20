@@ -89,125 +89,34 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>R users are a global community. From Xiamen to Santiago, Addis Ababa to Tbilisi, Ogallala to Adelaide, R users are legion and their native languages are as well.</p>
-<p>If the target audience of your package extends beyond the English-speaking world, or if you want to make the user experience for the non-native English speakers using your tools, you can consider internationalizing your package by translating its user-facing communications (verbose messages, warnings, errors, etc.).</p>
-<p>Unfortunately, to do so has some tedious aspects, namely, learning the gettext system of <code>.po</code> files, <code>.pot</code> templates, and <code>.mo</code> binaries – another syntax rife with quirks and idiosyncrasies.</p>
-<p><code>potools</code> is designed to minimize the friction to translating your package by abstracting away as many details of the <code>.po</code> system of translations as possible.</p>
-<p>The core function of <code>potools</code>, <code>translate_package</code>, is a one-stop-shop for interactively setting your package up for translation and providing those translations, all without ever having to touch a <code>.po</code> file yourself.</p>
-<p><code>potools</code> is a UTF-8 package – all <code>.po</code> and <code>.pot</code> files it produces will be treated as UTF-8.</p>
+<p>R users are a global community. From Xiamen to Santiago, Addis Ababa to Tbilisi, Ogallala to Adelaide, R users are legion and speak many different languages. To serve these diverse communities, R includes built-in tools based on the <a href="https://www.gnu.org/software/gettext/" class="external-link">GNU gettext system</a> that make it possible to translate user-facing communications like messages, warnings, and errors. Unfortunately, this system uses new file types (<code>.pot</code> templates, <code>.po</code> files, and <code>.mo</code> binaries) that come with their own quirks and idiosyncrasies. The goal of potools is make it as easy as possible to translate your package by abstracting away as many details of the gettext system as possible.</p>
 <p>The potool logo features a <a href="https://en.wikipedia.org/wiki/Potoo" class="external-link">potoo</a> and was designed by <a href="https://www.allisonhorst.com" class="external-link">Allison Horst</a>.</p>
-<div class="section level3">
-<h3 id="translating-your-package-interactively-with-translate_package">Translating your package interactively with <code>translate_package()</code>
-<a class="anchor" aria-label="anchor" href="#translating-your-package-interactively-with-translate_package"></a>
-</h3>
-<p>The primary feature of <code>potools</code> is the <code><a href="reference/translate_package.html">translate_package()</a></code> function, which is designed to be your first &amp; only stop for typical experience internationalizing a package</p>
-<div class="section level4">
-<h4 id="as-a-developer--generating-a-pot-template">As a developer – generating a .pot template<a class="anchor" aria-label="anchor" href="#as-a-developer--generating-a-pot-template"></a>
-</h4>
-<p>A .pot template can be used by translators to produce translations; just running <code><a href="reference/translate_package.html">translate_package()</a></code> on your package’s source will produce this file (or files, if your package has both R and C/C++ messages to translated), e.g.</p>
-<pre><code><span class="co"># run from the directory into which potools is cloned, i.e., 'potools' here is a file path</span>
-<span class="fu"><a href="reference/translate_package.html">translate_package</a></span><span class="op">(</span><span class="st">'potools'</span><span class="op">)</span></code></pre>
-</div>
-<div class="section level4">
-<h4 id="as-a-translator--generating-a-po-translation--mo-translation-binary">As a translator – generating a .po translation &amp; .mo translation binary<a class="anchor" aria-label="anchor" href="#as-a-translator--generating-a-po-translation--mo-translation-binary"></a>
-</h4>
-<p>To further add translations in your desired language, include the target language in the <code><a href="reference/translate_package.html">translate_package()</a></code> call.</p>
-<p>Running the following will launch an interactive dialog prompting for translations message-by-message:</p>
-<pre><code><span class="co"># es.po &amp; es.mo Spanish translation files will be produced</span>
-<span class="fu"><a href="reference/translate_package.html">translate_package</a></span><span class="op">(</span><span class="st">'potools'</span>, <span class="st">'es'</span><span class="op">)</span></code></pre>
-</div>
-</div>
-<div class="section level3">
-<h3 id="customized-translators">Customized translators<a class="anchor" aria-label="anchor" href="#customized-translators"></a>
-</h3>
-<p><code>base</code> R provides several functions for messaging that are natively equipped for translation (they all have a <code>domain</code> argument): <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>, <code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code>, <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>, <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext()</a></code>, <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf()</a></code>, <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">ngettext()</a></code>, and <code><a href="https://rdrr.io/r/base/message.html" class="external-link">packageStartupMessage()</a></code>.</p>
-<p>While handy, some developers may prefer to write their own functions, or to write wrappers of the provided functions that provide some enhanced functionality (e.g., templating or automatic wrapping). In this case, the default R tooling for translation (<code>xgettext()</code>, <code>xngettext()</code> <code>xgettext2pot()</code>, <code>update_pkg_po()</code> from <code>tools</code>) will not work, but <code><a href="reference/translate_package.html">potools::translate_package()</a></code> and its workhorse <code><a href="reference/get_message_data.html">potools::get_message_data()</a></code> provide an interface to continue building translations for your workflow.</p>
-<p>Suppose you wrote a function <code>stopf()</code> that is a wrapper of <code>stop(gettextf())</code> used to build templated error messages in R, which makes translation easier for translators (see below), e.g.:</p>
-<pre><code><span class="va">stopf</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">domain</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span><span class="op">)</span>, domain <span class="op">=</span> <span class="va">domain</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="op">}</span></code></pre>
-<p>Note that <code>potools</code> itself uses just such a wrapper internally to build error messages! To extract strings from calls in your package to <code>stopf()</code> and mark them for translation, use the argument <code>custom_translation_functions</code>:</p>
-<pre><code><span class="fu"><a href="reference/get_message_data.html">get_message_data</a></span><span class="op">(</span>
-  <span class="st">'/path/to/my_package'</span>,
-  custom_translation_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>R <span class="op">=</span> <span class="st">'stopf:fmt|1'</span><span class="op">)</span>
-<span class="op">)</span></code></pre>
-<p>This invocation tells <code><a href="reference/get_message_data.html">get_message_data()</a></code> to look for strings in the <code>fmt</code> argument in calls to <code>stopf()</code>. <code>1</code> indicates that <code>fmt</code> is the first argument.</p>
-<p>More specifications are possible, including marking custom calls in C/C++; see <code><a href="reference/translate_package.html">?translate_package</a></code> for a full explanation.</p>
-<p>Note that this is only good for <em>marking</em> such strings for translation – for them to actually be translated during code execution, your custom function will ultimately have to be pass the strings to <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext()</a></code> or <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf()</a></code> (as done in the <code>stopf()</code> example). Without doing so, the string will always just appear in English.</p>
-</div>
-<div class="section level3">
-<h3 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
-</h3>
-<p><code>translate_package</code> also runs some diagnostics that can help make your package more translation-ready (see below).</p>
-<div class="section level4">
-<h4 id="cracked-messages">Cracked messages<a class="anchor" aria-label="anchor" href="#cracked-messages"></a>
-</h4>
-<p>A cracked message is one like:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="va">n</span>, <span class="st">" good things and "</span>, <span class="va">m</span>, <span class="st">" bad things."</span><span class="op">)</span></code></pre></div>
-<p>In its current state, translators will be asked to translate three messages independently:</p>
-<ul>
-<li>“There are”</li>
-<li>“good things and”</li>
-<li>“bad things.”</li>
-</ul>
-<p>The message has been cracked; it might not be possible to translate a string as generic as “There are” into many languages – context is key!</p>
-<p>To keep the context, the error message should instead be build with <code>gettextf</code> like so:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span>domain<span class="op">=</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="st">"There are %d good things and %d bad things."</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Now there is only one string to translate! Note that this also allows the translator to change the word order as they see fit – for example, in Japanese, the grammatical order usually puts the verb last (where in English it usually comes right after the subject).</p>
-<p><code>translate_package</code> detects such cracked messages and suggests a <code>gettextf</code>-based approach to fix them.</p>
-</div>
-<div class="section level4">
-<h4 id="untranslated-r-messages-produced-by-cat">Untranslated R messages produced by <code>cat()</code>
-<a class="anchor" aria-label="anchor" href="#untranslated-r-messages-produced-by-cat"></a>
-</h4>
-<p>Only strings which are passed to certain <code>base</code> functions are eligible for translation, namely <code>stop</code>, <code>warning</code>, <code>message</code>, <code>packageStartupMessage</code>, <code>gettext</code>, <code>gettextf</code>, and <code>ngettext</code> (all of which have a <code>domain</code> argument that is key for translation).</p>
-<p>However, it is common to also produce some user-facing messages using <code>cat</code> – if your package does so, it must first use <code>gettext</code> or <code>gettextf</code> to translate the message before sending it to the user with <code>cat</code>.</p>
-<p><code>translate_package</code> detects strings produced with <code>cat</code> and suggests a <code>gettext</code>- or <code>gettextf</code>-based fix.</p>
-</div>
-<div class="section level4">
-<h4 id="untranslated-cc-messages">Untranslated C/C++ messages<a class="anchor" aria-label="anchor" href="#untranslated-cc-messages"></a>
-</h4>
-<p>This diagnostic detects any literal <code>char</code> arrays provided to common messaging functions in C/C++, namely <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">ngettext()</a></code>, <code>Rprintf()</code>, <code>REprintf()</code>, <code>Rvprintf()</code>, <code>REvprintf()</code>, <code>R_ShowMessage()</code>, <code>R_Suicide()</code>, <code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code>, <code>Rf_warning()</code>, <code>error()</code>, <code>Rf_error()</code>, <code>dgettext()</code>, and <code>snprintf()</code>. To actually translate these strings, pass them through the translation macro <code>_</code>.</p>
-<p>NB: Translation in C/C++ requires some additional <code>#include</code>s and declarations, including defining the <code>_</code> macro. See the Internationalization section of Writing R Extensions for details.</p>
-</div>
-</div>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p><code>potools</code> is on CRAN as of v0.2.0.</p>
-<p>You can also install the latest development version from GitHub. The easiest way to do so:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>Start by installing the released version potools from CRAN:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"potools"</span><span class="op">)</span></code></pre></div>
+<p>Or the development version from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># install.packages("remotes")</span>
 <span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"MichaelChirico/potools"</span><span class="op">)</span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="tips--tricks-for-translation">Tips &amp; Tricks for Translation<a class="anchor" aria-label="anchor" href="#tips--tricks-for-translation"></a>
-</h2>
-<div class="section level3">
-<h3 id="searchable-error-messages">Searchable error messages<a class="anchor" aria-label="anchor" href="#searchable-error-messages"></a>
-</h3>
-<p>One observation about offering translated messages is that non-English messages are harder to google. A few suggestions:</p>
+<p>You’ll also need to install gettext, the GNU command line toolkit that powers potools. Installation depends on your operating system:</p>
 <ul>
-<li>You can give error messages a unique identifier (e.g. numbering). This may be harder to do for “established” packages since adding identifiers might be a breaking change.</li>
-<li>End users can switch to an English locale mid-session by running <code>Sys.setenv(LANGUAGE = 'en')</code> – error messages will be produced in English until they set <code>LANGUAGE</code> again.</li>
-<li>You could write a custom error wrapper that produces the error both in English and as a translation.</li>
+<li><p>On Windows, gettext is bundled with <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">Rtools</a>, so if you’re developing packages you probably already have it.</p></li>
+<li><p>On Mac, it’s easiest to install with <a href="https://brew.sh" class="external-link">brew</a>: <code>brew install gettext</code></p></li>
+<li><p>On Linux, it’s usually already installed; otherwise you’ll need to install <code>gettext</code> with your distro’s standard tool.</p></li>
 </ul>
 </div>
-<div class="section level3">
-<h3 id="translating-technical-terms">Translating technical terms<a class="anchor" aria-label="anchor" href="#translating-technical-terms"></a>
-</h3>
-<p>Technical terms are par for the course in R packages; showing users similar terms for the same concept might lead to needless confusion. R recommends using the <a href="https://www.isi-web.org/publications/glossary-of-statistical-terms" class="external-link">ISI Multilingual Glossary of Statistical Terms</a> to help overcome this issue.</p>
-</div>
-<div class="section level3">
-<h3 id="picking-a-domain-for-diasporic-languages">Picking a domain for diasporic languages<a class="anchor" aria-label="anchor" href="#picking-a-domain-for-diasporic-languages"></a>
-</h3>
-<p>What domain should you use when translating Spanish? There’s <code>es_AR</code>, <code>es_BO</code>, <code>es_CL</code>, <code>es_DO</code>, <code>es_HN</code>, … do I really need to provide a separate file for my Nicaraguan (<code>es_NI</code>) users?</p>
-<p>No, but you could. Typically, you are best off creating one set of translations under the language’s general domain (here, <code>es</code>). Once translations exist for <code>es</code>, users in all of the more specific locales will see the messages for <code>es</code> whenever they exist. If you really do want to provide more regionally-specific error messages (awesome!), you can either (1) create a whole new set of translations for each region or (2) write translations <em>only for the region-specific messages</em>. The latter is how R handles messages that differ on British/American spelling, for example.</p>
-<p>Say a user is running in <code>es_GT</code> and triggers an error. R will first look for a translation into <code>es_GT</code>; if none is defined, it will look for a translation into <code>es</code>. If none is defined again, it will finally fall back to the package’s default language (i.e., whatever language is written in the source code, usually English).</p>
-</div>
+<div class="section level2">
+<h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
+</h2>
+<p>There are two core workflows provided by potools:</p>
+<ul>
+<li><p><code><a href="reference/translate_package.html">translate_package()</a></code> is a one-stop-shop for interactively setting your package and providing translations, as described in <code><a href="reference/translate_package.html">?translate_package</a></code>.</p></li>
+<li><p><code><a href="reference/po_extract.html">po_extract()</a></code>, <code><a href="reference/po_create.html">po_create()</a></code>, <code><a href="reference/po_update.html">po_update()</a></code>, and <code><a href="reference/po_compile.html">po_compile()</a></code> let you perform the individual steps of <code><a href="reference/translate_package.html">translate_package()</a></code> as described in <code><a href="articles/developers.html">vignette("developers")</a></code> and <code><a href="articles/translators.html">vignette("translators")</a></code>.</p></li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="alternative-software">Alternative software<a class="anchor" aria-label="anchor" href="#alternative-software"></a>

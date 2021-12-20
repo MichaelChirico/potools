@@ -280,6 +280,16 @@ msgstr "%3$s %1$s %2$s"</code></pre>
 <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"&lt;a href='/index.html'&gt;"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"Home page"</span><span class="op">)</span>, <span class="st">"&lt;/a&gt;"</span><span class="op">)</span></code></pre></div>
 <p>Generally, you want to help the translator spend as much time as possible helping you out.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="googling">Googling<a class="anchor" aria-label="anchor" href="#googling"></a>
+</h2>
+<p>It’s worth noting that that non-English messages are often harder to Google because few non-English languages have a significant presence on StackOverflow. A few suggestions:</p>
+<ul>
+<li>You can give error messages a unique identifier (e.g. numbering). This may be harder to do for “established” packages since adding identifiers might be a breaking change. It could also be a headache to keep track of which numbers have been taken, e.g. in a context of concurrent PRs incrementing the error numbering in parallel.</li>
+<li>End users can switch to an English locale mid-session by running <code>Sys.setenv(LANGUAGE = 'en')</code>: error messages will be produced in English until they set <code>LANGUAGE</code> again.</li>
+<li>You could write a custom error wrapper that produces the error both in English and as a translation.</li>
+</ul>
 <div class="section level3">
 <h3 id="plurals">Plurals<a class="anchor" aria-label="anchor" href="#plurals"></a>
 </h3>

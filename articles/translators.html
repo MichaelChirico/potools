@@ -137,6 +137,15 @@ msgid "Running message diagnostics..."
 msgstr "メッセージ診断中。。。"</code></pre>
 <p>That’s basically it! Just work through the file filling in the translations one by one. If there’s not quite enough context to figure out the best translation you can either look at the source code (using the file number &amp; line reference in the line above <code>msgid</code>) or contact the developer for clarification. (If a message is challenging to translate, it often indicates that the English version might be suboptimal, so most developers will appreciate you reaching out).</p>
 <p>Next we’ll go through the details of a few message variations you might come across, show you how to try out your work, and then finish up by discussing a few extra details that arise when updating the translations for a package, rather than starting from scratch.</p>
+<div class="section level3">
+<h3 id="picking-a-domain-for-diasporic-languages">Picking a domain for diasporic languages<a class="anchor" aria-label="anchor" href="#picking-a-domain-for-diasporic-languages"></a>
+</h3>
+<p>What domain should you use when translating Spanish? There’s <code>es_AR</code>, <code>es_BO</code>, <code>es_CL</code>, <code>es_DO</code>, <code>es_HN</code>, … Do you really need to provide a separate translation for Nicaraguan (<code>es_NI</code>) users? No, but you could.</p>
+<p>Typically, you are best off creating one set of translations under the language’s general domain (here, <code>es</code>). Once translations exist for <code>es</code>, users in all of the more specific locales will see the messages for <code>es</code> whenever they exist. If you really do want to provide more regionally-specific error messages (awesome!), you can either (1) create a whole new set of translations for each region or (2) write translations <em>only for the region-specific messages</em>. The latter is how R handles messages that differ on British/American spelling, for example.</p>
+<p>Say a user is running in <code>es_GT</code> and triggers an error. R will first look for a translation into <code>es_GT</code>; if none is defined, it will look for a translation into <code>es</code>. If none is defined again, it will finally fall back to the package’s default language (i.e., whatever language is written in the source code, usually English).</p>
+<p>Note also the advice given in the R Installation and Administration manual (also cited below) – if you are writing Spanish translations, a typical package should use <code>language = "es"</code> to generate Spanish translations for <em>all</em> Spanish domains. If you want to add more regional flair to your messaging, you can do so through supplemental <code>.po</code> files. For example, you can add some Argentinian messages to <code>es_AR</code>; users running R in the <code>es_AR</code> locale will see messages specifically written for <code>es_AR</code> first; absent that, the <code>es</code> message will be shown; and absent that, the default message (i.e., in the language written in the source code, usually English).</p>
+<p>Chinese is a slightly different case – typically, the <code>zh_CN</code> domain is used to write with simplified characters while <code>zh_TW</code> is used for traditional characters. In principal you could leverage <code>zh_TW</code> for Taiwanisms and <code>zh_HK</code> for Hongkieisms.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="message-variations">Message variations<a class="anchor" aria-label="anchor" href="#message-variations"></a>
@@ -219,6 +228,11 @@ msgstr[3]: Na polju je {n} krav</code></pre>
 <p>(Note the forms are zero-indexed, so they start at 0, not 1.)</p>
 <p>The rules for converting the number to the <code>msgid</code> index are expressed using C-code and can be found at the top of the <code>.po</code> file (look for “plural-forms”). It’s a little tricky to go from the C code to a human description of the cases, but if you’re a native speaker you’re hopefully already familiar with the basic breakdown.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="other-issues">Other issues<a class="anchor" aria-label="anchor" href="#other-issues"></a>
+</h2>
+<p>Technical terms are par for the course in R packages; showing users similar terms for the same concept might lead to needless confusion. R recommends using the <a href="https://www.isi-web.org/publications/glossary-of-statistical-terms" class="external-link">ISI Multilingual Glossary of Statistical Terms</a> to help overcome this issue.</p>
 </div>
 <div class="section level2">
 <h2 id="trying-out-your-work">Trying out your work<a class="anchor" aria-label="anchor" href="#trying-out-your-work"></a>

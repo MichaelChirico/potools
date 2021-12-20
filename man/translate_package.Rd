@@ -21,8 +21,14 @@ translate_package(
 \item{dir}{Character, default the present directory; a directory in which an
 R package is stored.}
 
-\item{languages}{Character vector; locale codes to which to translate. See
-Details.}
+\item{languages}{Character vector; locale codes to which to translate.
+Must be a valid language accepted by gettext. This almost always takes
+the form of (1) an ISO 639 2-letter language code; or (2) \code{ll_CC}, where
+\code{ll} is an ISO 639 2-letter language code and \code{CC} is an ISO 3166 2-letter
+country code e.g. \code{es} for Spanish, \code{es_AR} for Argentinian Spanish, \code{ro}
+for Romanian, etc. See \code{\link[base:locales]{base::Sys.getlocale()}} for some helpful tips
+about how to tell which locales are currently available on your machine, and
+see the References below for some web resources listing more locales.}
 
 \item{diagnostics}{A \code{list} of diagnostic functions to be run on the
 package's message data. See Details.}
@@ -58,25 +64,29 @@ This function handles the "grunt work" of building and updating translation
 libraries. In addition to providing a friendly interface for supplying
 translations, some internal logic is built to help make your package more
 translation-friendly.
+
+To get started, the package developer should run \code{translate_package()} on
+your package's source to produce a template \code{.pot} file (or files, if your
+package has both R and C/C++ messages to translated), e.g.
+
+To add translations in your desired language, include the target language:
+in the \code{translate_package(languages = "es")} call.
 }
-\details{
-To do so, it builds on low-level command line tools from \code{gettext}. See
-Details.
+\section{Phases}{
 
-\code{translate_package} goes through roughly three "phases" of translation.
-
-Phase one is setup -- \code{dir} is checked for existing translations
+\code{translate_package()} goes through roughly three "phases" of translation.
+\enumerate{
+\item Setup -- \code{dir} is checked for existing translations
 (toggling between "update" and "new" modes), and R files are parsed and
 combed for user-facing messages.
-
-Phase two is for diagnostics; see the Diagnostics section below. Any
+\item Diagnostics:  see the Diagnostics section below. Any
 diagnostic detecting "unhealthy" messages will result in a yes/no prompt to
 exit translation to address the issues before continuing.
-
-Phase three is translation. All of the messages found in phase one are
-iterated over -- the user is shown a message in English and prompted for the
-translation in the target language. This process is repeated for each domain
+\item Translation. All of the messages found in phase one are iterated over --
+the user is shown a message in English and prompted for the translation
+in the target language. This process is repeated for each domain
 in \code{languages}.
+}
 
 An attempt is made to provide hints for some translations that require
 special care (e.g. that have escape sequences or use templates). For
@@ -102,16 +112,45 @@ base R and the default packages (\code{tools}, \code{utils}, \code{stats},
 etc.) as smooth as possible, set the \code{use_base_rules} argument to
 \code{TRUE} and your resulting \file{.po}/\file{.pot}/\file{.mo} file will
 match base's.
+}
 
-\strong{Custom translation functions:}
+\section{Custom translation functions}{
 
-Some package developers may want to write their own messaging interface, or
-to use wrappers around the base interface (i.e., \code{stop},
-\code{warning}, \code{message}, and a few others) which won't be detected by
-default (e.g. with \code{\link[tools:update_pkg_po]{tools::update_pkg_po()}}).
 
-In such cases, use the \code{custom_translation_functions} argument, whose
-interface is inspired by the \code{--keyword} argument to the
+\code{base} R provides several functions for messaging that are natively equipped
+for translation (they all have a \code{domain} argument): \code{stop()}, \code{warning()},
+\code{message()}, \code{gettext()}, \code{gettextf()}, \code{ngettext()}, and
+\code{packageStartupMessage()}.
+
+While handy, some developers may prefer to write their own functions, or to
+write wrappers of the provided functions that provide some enhanced
+functionality (e.g., templating or automatic wrapping). In this case,
+the default R tooling for translation (\code{xgettext()}, \code{xngettext()}
+\code{xgettext2pot()}, \code{update_pkg_po()} from \code{tools}) will not work, but
+\code{translate_package()} and its workhorse \code{get_message_data()} provide an
+interface to continue building  translations for your workflow.
+
+Suppose you wrote a function \code{stopf()} that is a wrapper of
+\code{stop(gettextf())} used to build templated error messages in R, which makes
+translation easier for translators (see below), e.g.:\if{html}{\out{<div class="sourceCode R">}}\preformatted{stopf = function(fmt, ..., domain = NULL) \{
+  stop(gettextf(fmt, ...), domain = domain, call. = FALSE)
+\}
+}\if{html}{\out{</div>}}
+
+Note that \code{potools} itself uses just such a wrapper internally to build
+error messages! To extract strings from calls in your package to \code{stopf()}
+and mark them for translation, use the argument
+\code{custom_translation_functions}:\if{html}{\out{<div class="sourceCode R">}}\preformatted{get_message_data(
+  '/path/to/my_package',
+  custom_translation_functions = list(R = 'stopf:fmt|1')
+)
+}\if{html}{\out{</div>}}
+
+This invocation tells \code{get_message_data()} to look for strings in the
+\code{fmt} argument in calls to \code{stopf()}. \code{1} indicates that \code{fmt} is the
+first argument.
+
+This interface is inspired by the \code{--keyword} argument to the
 \code{xgettext} command-line tool. This argument consists of a list with two
 components, \code{R} and \code{src} (either can be excluded), owing to
 differences between R and C/C++. Both components, if present, should consist
@@ -119,21 +158,21 @@ of a character vector.
 
 For R, there are two types of input: one for named arguments, the other for
 unnamed arguments.
-
-Entries for named arguments will look like \code{"fname:arg|num"} (singular
+\itemize{
+\item Entries for \strong{named} arguments will look like \code{"fname:arg|num"} (singular
 string) or \code{"fname:arg1|num1,arg2|num2"} (plural string). \code{fname}
 gives the name of the function/call to be extracted from the R source,
 \code{arg}/\code{arg1}/\code{arg2} specify the name of the argument to
 \code{fname} from which strings should be extracted, and
 \code{num}/\code{num1}/\code{num2} specify the \emph{order} of the named
 argument within the signature of \code{fname}.
-
-Entries for unnamed arguments will look like
+\item Entries for \strong{unnamed} arguments will look like
 \code{"fname:...\\xarg1,...,xargn"}, i.e., \code{fname}, followed by
 \code{:}, followed by \code{...} (three dots), followed by a backslash
 (\verb{\\}), followed by a comma-separated list of argument names. All
 strings within calls to \code{fname} \emph{except} those supplied to the
 arguments named among \code{xarg1}, ..., \code{xargn} will be extracted.
+}
 
 To clarify, consider the how we would (redundantly) specify
 \code{custom_translation_functions} for some of the default messagers,
@@ -153,8 +192,71 @@ rather, to expand the set of calls which are searched for potentially
 \emph{untranslated} arrays (i.e., arrays passed to the specified calls that
 are not explicitly marked for translation). These can then be reported in
 the \code{\link[=check_untranslated_src]{check_untranslated_src()}} diagnostic, for example.
+}
 
-\strong{Diagnostics:}
+\section{Diagnostics}{
+
+\subsection{Cracked messages}{
+
+A cracked message is one like:\if{html}{\out{<div class="sourceCode r">}}\preformatted{stop("There are ", n, " good things and ", m, " bad things.")
+}\if{html}{\out{</div>}}
+
+In its current state, translators will be asked to translate three messages
+independently:
+\itemize{
+\item "There are"
+\item "good things and"
+\item "bad things."
+}
+
+The message has been cracked; it might not be possible to translate a string
+as generic as "There are" into many languages -- context is key!
+
+To keep the context, the error message should instead be build with
+\code{gettextf} like so:\if{html}{\out{<div class="sourceCode r">}}\preformatted{stop(domain=NA, gettextf("There are \%d good things and \%d bad things."))
+}\if{html}{\out{</div>}}
+
+Now there is only one string to translate! Note that this also allows the
+translator to change the word order as they see fit -- for example, in
+Japanese, the grammatical order usually puts the verb last (where in
+English it usually comes right after the subject).
+
+\code{translate_package} detects such cracked messages and suggests a
+\code{gettextf}-based approach to fix them.
+}
+
+\subsection{Untranslated R messages produced by \code{cat()}}{
+
+Only strings which are passed to certain \code{base} functions are eligible for
+translation, namely \code{stop}, \code{warning}, \code{message}, \code{packageStartupMessage},
+\code{gettext}, \code{gettextf}, and \code{ngettext} (all of which have a \code{domain} argument
+that is key for translation).
+
+However, it is common to also produce some user-facing messages using
+\code{cat} -- if your package does so, it must first use \code{gettext} or \code{gettextf}
+to translate the message before sending it to the user with \code{cat}.
+
+\code{translate_package} detects strings produced with \code{cat} and suggests a
+\code{gettext}- or \code{gettextf}-based fix.
+}
+
+\subsection{Untranslated C/C++ messages}{
+
+This diagnostic detects any literal \code{char} arrays provided to common
+messaging functions in C/C++, namely \code{ngettext()}, \code{Rprintf()}, \code{REprintf()},
+\code{Rvprintf()}, \code{REvprintf()}, \code{R_ShowMessage()}, \code{R_Suicide()}, \code{warning()},
+\code{Rf_warning()}, \code{error()}, \code{Rf_error()}, \code{dgettext()}, and \code{snprintf()}.
+To actually translate these strings, pass them through the translation
+macro \verb{_}.
+
+NB: Translation in C/C++ requires some additional \verb{#include}s and
+declarations, including defining the \verb{_} macro.
+See the Internationalization section of Writing R Extensions for details.
+}
+}
+
+\section{Custom diagnostics}{
+
 
 A diagnostic is a function which takes as input a \code{data.table}
 summarizing the translatable strings in a package (e.g. as generated by
@@ -179,41 +281,8 @@ The output diagnostic result has the following schema:
 See \code{\link[=check_cracked_messages]{check_cracked_messages()}},
 \code{\link[=check_untranslated_cat]{check_untranslated_cat()}}, and
 \code{\link[=check_untranslated_src]{check_untranslated_src()}} for examples of diagnostics.
-
-\strong{Domains:}
-
-The input to \code{languages} conform to the valid languages accepted by
-gettext. This almost always takes the form of (1) an ISO 639 2-letter
-language code; or (2) \code{ll_CC}, where \code{ll} is an ISO 639 2-letter
-language code and \code{CC} is an ISO 3166 2-letter country code e.g.
-\code{es} for Spanish, \code{es_AR} for Argentinian Spanish, \code{ro} for
-Romanian, etc. See \code{\link[base:locales]{base::Sys.getlocale()}} for some helpful tips
-about how to tell which locales are currently available on your machine, and
-see the References below for some web resources listing more locales.
-
-Note also the advice given in the R Installation and Administration manual
-(also cited below) -- if you are writing Spanish translations, a typical
-package should use \code{language = "es"} to generate Spanish translations
-for \emph{all} Spanish domains. If you want to add more regional flair to
-your messaging, you can do so through supplemental \code{.po} files. For
-example, you can add some Argentinian messages to \code{es_AR}; users
-running R in the \code{es_AR} locale will see messages specifically written
-for \code{es_AR} first; absent that, the \code{es} message will be shown;
-and absent that, the default message (i.e., in the language written in the
-source code, usually English).
-
-Chinese is a slightly different case -- typically, the \code{zh_CN} domain
-is used to write with simplified characters while \code{zh_TW} is used for
-traditional characters. In principal you could leverage \code{zh_TW} for
-Taiwanisms and \code{zh_HK} for Hongkieisms.
-
-Currently, translation is limited to the same set of domains as is available
-for base R: Danish, German, English, British English, Spanish, Farsi,
-French, Italian, Japanese, Korean, Dutch, Polish, Brazilian Portugese,
-Russian, Turkish, Mainland Chinese, and Taiwanese Chinese.
-
-This list can be expanded; please file an Issue request on GitHub.
 }
+
 \examples{
 
 pkg <- system.file('pkg', package = 'potools')

@@ -268,6 +268,15 @@ paste0("<a href='/index.html'>", tr_("Home page"), "</a>")
 
 Generally, you want to help the translator spend as much time as possible helping you out.
 
+## Googling
+
+It's worth noting that that non-English messages are often harder to Google because few non-English languages have a significant presence on StackOverflow.
+A few suggestions:
+
+-   You can give error messages a unique identifier (e.g. numbering). This may be harder to do for "established" packages since adding identifiers might be a breaking change. It could also be a headache to keep track of which numbers have been taken, e.g. in a context of concurrent PRs incrementing the error numbering in parallel.
+-   End users can switch to an English locale mid-session by running `Sys.setenv(LANGUAGE = 'en')`: error messages will be produced in English until they set `LANGUAGE` again.
+-   You could write a custom error wrapper that produces the error both in English and as a translation.
+
 ### Plurals
 
 In English, most nouns have different forms for one item (the singular) or more than one item (the plural, also used for zero items).

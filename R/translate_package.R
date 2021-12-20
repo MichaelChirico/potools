@@ -336,7 +336,7 @@ translate_package = function(
   version <- desc_data['Version']
 
   po_dir <- file.path(dir, 'po')
-  r_potfile <- file.path(po_dir, sprintf("R-%s.pot", package))
+  r_potfile <- file.path(po_dir, glue("R-{package}.pot"))
   src_potfile <- file.path(po_dir, sprintf("%s.pot", if (is_base) 'R' else package))
   update = file.exists(po_dir) && (file.exists(r_potfile) || file.exists(src_potfile))
 
@@ -408,7 +408,7 @@ translate_package = function(
     message_data[type == 'singular', 'msgstr' := ""]
     message_data[type == 'plural', 'msgstr_plural' := .(list(rep("", metadata$nplurals)))]
 
-    lang_file <- file.path(po_dir, sprintf("R-%s.po", language))
+    lang_file <- file.path(po_dir, glue("R-{language}.po"))
     if (update && file.exists(lang_file)) {
       if (verbose) {
         messagef(
@@ -423,7 +423,7 @@ translate_package = function(
       message_data[message_source == "R", 'fuzzy' := 0L]
     }
 
-    lang_file <- file.path(po_dir, sprintf("%s.po", language))
+    lang_file <- file.path(po_dir, glue("{language}.po"))
     if (update && file.exists(lang_file)) {
       if (verbose) {
         messagef(

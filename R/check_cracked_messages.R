@@ -77,15 +77,11 @@ build_gettextf_call = function(e) {
   rest <- e[-1L]
   arg_names <- names(rest)
   if (is.null(arg_names) || all(keep_args <- arg_names %chin% c("", "domain"))) {
-    sprintf('%s(domain=NA, %s)', call, gettextify(rest))
+    glue('{call}(domain=NA, {gettextify(rest)})')
   } else {
     # if other arguments, e.g. call., appendLF, immediate. are present, keep them with the right call (#227)
-    sprintf(
-      '%s(domain=NA, %s, %s)',
-      call,
-      gettextify(rest[keep_args]),
-      toString(paste(names(rest[!keep_args]), "=", vapply(rest[!keep_args], deparse1, character(1L))))
-    )
+    kwargs = toString(paste(names(rest[!keep_args]), "=", vapply(rest[!keep_args], deparse1, character(1L))))
+    glue('{call}(domain=NA, {gettextify(rest[keep_args])}, {kwargs})')
   }
 }
 

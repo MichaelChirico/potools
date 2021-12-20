@@ -115,10 +115,6 @@ For example, you can add some Argentinian messages to `es_AR`; users running R i
 Chinese is a slightly different case -- typically, the `zh_CN` domain is used to write with simplified characters while `zh_TW` is used for traditional characters.
 In principal you could leverage `zh_TW` for Taiwanisms and `zh_HK` for Hongkieisms.
 
-Currently, translation is limited to the same set of domains as is available for base R: Danish, German, English, British English, Spanish, Farsi, French, Italian, Japanese, Korean, Dutch, Polish, Brazilian Portugese, Russian, Turkish, Mainland Chinese, and Taiwanese Chinese.
-
-This list can be expanded; please file an Issue request on GitHub.
-
 ## Message variations
 
 The following sections describe four important message variations:

@@ -17,10 +17,9 @@ BugReports: https://github.com/MichaelChirico/potools/issues
 Depends: 
     R (>= 4.0.0)
 Imports: 
-    data.table
+    data.table, glue
 Suggests: 
     crayon,
-    glue,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),

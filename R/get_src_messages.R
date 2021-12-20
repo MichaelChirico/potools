@@ -116,7 +116,7 @@ get_file_src_messages = function(file, custom_params = NULL) {
 
   # first find all calls.
   # TODO: maybe leverage the match_parens() call which runs a nearly identical gregexpr?
-  call_idx = gregexpr(sprintf("%s\\s*\\(", C_IDENTIFIER_REGEX), contents)[[1L]]
+  call_idx = gregexpr(glue("{C_IDENTIFIER_REGEX}\\s*\\("), contents)[[1L]]
   calls = data.table(
     call_start = as.integer(call_idx),
     paren_start = as.integer(call_idx) + attr(call_idx, "match.length") - 1L,

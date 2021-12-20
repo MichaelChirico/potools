@@ -115,10 +115,7 @@ gettextify = function(e, sep = '') {
     fmt = paste0(paste0(fmt[-length(fmt)], sep, collapse = ''), fmt[length(fmt)])
   }
 
-  sprintf(
-    '%s("%s"%s)',
-    call_nm, fmt, dots
-  )
+  glue('{call_nm}("{fmt}"{dots})')
 }
 
 # regex for sprintf templates is taken from a thorough reading of ?sprintf,

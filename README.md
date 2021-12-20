@@ -2,7 +2,7 @@
 
 ## Overview
 
-R users are a global community. From Xiamen to Santiago, Addis Ababa to Tbilisi, Ogallala to Adelaide, R users are legion and speak many different languages. To serve these diverse communities, R includes built-in tools based on the [GNU gettext system](https://www.gnu.org/software/gettext/) that make it possible to translate user-facing communications like messages, warnings, and errors. Unfortunately, this system uses new file types (`.pot` templates, `.po` files, and `.mo` binaries) that come with their own quirks and idiosyncrasies. The goal of potools is make it as easy as possible to translate your package by abstracting away as many details of the gettext systemas possible.
+R users are a global community. From Xiamen to Santiago, Addis Ababa to Tbilisi, Ogallala to Adelaide, R users are legion and speak many different languages. To serve these diverse communities, R includes built-in tools based on the [GNU gettext system](https://www.gnu.org/software/gettext/) that make it possible to translate user-facing communications like messages, warnings, and errors. Unfortunately, this system uses new file types (`.pot` templates, `.po` files, and `.mo` binaries) that come with their own quirks and idiosyncrasies. The goal of potools is make it as easy as possible to translate your package by abstracting away as many details of the gettext system as possible.
 
 The potool logo features a [potoo](https://en.wikipedia.org/wiki/Potoo) and was designed by [Allison Horst](https://www.allisonhorst.com).
 

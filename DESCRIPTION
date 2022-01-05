@@ -21,12 +21,14 @@ Imports:
 Suggests: 
     crayon,
     knitr,
+    mockery,
     rmarkdown,
     testthat (>= 3.0.0),
     withr
 VignetteBuilder: 
     knitr
 Config/testthat/edition: 3
+Remotes: r-lib/testthat
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2

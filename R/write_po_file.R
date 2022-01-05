@@ -158,6 +158,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
 #'   tmp_po <- tempfile(fileext = '.po'),
 #'   metadata
 #' )
+#' # NB: in general, beware of encoding in this snippet
 #' writeLines(readLines(tmp_po))
 #'
 #' # write .pot template
@@ -181,18 +182,14 @@ write_po_file <- function(
 
   template = endsWith(po_file, ".pot")
 
-  # cat seems to fail at writing UTF-8 on Windows; useBytes should do the trick instead:
-  #   https://stackoverflow.com/q/10675360
-  po_conn = file(po_file, "wb")
-  on.exit(close(po_conn))
-
   po_header = format(
     metadata,
     template = template,
     use_plurals = any(message_data$type == "plural")
   )
 
-  writeLines(con=po_conn, useBytes=TRUE, po_header)
+  po_conn <- write_utf8(po_header, po_file, "wb")
+  on.exit(close(po_conn))
 
   # drop untranslated strings, collapse duplicates, drop unneeded data.
   #   for now, treating R & src separately so they can be treated differently; eventually this should
@@ -286,7 +283,7 @@ write_po_file <- function(
       )
     }
 
-    writeLines(con=po_conn, useBytes=TRUE, out_lines)
+    write_utf8(out_lines, po_conn)
   }]
 }
 

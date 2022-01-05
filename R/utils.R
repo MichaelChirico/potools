@@ -53,7 +53,7 @@ RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 #' @seealso [tools::update_pkg_po()]
 #' @export
 check_potools_sys_reqs = function(which = SYSTEM_REQUIREMENTS) {
-  if (any(is_missing <- !vapply(.potools$cmd, nzchar, character(1L)))) {
+  if (any(is_missing <- !vapply(.potools$cmd, nzchar, logical(1L)))) {
     if (.Platform$OS.type == 'windows') {
       platform_msg = gettextf(
         'These tools are available as an Rtools goodie, check %s',

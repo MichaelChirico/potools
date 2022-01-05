@@ -5,6 +5,7 @@
 run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
   args <- c(
     "--update", shQuote(path.expand(po_file)),
+    "--backup=off",
     if (previous) "--previous", #show previous match for fuzzy matches
     shQuote(path.expand(pot_file))
   )
@@ -26,12 +27,16 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
 }
 
 run_msgfmt = function(po_file, mo_file, verbose) {
+  po_file <- path.expand(po_file)
+  mo_file <- path.expand(mo_file)
+
   # See #218. Solaris msgfmt (non-GNU on CRAN) doesn't support --check or --statistics;
   #   see also https://bugs.r-project.org/show_bug.cgi?id=18150
   args = character()
   if (is_gnu_gettext()) {
     args = c("--check", if (verbose) '--statistics')
   }
+
   val = system2("msgfmt", c(args, "-o", shQuote(mo_file), shQuote(po_file)), stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     warningf(

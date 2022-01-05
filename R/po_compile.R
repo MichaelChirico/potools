@@ -53,7 +53,7 @@ get_po_metadata <- function(dir = ".", package = NULL) {
   languages <- gsub(lang_regex, "\\2", basename(po_paths))
   type <- ifelse(startsWith(basename(po_paths), "R-"), "R", "src")
 
-  mo_names <- gsub(lang_regex, sprintf("\\1%s.mo", package), basename(po_paths))
+  mo_names <- gsub(lang_regex, glue("\\1{package}.mo"), basename(po_paths))
   mo_paths <- file.path(dir, "inst", "po", languages, "LC_MESSAGES", mo_names)
   pot_paths <- pot_paths(dir, type, package = package)
 

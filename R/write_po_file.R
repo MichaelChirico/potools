@@ -7,11 +7,11 @@
 #   going to go ahead and try to anyway until it breaks something :)
 write_po_files <- function(message_data, po_dir, params, template = FALSE, use_base_rules = FALSE, verbose = TRUE) {
   if (template) {
-    r_file <- sprintf("R-%s.pot", params$package)
-    src_file <- sprintf("%s.pot", if (params$package == 'base') 'R' else params$package)
+    r_file <- glue_data(params, "R-{package}.pot")
+    src_file <- glue_data(params, "{if (package == 'base') 'R' else package}.pot")
   } else {
-    r_file <- sprintf("R-%s.po", params$language)
-    src_file <- sprintf("%s.po", params$language)
+    r_file <- glue_data(params, "R-{language}.po")
+    src_file <- glue_data(params, "{language}.po")
   }
 
   is_base_package <- params$package %chin% .potools$base_package_names
@@ -29,7 +29,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     metadata = with(params, po_metadata(
       package = package, version = version, language = language,
       author = author, email = email, bugs = bugs, copyright = copyright,
-      `X-Generator` = sprintf("potools %s", packageVersion("potools"))
+      `X-Generator` = glue("potools {packageVersion('potools')}")
     ))
   }
 
@@ -385,7 +385,7 @@ wrap_string = function(str, boundary, str_width, line_width) {
 
 make_src_location <- function(files, lines, message_source, use_base_rules) {
   if (use_base_rules && message_source == "R") return("")
-  s <- paste(sprintf("%s:%d", files, lines), collapse = " ")
+  s <- paste(glue("{files}:{lines}"), collapse = " ")
   # branch above implies use_base_rules => message_source == "src"
   # 77 = 80 - nchar("#: "). 80 not 79 is for strwrap. NB: strwrap("012 345", width=4)
   paste0("#: ", if (use_base_rules) strwrap(s, width=77L) else s, "\n", collapse="")
@@ -424,24 +424,25 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
   }
   copyright = build_copyright(x$copyright, template)
   keys = with(x, c(
-    `Project-Id-Version` = sprintf("%s %s", package, version),
+    `Project-Id-Version` = glue("{package} {version}"),
     `Report-Msgid-Bugs-To` = bugs,
     `POT-Creation-Date` = maybe_make_time(pot_timestamp),
     `PO-Revision-Date` = maybe_make_time(po_timestamp),
-    `Last-Translator` = if (nzchar(author) && nzchar(email)) sprintf("%s <%s>", author, email) else '',
+    `Last-Translator` = if (nzchar(author) && nzchar(email)) glue("{author} <{email}>") else '',
     `Language-Team` = language_team,
     `Language` = language,
     `MIME-Version` = "1.0",
-    `Content-Type` = sprintf("text/plain; charset=%s", charset),
+    `Content-Type` = glue("text/plain; charset={charset}"),
     `Content-Transfer-Encoding` = "8bit"
   ))
   if (use_plurals) {
     if (template) {
-      keys["Plural-Forms"] = "nplurals=INTEGER; plural=EXPRESSION;"
+      keys["Plural-Forms"] =
+        "nplurals=INTEGER; plural=EXPRESSION;"
     } else {
-      keys["Plural-Forms"] = with(
+      keys["Plural-Forms"] = glue_data(
         get_lang_metadata(x$language),
-        sprintf("nplurals=%s; plural=%s;", as.character(nplurals), plural)
+        "nplurals={nplurals}; plural={plural};"
       )
     }
   }
@@ -460,7 +461,7 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
     c(
       copyright,
       wrap_msg("msgid", ""),
-      wrap_msg("msgstr", paste(sprintf("%s: %s\\n", names(keys), keys), collapse = ""))
+      wrap_msg("msgstr", paste(glue("{names(keys)}: {keys}\\n"), collapse = ""))
     ),
     collapse = "\n"
   )
@@ -488,7 +489,7 @@ build_copyright = function(copyright, template) {
     "#",
     c(
       copyright$title,
-      sprintf("Copyright (C) %s %s", copyright$years, copyright$holder),
+      glue_data(copyright, "Copyright (C) {years} {holder}"),
       "This file is distributed under the same license as the R package.",
       copyright$additional
     )

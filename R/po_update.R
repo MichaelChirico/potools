@@ -32,7 +32,7 @@
 po_update <- function(dir = ".", lazy = TRUE, verbose = !is_testing()) {
   meta <- get_po_metadata(dir)
   if (lazy) {
-    meta <- meta[is_outdated(meta$po, meta$pot)]
+    meta <- meta[is_outdated(meta$pot, meta$po)]
   }
 
   for (ii in seq_len(nrow(meta))) {

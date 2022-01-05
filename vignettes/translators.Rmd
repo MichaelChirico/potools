@@ -1,0 +1,256 @@
+---
+title: "Translation for package translators"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Translation for package translators}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(potools)
+```
+
+This vignette discusses translation from the perspective of a translator; if you're a package developer, you might want to start with `vignette("developers")`.
+
+First of all, thank you for helping out!
+Providing translations for a package is a fantastic way to contribute and I know that your work is deeply appreciated by the package developer.
+
+Before you go any further, make sure the that the package has started the process of providing translations by checking that it has `po/` directory in the package root.
+If you don't see that directory, you might want to start by opening an issue to see if the developer is interested in receiving translations.
+
+### Basic process
+
+Before we get into the details let's review the basic process of creating translations:
+
+-   The package developer runs `po_extract()` to extract all translatable messages from their R and C code.
+
+-   You call `po_create()` to generate a `.po` file for the language you're translating.
+    A `.po` file consists of a metadata header and pairs of lines like:
+
+        msgid "This is the message in English"
+        msgstr ""
+
+    You then replace each `msgstr` with the appropriate translation:
+
+        msgid "This is the message in English"
+        msgstr "This is the message in another language"
+
+-   Finally, either you or the package developer uses `po_compile()` to turn the plain text `.po` files into binary `.mo` files that are distributed with the package.
+
+The process for updating translations is slightly different, and we'll come back to it later in the doc.
+
+## Translation basics
+
+As a translator, you'll work primarily with `.po` files.
+There's one (or two) `.po` file(s) for each language that lives in the `po/` directory.
+In the same directory, you'll also see a `.pot` file --- that's a template file that contains the list of all translatable strings in the package and is used to generate the `.po` files for each language.
+
+Get started by creating a `.po` for your language by running `potools::po_create("{language code}")`.
+Next, open that file with your favourite text editor.
+At the top of the file you'll see some metadata that looks something like this:
+
+    msgid ""
+    msgstr ""
+    "Project-Id-Version: potools 0.2.3\n"
+    "Report-Msgid-Bugs-To: \n"
+    "POT-Creation-Date: 2021-11-06 14:19-0700\n"
+    "PO-Revision-Date: 2021-11-06 14:19-0700\n"
+    "Last-Translator: Michael Chirico <michaelchirico4@gmail.com>\n"
+    "Language-Team: ja\n"
+    "Language: ja\n"
+    "MIME-Version: 1.0\n"
+    "Content-Type: text/plain; charset=UTF-8\n"
+    "Content-Transfer-Encoding: 8bit\n"
+    "X-Generator: potools 0.2.3\n"
+
+Begin by updating `Last-Translator` to your email address; this tells the developer how to reach you (e.g. to ask if you might update your translations when a new version of the package comes out).
+
+The rest of the file consist of pairs of `msgid` and `msgstr` that initially look like this:
+
+    #: translate_package.R:66
+    msgid "Running message diagnostics..."
+    msgstr ""
+
+The `msgid` is the string that appears in the R source code; it could be in an error, warning, message, or just printed to the console.
+The `msgstr` is the translated equivalent and it's your job as a translator to fill out `msgstr` with the equivalent in your language:
+
+    #: translate_package.R:66
+    msgid "Running message diagnostics..."
+    msgstr "メッセージ診断中。。。"
+
+That's basically it!
+Just work through the file filling in the translations one by one.
+If there's not quite enough context to figure out the best translation you can either look at the source code (using the file number & line reference in the line above `msgid`) or contact the developer for clarification.
+(If a message is challenging to translate, it often indicates that the English version might be suboptimal, so most developers will appreciate you reaching out).
+
+Next we'll go through the details of a few message variations you might come across, show you how to try out your work, and then finish up by discussing a few extra details that arise when updating the translations for a package, rather than starting from scratch.
+
+### Picking a domain for diasporic languages
+
+What domain should you use when translating Spanish?
+There's `es_AR`, `es_BO`, `es_CL`, `es_DO`, `es_HN`, ... Do you really need to provide a separate translation for Nicaraguan (`es_NI`) users?
+No, but you could.
+
+Typically, you are best off creating one set of translations under the language's general domain (here, `es`).
+Once translations exist for `es`, users in all of the more specific locales will see the messages for `es` whenever they exist.
+If you really do want to provide more regionally-specific error messages (awesome!), you can either (1) create a whole new set of translations for each region or (2) write translations *only for the region-specific messages*.
+The latter is how R handles messages that differ on British/American spelling, for example.
+
+Say a user is running in `es_GT` and triggers an error.
+R will first look for a translation into `es_GT`; if none is defined, it will look for a translation into `es`.
+If none is defined again, it will finally fall back to the package's default language (i.e., whatever language is written in the source code, usually English).
+
+Note also the advice given in the R Installation and Administration manual (also cited below) -- if you are writing Spanish translations, a typical package should use `language = "es"` to generate Spanish translations for *all* Spanish domains.
+If you want to add more regional flair to your messaging, you can do so through supplemental `.po` files.
+For example, you can add some Argentinian messages to `es_AR`; users running R in the `es_AR` locale will see messages specifically written for `es_AR` first; absent that, the `es` message will be shown; and absent that, the default message (i.e., in the language written in the source code, usually English).
+
+Chinese is a slightly different case -- typically, the `zh_CN` domain is used to write with simplified characters while `zh_TW` is used for traditional characters.
+In principal you could leverage `zh_TW` for Taiwanisms and `zh_HK` for Hongkieisms.
+
+## Message variations
+
+The following sections describe four important message variations:
+
+-   Messages that use `glue()`
+-   Messages that use `sprintf()`
+-   Multi-line messages
+-   Plurals
+
+### `glue()`
+
+You can tell if message uses [glue](https://glue.tidyverse.org) because it will contain pairs of braces: `{}`[^1].
+glue evaluates any R code in between `{}` and inserts the results into the string:
+
+[^1]: Also, the package should have a dependency on `glue`, probably in Imports, but maybe in Depends or Suggests.
+
+```{r}
+name <- "Michael"
+glue::glue("Hi {name}!")
+```
+
+The code above would generate the following in the `.po` file:
+
+    msgid: "Hi {name}!"
+    msgstr: ""
+
+The main thing to remember when translating glue strings is not to translate the contents of `{}` since that is the name of a variable in the code:
+
+    msgid: "Hi {name}!"
+    msgstr: "こんにちは {name}！"
+
+### `sprintf()`
+
+You can tell if a message uses `sprintf()` because it will contain a format specifier like `%s` (a string), `%i` (an integer), or `%f` (a floating point number).
+When called, `sprintf()` replaces these placeholders with values:
+
+```{r}
+name <- "Michael"
+sprintf("Hi %s!", name)
+```
+
+This would generate the following `.po`:
+
+    msgid: "Hi %s!"
+    msgstr: ""
+
+Which (if you spoke Japanese), you might translate to:
+
+    msgid: "Hi %s!"
+    msgstr: "こんにちは %s！"
+
+If there are multiple interpolated strings, and you need to change their order to make grammatical sense in your language, you can put `1$`, `2$` etc. after the `%` to refer to variable in that position.
+
+```{r}
+sprintf("%s %s %s", "first", "second", "third")
+sprintf("%2$s %1$s %3$s", "first", "second", "third")
+```
+
+This can be hard to puzzle out and confusing to read, which is why we recommend that package developers use `glue()`.
+
+### Multi-line messages
+
+If the message is very long, it might get wrapped across multiple lines:
+
+    msgid ""
+    "Reproducing these messages here for your reference since they might still "
+    "provide some utility."
+    msgstr ""
+
+You don't need to worry about preserving the line breaks, since the translated version might be shorter or longer than the English version.
+Just note that each line must start and end with `"` and that if it doesn't all fit on one line, the first `msgstr` should be `""`.
+
+### Plurals
+
+Messages that vary based on some count have slightly different form.
+They begin with the English singular and plural forms:
+
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
+
+Then are followed by the forms for your language.
+Depending on your language, you will need to provide somewhere between 1 and 6 translations.
+For example, Japanese only needs a single form, because the rest of the sentence doesn't vary based on the number of cows:
+
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
+    msgstr[0]: 牧草地に{n}頭牛がいます
+
+Slovenian has four forms (1, 2, 3-4, everything else) so gets four entries:
+
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
+    msgstr[0]: Na polju je {n} krava
+    msgstr[1]: Na polju sta {n} kravi
+    msgstr[2]: Na polju so {n} krave
+    msgstr[3]: Na polju je {n} krav
+
+(Note the forms are zero-indexed, so they start at 0, not 1.)
+
+The rules for converting the number to the `msgid` index are expressed using C-code and can be found at the top of the `.po` file (look for "plural-forms").
+It's a little tricky to go from the C code to a human description of the cases, but if you're a native speaker you're hopefully already familiar with the basic breakdown.
+
+## Other issues
+
+Technical terms are par for the course in R packages; showing users similar terms for the same concept might lead to needless confusion.
+R recommends using the [ISI Multilingual Glossary of Statistical Terms](https://www.isi-web.org/publications/glossary-of-statistical-terms) to help overcome this issue.
+
+## Trying out your work
+
+If you know how to use the package, you can try out your translations.
+There are three important steps:
+
+1.  Set the LANGUAGE environment variable to the language you're translating: `Sys.setenv(LANGUAGE = "{language code}")`. (You only need to do this once per session).
+2.  Compile the plain text `.po` file you've been editing to the binary `.mo` file that R uses by running `potools::po_compile()`.
+3.  Re-load (with `devtools::load_all()`) or re-install the package (e.g. using RStudio's "Install and restart" button).
+
+You can then work with the package as you usually would and any messages you've translated should appear in your language.
+
+## Updating a package
+
+So far we've assumed you're providing the first set of translations for a package.
+But another common scenario is updating the translations for a new release of the package.
+To get to this point, the developer will have updated the `.pot` file and all of the `.po` files.
+There are three cases:
+
+-   A message has been **added**: the `msgstr` is empty, and you'll need to fill it in like for the initial translation.
+
+-   A message has been **removed**: old translations are moved to the bottom of the file (so you can still refer to them if they're needed), and marked as deprecated (using the ??? symbol).
+
+-   A message has **changed**: if it's a big change, it'll be treated like an addition and a deletion, but if it's a small change it might get marked as fuzzy.
+
+        #: build-news.R:285
+        #, fuzzy
+        msgid "CRAN release: %s"
+        msgstr "Versión en CRAN %s"
+
+    TODO: show how the old message shows up.
+
+    You'll need to double check the translation and remove "fuzzy" once you're done.

@@ -3,6 +3,7 @@
 # https://www.gnu.org/software/gettext/manual/html_node/msgmerge-Invocation.html
 # https://docs.oracle.com/cd/E36784_01/html/E36870/msgmerge-1.html#scrolltoc
 run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
+  check_potools_sys_reqs("msgmerge")
   args <- c(
     "--update", shQuote(path.expand(po_file)),
     "--backup=off",
@@ -10,7 +11,7 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
     shQuote(path.expand(pot_file))
   )
 
-  val <- system2("msgmerge", args, stdout = TRUE, stderr = TRUE)
+  val <- system2(.potools$cmd$msgmerge, args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
     warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
@@ -27,6 +28,7 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
 }
 
 run_msgfmt = function(po_file, mo_file, verbose) {
+  check_potools_sys_reqs("msgfmt")
   use_stats <- if (verbose) '--statistics' else ''
 
   po_file <- path.expand(po_file)
@@ -34,9 +36,9 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 
   # See #218. Solaris msgfmt doesn't support -c or --statistics
   if (Sys.info()[["sysname"]] == "SunOS") {
-    cmd = glue("msgfmt -o {shQuote(mo_file)} {shQuote(po_file)}") # nocov
+    cmd = glue("{.potools$cmd$msgfmt} -o {shQuote(mo_file)} {shQuote(po_file)}") # nocov
   } else {
-    cmd = glue("msgfmt -c {use_stats} -o {shQuote(mo_file)} {shQuote(po_file)}")
+    cmd = glue("{.potools$cmd$msgfmt} -c {use_stats} -o {shQuote(mo_file)} {shQuote(po_file)}")
   }
   if (system(cmd) != 0L) {
     warningf(
@@ -51,6 +53,7 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 
 
 update_en_quot_mo_files <- function(dir, verbose) {
+  check_potools_sys_reqs(c("msgfmt", "msginit", "msgconv"))
   pot_files <- list.files(file.path(dir, "po"), pattern = "\\.pot$", full.names = TRUE)
   mo_dir <- file.path(dir, "inst", "po", "en@quot", "LC_MESSAGES")
   dir.create(mo_dir, recursive = TRUE, showWarnings = FALSE)
@@ -71,6 +74,7 @@ update_en_quot_mo_files <- function(dir, verbose) {
 # https://www.gnu.org/software/gettext/manual/html_node/msginit-Invocation.html
 # https://docs.oracle.com/cd/E36784_01/html/E36870/msginit-1.html#scrolltoc
 run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
+  check_potools_sys_reqs("msginit")
   args <- c(
     "-i", shQuote(path.expand(pot_path)),
     "-o", shQuote(path.expand(po_path)),
@@ -78,7 +82,7 @@ run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
     "-w", width,
     "--no-translator" # don't consult user-email etc
   )
-  val <- system2("msginit", args, stdout = TRUE, stderr = TRUE)
+  val <- system2(.potools$cmd$msginit, args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     stopf("Running msginit on '%s' failed", pot_path)
   } else if (verbose) {

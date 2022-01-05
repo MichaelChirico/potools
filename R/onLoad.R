@@ -32,8 +32,16 @@ if (requireNamespace('crayon', quietly = TRUE)) {
   call_color = file_color = msgid_color = language_color = replacement_color = plural_range_color = identity
 }
 
+# msgmerge | msgmerge.R | run_msgmerge()
+# msgfmt   | msgmerge.R | run_msgfmt()
+# msginit  | msgmerge.R | run_msginit(), tools:::en_quote(),
+# msgconv  | msgmerge.R | tools:::en_quote()
+SYSTEM_REQUIREMENTS = c('msgmerge', 'msgfmt', 'msginit', 'msgconv')
+
 # nocov start
 .onLoad = function(libname, pkgname) {
   .potools$base_package_names = get(".get_standard_package_names", envir=asNamespace("tools"), mode="function")()$base
+
+  .potools$cmd <- as.list(Sys.which(SYSTEM_REQUIREMENTS))
 }
 # nocov end

@@ -3,8 +3,9 @@ test_that("the user is told what's happening", {
   file.create(file.path(temp, "po", "R-test.pot"))
 
   withr::local_dir(temp)
-  expect_snapshot(po_create("jp", verbose = TRUE))
-  expect_snapshot(po_create("jp", verbose = TRUE))
+  # verbose output for shell commands on Windows uses " in shQuote (vs ' on unix)
+  expect_snapshot(po_create("jp", verbose = TRUE), variant = .Platform$OS.type)
+  expect_snapshot(po_create("jp", verbose = TRUE), variant = .Platform$OS.type)
 })
 
 test_that("can generate both R and src pot files", {

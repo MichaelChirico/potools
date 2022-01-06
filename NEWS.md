@@ -5,7 +5,7 @@
  * [Bugfix] `check_cracked_messages()` recognizes named arguments (e.g. `call.` to `stop()` or `appendLF` to `message()`) and keeps them in the original call, [#227](https://github.com/MichaelChirico/potools/issues/227). Thanks @hadley for the report.
  * [Note] The test suite now relies on the 3rd edition of `testthat`, meaning a version requirement in the Suggested dependency.
  * [Note] The default value of `verbose` has been changed to `TRUE` in `translate_package()` and `get_message_data()`.
-
+ * [Feature] `check_potools_sys_reqs()` (mostly intended for internal use, but exported for testing) gains a `which` argument to fine-tune which system requirements to check, [#275](https://github.com/MichaelChirico/potools/issues/275) and [#288](https://github.com/MichaelChirico/potools/issues/288). Thanks @hadley for the suggestion and @LDalby for early dev testing which emphasized the need for this.
 
 ## New languages/locales supported out of the box:
 

@@ -5,9 +5,11 @@ test_that("user is told what's happening", {
   po_extract()
   po_create(c("ja", "fr"))
 
+  # verbose output for shell commands on Windows uses " in shQuote (vs ' on unix)
   expect_snapshot(
     po_update(verbose = TRUE, lazy = FALSE),
-    transform = standardise_dots
+    transform = standardise_dots,
+    variant = .Platform$OS.type
   )
 })
 

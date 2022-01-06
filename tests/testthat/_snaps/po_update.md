@@ -4,9 +4,9 @@
       po_update(verbose = TRUE, lazy = FALSE)
     Message <simpleMessage>
       Updating 'fr' R translation
-      Running system command msgmerge --update'./po/R-fr.po'--backup=off--previous'./po/R-test.pot'.
+      Running system command msgmerge --update './po/R-fr.po' --backup=off --previous './po/R-test.pot'.
       . done.
       Updating 'ja' R translation
-      Running system command msgmerge --update'./po/R-ja.po'--backup=off--previous'./po/R-test.pot'.
+      Running system command msgmerge --update './po/R-ja.po' --backup=off --previous './po/R-test.pot'.
       . done.
 

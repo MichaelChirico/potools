@@ -12,7 +12,7 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
   )
 
   if (verbose) {
-    message("Running system command msgmerge ", args, "...")
+    message("Running system command msgmerge ", paste(args, collapse = " "), "...")
   }
   val <- system2("msgmerge", args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
@@ -89,7 +89,7 @@ run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
     "--no-translator" # don't consult user-email etc
   )
   if (verbose) {
-    message("Running system command msginit ", args, "...")
+    message("Running system command msginit ", paste(args, collapse = " "), "...")
   }
   val <- system2("msginit", args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {

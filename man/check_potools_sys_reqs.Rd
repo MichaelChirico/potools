@@ -5,7 +5,17 @@
 \title{Check if the proper system utilities for running package translation are
 installed}
 \usage{
-check_potools_sys_reqs()
+check_potools_sys_reqs(which = SYSTEM_REQUIREMENTS)
+}
+\arguments{
+\item{which}{Which requirements to test for. Defaults to all of
+the command-line utilities on which potools relies, namely,
+\itemize{
+\item \code{msgmerge}
+\item \code{msgfmt}
+\item \code{msginit}
+\item \code{msgconv}
+}}
 }
 \value{
 \code{TRUE} if the system is ready for translation, otherwise a
@@ -19,12 +29,6 @@ is equipped for translation.
 }
 \details{
 Specifically, potools relies on these command-line utilities:
-\itemize{
-\item \code{msgmerge}
-\item \code{msgfmt}
-\item \code{msginit}
-\item \code{msgconv}
-}
 }
 \seealso{
 \code{\link[tools:update_pkg_po]{tools::update_pkg_po()}}

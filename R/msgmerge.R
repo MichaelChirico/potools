@@ -11,7 +11,7 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
     shQuote(path.expand(pot_file))
   )
 
-  val <- system2(.potools$cmd$msgmerge, args, stdout = TRUE, stderr = TRUE)
+  val <- system2("msgmerge", args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
     warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
@@ -36,9 +36,9 @@ run_msgfmt = function(po_file, mo_file, verbose) {
 
   # See #218. Solaris msgfmt doesn't support -c or --statistics
   if (Sys.info()[["sysname"]] == "SunOS") {
-    cmd = glue("{.potools$cmd$msgfmt} -o {shQuote(mo_file)} {shQuote(po_file)}") # nocov
+    cmd = glue("msgfmt -o {shQuote(mo_file)} {shQuote(po_file)}") # nocov
   } else {
-    cmd = glue("{.potools$cmd$msgfmt} -c {use_stats} -o {shQuote(mo_file)} {shQuote(po_file)}")
+    cmd = glue("msgfmt -c {use_stats} -o {shQuote(mo_file)} {shQuote(po_file)}")
   }
   if (system(cmd) != 0L) {
     warningf(
@@ -82,7 +82,7 @@ run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
     "-w", width,
     "--no-translator" # don't consult user-email etc
   )
-  val <- system2(.potools$cmd$msginit, args, stdout = TRUE, stderr = TRUE)
+  val <- system2("msginit", args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     stopf("Running msginit on '%s' failed", pot_path)
   } else if (verbose) {

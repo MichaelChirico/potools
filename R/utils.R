@@ -25,6 +25,11 @@ get_desc_data = function(dir, fields = c('Package', 'Version')) {
   return(drop(desc_data))
 }
 
+# msgmerge | msgmerge.R | run_msgmerge()
+# msgfmt   | msgmerge.R | run_msgfmt()
+# msginit  | msgmerge.R | run_msginit(), tools:::en_quote(),
+# msgconv  | msgmerge.R | tools:::en_quote()
+SYSTEM_REQUIREMENTS = c('msgmerge', 'msgfmt', 'msginit', 'msgconv')
 RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 
 # nocov start. in principal, could do another GH action on an ill-equipped machine?
@@ -53,7 +58,7 @@ RTOOLS_URL = 'https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip'
 #' @seealso [tools::update_pkg_po()]
 #' @export
 check_potools_sys_reqs = function(which = SYSTEM_REQUIREMENTS) {
-  if (any(is_missing <- !vapply(.potools$cmd, nzchar, logical(1L)))) {
+  if (any(is_missing <- !nzchar(Sys.which(which)))) {
     if (.Platform$OS.type == 'windows') {
       platform_msg = gettextf(
         'These tools are available as an Rtools goodie, check %s',

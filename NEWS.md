@@ -6,6 +6,8 @@
  * [Note] The test suite now relies on the 3rd edition of `testthat`, meaning a version requirement in the Suggested dependency.
  * [Note] The default value of `verbose` has been changed to `TRUE` in `translate_package()` and `get_message_data()`. Verbosity has also been increased to help detect the source of issues, [#288](https://github.com/MichaelChirico/potools/issues/288). Thanks for @LDalby for reporting an unhelpful error.
  * [Feature] `check_potools_sys_reqs()` (mostly intended for internal use, but exported for testing) gains a `which` argument to fine-tune which system requirements to check, [#275](https://github.com/MichaelChirico/potools/issues/275) and [#288](https://github.com/MichaelChirico/potools/issues/288). Thanks @hadley for the suggestion and @LDalby for early dev testing which emphasized the need for this.
+ * [Note] potools gains a logo featuring a [potoo](https://en.wikipedia.org/wiki/Potoo) thanks to the artistic skills of @allisonhorst
+ * [Feature] New function `po_explain_plurals()` to help de-mystify how to supply plurals for different languages. For example, `po_explain_plurals("pl", 3)` explains that "For Polish (Polski), plural index 2 applies when n = 0, 5-21, 25-31, 35-41, ...", [#278](https://github.com/MichaelChirico/potools/issues/278). Thanks @hadley for the suggestion to independently export this functionality which was already used as part of `translate_package()`.
 
 ## New languages/locales supported out of the box:
 
@@ -13,7 +15,6 @@
 
 # potools 0.2.2 (July 2021)
 
-* potools gains a logo featuring a [potoo](https://en.wikipedia.org/wiki/Potoo) thanks to the artistic skills of @allisonhorst
  * Skip tests on machines where `gettext` is unavailable, #187; also alter the `msgfmt` command executed to create .mo files to skip options unavailable on Solaris, #218
  * Faster parsing of src messages (e.g. `get_message_data()` for the `base` package reduced from 14 to 7 seconds), #119
  * [New feature] New argument `max_translations` for `translate_package()` to limit the number of translations done, #188

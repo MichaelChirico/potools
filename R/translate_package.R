@@ -523,34 +523,6 @@ translate_package = function(
   return(invisible())
 }
 
-# just here to generate translations. comes from the PLURAL_RANGE_STRINGS csv
-# cat(sprintf(
-#   "invisible({\n%s\n})\n",
-#   paste(
-#     sprintf(
-#       '  gettext("%s")',
-#       unique(sort(data.table::fread("inst/extdata/plurals_metadata.csv")$range))
-#     ),
-#     collapse = "\n"
-#   )
-# ))
-invisible({
-  gettext("independently of n")
-  gettext("when n = 0")
-  gettext("when n = 0, 5-20, 25-30, 35-40, ...")
-  gettext("when n = 0, 5-21, 25-31, 35-41, ...")
-  gettext("when n = 1")
-  gettext("when n = 1, 21, 31, 41, ...")
-  gettext("when n = 100-102, 200-202, 300-302, ...")
-  gettext("when n = 11-99, 111-199, 211-299, ...")
-  gettext("when n = 2")
-  gettext("when n = 2-4, 22-24, 32-34, ...")
-  gettext("when n = 3-10, 103-110, 203-210, ...")
-  gettext("when n is 0 or 1")
-  gettext("when n is at bigger than 1")
-  gettext("when n is not 1")
-})
-
 # take from those present in r-devel:
 # ls -1 ~/svn/R-devel/src/library/*/po/*.po | \
 #   awk -F"[./]" '{print $10}' | \

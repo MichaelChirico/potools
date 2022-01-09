@@ -40,7 +40,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div id="navbar" class="collapse navbar-collapse ms-2">
+    <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
@@ -74,6 +74,9 @@
     
   </div>
 </nav><div class="container template-article">
+
+
+
 <script src="developers_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <main id="main"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Translation for package developers</h1>
@@ -215,7 +218,7 @@ msgstr "après midi"
 msgid "evening"
 msgstr "soirée"</code></pre>
 <p>Unfortunately this breakdown won’t generate correct French. The three greetings should be “Bonjour” for morning and afternoon, and “Bonsoir” for evening. There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon après-midi is used as a farewell), and the two word English phrases turn into single French words.</p>
-<p>If you were translating to <a href="https://twitter.com/khorloobatpurev/status/1458044704130437124" class="external-link">Mongolian</a> you’d face a different problem. While Mongolian uses the same times of day, it arranges the words in the opposite order to English: “Өглөөний мэнд” is morning greetings, “Өдрийн мэнд” is afternoon greetings, and “Оройн мэнд” is evening greetings.</p>
+<p>If you were translating to <a href="https://twitter.com/khorloobatpurev/status/1458044704130437124" class="external-link">Mongolian</a> you’d face a different problem. While Mongolian uses the same times of day, it arranges the words <em>in the opposite order</em> to English: “Өглөөний мэнд” is morning greetings, “Өдрийн мэнд” is afternoon greetings, and “Оройн мэнд” is evening greetings.</p>
 <p>Again, we need to resolve this problem by moving away from translating fragments and towards translating complete sentences. One way to do that here would be to restrict ourselves to a fixed set of time points and use <code><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch()</a></code> to specify the greeting:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">greet</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">time_of_day</span><span class="op">)</span> <span class="op">{</span>
@@ -254,11 +257,12 @@ msgstr "{third} {first} {second}"</code></pre>
 <p>On the other hand, putting the name of the variable in the translated string means that you can’t change it without updating all your translations, and there’s a small risk of it also getting translated.</p>
 </li>
 <li>
-<p><code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> is built into base R, so is always available. The downside is that it can be hard to figure out the sentinels refer to and the syntax for rearranging components (which uses <code>1$</code>, <code>2$</code>) is somewhat arcane.</p>
+<p><code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> is built into base R, so is always available. The downside is that it can be hard to figure out what the sentinels refer to and the syntax for rearranging components (which uses <code>1$</code>, <code>2$</code>) is somewhat arcane.</p>
 <pre><code>msgid "%s %s %s"
 msgstr "%3$s %1$s %2$s"</code></pre>
 </li>
 </ul>
+<p>The difference may be more important than you realize – as mentioned above, some languages (e.g., Turkish, Korean, and Japanese) assemble phrases into sentences in a different order. “I have 7 apples” becomes “7りんごをもっています” in Japanese, i.e. “7 apples [I’m] holding” – the verb &amp; subject switched places. The reordering of templates in your messages is going to be quite common if you want your messages available in more than a very limited set of languages.</p>
 </div>
 <div class="section level3">
 <h3 id="un-translatable-content">Un-translatable content<a class="anchor" aria-label="anchor" href="#un-translatable-content"></a>
@@ -376,7 +380,7 @@ msgstr[2] "В поле {n} коров"</code></pre>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="https://github.com/MichaelChirico" class="external-link">Michael Chirico</a>, <a href="http://hadley.nz" class="external-link">Hadley Wickham</a>.</p>
+<p>Developed by <a href="https://github.com/MichaelChirico" class="external-link">Michael Chirico</a>, Hadley Wickham.</p>
 </div>
 
 <div class="pkgdown-footer-right">

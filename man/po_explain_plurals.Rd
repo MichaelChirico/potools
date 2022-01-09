@@ -7,6 +7,8 @@
 po_explain_plurals(language, index)
 }
 \arguments{
+\item{language}{A single locale code. See \code{\link[=translate_package]{translate_package()}} for details.}
+
 \item{index}{Optional. If supplied, a 0-based index to
 explain for a given language. If not supplied, all plurals
 for the supplied language are described.}

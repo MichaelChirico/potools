@@ -5,7 +5,7 @@
 #'   this by providing verbal expressions of which numbers apply
 #'   to which index in the `msgstr` array.
 #'
-#' @inheritParams translate_package
+#' @param language A single locale code. See [translate_package()] for details.
 #' @param index Optional. If supplied, a 0-based index to
 #'   explain for a given language. If not supplied, all plurals
 #'   for the supplied language are described.

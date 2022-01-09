@@ -14,6 +14,7 @@ globalVariables(
     'start', 'start.x', 'end', 'special', 'redirect_start', 'redirect_length', 'id_start', 'id_length',
     'width_precision', 'width_precision_start', 'width_precision_length', 'by_id',
     'lparen', 'N.x', 'N.y', 'next_paren', 'next_start',
+    'nplurals', 'full_name_eng', 'full_name_native', 'plural_index',
     '.', 'N'
   ),
   package = 'potools'

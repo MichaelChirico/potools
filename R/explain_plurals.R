@@ -14,7 +14,7 @@ po_explain_plurals <- function(language, index) {
   stopifnot(
     "Supply one language code (see ?translate_package)" =
       is.character(language) && length(language) == 1L,
-    "If supplied, `index` should be a single number" =
+    "If supplied, `index` should be a single non-negative number" =
       missing(index) || (is.numeric(index) && length(index) == 1L && index > 0)
   )
   language_metadata <- .potools$KNOWN_LANGUAGES[.(language), nomatch = NULL]
@@ -38,7 +38,7 @@ po_explain_plurals <- function(language, index) {
       index, language, language_metadata$nplurals
     )
     plural_metadata[
-      .(plural_index = index),
+      .(plural_index = as.integer(index)),
       on = 'plural_index',
       messagef(
         "For %s (%s), plural index %d applies %s",

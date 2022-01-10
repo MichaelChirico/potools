@@ -6,7 +6,7 @@
     + `po_compile()` converts `.po` translation files into binary `.mo` files used for installation (@hadley, [#234](https://github.com/MichaelChirico/potools/pull/234)).
     + `po_update()` incorporates and merges source message changes to existing `.po` files (@hadley, [#235](https://github.com/MichaelChirico/potools/pull/235))
  * [Note] `potools` now has a site built by [`pkgdown`](https://github.com/r-lib/pkgdown) and hosted on GitHub pages: https://michaelchirico.github.io/potools/. Thanks @hadley for the initial implementation.
- * [Documentation] Two new vignettes, ["Translation for package developers"](vignettes/developers.Rmd) and ["Translation for package translators"](vignettes/translators.Rmd) explain in some detail the process of translation from two perspectives -- that of the package developer and that of the message translator.
+ * [Documentation] Two new vignettes, ["Translation for package developers"](https://michaelchirico.github.io/potools/articles/developers.html) and ["Translation for package translators"](https://michaelchirico.github.io/potools/articles/translators.html) explain in some detail the process of translation from two perspectives -- that of the package developer and that of the message translator.
  * [Bugfix] `translate_package()` works in batch mode, [#224](https://github.com/MichaelChirico/potools/issues/224). Thanks @HenrikBengtsson for the report.
  * potools has a new hex logo! Thanks to @hadley for coordinating and @allisonhorst for the drawing!
  * [Bugfix] `check_cracked_messages()` recognizes named arguments (e.g. `call.` to `stop()` or `appendLF` to `message()`) and keeps them in the original call, [#227](https://github.com/MichaelChirico/potools/issues/227). Thanks @hadley for the report.

@@ -188,3 +188,5 @@ is_outdated <- function(src, dst) {
 }
 
 is_testing = function() identical(Sys.getenv("TESTTHAT"), "true")
+
+is_gnu_gettext = function() any(grepl("GNU gettext", system('gettext --version', intern=TRUE)))

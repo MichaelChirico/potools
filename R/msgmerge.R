@@ -37,11 +37,12 @@ run_msgfmt = function(po_file, mo_file, verbose) {
   po_file <- path.expand(po_file)
   mo_file <- path.expand(mo_file)
 
-  # See #218. Solaris msgfmt doesn't support -c or --statistics
-  if (Sys.info()[["sysname"]] == "SunOS") {
-    cmd = glue("msgfmt -o {shQuote(mo_file)} {shQuote(po_file)}") # nocov
-  } else {
+  # See #218, #221. Solaris msgfmt doesn't support -c or --statistics
+  #   see also https://bugs.r-project.org/show_bug.cgi?id=18150
+  if (is_gnu_gettext()) {
     cmd = glue("msgfmt -c {use_stats} -o {shQuote(mo_file)} {shQuote(po_file)}")
+  } else {
+    cmd = glue("msgfmt -o {shQuote(mo_file)} {shQuote(po_file)}") # nocov
   }
   if (verbose) {
     message("Running system command ", cmd, "...")
@@ -55,8 +56,6 @@ run_msgfmt = function(po_file, mo_file, verbose) {
   }
   return(invisible())
 }
-
-
 
 update_en_quot_mo_files <- function(dir, verbose) {
   check_potools_sys_reqs(c("msgfmt", "msginit", "msgconv"))

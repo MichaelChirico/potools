@@ -12,6 +12,7 @@ reference:
   - po_create
   - po_compile
   - po_update
+  - po_explain_plurals
 
 - title: Check messages
   contents:

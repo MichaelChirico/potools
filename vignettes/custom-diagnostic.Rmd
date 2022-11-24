@@ -13,7 +13,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Motivation
+## Motivation
 
 `potools` provides several "diagnostic" functions used to check the "health" of the messaging corpus available in a given package. These are `check_cracked_messages`, which looks for messages split into chunks which are hard to translate; `check_untranslated_cat`, which looks for messages displayed via `cat()` which are not marked for translation; and `check_untranslated_src`, which looks for messages in the `src` directory which are not marked for translation.
 
@@ -21,7 +21,7 @@ These just crack the surface of the types of diagnostics that are possible for i
 
 In this vignette we'll demonstrate just such a use case by writing a custom diagnostic function that checks for typos in your messages by applying the function `utils::aspell()`.
 
-# Writing the diagnostic
+## Writing the diagnostic
 
 We'll call our function `check_spelling`; it will take as input a `data.table` like that produced by `get_message_data()`, and give as output a `data.table` indexing any issues found. Specifically, it should have three or four columns: `call`, `file`, `line_number`, and `replacement`. The first three come directly from the input; the last one is optional and suggests to the user a way to repair any "unhealthy" messages.
 
@@ -100,7 +100,7 @@ check_spelling = function(message_data) {
 
 In a package, we would probably use a few more helper functions to clean up & simplify  the body of this diagnostic; we're piling everything in sequence for illustration to have everything in one place.
 
-# Running the diagnostic
+## Running the diagnostic
 
 We can check how the diagnostic works on a simple test package `GreatSpelling` created for this vignette.
 

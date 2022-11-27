@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Translation for package developers">
 <meta property="og:description" content="potools">
@@ -77,8 +77,9 @@
 
 
 
-<script src="developers_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
-  <main id="main"><div class="page-header">
+
+<div class="row">
+  <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Translation for package developers</h1>
             
       
@@ -88,124 +89,188 @@
 
     
     
-<p>In this vignette you’ll learn how to set up your package for translation, focusing on translating messages in your R code. It’s aimed at a package developers; if you’re translating an existing package, you might want to start with <code><a href="../articles/translators.html">vignette("translators")</a></code>.</p>
+<p>In this vignette you’ll learn how to set up your package for
+translation, focusing on translating messages in your R code. It’s aimed
+at a package developers; if you’re translating an existing package, you
+might want to start with <code><a href="../articles/translators.html">vignette("translators")</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MichaelChirico/potools" class="external-link">potools</a></span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MichaelChirico/potools" class="external-link">potools</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="basic-process">Basic process<a class="anchor" aria-label="anchor" href="#basic-process"></a>
 </h2>
 <p>Before we get into the details lets review the basic process:</p>
 <ul>
-<li><p>You run <code><a href="../reference/po_extract.html">po_extract()</a></code> to extract all translatable messages from your R and C code. This creates a <code>.pot</code> (po template) file that contains every translatable message.</p></li>
+<li><p>You run <code><a href="../reference/po_extract.html">po_extract()</a></code> to extract all translatable
+messages from your R and C code. This creates a <code>.pot</code> (po
+template) file that contains every translatable message.</p></li>
 <li>
-<p>A translator calls <code><a href="../reference/po_create.html">po_create()</a></code> to generate a <code>.po</code> file for their language. A <code>.po</code> file consists of pair of lines like:</p>
+<p>A translator calls <code><a href="../reference/po_create.html">po_create()</a></code> to generate a
+<code>.po</code> file for their language. A <code>.po</code> file
+consists of pair of lines like:</p>
 <pre><code>msgid "This is the message in English"
 msgstr ""</code></pre>
-<p>They then replace each <code>msgstr</code> line with the appropriate translation:</p>
+<p>They then replace each <code>msgstr</code> line with the appropriate
+translation:</p>
 <pre><code>msgid "This is the message in English"
 msgstr "This is the message in another language"</code></pre>
 </li>
-<li><p>Either you or the translator uses <code><a href="../reference/po_compile.html">po_compile()</a></code> to turn the plain text <code>.po</code> files into binary <code>.mo</code> files that are distributed with your package.</p></li>
+<li><p>Either you or the translator uses <code><a href="../reference/po_compile.html">po_compile()</a></code> to
+turn the plain text <code>.po</code> files into binary <code>.mo</code>
+files that are distributed with your package.</p></li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="extraction">Extraction<a class="anchor" aria-label="anchor" href="#extraction"></a>
 </h2>
-<p>potools provides two styles for extracting messages for translation: <code>base</code> and <code>explicit</code>, as described below. Once you’ve decided which style you want to use, record it in the <code>DESCRIPTION</code>:</p>
-<pre><code><span class="va">Config</span><span class="op">/</span><span class="va">potools</span><span class="op">/</span><span class="va">style</span><span class="op">:</span> <span class="va">explicit</span></code></pre>
-<p>And then run <code><a href="../reference/po_extract.html">po_extract()</a></code> to generate the <code>.pot</code> file.</p>
+<p>potools provides two styles for extracting messages for translation:
+<code>base</code> and <code>explicit</code>, as described below. Once
+you’ve decided which style you want to use, record it in the
+<code>DESCRIPTION</code>:</p>
+<pre><code><span><span class="va">Config</span><span class="op">/</span><span class="va">potools</span><span class="op">/</span><span class="va">style</span><span class="op">:</span> <span class="va">explicit</span></span></code></pre>
+<p>And then run <code><a href="../reference/po_extract.html">po_extract()</a></code> to generate the
+<code>.pot</code> file.</p>
 <div class="section level3">
 <h3 id="base-style">Base style<a class="anchor" aria-label="anchor" href="#base-style"></a>
 </h3>
-<p>The base style captures messages the base functions that include built-in translation capabilities<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;You can tell they have translation capabilities because they include the &lt;code&gt;domain&lt;/code&gt; argument; behind the scenes they all call &lt;code&gt;&lt;a href="https://rdrr.io/r/base/gettext.html" class="external-link"&gt;gettext()&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;'><sup>1</sup></a>: <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>, <code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code>, and <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>. It also captures messages from the explicit translation functions <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext()</a></code>, <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf()</a></code>, and <code>ngettext().</code> (It does <strong>not</strong>, however, not translate <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>). The advantage of the base style, is that it’s very quick to get started with.</p>
-<p><code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>, <code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code> and <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code> concatenate the components of <code>…</code>:</p>
+<p>The base style captures messages the base functions that include
+built-in translation capabilities<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;You can tell they have translation capabilities because
+they include the &lt;code&gt;domain&lt;/code&gt; argument; behind the scenes they
+all call &lt;code&gt;&lt;a href="https://rdrr.io/r/base/gettext.html" class="external-link"&gt;gettext()&lt;/a&gt;&lt;/code&gt;.&lt;/p&gt;'><sup>1</sup></a>: <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>,
+<code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code>, and <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>. It also captures
+messages from the explicit translation functions <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext()</a></code>,
+<code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf()</a></code>, and <code>ngettext().</code> (It does
+<strong>not</strong>, however, not translate <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>). The
+advantage of the base style, is that it’s very quick to get started
+with.</p>
+<p><code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>, <code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code> and
+<code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code> concatenate the components of <code>…</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"This"</span>, <span class="st">" is"</span>, <span class="st">" a"</span>, <span class="st">" message"</span><span class="op">)</span>
-<span class="co">#&gt; This is a message</span>
-<span class="kw"><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning</a></span><span class="op">(</span><span class="st">"This"</span>, <span class="st">" is"</span>, <span class="st">" a"</span>, <span class="st">" warning"</span><span class="op">)</span>
-<span class="co">#&gt; Warning: This is a warning</span>
-<span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"This"</span>, <span class="st">" is"</span>, <span class="st">" an"</span>, <span class="st">" error"</span><span class="op">)</span>
-<span class="co">#&gt; Error in eval(expr, envir, enclos): This is an error</span></code></pre></div>
-<p>However, as you’ll learn shortly, this style is unlikely to generate messages that are easily translated, so <code>po_extract(style = "base")</code> will also capture messages from <code>messagef()</code>, <code>warningf()</code>, and <code>stopf</code>(). These are equivalents to <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>, <code><a href="https://rdrr.io/r/base/warnings.html" class="external-link">warnings()</a></code>, and <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code> that use <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> style (hence the <code>f</code> suffix).</p>
-<p>These functions are not included in base R, so if you want to use them, you’ll need to copy the definitions from below:</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"This"</span>, <span class="st">" is"</span>, <span class="st">" a"</span>, <span class="st">" message"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; This is a message</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning</a></span><span class="op">(</span><span class="st">"This"</span>, <span class="st">" is"</span>, <span class="st">" a"</span>, <span class="st">" warning"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: This is a warning</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"This"</span>, <span class="st">" is"</span>, <span class="st">" an"</span>, <span class="st">" error"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in eval(expr, envir, enclos): This is an error</span></span></code></pre></div>
+<p>However, as you’ll learn shortly, this style is unlikely to generate
+messages that are easily translated, so
+<code>po_extract(style = "base")</code> will also capture messages from
+<code>messagef()</code>, <code>warningf()</code>, and
+<code>stopf</code>(). These are equivalents to <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>,
+<code><a href="https://rdrr.io/r/base/warnings.html" class="external-link">warnings()</a></code>, and <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code> that use
+<code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> style (hence the <code>f</code> suffix).</p>
+<p>These functions are not included in base R, so if you want to use
+them, you’ll need to copy the definitions from below:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">messagef</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">appendLF</span> <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="va">msg</span>, domain <span class="op">=</span> <span class="cn">NA</span>, appendLF <span class="op">=</span> <span class="va">appendLF</span><span class="op">)</span>
-<span class="op">}</span>
-
-<span class="va">warningf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">immediate.</span> <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">noBreaks.</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning</a></span><span class="op">(</span><span class="va">msg</span>, 
-    domain <span class="op">=</span> <span class="cn">NA</span>, 
-    call. <span class="op">=</span> <span class="cn">FALSE</span>, 
-    immediate. <span class="op">=</span> <span class="va">immediate.</span>, 
-    noBreaks. <span class="op">=</span> <span class="va">noBreaks.</span>
-  <span class="op">)</span>
-<span class="op">}</span>
-
-<span class="va">stopf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="va">msg</span>, domain <span class="op">=</span> <span class="cn">NA</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">messagef</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">appendLF</span> <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="va">msg</span>, domain <span class="op">=</span> <span class="cn">NA</span>, appendLF <span class="op">=</span> <span class="va">appendLF</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">warningf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">immediate.</span> <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">noBreaks.</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning</a></span><span class="op">(</span><span class="va">msg</span>, </span>
+<span>    domain <span class="op">=</span> <span class="cn">NA</span>, </span>
+<span>    call. <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>    immediate. <span class="op">=</span> <span class="va">immediate.</span>, </span>
+<span>    noBreaks. <span class="op">=</span> <span class="va">noBreaks.</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">stopf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="va">msg</span>, domain <span class="op">=</span> <span class="cn">NA</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="explicit-style">Explicit style<a class="anchor" aria-label="anchor" href="#explicit-style"></a>
 </h3>
-<p>The explicit style only captures messages that explicitly flagged for translation by <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext()</a></code>, <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">ngettext()</a></code>, or <code>tr_()</code>. Like <code>messagef()</code> and friends, <code>tr_()</code> is not provided by R, so you’ll need to define it yourself:</p>
+<p>The explicit style only captures messages that explicitly flagged for
+translation by <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext()</a></code>, <code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">ngettext()</a></code>, or
+<code>tr_()</code>. Like <code>messagef()</code> and friends,
+<code>tr_()</code> is not provided by R, so you’ll need to define it
+yourself:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">tr_</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/Encoding.html" class="external-link">enc2utf8</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
-<p>The advantage of the explicit style is that it’s very clear which messages are ready for translated. The disadvantage is that it’s easy to miss string, so in the future we’ll provide automated ways to identify strings that haven’t been translated and probably should be.</p>
-<p>I’ll use the explicit style in the rest of this vignette because it makes it very clear what is being translated.</p>
+<code class="sourceCode R"><span><span class="va">tr_</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Encoding.html" class="external-link">enc2utf8</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/gettext.html" class="external-link">gettext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>The advantage of the explicit style is that it’s very clear which
+messages are ready for translated. The disadvantage is that it’s easy to
+miss string, so in the future we’ll provide automated ways to identify
+strings that haven’t been translated and probably should be.</p>
+<p>I’ll use the explicit style in the rest of this vignette because it
+makes it very clear what is being translated.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="writing-good-messages">Writing good messages<a class="anchor" aria-label="anchor" href="#writing-good-messages"></a>
 </h2>
-<p>The mechanics of translating your package are quite straightforward. The bigger challenge is writing messages that are easy to translate. In part, this is an extension of writing messages that are easy to understand in English as well! And if it’s hard for a native English speaker to understand your message, it’s going to be even harder once it’s translated into another language. The following sections give some advice about how to write good messages, as inspired by the “<a href="https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20)" class="external-link">Preparing translatable strings</a>” section of the gettext<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;gettext is the underlying library that powers R’s translation system.&lt;/p&gt;"><sup>2</sup></a> manual.</p>
+<p>The mechanics of translating your package are quite straightforward.
+The bigger challenge is writing messages that are easy to translate. In
+part, this is an extension of writing messages that are easy to
+understand in English as well! And if it’s hard for a native English
+speaker to understand your message, it’s going to be even harder once
+it’s translated into another language. The following sections give some
+advice about how to write good messages, as inspired by the “<a href="https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20)" class="external-link">Preparing
+translatable strings</a>” section of the gettext<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;gettext is the underlying library that powers R’s
+translation system.&lt;/p&gt;"><sup>2</sup></a> manual.</p>
 <div class="section level3">
 <h3 id="write-full-sentences">Write full sentences<a class="anchor" aria-label="anchor" href="#write-full-sentences"></a>
 </h3>
-<p>Generally, you should strive to make sure that each message comes from a single string (i.e. lives within a single "“). Take this simple greeting where I translate”good" and “morning” individually:</p>
+<p>Generally, you should strive to make sure that each message comes
+from a single string (i.e. lives within a single ““). Take this simple
+greeting where I translate”good” and “morning” individually:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">name</span> <span class="op">&lt;-</span> <span class="st">"Hadley"</span>
-<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good"</span><span class="op">)</span>, <span class="st">" "</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"morning"</span><span class="op">)</span>, <span class="st">" "</span>, <span class="va">name</span>, <span class="st">"!"</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Good morning Hadley!"</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">name</span> <span class="op">&lt;-</span> <span class="st">"Hadley"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good"</span><span class="op">)</span>, <span class="st">" "</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"morning"</span><span class="op">)</span>, <span class="st">" "</span>, <span class="va">name</span>, <span class="st">"!"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Good morning Hadley!"</span></span></code></pre></div>
 <p>This will pose two challenges for translators:</p>
 <ul>
 <li>
-<p>When working with <code>.po</code> files, translators see each individual string without context, and they may be in a different order to the original source. This can lead either to a poor translation or an expensive journey to the source code to get more context.</p>
+<p>When working with <code>.po</code> files, translators see each
+individual string without context, and they may be in a different order
+to the original source. This can lead either to a poor translation or an
+expensive journey to the source code to get more context.</p>
 <pre><code>msgid "morning"
 msgstr ""
 
 msgid "Good"
 msgstr ""</code></pre>
 </li>
-<li><p>Prose is not like code: you can’t reliably build up sentences from small fragments of text. Even if you can figure out how to do it in English, it’s unlikely the same form will work for other languages.</p></li>
+<li><p>Prose is not like code: you can’t reliably build up sentences
+from small fragments of text. Even if you can figure out how to do it in
+English, it’s unlikely the same form will work for other
+languages.</p></li>
 </ul>
-<p>Instead it’s better to generate the complete message in a single string using <code>glue()</code> or <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> <a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;If you’re using the “base” style, you could instead write &lt;code&gt;gettextf("Good morning %s", name)&lt;/code&gt;; &lt;code&gt;&lt;a href="https://rdrr.io/r/base/sprintf.html" class="external-link"&gt;gettextf()&lt;/a&gt;&lt;/code&gt; is a version of &lt;code&gt;&lt;a href="https://rdrr.io/r/base/sprintf.html" class="external-link"&gt;sprintf()&lt;/a&gt;&lt;/code&gt; that translates the first argument.&lt;/p&gt;'><sup>3</sup></a> to interpolate in the parts that vary:</p>
+<p>Instead it’s better to generate the complete message in a single
+string using <code>glue()</code> or <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> <a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;If you’re using the “base” style, you could instead
+write &lt;code&gt;gettextf("Good morning %s", name)&lt;/code&gt;;
+&lt;code&gt;&lt;a href="https://rdrr.io/r/base/sprintf.html" class="external-link"&gt;gettextf()&lt;/a&gt;&lt;/code&gt; is a version of &lt;code&gt;&lt;a href="https://rdrr.io/r/base/sprintf.html" class="external-link"&gt;sprintf()&lt;/a&gt;&lt;/code&gt; that
+translates the first argument.&lt;/p&gt;'><sup>3</sup></a> to
+interpolate in the parts that vary:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good morning {name}"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; Good morning Hadley</span>
-<span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good morning %s"</span><span class="op">)</span>, <span class="va">name</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Good morning Hadley"</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good morning {name}"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Good morning Hadley</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good morning %s"</span><span class="op">)</span>, <span class="va">name</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Good morning Hadley"</span></span></code></pre></div>
 <p>Then the translator sees something like this:</p>
 <pre><code>msgid "Good morning {name}!"
 msgstr ""</code></pre>
-<p>This gives the translator enough context to create a good translation and the freedom to change word order to make a grammatically correct sentence in their language. We can make the problem more challenging by making our greeting more flexible:</p>
+<p>This gives the translator enough context to create a good translation
+and the freedom to change word order to make a grammatically correct
+sentence in their language. We can make the problem more challenging by
+making our greeting more flexible:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">greet</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">time_of_day</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good"</span><span class="op">)</span>, <span class="st">" "</span>, <span class="va">time_of_day</span>, <span class="st">" "</span>, <span class="va">name</span>, <span class="st">"!"</span><span class="op">)</span>
-<span class="op">}</span>
-<span class="fu">greet</span><span class="op">(</span><span class="st">"Hadley"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"morning"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Good morning Hadley!"</span>
-<span class="fu">greet</span><span class="op">(</span><span class="st">"Hadley"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"afternoon"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Good afternoon Hadley!"</span>
-<span class="fu">greet</span><span class="op">(</span><span class="st">"Hadley"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"evening"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Good evening Hadley!"</span></code></pre></div>
-<p>This would generate the following sequence of translations for French:</p>
+<code class="sourceCode R"><span><span class="va">greet</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">time_of_day</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good"</span><span class="op">)</span>, <span class="st">" "</span>, <span class="va">time_of_day</span>, <span class="st">" "</span>, <span class="va">name</span>, <span class="st">"!"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu">greet</span><span class="op">(</span><span class="st">"Hadley"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"morning"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Good morning Hadley!"</span></span>
+<span><span class="fu">greet</span><span class="op">(</span><span class="st">"Hadley"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"afternoon"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Good afternoon Hadley!"</span></span>
+<span><span class="fu">greet</span><span class="op">(</span><span class="st">"Hadley"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"evening"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Good evening Hadley!"</span></span></code></pre></div>
+<p>This would generate the following sequence of translations for
+French:</p>
 <pre><code>msgid "Good"
 msgstr "Bon"
 
@@ -217,158 +282,241 @@ msgstr "après midi"
 
 msgid "evening"
 msgstr "soirée"</code></pre>
-<p>Unfortunately this breakdown won’t generate correct French. The three greetings should be “Bonjour” for morning and afternoon, and “Bonsoir” for evening. There are two problems: good morning and good afternoon both use bonjour (even though French has different words for morning and afternoon; bon après-midi is used as a farewell), and the two word English phrases turn into single French words.</p>
-<p>If you were translating to <a href="https://twitter.com/khorloobatpurev/status/1458044704130437124" class="external-link">Mongolian</a> you’d face a different problem. While Mongolian uses the same times of day, it arranges the words <em>in the opposite order</em> to English: “Өглөөний мэнд” is morning greetings, “Өдрийн мэнд” is afternoon greetings, and “Оройн мэнд” is evening greetings.</p>
-<p>Again, we need to resolve this problem by moving away from translating fragments and towards translating complete sentences. One way to do that here would be to restrict ourselves to a fixed set of time points and use <code><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch()</a></code> to specify the greeting:</p>
+<p>Unfortunately this breakdown won’t generate correct French. The three
+greetings should be “Bonjour” for morning and afternoon, and “Bonsoir”
+for evening. There are two problems: good morning and good afternoon
+both use bonjour (even though French has different words for morning and
+afternoon; bon après-midi is used as a farewell), and the two word
+English phrases turn into single French words.</p>
+<p>If you were translating to <a href="https://twitter.com/khorloobatpurev/status/1458044704130437124" class="external-link">Mongolian</a>
+you’d face a different problem. While Mongolian uses the same times of
+day, it arranges the words <em>in the opposite order</em> to English:
+“Өглөөний мэнд” is morning greetings, “Өдрийн мэнд” is afternoon
+greetings, and “Оройн мэнд” is evening greetings.</p>
+<p>Again, we need to resolve this problem by moving away from
+translating fragments and towards translating complete sentences. One
+way to do that here would be to restrict ourselves to a fixed set of
+time points and use <code><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch()</a></code> to specify the greeting:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">greet</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">time_of_day</span><span class="op">)</span> <span class="op">{</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span><span class="va">time_of_day</span>,
-    morning <span class="op">=</span> <span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good morning {name}!"</span><span class="op">)</span><span class="op">)</span>,
-    afternoon <span class="op">=</span> <span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good afternoon {name}!"</span><span class="op">)</span><span class="op">)</span>,
-    evening <span class="op">=</span> <span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good evening {name}!"</span><span class="op">)</span><span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">greet</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">time_of_day</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span><span class="va">time_of_day</span>,</span>
+<span>    morning <span class="op">=</span> <span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good morning {name}!"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    afternoon <span class="op">=</span> <span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good afternoon {name}!"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    evening <span class="op">=</span> <span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"Good evening {name}!"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>This works for French (and Mongolian):</p>
-<pre><code><span class="va">msgstr</span><span class="op">:</span> <span class="st">"Good morning {name}!"</span>
-<span class="va">msgid</span><span class="op">:</span> <span class="st">"Bonjour {name}!"</span>
-
-<span class="va">msgstr</span><span class="op">:</span> <span class="st">"Good afternoon {name}!"</span>
-<span class="va">msgid</span><span class="op">:</span> <span class="st">"Bonjour {name}!"</span>
-
-<span class="va">msgstr</span><span class="op">:</span> <span class="st">"Good evening {name}!"</span>
-<span class="va">msgid</span><span class="op">:</span> <span class="st">"Bonsoir {name}!"</span></code></pre>
-<p>However, it’s still not a fully general solution as it assumes that the time of day is the most important characteristic of a greeting, and that the day is broken down into at most three components. Neither is true in general:</p>
+<pre><code><span><span class="va">msgstr</span><span class="op">:</span> <span class="st">"Good morning {name}!"</span></span>
+<span><span class="va">msgid</span><span class="op">:</span> <span class="st">"Bonjour {name}!"</span></span>
+<span></span>
+<span><span class="va">msgstr</span><span class="op">:</span> <span class="st">"Good afternoon {name}!"</span></span>
+<span><span class="va">msgid</span><span class="op">:</span> <span class="st">"Bonjour {name}!"</span></span>
+<span></span>
+<span><span class="va">msgstr</span><span class="op">:</span> <span class="st">"Good evening {name}!"</span></span>
+<span><span class="va">msgid</span><span class="op">:</span> <span class="st">"Bonsoir {name}!"</span></span></code></pre>
+<p>However, it’s still not a fully general solution as it assumes that
+the time of day is the most important characteristic of a greeting, and
+that the day is broken down into at most three components. Neither is
+true in general:</p>
 <ul>
-<li><p><a href="https://twitter.com/T_Norin/status/1457975164008898560" class="external-link">Danish</a> breaks the time of day in two six parts: (“morgen”), pre-noon (“formiddag”), noon (“middag”), afternoon (“eftermiddag”), evening (“aften”), and night (“nat”).</p></li>
-<li><p>In <a href="https://twitter.com/larsplus/status/1457963302982672386" class="external-link">Swahili</a>, the greeting varies based on the relationship between the people: “Shikamoo” is for young to old, “Hujambo” is for old to young, and “Mambo” is for young to young.</p></li>
+<li><p><a href="https://twitter.com/T_Norin/status/1457975164008898560" class="external-link">Danish</a>
+breaks the time of day in two six parts: (“morgen”), pre-noon
+(“formiddag”), noon (“middag”), afternoon (“eftermiddag”), evening
+(“aften”), and night (“nat”).</p></li>
+<li><p>In <a href="https://twitter.com/larsplus/status/1457963302982672386" class="external-link">Swahili</a>,
+the greeting varies based on the relationship between the people:
+“Shikamoo” is for young to old, “Hujambo” is for old to young, and
+“Mambo” is for young to young.</p></li>
 </ul>
-<p>Greetings are particularly challenging to translate because of their great cultural variation; fortunately most messages in R packages won’t require such nuance.</p>
+<p>Greetings are particularly challenging to translate because of their
+great cultural variation; fortunately most messages in R packages won’t
+require such nuance.</p>
 </div>
 <div class="section level3">
 <h3 id="sprintf-vs-glue">
 <code>sprintf()</code> vs <code>glue()</code><a class="anchor" aria-label="anchor" href="#sprintf-vs-glue"></a>
 </h3>
-<p>In R, there are two common ways to interpolate variables into a string: <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> and <code>glue()</code>. There are pros and cons to each:</p>
+<p>In R, there are two common ways to interpolate variables into a
+string: <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> and <code>glue()</code>. There are pros
+and cons to each:</p>
 <ul>
 <li>
-<p>Using <code>glue()</code> requires an additional, if lightweight, dependency, but gives the translator more context (assuming you use informative names for local variables), and makes it easy to rearrange interpolated components:</p>
+<p>Using <code>glue()</code> requires an additional, if lightweight,
+dependency, but gives the translator more context (assuming you use
+informative names for local variables), and makes it easy to rearrange
+interpolated components:</p>
 <pre><code>msgid "{first} {second} {third}"
 msgstr "{third} {first} {second}"</code></pre>
-<p>On the other hand, putting the name of the variable in the translated string means that you can’t change it without updating all your translations, and there’s a small risk of it also getting translated.</p>
+<p>On the other hand, putting the name of the variable in the translated
+string means that you can’t change it without updating all your
+translations, and there’s a small risk of it also getting
+translated.</p>
 </li>
 <li>
-<p><code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> is built into base R, so is always available. The downside is that it can be hard to figure out what the sentinels refer to and the syntax for rearranging components (which uses <code>1$</code>, <code>2$</code>) is somewhat arcane.</p>
+<p><code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> is built into base R, so is always
+available. The downside is that it can be hard to figure out what the
+sentinels refer to and the syntax for rearranging components (which uses
+<code>1$</code>, <code>2$</code>) is somewhat arcane.</p>
 <pre><code>msgid "%s %s %s"
 msgstr "%3$s %1$s %2$s"</code></pre>
 </li>
 </ul>
-<p>The difference may be more important than you realize – as mentioned above, some languages (e.g., Turkish, Korean, and Japanese) assemble phrases into sentences in a different order. “I have 7 apples” becomes “7りんごをもっています” in Japanese, i.e. “7 apples [I’m] holding” – the verb &amp; subject switched places. The reordering of templates in your messages is going to be quite common if you want your messages available in more than a very limited set of languages.</p>
+<p>The difference may be more important than you realize – as mentioned
+above, some languages (e.g., Turkish, Korean, and Japanese) assemble
+phrases into sentences in a different order. “I have 7 apples” becomes
+“7りんごをもっています” in Japanese, i.e. “7 apples [I’m] holding” – the
+verb &amp; subject switched places. The reordering of templates in your
+messages is going to be quite common if you want your messages available
+in more than a very limited set of languages.</p>
 </div>
 <div class="section level3">
 <h3 id="un-translatable-content">Un-translatable content<a class="anchor" aria-label="anchor" href="#un-translatable-content"></a>
 </h3>
-<p>You can use interpolation to avoid including un-translatable components like URLs or email addresses into a message. This is good practice because it saves work for the translators, makes it easier for them to see changes to the text, and avoids the chance of a translator accidentally introducing a typo. It works something like this:</p>
+<p>You can use interpolation to avoid including un-translatable
+components like URLs or email addresses into a message. This is good
+practice because it saves work for the translators, makes it easier for
+them to see changes to the text, and avoids the chance of a translator
+accidentally introducing a typo. It works something like this:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Instead of this:</span>
-<span class="fu">tr_</span><span class="op">(</span><span class="st">"See &lt;https://r-project.org&gt; to learn more"</span><span class="op">)</span>
-
-<span class="co"># Try this:</span>
-<span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"https://r-project.org"</span>
-<span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"See &lt;{url}&gt; to learn more"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Similarly, if you’re generating strings that include in HTML, avoid including the HTML in the translated string, and instead translate just the words:</p>
+<code class="sourceCode R"><span><span class="co"># Instead of this:</span></span>
+<span><span class="fu">tr_</span><span class="op">(</span><span class="st">"See &lt;https://r-project.org&gt; to learn more"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Try this:</span></span>
+<span><span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"https://r-project.org"</span></span>
+<span><span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"See &lt;{url}&gt; to learn more"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Similarly, if you’re generating strings that include in HTML, avoid
+including the HTML in the translated string, and instead translate just
+the words:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Instead of this:</span>
-<span class="fu">tr_</span><span class="op">(</span><span class="st">"&lt;a href='/index.html'&gt;Home page&lt;/a&gt;"</span><span class="op">)</span>
-
-<span class="co"># Try this:</span>
-<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"&lt;a href='/index.html'&gt;"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"Home page"</span><span class="op">)</span>, <span class="st">"&lt;/a&gt;"</span><span class="op">)</span></code></pre></div>
-<p>Generally, you want to help the translator spend as much time as possible helping you out.</p>
+<code class="sourceCode R"><span><span class="co"># Instead of this:</span></span>
+<span><span class="fu">tr_</span><span class="op">(</span><span class="st">"&lt;a href='/index.html'&gt;Home page&lt;/a&gt;"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Try this:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"&lt;a href='/index.html'&gt;"</span>, <span class="fu">tr_</span><span class="op">(</span><span class="st">"Home page"</span><span class="op">)</span>, <span class="st">"&lt;/a&gt;"</span><span class="op">)</span></span></code></pre></div>
+<p>Generally, you want to help the translator spend as much time as
+possible helping you out.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="googling">Googling<a class="anchor" aria-label="anchor" href="#googling"></a>
 </h2>
-<p>It’s worth noting that that non-English messages are often harder to Google because few non-English languages have a significant presence on StackOverflow. A few suggestions:</p>
+<p>It’s worth noting that that non-English messages are often harder to
+Google because few non-English languages have a significant presence on
+StackOverflow. A few suggestions:</p>
 <ul>
-<li>You can give error messages a unique identifier (e.g. numbering). This may be harder to do for “established” packages since adding identifiers might be a breaking change. It could also be a headache to keep track of which numbers have been taken, e.g. in a context of concurrent PRs incrementing the error numbering in parallel.</li>
-<li>End users can switch to an English locale mid-session by running <code>Sys.setenv(LANGUAGE = 'en')</code>: error messages will be produced in English until they set <code>LANGUAGE</code> again.</li>
-<li>You could write a custom error wrapper that produces the error both in English and as a translation.</li>
+<li>You can give error messages a unique identifier (e.g. numbering).
+This may be harder to do for “established” packages since adding
+identifiers might be a breaking change. It could also be a headache to
+keep track of which numbers have been taken, e.g. in a context of
+concurrent PRs incrementing the error numbering in parallel.</li>
+<li>End users can switch to an English locale mid-session by running
+<code>Sys.setenv(LANGUAGE = 'en')</code>: error messages will be
+produced in English until they set <code>LANGUAGE</code> again.</li>
+<li>You could write a custom error wrapper that produces the error both
+in English and as a translation.</li>
 </ul>
 <div class="section level3">
 <h3 id="plurals">Plurals<a class="anchor" aria-label="anchor" href="#plurals"></a>
 </h3>
-<p>In English, most nouns have different forms for one item (the singular) or more than one item (the plural, also used for zero items). Or, more formally, in English the <a href="https://en.wikipedia.org/wiki/Grammatical_number" class="external-link">grammatical count</a> has two forms: singular and plural. So you might be tempted to construct a sentence like this:</p>
+<p>In English, most nouns have different forms for one item (the
+singular) or more than one item (the plural, also used for zero items).
+Or, more formally, in English the <a href="https://en.wikipedia.org/wiki/Grammatical_number" class="external-link">grammatical
+count</a> has two forms: singular and plural. So you might be tempted to
+construct a sentence like this:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span>
-  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>, <span class="st">" cow"</span><span class="op">)</span> 
-  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> 
-    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>, <span class="st">" cows"</span><span class="op">)</span>
-  <span class="op">}</span>
-<span class="op">}</span>
-<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"I have "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "I have  0 cows"</span>
-<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"I have "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "I have  1 cow"</span>
-<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"I have "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "I have  2 cows"</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>, <span class="st">" cow"</span><span class="op">)</span> </span>
+<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>, <span class="st">" cows"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"I have "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "I have  0 cows"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"I have "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "I have  1 cow"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"I have "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "I have  2 cows"</span></span></code></pre></div>
 <p>But this doesn’t always work, even in English:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, <span class="st">" in the field"</span><span class="op">)</span>
-<span class="co">#&gt; [1] "There are 0 cows in the field"</span>
-<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="st">" in the field"</span><span class="op">)</span>
-<span class="co">#&gt; [1] "There are 1 cow in the field"</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, <span class="st">" in the field"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "There are 0 cows in the field"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="st">" in the field"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "There are 1 cow in the field"</span></span></code></pre></div>
 <p>Again, we always want to construct a complete sentence:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">field_cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span>
-  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span>
-    <span class="va">fmt</span> <span class="op">&lt;-</span> <span class="fu">tr_</span><span class="op">(</span><span class="st">"There is {n} cow in the field"</span><span class="op">)</span>
-  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-    <span class="va">fmt</span> <span class="op">&lt;-</span> <span class="fu">tr_</span><span class="op">(</span><span class="st">"There are {n} cows in the field"</span><span class="op">)</span>
-  <span class="op">}</span>
-  <span class="fu">glue</span><span class="op">(</span><span class="va">fmt</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
-<p>But there’s an additional wrinkle here: while English has singular and plural, other languages have different forms like singular (1), dual (2), and plural (3 or more), or singular (1), paucal (a few), and plural (many). So we need to use a different helper: <code>ngettext(n, singular, plural)</code>:</p>
+<code class="sourceCode R"><span><span class="va">field_cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">fmt</span> <span class="op">&lt;-</span> <span class="fu">tr_</span><span class="op">(</span><span class="st">"There is {n} cow in the field"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>    <span class="va">fmt</span> <span class="op">&lt;-</span> <span class="fu">tr_</span><span class="op">(</span><span class="st">"There are {n} cows in the field"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu">glue</span><span class="op">(</span><span class="va">fmt</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>But there’s an additional wrinkle here: while English has singular
+and plural, other languages have different forms like singular (1), dual
+(2), and plural (3 or more), or singular (1), paucal (a few), and plural
+(many). So we need to use a different helper:
+<code>ngettext(n, singular, plural)</code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">field_cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu">glue</span><span class="op">(</span><span class="fu">ngettxt</span><span class="op">(</span><span class="va">n</span>,
-    <span class="st">"There is {n} cow in the field"</span>,
-    <span class="st">"There are {n} cows in the field"</span>
-  <span class="op">)</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
-<p><code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">ngettext()</a></code> generates a special form in the <code>.po</code> file, which shows both singular and plural forms:</p>
+<code class="sourceCode R"><span><span class="va">field_cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">glue</span><span class="op">(</span><span class="fu">ngettxt</span><span class="op">(</span><span class="va">n</span>,</span>
+<span>    <span class="st">"There is {n} cow in the field"</span>,</span>
+<span>    <span class="st">"There are {n} cows in the field"</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p><code><a href="https://rdrr.io/r/base/gettext.html" class="external-link">ngettext()</a></code> generates a special form in the
+<code>.po</code> file, which shows both singular and plural forms:</p>
 <pre><code>msgid "There is {n} cow in the field"
 msgid_plural "There are {n} cows in the field"</code></pre>
-<p>Then the translator can supply any number of translations. Languages that don’t have plurals (e.g. Chinese) only need to supply a single translation:</p>
+<p>Then the translator can supply any number of translations. Languages
+that don’t have plurals (e.g. Chinese) only need to supply a single
+translation:</p>
 <pre><code>msgid "There is {n} cow in the field"
 msgid_plural "There are {n} cows in the field"
 msgstr[0] "田裡有{n}頭牛"</code></pre>
-<p>Russian has three forms, so it gets three entries (roughly 1, 2-4, and everything else):</p>
+<p>Russian has three forms, so it gets three entries (roughly 1, 2-4,
+and everything else):</p>
 <pre><code>msgid "There is {n} cow in the field"
 msgid_plural "There are {n} cows in the field"
 msgstr[0] "В поле {xn} корова"
 msgstr[1] "В поле {n} коровы"
 msgstr[2] "В поле {n} коров"</code></pre>
-<p>Slovenian and Serbian have four forms, Irish has five forms (learn more at <a href="https://www.bitesize.irish/blog/counting/" class="external-link">bitesize Irish</a>), and Arabic has six forms. The rules that define which number get which message are quite complex and encoded in the “plural form” that’s recorded at the top of the <code>.po</code> file and looks something like <code>(n%10==1 &amp;&amp; n%100!=11 ? 0 : n%10&gt;=2 &amp;&amp; n%10&lt;=4 &amp;&amp; (n%100&lt;10 || n%100&gt;=20)? 1 : 2).</code> However, this is something the translators need to worry about not you, and as speakers of the language they should find it easier to puzzle out the rules.</p>
+<p>Slovenian and Serbian have four forms, Irish has five forms (learn
+more at <a href="https://www.bitesize.irish/blog/counting/" class="external-link">bitesize
+Irish</a>), and Arabic has six forms. The rules that define which number
+get which message are quite complex and encoded in the “plural form”
+that’s recorded at the top of the <code>.po</code> file and looks
+something like
+<code>(n%10==1 &amp;&amp; n%100!=11 ? 0 : n%10&gt;=2 &amp;&amp; n%10&lt;=4 &amp;&amp; (n%100&lt;10 || n%100&gt;=20)? 1 : 2).</code>
+However, this is something the translators need to worry about not you,
+and as speakers of the language they should find it easier to puzzle out
+the rules.</p>
 </div>
 <div class="section level3">
 <h3 id="collapsed-lists">Collapsed lists<a class="anchor" aria-label="anchor" href="#collapsed-lists"></a>
 </h3>
-<p>In English we typically lists of items like “a, b, or c”, where the use of the serial, or <a href="https://en.wikipedia.org/wiki/Serial_comma" class="external-link">Oxford</a>, comma being a hotly debated style preference. European languages follow the mostly same form, although none use the Oxford comma, and they obviously translate “or”<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;In Spanish and Italian, the word used varies based on the start of the following word.&lt;/p&gt;"><sup>4</sup></a>. The <a href="https://github.com/rossellhayes/and" class="external-link">and</a> package takes care of these details:</p>
+<p>In English we typically lists of items like “a, b, or c”, where the
+use of the serial, or <a href="https://en.wikipedia.org/wiki/Serial_comma" class="external-link">Oxford</a>, comma
+being a hotly debated style preference. European languages follow the
+mostly same form, although none use the Oxford comma, and they obviously
+translate “or”<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;In Spanish and Italian, the word used varies based on
+the start of the following word.&lt;/p&gt;"><sup>4</sup></a>. The <a href="https://github.com/rossellhayes/and" class="external-link">and</a> package takes care of
+these details:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">and</span><span class="op">)</span>
-<span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"middle"</span>, <span class="st">"last"</span><span class="op">)</span>
-<span class="fu">or</span><span class="op">(</span><span class="va">values</span><span class="op">)</span>
-<span class="co">#&gt; [1] "first, middle, and last"</span>
-
-<span class="co"># lang is normally retrieve automatically from the environemtn</span>
-<span class="co"># overriding it here to show what a translation looks like:</span>
-<span class="fu">or</span><span class="op">(</span><span class="va">values</span>, lang <span class="op">=</span> <span class="st">"fr"</span><span class="op">)</span>
-<span class="co">#&gt; [1] "first, middle ou last"</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://and.rossellhayes.com" class="external-link">and</a></span><span class="op">)</span></span>
+<span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"middle"</span>, <span class="st">"last"</span><span class="op">)</span></span>
+<span><span class="fu">or</span><span class="op">(</span><span class="va">values</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "first, middle, and last"</span></span>
+<span></span>
+<span><span class="co"># lang is normally retrieve automatically from the environemtn</span></span>
+<span><span class="co"># overriding it here to show what a translation looks like:</span></span>
+<span><span class="fu">or</span><span class="op">(</span><span class="va">values</span>, lang <span class="op">=</span> <span class="st">"fr"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "first, middle ou last"</span></span></code></pre></div>
 <p>Which also works will in glue:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"`x` must be one of {and(values)}"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; `x` must be one of first, middle and last</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"`x` must be one of {and(values)}"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `x` must be one of first, middle and last</span></span></code></pre></div>
 </div>
 </div>
 
@@ -385,7 +533,7 @@ msgstr[2] "В поле {n} коров"</code></pre>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
     </footer>

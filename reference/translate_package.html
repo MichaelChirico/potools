@@ -7,7 +7,7 @@ To get started, the package developer should run translate_package() on
 your package's source to produce a template .pot file (or files, if your
 package has both R and C/C++ messages to translated), e.g.
 To add translations in your desired language, include the target language:
-in the translate_package(languages = &quot;es&quot;) call."><title>Interactively provide translations for a package's messages — translate_package • potools</title><!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png"><link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png"><link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png"><link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png"><link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png"><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Interactively provide translations for a package's messages — translate_package"><meta property="og:description" content="This function handles the &quot;grunt work&quot; of building and updating translation
+in the translate_package(languages = &quot;es&quot;) call."><title>Interactively provide translations for a package's messages — translate_package • potools</title><!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png"><link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png"><link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png"><link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png"><link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png"><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Interactively provide translations for a package's messages — translate_package"><meta property="og:description" content="This function handles the &quot;grunt work&quot; of building and updating translation
 libraries. In addition to providing a friendly interface for supplying
 translations, some internal logic is built to help make your package more
 translation-friendly.
@@ -83,18 +83,18 @@ in the <code>translate_package(languages = "es")</code> call.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">translate_package</span><span class="op">(</span>
-  dir <span class="op">=</span> <span class="st">"."</span>,
-  <span class="va">languages</span>,
-  diagnostics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">check_cracked_messages</span>, <span class="va">check_untranslated_cat</span>,
-    <span class="va">check_untranslated_src</span><span class="op">)</span>,
-  custom_translation_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>R <span class="op">=</span> <span class="cn">NULL</span>, src <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,
-  max_translations <span class="op">=</span> <span class="cn">Inf</span>,
-  use_base_rules <span class="op">=</span> <span class="va">package</span> <span class="op">%chin%</span> <span class="va">.potools</span><span class="op">$</span><span class="va">base_package_names</span>,
-  copyright <span class="op">=</span> <span class="cn">NULL</span>,
-  bugs <span class="op">=</span> <span class="st">""</span>,
-  verbose <span class="op">=</span> <span class="op">!</span><span class="fu">is_testing</span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">translate_package</span><span class="op">(</span></span>
+<span>  dir <span class="op">=</span> <span class="st">"."</span>,</span>
+<span>  <span class="va">languages</span>,</span>
+<span>  diagnostics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">check_cracked_messages</span>, <span class="va">check_untranslated_cat</span>,</span>
+<span>    <span class="va">check_untranslated_src</span><span class="op">)</span>,</span>
+<span>  custom_translation_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>R <span class="op">=</span> <span class="cn">NULL</span>, src <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
+<span>  max_translations <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  use_base_rules <span class="op">=</span> <span class="va">package</span> <span class="op">%chin%</span> <span class="va">.potools</span><span class="op">$</span><span class="va">base_package_names</span>,</span>
+<span>  copyright <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bugs <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="op">!</span><span class="fu">is_testing</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -102,6 +102,8 @@ in the <code>translate_package(languages = "es")</code> call.</p>
     <dl><dt>dir</dt>
 <dd><p>Character, default the present directory; a directory in which an
 R package is stored.</p></dd>
+
+
 <dt>languages</dt>
 <dd><p>Character vector; locale codes to which to translate.
 Must be a valid language accepted by gettext. This almost always takes
@@ -111,35 +113,55 @@ country code e.g. <code>es</code> for Spanish, <code>es_AR</code> for Argentinia
 for Romanian, etc. See <code><a href="https://rdrr.io/r/base/locales.html" class="external-link">base::Sys.getlocale()</a></code> for some helpful tips
 about how to tell which locales are currently available on your machine, and
 see the References below for some web resources listing more locales.</p></dd>
+
+
 <dt>diagnostics</dt>
 <dd><p>A <code>list</code> of diagnostic functions to be run on the
 package's message data. See Details.</p></dd>
+
+
 <dt>custom_translation_functions</dt>
 <dd><p>A <code>list</code> with either/both of two
 components, <code>R</code> and <code>src</code>, together governing how to extract any
 non-standard strings from the package. See Details.</p></dd>
+
+
 <dt>max_translations</dt>
 <dd><p>Numeric; used for setting a cap on the number of
 translations to be done for each language. Defaults to <code>Inf</code>, meaning
 all messages in the package.</p></dd>
+
+
 <dt>use_base_rules</dt>
 <dd><p>Logical; Should internal behavior match base behavior
 as strictly as possible? <code>TRUE</code> if being run on a base package (i.e.,
 <code>base</code> or one of the default packages like <code>utils</code>,
 <code>graphics</code>, etc.). See Details.</p></dd>
+
+
 <dt>copyright</dt>
 <dd><p>Character; passed on to <code><a href="write_po_file.html">write_po_file()</a></code>.</p></dd>
+
+
 <dt>bugs</dt>
 <dd><p>Character; passed on to <code><a href="write_po_file.html">write_po_file()</a></code>.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Logical, default <code>TRUE</code> (except during testing). Should
 extra information about progress, etc. be reported?</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>This function returns nothing invisibly. As a side effect, a
+    
+
+<p>This function returns nothing invisibly. As a side effect, a
 <code class="file">.pot</code> file is written to the package's <code class="file">po</code> directory (updated if
-one does not yet exist, or created from scratch otherwise), and a <code class="file">.po</code>file is written in the same directory for each element of <code>languages</code>.</p>
+one does not yet exist, or created from scratch otherwise), and a <code class="file">.po</code></p>
+
+
+<p>file is written in the same directory for each element of <code>languages</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="phases">Phases<a class="anchor" aria-label="anchor" href="#phases"></a></h2>
@@ -196,16 +218,16 @@ the default R tooling for translation (<code>xgettext()</code>, <code>xngettext(
 interface to continue building  translations for your workflow.</p>
 <p>Suppose you wrote a function <code>stopf()</code> that is a wrapper of
 <code>stop(gettextf())</code> used to build templated error messages in R, which makes
-translation easier for translators (see below), e.g.:</p><div class="sourceCode R"><pre><code><span class="va">stopf</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">domain</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span><span class="op">)</span>, domain <span class="op">=</span> <span class="va">domain</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="op">}</span></code></pre><p></p></div>
+translation easier for translators (see below), e.g.:</p><div class="sourceCode R"><pre><code><span><span class="va">stopf</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">domain</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span><span class="op">)</span>, domain <span class="op">=</span> <span class="va">domain</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre><p></p></div>
 <p>Note that <code>potools</code> itself uses just such a wrapper internally to build
 error messages! To extract strings from calls in your package to <code>stopf()</code>
 and mark them for translation, use the argument
-<code>custom_translation_functions</code>:</p><div class="sourceCode R"><pre><code><span class="fu"><a href="../reference/get_message_data.html">get_message_data</a></span><span class="op">(</span>
-  <span class="st">'/path/to/my_package'</span>,
-  custom_translation_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>R <span class="op">=</span> <span class="st">'stopf:fmt|1'</span><span class="op">)</span>
-<span class="op">)</span></code></pre><p></p></div>
+<code>custom_translation_functions</code>:</p><div class="sourceCode R"><pre><code><span><span class="fu"><a href="../reference/get_message_data.html">get_message_data</a></span><span class="op">(</span></span>
+<span>  <span class="st">'/path/to/my_package'</span>,</span>
+<span>  custom_translation_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>R <span class="op">=</span> <span class="st">'stopf:fmt|1'</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre><p></p></div>
 <p>This invocation tells <code><a href="get_message_data.html">get_message_data()</a></code> to look for strings in the
 <code>fmt</code> argument in calls to <code>stopf()</code>. <code>1</code> indicates that <code>fmt</code> is the
 first argument.</p>
@@ -253,7 +275,7 @@ the <code><a href="check_untranslated_src.html">check_untranslated_src()</a></co
 <h3 id="cracked-messages">Cracked messages<a class="anchor" aria-label="anchor" href="#cracked-messages"></a></h3>
 
 
-<p>A cracked message is one like:</p><div class="sourceCode r"><pre><code><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="va">n</span>, <span class="st">" good things and "</span>, <span class="va">m</span>, <span class="st">" bad things."</span><span class="op">)</span></code></pre><p></p></div>
+<p>A cracked message is one like:</p><div class="sourceCode r"><pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="va">n</span>, <span class="st">" good things and "</span>, <span class="va">m</span>, <span class="st">" bad things."</span><span class="op">)</span></span></code></pre><p></p></div>
 <p>In its current state, translators will be asked to translate three messages
 independently:</p><ul><li><p>"There are"</p></li>
 <li><p>"good things and"</p></li>
@@ -261,7 +283,7 @@ independently:</p><ul><li><p>"There are"</p></li>
 </ul><p>The message has been cracked; it might not be possible to translate a string
 as generic as "There are" into many languages -- context is key!</p>
 <p>To keep the context, the error message should instead be build with
-<code>gettextf</code> like so:</p><div class="sourceCode r"><pre><code><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span>domain<span class="op">=</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="st">"There are %d good things and %d bad things."</span><span class="op">)</span><span class="op">)</span></code></pre><p></p></div>
+<code>gettextf</code> like so:</p><div class="sourceCode r"><pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span>domain<span class="op">=</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="st">"There are %d good things and %d bad things."</span><span class="op">)</span><span class="op">)</span></span></code></pre><p></p></div>
 <p>Now there is only one string to translate! Note that this also allows the
 translator to change the word order as they see fit -- for example, in
 Japanese, the grammatical order usually puts the verb last (where in
@@ -347,31 +369,31 @@ that describes what the diagnostic does; it is reproduced in the format
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">pkg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'pkg'</span>, package <span class="op">=</span> <span class="st">'potools'</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># copy to a temporary location to be able to read/write/update below</span></span>
-<span class="r-in"><span class="va">tmp_pkg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"pkg"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp_pkg</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span><span class="va">pkg</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">dirname</a></span><span class="op">(</span><span class="va">tmp_pkg</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">pkg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'pkg'</span>, package <span class="op">=</span> <span class="st">'potools'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># copy to a temporary location to be able to read/write/update below</span></span></span>
+<span class="r-in"><span><span class="va">tmp_pkg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"pkg"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp_pkg</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span><span class="va">pkg</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">dirname</a></span><span class="op">(</span><span class="va">tmp_pkg</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># run translate_package() without any languages</span></span>
-<span class="r-in"><span class="co"># this will generate a .pot template file and en@quot translations (in UTF-8 locales)</span></span>
-<span class="r-in"><span class="co"># we can also pass empty 'diagnostics' to skip the diagnostic step</span></span>
-<span class="r-in"><span class="co"># (skip if gettext isn't available to avoid an error)</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="va">check_potools_sys_reqs</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu">translate_package</span><span class="op">(</span><span class="va">tmp_pkg</span>, diagnostics <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># launches the interactive translation dialog for translations into Estonian:</span></span>
-<span class="r-in"><span class="fu">translate_package</span><span class="op">(</span><span class="va">tmp_pkg</span>, <span class="st">"et_EE"</span>, diagnostics <span class="op">=</span> <span class="cn">NULL</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># cleanup</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">tmp_pkg</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">pkg</span>, <span class="va">tmp_pkg</span><span class="op">)</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># run translate_package() without any languages</span></span></span>
+<span class="r-in"><span><span class="co"># this will generate a .pot template file and en@quot translations (in UTF-8 locales)</span></span></span>
+<span class="r-in"><span><span class="co"># we can also pass empty 'diagnostics' to skip the diagnostic step</span></span></span>
+<span class="r-in"><span><span class="co"># (skip if gettext isn't available to avoid an error)</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="va">check_potools_sys_reqs</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">translate_package</span><span class="op">(</span><span class="va">tmp_pkg</span>, diagnostics <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># launches the interactive translation dialog for translations into Estonian:</span></span></span>
+<span class="r-in"><span><span class="fu">translate_package</span><span class="op">(</span><span class="va">tmp_pkg</span>, <span class="st">"et_EE"</span>, diagnostics <span class="op">=</span> <span class="cn">NULL</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># cleanup</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">tmp_pkg</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">pkg</span>, <span class="va">tmp_pkg</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -383,7 +405,7 @@ that describes what the diagnostic does; it is reproduced in the format
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
     </footer></div>

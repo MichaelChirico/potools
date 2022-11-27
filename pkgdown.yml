@@ -1,11 +1,11 @@
-pandoc: 2.7.3
-pkgdown: 2.0.1.9000
-pkgdown_sha: e25bd0bb6a604ecc60d704c7154f291afbf0dd7b
+pandoc: 2.19.2
+pkgdown: 2.0.6
+pkgdown_sha: ~
 articles:
   custom-diagnostic: custom-diagnostic.html
   developers: developers.html
   translators: translators.html
-last_built: 2022-01-10T01:52Z
+last_built: 2022-11-27T07:41Z
 urls:
   reference: https://michaelchirico.github.io/potools/reference
   article: https://michaelchirico.github.io/potools/articles

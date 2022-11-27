@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Translation for package translators">
 <meta property="og:description" content="potools">
@@ -77,8 +77,9 @@
 
 
 
-<script src="translators_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
-  <main id="main"><div class="page-header">
+
+<div class="row">
+  <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Translation for package translators</h1>
             
       
@@ -89,33 +90,58 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MichaelChirico/potools" class="external-link">potools</a></span><span class="op">)</span></code></pre></div>
-<p>This vignette discusses translation from the perspective of a translator; if you’re a package developer, you might want to start with <code><a href="../articles/developers.html">vignette("developers")</a></code>.</p>
-<p>First of all, thank you for helping out! Providing translations for a package is a fantastic way to contribute and I know that your work is deeply appreciated by the package developer.</p>
-<p>Before you go any further, make sure the that the package has started the process of providing translations by checking that it has <code>po/</code> directory in the package root. If you don’t see that directory, you might want to start by opening an issue to see if the developer is interested in receiving translations.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MichaelChirico/potools" class="external-link">potools</a></span><span class="op">)</span></span></code></pre></div>
+<p>This vignette discusses translation from the perspective of a
+translator; if you’re a package developer, you might want to start with
+<code><a href="../articles/developers.html">vignette("developers")</a></code>.</p>
+<p>First of all, thank you for helping out! Providing translations for a
+package is a fantastic way to contribute and I know that your work is
+deeply appreciated by the package developer.</p>
+<p>Before you go any further, make sure the that the package has started
+the process of providing translations by checking that it has
+<code>po/</code> directory in the package root. If you don’t see that
+directory, you might want to start by opening an issue to see if the
+developer is interested in receiving translations.</p>
 <div class="section level3">
 <h3 id="basic-process">Basic process<a class="anchor" aria-label="anchor" href="#basic-process"></a>
 </h3>
-<p>Before we get into the details let’s review the basic process of creating translations:</p>
+<p>Before we get into the details let’s review the basic process of
+creating translations:</p>
 <ul>
-<li><p>The package developer runs <code><a href="../reference/po_extract.html">po_extract()</a></code> to extract all translatable messages from their R and C code.</p></li>
+<li><p>The package developer runs <code><a href="../reference/po_extract.html">po_extract()</a></code> to extract
+all translatable messages from their R and C code.</p></li>
 <li>
-<p>You call <code><a href="../reference/po_create.html">po_create()</a></code> to generate a <code>.po</code> file for the language you’re translating. A <code>.po</code> file consists of a metadata header and pairs of lines like:</p>
+<p>You call <code><a href="../reference/po_create.html">po_create()</a></code> to generate a <code>.po</code>
+file for the language you’re translating. A <code>.po</code> file
+consists of a metadata header and pairs of lines like:</p>
 <pre><code>msgid "This is the message in English"
 msgstr ""</code></pre>
-<p>You then replace each <code>msgstr</code> with the appropriate translation:</p>
+<p>You then replace each <code>msgstr</code> with the appropriate
+translation:</p>
 <pre><code>msgid "This is the message in English"
 msgstr "This is the message in another language"</code></pre>
 </li>
-<li><p>Finally, either you or the package developer uses <code><a href="../reference/po_compile.html">po_compile()</a></code> to turn the plain text <code>.po</code> files into binary <code>.mo</code> files that are distributed with the package.</p></li>
+<li><p>Finally, either you or the package developer uses
+<code><a href="../reference/po_compile.html">po_compile()</a></code> to turn the plain text <code>.po</code> files
+into binary <code>.mo</code> files that are distributed with the
+package.</p></li>
 </ul>
-<p>The process for updating translations is slightly different, and we’ll come back to it later in the doc.</p>
+<p>The process for updating translations is slightly different, and
+we’ll come back to it later in the doc.</p>
 </div>
 <div class="section level2">
 <h2 id="translation-basics">Translation basics<a class="anchor" aria-label="anchor" href="#translation-basics"></a>
 </h2>
-<p>As a translator, you’ll work primarily with <code>.po</code> files. There’s one (or two) <code>.po</code> file(s) for each language that lives in the <code>po/</code> directory. In the same directory, you’ll also see a <code>.pot</code> file — that’s a template file that contains the list of all translatable strings in the package and is used to generate the <code>.po</code> files for each language.</p>
-<p>Get started by creating a <code>.po</code> for your language by running <code>potools::po_create("{language code}")</code>. Next, open that file with your favourite text editor. At the top of the file you’ll see some metadata that looks something like this:</p>
+<p>As a translator, you’ll work primarily with <code>.po</code> files.
+There’s one (or two) <code>.po</code> file(s) for each language that
+lives in the <code>po/</code> directory. In the same directory, you’ll
+also see a <code>.pot</code> file — that’s a template file that contains
+the list of all translatable strings in the package and is used to
+generate the <code>.po</code> files for each language.</p>
+<p>Get started by creating a <code>.po</code> for your language by
+running <code>potools::po_create("{language code}")</code>. Next, open
+that file with your favourite text editor. At the top of the file you’ll
+see some metadata that looks something like this:</p>
 <pre><code>msgid ""
 msgstr ""
 "Project-Id-Version: potools 0.2.3\n"
@@ -129,31 +155,81 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: potools 0.2.3\n"</code></pre>
-<p>Begin by updating <code>Last-Translator</code> to your email address; this tells the developer how to reach you (e.g. to ask if you might update your translations when a new version of the package comes out).</p>
-<p>The rest of the file consist of pairs of <code>msgid</code> and <code>msgstr</code> that initially look like this:</p>
+<p>Begin by updating <code>Last-Translator</code> to your email address;
+this tells the developer how to reach you (e.g. to ask if you might
+update your translations when a new version of the package comes
+out).</p>
+<p>The rest of the file consist of pairs of <code>msgid</code> and
+<code>msgstr</code> that initially look like this:</p>
 <pre><code>#: translate_package.R:66
 msgid "Running message diagnostics..."
 msgstr ""</code></pre>
-<p>The <code>msgid</code> is the string that appears in the R source code; it could be in an error, warning, message, or just printed to the console. The <code>msgstr</code> is the translated equivalent and it’s your job as a translator to fill out <code>msgstr</code> with the equivalent in your language:</p>
+<p>The <code>msgid</code> is the string that appears in the R source
+code; it could be in an error, warning, message, or just printed to the
+console. The <code>msgstr</code> is the translated equivalent and it’s
+your job as a translator to fill out <code>msgstr</code> with the
+equivalent in your language:</p>
 <pre><code>#: translate_package.R:66
 msgid "Running message diagnostics..."
 msgstr "メッセージ診断中。。。"</code></pre>
-<p>That’s basically it! Just work through the file filling in the translations one by one. If there’s not quite enough context to figure out the best translation you can either look at the source code (using the file number &amp; line reference in the line above <code>msgid</code>) or contact the developer for clarification. (If a message is challenging to translate, it often indicates that the English version might be suboptimal, so most developers will appreciate you reaching out).</p>
-<p>Next we’ll go through the details of a few message variations you might come across, show you how to try out your work, and then finish up by discussing a few extra details that arise when updating the translations for a package, rather than starting from scratch.</p>
+<p>That’s basically it! Just work through the file filling in the
+translations one by one. If there’s not quite enough context to figure
+out the best translation you can either look at the source code (using
+the file number &amp; line reference in the line above
+<code>msgid</code>) or contact the developer for clarification. (If a
+message is challenging to translate, it often indicates that the English
+version might be suboptimal, so most developers will appreciate you
+reaching out).</p>
+<p>Next we’ll go through the details of a few message variations you
+might come across, show you how to try out your work, and then finish up
+by discussing a few extra details that arise when updating the
+translations for a package, rather than starting from scratch.</p>
 <div class="section level3">
 <h3 id="picking-a-domain-for-diasporic-languages">Picking a domain for diasporic languages<a class="anchor" aria-label="anchor" href="#picking-a-domain-for-diasporic-languages"></a>
 </h3>
-<p>What domain should you use when translating Spanish? There’s <code>es_AR</code>, <code>es_BO</code>, <code>es_CL</code>, <code>es_DO</code>, <code>es_HN</code>, … Do you really need to provide a separate translation for Nicaraguan (<code>es_NI</code>) users? No, but you could.</p>
-<p>Typically, you are best off creating one set of translations under the language’s general domain (here, <code>es</code>). Once translations exist for <code>es</code>, users in all of the more specific locales will see the messages for <code>es</code> whenever they exist. If you really do want to provide more regionally-specific error messages (awesome!), you can either (1) create a whole new set of translations for each region or (2) write translations <em>only for the region-specific messages</em>. The latter is how R handles messages that differ on British/American spelling, for example.</p>
-<p>Say a user is running in <code>es_GT</code> and triggers an error. R will first look for a translation into <code>es_GT</code>; if none is defined, it will look for a translation into <code>es</code>. If none is defined again, it will finally fall back to the package’s default language (i.e., whatever language is written in the source code, usually English).</p>
-<p>Note also the advice given in the R Installation and Administration manual (also cited below) – if you are writing Spanish translations, a typical package should use <code>language = "es"</code> to generate Spanish translations for <em>all</em> Spanish domains. If you want to add more regional flair to your messaging, you can do so through supplemental <code>.po</code> files. For example, you can add some Argentinian messages to <code>es_AR</code>; users running R in the <code>es_AR</code> locale will see messages specifically written for <code>es_AR</code> first; absent that, the <code>es</code> message will be shown; and absent that, the default message (i.e., in the language written in the source code, usually English).</p>
-<p>Chinese is a slightly different case – typically, the <code>zh_CN</code> domain is used to write with simplified characters while <code>zh_TW</code> is used for traditional characters. In principal you could leverage <code>zh_TW</code> for Taiwanisms and <code>zh_HK</code> for Hongkieisms.</p>
+<p>What domain should you use when translating Spanish? There’s
+<code>es_AR</code>, <code>es_BO</code>, <code>es_CL</code>,
+<code>es_DO</code>, <code>es_HN</code>, … Do you really need to provide
+a separate translation for Nicaraguan (<code>es_NI</code>) users? No,
+but you could.</p>
+<p>Typically, you are best off creating one set of translations under
+the language’s general domain (here, <code>es</code>). Once translations
+exist for <code>es</code>, users in all of the more specific locales
+will see the messages for <code>es</code> whenever they exist. If you
+really do want to provide more regionally-specific error messages
+(awesome!), you can either (1) create a whole new set of translations
+for each region or (2) write translations <em>only for the
+region-specific messages</em>. The latter is how R handles messages that
+differ on British/American spelling, for example.</p>
+<p>Say a user is running in <code>es_GT</code> and triggers an error. R
+will first look for a translation into <code>es_GT</code>; if none is
+defined, it will look for a translation into <code>es</code>. If none is
+defined again, it will finally fall back to the package’s default
+language (i.e., whatever language is written in the source code, usually
+English).</p>
+<p>Note also the advice given in the R Installation and Administration
+manual (also cited below) – if you are writing Spanish translations, a
+typical package should use <code>language = "es"</code> to generate
+Spanish translations for <em>all</em> Spanish domains. If you want to
+add more regional flair to your messaging, you can do so through
+supplemental <code>.po</code> files. For example, you can add some
+Argentinian messages to <code>es_AR</code>; users running R in the
+<code>es_AR</code> locale will see messages specifically written for
+<code>es_AR</code> first; absent that, the <code>es</code> message will
+be shown; and absent that, the default message (i.e., in the language
+written in the source code, usually English).</p>
+<p>Chinese is a slightly different case – typically, the
+<code>zh_CN</code> domain is used to write with simplified characters
+while <code>zh_TW</code> is used for traditional characters. In
+principal you could leverage <code>zh_TW</code> for Taiwanisms and
+<code>zh_HK</code> for Hongkieisms.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="message-variations">Message variations<a class="anchor" aria-label="anchor" href="#message-variations"></a>
 </h2>
-<p>The following sections describe four important message variations:</p>
+<p>The following sections describe four important message
+variations:</p>
 <ul>
 <li>Messages that use <code>glue()</code>
 </li>
@@ -166,62 +242,87 @@ msgstr "メッセージ診断中。。。"</code></pre>
 <h3 id="glue">
 <code>glue()</code><a class="anchor" aria-label="anchor" href="#glue"></a>
 </h3>
-<p>You can tell if message uses <a href="https://glue.tidyverse.org" class="external-link">glue</a> because it will contain pairs of braces: <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Also, the package should have a dependency on &lt;code&gt;glue&lt;/code&gt;, probably in Imports, but maybe in Depends or Suggests.&lt;/p&gt;"><sup>1</sup></a>. glue evaluates any R code in between <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code> and inserts the results into the string:</p>
+<p>You can tell if message uses <a href="https://glue.tidyverse.org" class="external-link">glue</a> because it will contain pairs
+of braces: <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Also, the package should have a dependency on
+&lt;code&gt;glue&lt;/code&gt;, probably in Imports, but maybe in Depends or
+Suggests.&lt;/p&gt;"><sup>1</sup></a>. glue evaluates any R code in between
+<code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code> and inserts the results into the string:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">name</span> <span class="op">&lt;-</span> <span class="st">"Michael"</span>
-<span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">"Hi {name}!"</span><span class="op">)</span>
-<span class="co">#&gt; Hi Michael!</span></code></pre></div>
-<p>The code above would generate the following in the <code>.po</code> file:</p>
-<pre><code><span class="va">msgid</span><span class="op">:</span> <span class="st">"Hi {name}!"</span>
-<span class="va">msgstr</span><span class="op">:</span> <span class="st">""</span></code></pre>
-<p>The main thing to remember when translating glue strings is not to translate the contents of <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code> since that is the name of a variable in the code:</p>
-<pre><code><span class="va">msgid</span><span class="op">:</span> <span class="st">"Hi {name}!"</span>
-<span class="va">msgstr</span><span class="op">:</span> <span class="st">"こんにちは {name}！"</span></code></pre>
+<code class="sourceCode R"><span><span class="va">name</span> <span class="op">&lt;-</span> <span class="st">"Michael"</span></span>
+<span><span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">"Hi {name}!"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Hi Michael!</span></span></code></pre></div>
+<p>The code above would generate the following in the <code>.po</code>
+file:</p>
+<pre><code><span><span class="va">msgid</span><span class="op">:</span> <span class="st">"Hi {name}!"</span></span>
+<span><span class="va">msgstr</span><span class="op">:</span> <span class="st">""</span></span></code></pre>
+<p>The main thing to remember when translating glue strings is not to
+translate the contents of <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code> since that is the name of a
+variable in the code:</p>
+<pre><code><span><span class="va">msgid</span><span class="op">:</span> <span class="st">"Hi {name}!"</span></span>
+<span><span class="va">msgstr</span><span class="op">:</span> <span class="st">"こんにちは {name}！"</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="sprintf">
 <code>sprintf()</code><a class="anchor" aria-label="anchor" href="#sprintf"></a>
 </h3>
-<p>You can tell if a message uses <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> because it will contain a format specifier like <code>%s</code> (a string), <code>%i</code> (an integer), or <code>%f</code> (a floating point number). When called, <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> replaces these placeholders with values:</p>
+<p>You can tell if a message uses <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> because it will
+contain a format specifier like <code>%s</code> (a string),
+<code>%i</code> (an integer), or <code>%f</code> (a floating point
+number). When called, <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code> replaces these placeholders
+with values:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">name</span> <span class="op">&lt;-</span> <span class="st">"Michael"</span>
-<span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Hi %s!"</span>, <span class="va">name</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Hi Michael!"</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">name</span> <span class="op">&lt;-</span> <span class="st">"Michael"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Hi %s!"</span>, <span class="va">name</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Hi Michael!"</span></span></code></pre></div>
 <p>This would generate the following <code>.po</code>:</p>
-<pre><code><span class="va">msgid</span><span class="op">:</span> <span class="st">"Hi %s!"</span>
-<span class="va">msgstr</span><span class="op">:</span> <span class="st">""</span></code></pre>
+<pre><code><span><span class="va">msgid</span><span class="op">:</span> <span class="st">"Hi %s!"</span></span>
+<span><span class="va">msgstr</span><span class="op">:</span> <span class="st">""</span></span></code></pre>
 <p>Which (if you spoke Japanese), you might translate to:</p>
-<pre><code><span class="va">msgid</span><span class="op">:</span> <span class="st">"Hi %s!"</span>
-<span class="va">msgstr</span><span class="op">:</span> <span class="st">"こんにちは %s！"</span></code></pre>
-<p>If there are multiple interpolated strings, and you need to change their order to make grammatical sense in your language, you can put <code>1$</code>, <code>2$</code> etc. after the <code>%</code> to refer to variable in that position.</p>
+<pre><code><span><span class="va">msgid</span><span class="op">:</span> <span class="st">"Hi %s!"</span></span>
+<span><span class="va">msgstr</span><span class="op">:</span> <span class="st">"こんにちは %s！"</span></span></code></pre>
+<p>If there are multiple interpolated strings, and you need to change
+their order to make grammatical sense in your language, you can put
+<code>1$</code>, <code>2$</code> etc. after the <code>%</code> to refer
+to variable in that position.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%s %s %s"</span>, <span class="st">"first"</span>, <span class="st">"second"</span>, <span class="st">"third"</span><span class="op">)</span>
-<span class="co">#&gt; [1] "first second third"</span>
-<span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%2$s %1$s %3$s"</span>, <span class="st">"first"</span>, <span class="st">"second"</span>, <span class="st">"third"</span><span class="op">)</span>
-<span class="co">#&gt; [1] "second first third"</span></code></pre></div>
-<p>This can be hard to puzzle out and confusing to read, which is why we recommend that package developers use <code>glue()</code>.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%s %s %s"</span>, <span class="st">"first"</span>, <span class="st">"second"</span>, <span class="st">"third"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "first second third"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%2$s %1$s %3$s"</span>, <span class="st">"first"</span>, <span class="st">"second"</span>, <span class="st">"third"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "second first third"</span></span></code></pre></div>
+<p>This can be hard to puzzle out and confusing to read, which is why we
+recommend that package developers use <code>glue()</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="multi-line-messages">Multi-line messages<a class="anchor" aria-label="anchor" href="#multi-line-messages"></a>
 </h3>
-<p>If the message is very long, it might get wrapped across multiple lines:</p>
+<p>If the message is very long, it might get wrapped across multiple
+lines:</p>
 <pre><code>msgid ""
 "Reproducing these messages here for your reference since they might still "
 "provide some utility."
 msgstr ""</code></pre>
-<p>You don’t need to worry about preserving the line breaks, since the translated version might be shorter or longer than the English version. Just note that each line must start and end with <code>"</code> and that if it doesn’t all fit on one line, the first <code>msgstr</code> should be <code>""</code>.</p>
+<p>You don’t need to worry about preserving the line breaks, since the
+translated version might be shorter or longer than the English version.
+Just note that each line must start and end with <code>"</code> and that
+if it doesn’t all fit on one line, the first <code>msgstr</code> should
+be <code>""</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="plurals">Plurals<a class="anchor" aria-label="anchor" href="#plurals"></a>
 </h3>
-<p>Messages that vary based on some count have slightly different form. They begin with the English singular and plural forms:</p>
+<p>Messages that vary based on some count have slightly different form.
+They begin with the English singular and plural forms:</p>
 <pre><code>msgid "There is {n} cow in the field"
 msgid_plural "There are {n} cows in the field"</code></pre>
-<p>Then are followed by the forms for your language. Depending on your language, you will need to provide somewhere between 1 and 6 translations. For example, Japanese only needs a single form, because the rest of the sentence doesn’t vary based on the number of cows:</p>
+<p>Then are followed by the forms for your language. Depending on your
+language, you will need to provide somewhere between 1 and 6
+translations. For example, Japanese only needs a single form, because
+the rest of the sentence doesn’t vary based on the number of cows:</p>
 <pre><code>msgid "There is {n} cow in the field"
 msgid_plural "There are {n} cows in the field"
 msgstr[0]: 牧草地に{n}頭牛がいます</code></pre>
-<p>Slovenian has four forms (1, 2, 3-4, everything else) so gets four entries:</p>
+<p>Slovenian has four forms (1, 2, 3-4, everything else) so gets four
+entries:</p>
 <pre><code>msgid "There is {n} cow in the field"
 msgid_plural "There are {n} cows in the field"
 msgstr[0]: Na polju je {n} krava
@@ -229,40 +330,68 @@ msgstr[1]: Na polju sta {n} kravi
 msgstr[2]: Na polju so {n} krave
 msgstr[3]: Na polju je {n} krav</code></pre>
 <p>(Note the forms are zero-indexed, so they start at 0, not 1.)</p>
-<p>The rules for converting the number to the <code>msgid</code> index are expressed using C-code and can be found at the top of the <code>.po</code> file (look for “plural-forms”). It’s a little tricky to go from the C code to a human description of the cases, but if you’re a native speaker you’re hopefully already familiar with the basic breakdown.</p>
+<p>The rules for converting the number to the <code>msgid</code> index
+are expressed using C-code and can be found at the top of the
+<code>.po</code> file (look for “plural-forms”). It’s a little tricky to
+go from the C code to a human description of the cases, but if you’re a
+native speaker you’re hopefully already familiar with the basic
+breakdown.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="other-issues">Other issues<a class="anchor" aria-label="anchor" href="#other-issues"></a>
 </h2>
-<p>Technical terms are par for the course in R packages; showing users similar terms for the same concept might lead to needless confusion. R recommends using the <a href="https://www.isi-web.org/publications/glossary-of-statistical-terms" class="external-link">ISI Multilingual Glossary of Statistical Terms</a> to help overcome this issue.</p>
+<p>Technical terms are par for the course in R packages; showing users
+similar terms for the same concept might lead to needless confusion. R
+recommends using the <a href="https://www.isi-web.org/publications/glossary-of-statistical-terms" class="external-link">ISI
+Multilingual Glossary of Statistical Terms</a> to help overcome this
+issue.</p>
 </div>
 <div class="section level2">
 <h2 id="trying-out-your-work">Trying out your work<a class="anchor" aria-label="anchor" href="#trying-out-your-work"></a>
 </h2>
-<p>If you know how to use the package, you can try out your translations. There are three important steps:</p>
+<p>If you know how to use the package, you can try out your
+translations. There are three important steps:</p>
 <ol style="list-style-type: decimal">
-<li>Set the LANGUAGE environment variable to the language you’re translating: <code>Sys.setenv(LANGUAGE = "{language code}")</code>. (You only need to do this once per session).</li>
-<li>Compile the plain text <code>.po</code> file you’ve been editing to the binary <code>.mo</code> file that R uses by running <code><a href="../reference/po_compile.html">potools::po_compile()</a></code>.</li>
-<li>Re-load (with <code>devtools::load_all()</code>) or re-install the package (e.g. using RStudio’s “Install and restart” button).</li>
+<li>Set the LANGUAGE environment variable to the language you’re
+translating: <code>Sys.setenv(LANGUAGE = "{language code}")</code>. (You
+only need to do this once per session).</li>
+<li>Compile the plain text <code>.po</code> file you’ve been editing to
+the binary <code>.mo</code> file that R uses by running
+<code><a href="../reference/po_compile.html">potools::po_compile()</a></code>.</li>
+<li>Re-load (with <code>devtools::load_all()</code>) or re-install the
+package (e.g. using RStudio’s “Install and restart” button).</li>
 </ol>
-<p>You can then work with the package as you usually would and any messages you’ve translated should appear in your language.</p>
+<p>You can then work with the package as you usually would and any
+messages you’ve translated should appear in your language.</p>
 </div>
 <div class="section level2">
 <h2 id="updating-a-package">Updating a package<a class="anchor" aria-label="anchor" href="#updating-a-package"></a>
 </h2>
-<p>So far we’ve assumed you’re providing the first set of translations for a package. But another common scenario is updating the translations for a new release of the package. To get to this point, the developer will have updated the <code>.pot</code> file and all of the <code>.po</code> files. There are three cases:</p>
+<p>So far we’ve assumed you’re providing the first set of translations
+for a package. But another common scenario is updating the translations
+for a new release of the package. To get to this point, the developer
+will have updated the <code>.pot</code> file and all of the
+<code>.po</code> files. There are three cases:</p>
 <ul>
-<li><p>A message has been <strong>added</strong>: the <code>msgstr</code> is empty, and you’ll need to fill it in like for the initial translation.</p></li>
-<li><p>A message has been <strong>removed</strong>: old translations are moved to the bottom of the file (so you can still refer to them if they’re needed), and marked as deprecated (using the ??? symbol).</p></li>
+<li><p>A message has been <strong>added</strong>: the
+<code>msgstr</code> is empty, and you’ll need to fill it in like for the
+initial translation.</p></li>
+<li><p>A message has been <strong>removed</strong>: old translations are
+moved to the bottom of the file (so you can still refer to them if
+they’re needed), and marked as deprecated (using the ???
+symbol).</p></li>
 <li>
-<p>A message has <strong>changed</strong>: if it’s a big change, it’ll be treated like an addition and a deletion, but if it’s a small change it might get marked as fuzzy.</p>
+<p>A message has <strong>changed</strong>: if it’s a big change,
+it’ll be treated like an addition and a deletion, but if it’s a small
+change it might get marked as fuzzy.</p>
 <pre><code>#: build-news.R:285
 #, fuzzy
 msgid "CRAN release: %s"
 msgstr "Versión en CRAN %s"</code></pre>
 <p>TODO: show how the old message shows up.</p>
-<p>You’ll need to double check the translation and remove “fuzzy” once you’re done.</p>
+<p>You’ll need to double check the translation and remove “fuzzy” once
+you’re done.</p>
 </li>
 </ul>
 </div>
@@ -280,7 +409,7 @@ msgstr "Versión en CRAN %s"</code></pre>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
     </footer>

@@ -47,7 +47,7 @@ get_po_messages <- function(po_file) {
     stopf("Found %d msgid which differs from %d msgstr; corrupted .po file", n_singular, length(msgstr_start))
   }
 
-  if ((n_plural == 0L && n_msgstr_plural > 0L) || (n_plural > 0 && n_msgstr_plural %% n_plural != 0L)) {
+  if ((n_plural == 0L && n_msgstr_plural > 0L) || (n_plural > 0L && n_msgstr_plural %% n_plural != 0L)) {
     stopf(
       "Found %d msgid_plural, which does not evenly divide %d msgstr[n]; corrupted .po file",
       n_msgstr_plural, n_plural
@@ -55,7 +55,7 @@ get_po_messages <- function(po_file) {
   }
   # pre-calculate which lines contain message continuations. Append
   #   FALSE for a while loop to terminate gracefully on hitting file end
-  is_msg_continuation = c(grepl('^"', po_lines), FALSE)
+  is_msg_continuation = c(startsWith(po_lines, '"'), FALSE)
 
   po_data = data.table(
     message_source = message_source,
@@ -88,7 +88,7 @@ get_po_messages <- function(po_file) {
     end = find_msg_end(start)
     set(po_data, msg_j, 'msgid', build_msg(start, end, 'msgid'))
 
-    set(po_data, msg_j, 'fuzzy', as.integer(start != 1L && grepl("^#, fuzzy", po_lines[start-1L])))
+    set(po_data, msg_j, 'fuzzy', as.integer(start != 1L && startsWith(po_lines[start - 1L], "#, fuzzy")))
 
     start = end + 1L
     end = find_msg_end(start)
@@ -102,7 +102,7 @@ get_po_messages <- function(po_file) {
     end = find_msg_end(start)
     msg1 = build_msg(start, end, 'msgid')
 
-    set(po_data, msg_j, 'fuzzy', as.integer(start != 1L && grepl("^#, fuzzy", po_lines[start-1L])))
+    set(po_data, msg_j, 'fuzzy', as.integer(start != 1L && startsWith(po_lines[start - 1L], "#, fuzzy")))
 
     start = end + 1L
     end = find_msg_end(start)
@@ -112,7 +112,7 @@ get_po_messages <- function(po_file) {
 
     start = end + 1L
     msgstr_plural = character()
-    while (start <= po_length && grepl('^msgstr\\[', po_lines[start])) {
+    while (start <= po_length && startsWith(po_lines[start], 'msgstr[')) {
       end = find_msg_end(start)
       msgstr_plural = c(msgstr_plural, build_msg(start, end, 'msgstr\\[\\d+\\]'))
       start = end + 1L

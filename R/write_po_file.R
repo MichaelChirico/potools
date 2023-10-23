@@ -248,7 +248,7 @@ write_po_file <- function(
   po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
 
   # tools::xgettext2pot() tries to make the entries' whitespace align, which xgettext doesn't do
-  if (use_base_rules & po_data$message_source[1L] == "R") {
+  if (use_base_rules && po_data$message_source[1L] == "R") {
     plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d]    "%s"'
   } else {
@@ -272,8 +272,8 @@ write_po_file <- function(
       msgid2 = vapply(msgid_plural, `[`, character(1L), 2L)
       msgid_plural = vapply(
         msgstr_plural[!singular_idx],
-        function(msgstr) paste(
-          sprintf(msgstr_fmt, seq_along(msgstr)-1L, msgstr),
+        function(msgstr) paste( # nolint: brace_linter. TODO(lintr/2240): remove nolint.
+          sprintf(msgstr_fmt, seq_along(msgstr) - 1L, msgstr),
           collapse='\n'
         ),
         character(1L)
@@ -295,7 +295,7 @@ wrap_msg = function(key, value, width=Inf, wrap_at_newline = TRUE) {
   # xgettext always wraps at a newline (even if the whole message fits inside 'width')
   wrap_idx <- nchar(value) + nchar(key) + 3L > width
   if (wrap_at_newline) {
-     wrap_idx <- wrap_idx | grepl("[\\]n.", value)
+    wrap_idx <- wrap_idx | grepl("[\\]n.", value)
   }
   out[!wrap_idx] = sprintf('%s "%s"', key, value[!wrap_idx])
   out[wrap_idx] = sprintf('%s ""\n%s', key, wrap_strings(value[wrap_idx], width))
@@ -326,7 +326,7 @@ wrap_strings = function(str, width) {
       sub_str = character(length(newline_indices) - 1L)
       for (jj in seq_along(sub_str)) {
         # -2 to exclude \n
-        sub_str[jj] = substr(str[ii], newline_indices[jj]+1L, newline_indices[jj+1L]-2L)
+        sub_str[jj] = substr(str[ii], newline_indices[jj] + 1L, newline_indices[jj + 1L] - 2L)
       }
       sub_boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|[^\'](?=\'?%)', sub_str, perl = TRUE)
       sub_str_widths = nchar(sub_str)

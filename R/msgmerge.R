@@ -78,7 +78,7 @@ update_en_quot_mo_files <- function(dir, verbose) {
 
 # https://www.gnu.org/software/gettext/manual/html_node/msginit-Invocation.html
 # https://docs.oracle.com/cd/E36784_01/html/E36870/msginit-1.html#scrolltoc
-run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
+run_msginit <- function(po_path, pot_path, locale, width = 80L, verbose = TRUE) {
   check_potools_sys_reqs("msginit")
   args <- c(
     "-i", shQuote(path.expand(pot_path)),
@@ -98,4 +98,3 @@ run_msginit <- function(po_path, pot_path, locale, width = 80, verbose = TRUE) {
   }
   return(invisible())
 }
-

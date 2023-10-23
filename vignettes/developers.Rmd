@@ -79,10 +79,10 @@ messagef <- function(fmt, ..., appendLF = TRUE) {
 
 warningf <- function(fmt, ..., immediate. = FALSE, noBreaks. = FALSE) {
   msg <- gettextf(fmt, ..., domain = "R-{mypackage}")
-  warning(msg, 
-    domain = NA, 
-    call. = FALSE, 
-    immediate. = immediate., 
+  warning(msg,
+    domain = NA,
+    call. = FALSE,
+    immediate. = immediate.,
     noBreaks. = noBreaks.
   )
 }
@@ -288,8 +288,8 @@ So you might be tempted to construct a sentence like this:
 ```{r}
 cows <- function(n) {
   if (n == 1) {
-    paste0(n, " cow") 
-  } else { 
+    paste0(n, " cow")
+  } else {
     paste0(n, " cows")
   }
 }
@@ -323,7 +323,7 @@ So we need to use a different helper: `ngettext(n, singular, plural)`:
 
 ```{r}
 field_cows <- function(n) {
-  glue(ngettxt(n,
+  glue(ngettext(n,
     "There is {n} cow in the field",
     "There are {n} cows in the field"
   ))

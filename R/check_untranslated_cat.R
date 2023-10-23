@@ -52,7 +52,7 @@
 #' unlink(tmp_pkg, recursive = TRUE)
 #' rm(pkg, tmp_pkg, message_data)
 #' @export
-check_untranslated_cat <- function (message_data) {
+check_untranslated_cat <- function(message_data) {
   if (!is.data.table(message_data)) message_data = as.data.table(message_data)
   # not iron-clad but it's a good first pass
   cat_calls = unique(

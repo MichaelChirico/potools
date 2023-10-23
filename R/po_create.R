@@ -17,7 +17,6 @@
 #' @inheritParams po_extract
 #' @export
 po_create <- function(languages, dir = ".", verbose = !is_testing()) {
-  package <- get_desc_data(dir, "Package")
   po_files <- po_language_files(languages, dir)
 
   for (ii in seq_len(nrow(po_files))) {
@@ -48,7 +47,7 @@ pot_paths <- function(dir, type, package = NULL) {
   if (is.null(package)) {
     package <- get_desc_data(dir, "Package")
   }
-  if (length(type) == 0) {
+  if (length(type) == 0L) {
     character()
   } else {
     file.path(dir, "po", paste0(po_prefix(type), package, ".pot"))

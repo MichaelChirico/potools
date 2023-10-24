@@ -15,8 +15,8 @@ test_that("get_po_metadata() returns 0 rows if no .po fles", {
   expect_equal(nrow(meta), 0)
 })
 
-test_that("po_compile() can handle UTF-8 msgstr", { temp <-
-  local_test_package(
+test_that("po_compile() can handle UTF-8 msgstr", { 
+  temp <- local_test_package(
     `R/foo.R` = "foo <- function() message('Hello!')"
   )
 

@@ -168,10 +168,10 @@ them, you’ll need to copy the definitions from below:</p>
 <span></span>
 <span><span class="va">warningf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">immediate.</span> <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">noBreaks.</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, domain <span class="op">=</span> <span class="st">"R-{mypackage}"</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning</a></span><span class="op">(</span><span class="va">msg</span>, </span>
-<span>    domain <span class="op">=</span> <span class="cn">NA</span>, </span>
-<span>    call. <span class="op">=</span> <span class="cn">FALSE</span>, </span>
-<span>    immediate. <span class="op">=</span> <span class="va">immediate.</span>, </span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning</a></span><span class="op">(</span><span class="va">msg</span>,</span>
+<span>    domain <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>    call. <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    immediate. <span class="op">=</span> <span class="va">immediate.</span>,</span>
 <span>    noBreaks. <span class="op">=</span> <span class="va">noBreaks.</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -426,8 +426,8 @@ construct a sentence like this:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>, <span class="st">" cow"</span><span class="op">)</span> </span>
-<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>, <span class="st">" cow"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>, <span class="st">" cows"</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
@@ -460,7 +460,7 @@ and plural, other languages have different forms like singular (1), dual
 <code>ngettext(n, singular, plural)</code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu">glue</span><span class="op">(</span><span class="fu">ngettxt</span><span class="op">(</span><span class="va">n</span>,</span>
+<span>  <span class="fu">glue</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/gettext.html" class="external-link">ngettext</a></span><span class="op">(</span><span class="va">n</span>,</span>
 <span>    <span class="st">"There is {n} cow in the field"</span>,</span>
 <span>    <span class="st">"There are {n} cows in the field"</span></span>
 <span>  <span class="op">)</span><span class="op">)</span></span>

@@ -18,6 +18,9 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
   if (is_base_package) {
     params$package <- "R"
     params$bugs <- "bugs.r-project.org"
+    # #299: msg* commands work best with charset=UTF-8,
+    #   but the 'base' .pot files leave it unsepecified (CHARSET).
+    if (template) params$charset <- "CHARSET"
   }
 
   if (template) {
@@ -248,7 +251,7 @@ write_po_file <- function(
   po_data[ , 'msgid_plural' := strsplit(msgid_plural, "|||", fixed = TRUE)]
 
   # tools::xgettext2pot() tries to make the entries' whitespace align, which xgettext doesn't do
-  if (use_base_rules & po_data$message_source[1L] == "R") {
+  if (use_base_rules && po_data$message_source[1L] == "R") {
     plural_fmt <- '\n%s%smsgid        "%s"\nmsgid_plural "%s"\n%s'
     msgstr_fmt <- 'msgstr[%d]    "%s"'
   } else {
@@ -403,7 +406,7 @@ po_metadata = function(package='', version='', language='', author='', email='',
       is.null(copyright) || is.character(copyright) || is.list(copyright)
   )
   pm = c(as.list(environment()), list(...))
-  pm$charset <- "UTF-8"
+  if (is.null(pm$charset)) pm$charset <- "UTF-8"
   if (is.null(pm$pot_timestamp)) pm$pot_timestamp <- Sys.time()
   if (is.null(pm$po_timestamp)) pm$po_timestamp <- pm$pot_timestamp
   if (is.null(pm$language_team)) pm$language_team <- pm$language
@@ -420,7 +423,6 @@ format.po_metadata = function(x, template = FALSE, use_plurals = FALSE, ...) {
     x$email = "EMAIL@ADDRESS"
     x$language = ''
     x$language_team = "LANGUAGE <LL@li.org>"
-    x$charset = 'CHARSET'
   }
   if (is.character(x$copyright)) {
     x$copyright = list(years = format(x$pot_timestamp, "%Y"), holder = x$copyright)

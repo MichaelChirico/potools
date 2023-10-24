@@ -11,7 +11,11 @@ test_that("po_explain_plurals works as expected", {
   expect_error(po_explain_plurals(1L), "Supply one language code", fixed=TRUE)
   expect_error(po_explain_plurals(letters), "Supply one language code", fixed=TRUE)
   expect_error(po_explain_plurals("en", "a"), "If supplied, `index` should be a single non-negative number", fixed=TRUE)
-  expect_error(po_explain_plurals("en", 1:10), "If supplied, `index` should be a single non-negative number", fixed=TRUE)
+  expect_error(
+    po_explain_plurals("en", 1:10),
+    "If supplied, `index` should be a single non-negative number",
+    fixed=TRUE
+  )
   expect_error(po_explain_plurals("en", -1), "If supplied, `index` should be a single non-negative number", fixed=TRUE)
 
   expect_error(po_explain_plurals("xx"), "not a known language", fixed=TRUE)

@@ -1,6 +1,6 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
 #   as R objects, do so from the parse data given by utils::getParseData().
-get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = FALSE, style = c("base", "explicit")) {
+get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = FALSE, style = c("base", "explicit")) {
   style <- match.arg(style)
 
   expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
@@ -104,7 +104,7 @@ get_r_messages <- function (dir, custom_translation_functions = NULL, is_base = 
   msg_files = unique(msg$file)
   if (is_base) {
     paths <- file.path(dir, 'R', msg_files)
-    share_idx <- grepl('^share/R', msg_files)
+    share_idx <- startsWith(msg_files, 'share/R')
     paths[share_idx] <- file.path(dir, '../../..', msg_files[share_idx])
   } else {
     paths <- file.path(dir, 'R', msg_files)
@@ -183,6 +183,7 @@ parse_r_files = function(dir, is_base) {
     if (!dir.exists(file.path(r_share_dir, 'R'))) {
       # templated to share with src-side message
       stopf(
+        # nolint next: line_length_linter.
         "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.",
         "share/R/REMOVE.R"
       )
@@ -208,6 +209,7 @@ parse_r_keywords = function(spec) {
   if (ncol(keyval) != 2L) {
     idx <- if (ncol(keyval) == 1L) seq_along(spec) else which(is.na(keyval$V2))
     stopf(
+      # nolint next: line_length_linter.
       "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
       toString(spec[idx])
     )
@@ -219,6 +221,7 @@ parse_r_keywords = function(spec) {
   dots_idx = grepl("^[.]{3}[\\](?:[a-zA-Z0-9._]+,)*[a-zA-Z0-9._]+$", keyval$V2)
   if (any(idx <- !named_idx & !dots_idx & !plural_idx)) {
     stopf(
+      # nolint next: line_length_linter.
       "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
       toString(spec[idx])
     )
@@ -228,7 +231,7 @@ parse_r_keywords = function(spec) {
     singular = list(
       dots = lapply(
         which(dots_idx),
-        function(ii) list(
+        function(ii) list( # nolint: brace_linter.
           fname = keyval$V1[ii],
           excluded_args = strsplit(gsub("^[.]{3}[\\]", "", keyval$V2[ii]), ",", fixed = TRUE)[[1L]]
         )
@@ -305,7 +308,9 @@ domain_fmt_funs <- function(use_conditions = TRUE) {
 NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
 
 # for functions (e.g. domain_dots_funs) where we extract strings from ... arguments
-get_dots_strings = function(expr_data, funs, arg_names, exclude = c('gettext', 'gettextf', 'ngettext'), recursive = TRUE) {
+get_dots_strings = function(expr_data, funs, arg_names,
+                            exclude = c('gettext', 'gettextf', 'ngettext'),
+                            recursive = TRUE) {
   call_neighbors = get_call_args(expr_data, funs)
   call_neighbors = drop_suppressed_and_named(call_neighbors, expr_data, arg_names)
 
@@ -344,8 +349,9 @@ get_named_arg_strings = function(expr_data, fun, args, recursive = FALSE, plural
       idx = shift(token, fill = '') == 'SYMBOL_SUB' & shift(text, fill = '') %chin% names(args)
       if (any(idx) & !all(matched <- names(args) %chin% text[token == 'SYMBOL_SUB'])) {
         stopf(
+          # nolint next: line_length_linter.
           "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
-          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args))
+          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args)[!matched])
         )
       }
       .(id = id[idx])
@@ -486,8 +492,8 @@ build_call = function(lines, comments, params) {
 }
 
 adjust_tabs = function(l) {
-  while((idx <- regexpr("\t", l, fixed = TRUE)) > 0L) {
-    l = sub("\t", strrep(" ", 9L-(idx %% 8L)), l, fixed = TRUE)
+  while ((idx <- regexpr("\t", l, fixed = TRUE)) > 0L) {
+    l = sub("\t", strrep(" ", 9L - (idx %% 8L)), l, fixed = TRUE)
   }
   l
 }
@@ -523,26 +529,30 @@ clean_text = function(x) {
   return(x)
 }
 
-string_schema = function() data.table(
-  file = character(),
-  # needed to build the call
-  parent = integer(),
-  # needed to order the strings correctly within the call
-  id = integer(),
-  fname = character(),
-  msgid = character(),
-  msgid_plural = list()
-)
+string_schema = function() {
+  data.table(
+    file = character(),
+    # needed to build the call
+    parent = integer(),
+    # needed to order the strings correctly within the call
+    id = integer(),
+    fname = character(),
+    msgid = character(),
+    msgid_plural = list()
+  )
+}
 
 # the schema for empty edge cases
-r_message_schema = function() data.table(
-  type = character(),
-  file = character(),
-  msgid = character(),
-  msgid_plural = list(),
-  line_number = integer(),
-  call = character(),
-  is_repeat = logical(),
-  is_marked_for_translation = logical(),
-  is_templated = logical()
-)
+r_message_schema = function() {
+  data.table(
+    type = character(),
+    file = character(),
+    msgid = character(),
+    msgid_plural = list(),
+    line_number = integer(),
+    call = character(),
+    is_repeat = logical(),
+    is_marked_for_translation = logical(),
+    is_templated = logical()
+  )
+}

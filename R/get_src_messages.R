@@ -8,6 +8,7 @@ get_src_messages = function(
     if (!file.exists(potfiles_loc)) {
       # templated to share with R-side message
       stopf(
+        # nolint next: line_length_linter.
         "Translation of the 'base' package can only be done on a local mirror of r-devel. Such a copy has a file %s at the top level that is required to proceed.",
         "po/POTFILES"
       )
@@ -55,10 +56,10 @@ get_src_messages = function(
 
   # all calls to certain functions are marked as templated, regardless of template markers, #137
   msg[ , "is_templated" :=
-         fname %chin% TEMPLATE_CALLS
-         | grepl(SPRINTF_TEMPLATE_REGEX, msgid, perl=TRUE)
-         | vapply(msgid_plural, function(str) any(grepl(SPRINTF_TEMPLATE_REGEX, str, perl=TRUE)), logical(1L))
-      ]
+    fname %chin% TEMPLATE_CALLS
+    | grepl(SPRINTF_TEMPLATE_REGEX, msgid, perl=TRUE)
+    | vapply(msgid_plural, function(str) any(grepl(SPRINTF_TEMPLATE_REGEX, str, perl=TRUE)), logical(1L))
+  ]
   msg[ , "fname" := NULL]
 
   # TODO: write this
@@ -266,6 +267,7 @@ parse_src_keywords = function(spec) {
 
   if (!all(idx <- grepl("[a-zA-Z0-9_]+:[0-9]+", spec))) {
     stopf(
+      # nolint next: line_length_linter.
       "Invalid custom translator specification(s): %s.\nAll inputs for src must be key-value pairs like fn:arg1. Custom plural messagers are not yet supported.",
       toString(spec[!idx])
     )
@@ -290,27 +292,31 @@ preprocess = function(contents) {
       '"' = {
         ii = ii + 1L
         while (ii < nn - 1L) {
+          # nolint start: brace_linter.
           switch(
             contents[ii],
             '"' = break,
             "\\" = { ii = ii + 2L },
             { ii = ii + 1L }
           )
+          # nolint end: brace_linter.
         }
       },
       # " as a char ('"') also presents an issue for char array detection
-      "'" = { ii = ii + 2L + (contents[ii+1L] == '\\')},
+      "'" = {
+        ii = ii + 2L + (contents[ii + 1L] == '\\')
+      },
       "/" = {
         jj = 0L
         if (contents[ii + 1L] == "/") {
           jj = ii + 2L
-          while (jj <= nn && contents[jj] != "\n") { jj = jj + 1L }
+          while (jj <= nn && contents[jj] != "\n") jj = jj + 1L
           # blank the comment, not the newline; also don't overwrite \r on Windows
-          contents[ii:(jj - 1L - (contents[jj-1L] == "\r"))] = " "
+          contents[ii:(jj - 1L - (contents[jj - 1L] == "\r"))] = " "
           ii = jj
         } else if (contents[ii + 1L] == "*") {
           jj = ii + 2L
-          while (jj <= nn - 1L && (contents[jj] != "*" || contents[jj + 1L] != "/")) { jj = jj + 1L }
+          while (jj <= nn - 1L && (contents[jj] != "*" || contents[jj + 1L] != "/")) jj = jj + 1L
           idx = ii:(jj + 1L)
           # <3 windows
           contents[idx] = fifelse(contents[idx] %chin% c("\n", "\r"),  contents[idx], " ")
@@ -321,18 +327,18 @@ preprocess = function(contents) {
       #   we ignore some possibilities involving LEAST/FAST/MAX/PTR and only allow 32/64 widths, for simplicity.
       "P" = {
         if (
-          ii < nn-6L
-          && (ii == 1L || !contents[ii-1L] %chin% C_IDENTIFIER_CHARS)
-          && contents[ii+1L] == "R" && contents[ii+2L] == "I"
-          && contents[ii+3L] %chin% c("d", "i", "o", "u", "x", "X")
+          ii < nn - 6L
+          && (ii == 1L || !contents[ii - 1L] %chin% C_IDENTIFIER_CHARS)
+          && contents[ii + 1L] == "R" && contents[ii + 2L] == "I"
+          && contents[ii + 3L] %chin% c("d", "i", "o", "u", "x", "X")
           && (
-            (contents[ii+4L] == "3" && contents[ii+5L] == "2")
-            || (contents[ii+4L] == "6" && contents[ii+5L] == "4")
+            (contents[ii + 4L] == "3" && contents[ii + 5L] == "2")
+            || (contents[ii + 4L] == "6" && contents[ii + 5L] == "4")
           # ensure the identifier ends here, and it's a symbol, not a call
-          && (ii == nn-7L || !contents[ii+6L] %chin% C_IDENTIFIER_CHARS)
+          && (ii == nn - 7L || !contents[ii + 6L] %chin% C_IDENTIFIER_CHARS)
           )
         ) {
-          contents = c(head(contents, ii-1L), '"', '<', contents[ii:(ii+5L)], '>', '"', tail(contents, -ii-5L))
+          contents = c(head(contents, ii - 1L), '"', '<', contents[ii:(ii + 5L)], '>', '"', tail(contents, -ii - 5L))
           ii = ii + 9L
         }
       }
@@ -414,7 +420,7 @@ build_msgid = function(left, right, starts, ends, contents) {
   # Only the first array is extracted from ternary operator usage inside _(), #154
   # IINM, ternary operator usage has to come first, i.e., "abc" (test ? "def" : "ghi") won't parse
   if (endsWith(grout[1L], "?")) {
-    return(safe_substring(contents, starts[1L]+1L, ends[1L]-1L))
+    return(safe_substring(contents, starts[1L] + 1L, ends[1L] - 1L))
   }
 
   # any unknown macros are not expanded and the recorded array is cut off on encountering one,
@@ -425,7 +431,7 @@ build_msgid = function(left, right, starts, ends, contents) {
     ends = head(ends, keep_idx[1L])
   }
 
-  paste(safe_substring(contents, starts+1L, ends-1L), collapse = "")
+  paste(safe_substring(contents, starts + 1L, ends - 1L), collapse = "")
 }
 
 # this could probably go for more stress testing. it didn't _crash_ on base, but
@@ -442,7 +448,7 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents, message_
     msgid = ''
     n_grout = length(grout)
     for (ii in 2:length(grout)) {
-      msgid = paste0(msgid, safe_substring(contents, starts[ii-1L]+1L, ends[ii-1L]-1L))
+      msgid = paste0(msgid, safe_substring(contents, starts[ii - 1L] + 1L, ends[ii - 1L] - 1L))
       if (ii == n_grout || grepl(',', grout[ii], fixed = TRUE)) {
         msgid_plural = c(msgid_plural, msgid)
         msgid = ''
@@ -464,8 +470,8 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents, message_
       ii = ii + 1L
     }
     jj = ii
-    while (jj < length(grout) && !grepl(",", grout[jj], fixed = TRUE)) { jj = jj + 1L }
-    msgid = paste(safe_substring(contents, starts[ii:jj - 1L]+1L, ends[ii:jj - 1L]-1L), collapse = '')
+    while (jj < length(grout) && !grepl(",", grout[jj], fixed = TRUE)) jj = jj + 1L
+    msgid = paste(safe_substring(contents, starts[ii:jj - 1L] + 1L, ends[ii:jj - 1L] - 1L), collapse = '')
     msgid_plural = msgid
   }
   return(list(msgid_plural))
@@ -496,7 +502,8 @@ DEFAULT_MESSAGE_CALLS = data.table(
     "Rprintf", "REprintf", "Rvprintf", "REvprintf",
     "R_ShowMessage", "R_Suicide",
     "warning", "Rf_warning", "error", "Rf_error",
-    "dgettext", # NB: xgettext ignores the domain (first arg) when extracting templates, so we don't bother checking either
+    # NB: xgettext ignores the domain (first arg) when extracting templates, so we don't bother checking either
+    "dgettext",
     "snprintf"
   ),
   str_arg = c(0L, rep(1L, 10L), 2L, 3L),
@@ -525,23 +532,27 @@ C_IDENTIFIER_REST = "[_a-zA-Z0-9]"
 # ASCII-sorted
 C_IDENTIFIER_CHARS = c('(', as.character(0:9), LETTERS, '_', letters)
 
-src_msg_schema = function() data.table(
-  type = character(),
-  file = character(),
-  msgid = character(),
-  msgid_plural = list(),
-  line_number = integer(),
-  call = character(),
-  is_repeat = logical(),
-  is_marked_for_translation = logical(),
-  is_templated = logical()
-)
+src_msg_schema = function() {
+  data.table(
+    type = character(),
+    file = character(),
+    msgid = character(),
+    msgid_plural = list(),
+    line_number = integer(),
+    call = character(),
+    is_repeat = logical(),
+    is_marked_for_translation = logical(),
+    is_templated = logical()
+  )
+}
 
-file_msg_schema = function() data.table(
-  msgid = character(),
-  msgid_plural = list(),
-  line_number = integer(),
-  fname = character(),
-  call = character(),
-  is_marked_for_translation = logical()
-)
+file_msg_schema = function() {
+  data.table(
+    msgid = character(),
+    msgid_plural = list(),
+    line_number = integer(),
+    fname = character(),
+    call = character(),
+    is_marked_for_translation = logical()
+  )
+}

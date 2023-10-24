@@ -237,7 +237,16 @@ test_that("Packages with src code work correctly", {
       expect(
         any(grepl("inst/po/zh_CN/LC_MESSAGES/rSrcMsg.mo", pkg_files, fixed = TRUE)),
         sprintf(
-          "Didn't find rSrcMsg.mo; found %s.\n**Sysreq paths: %s.\n**po/zh_CN contents:\n%s\n**Direct msgfmt output:\n%s**Session info:\n%s",
+          paste(
+            "Didn't find rSrcMsg.mo; found %s.",
+            "**Sysreq paths: %s.",
+            "**po/zh_CN contents:",
+            "%s",
+            "**Direct msgfmt output:",
+            "%s**Session info:",
+            "%s",
+            sep = "\n"
+          ),
           toString(pkg_files), toString(Sys.which(potools:::SYSTEM_REQUIREMENTS)),
           paste(readLines(file.path(pkg, 'po/zh_CN.po')), collapse='\n'),
           {

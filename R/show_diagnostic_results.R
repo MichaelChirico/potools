@@ -12,9 +12,11 @@ show_diagnostic_results <- function(results, diagnostic) {
   }
 }
 
-diagnostic_schema = function() data.table(
-  call = character(),
-  file = character(),
-  line_number = integer(),
-  replacement = character()
-)
+diagnostic_schema = function() {
+  data.table(
+    call = character(),
+    file = character(),
+    line_number = integer(),
+    replacement = character()
+  )
+}

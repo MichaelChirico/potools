@@ -41,7 +41,7 @@
 #' unlink(tmp_pkg, recursive = TRUE)
 #' rm(pkg, tmp_pkg, message_data)
 #' @export
-check_untranslated_src <- function (message_data) {
+check_untranslated_src <- function(message_data) {
   if (!is.data.table(message_data)) message_data = as.data.table(message_data)
 
   return(message_data[

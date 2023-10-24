@@ -65,7 +65,7 @@ check_potools_sys_reqs = function(which = SYSTEM_REQUIREMENTS) {
         RTOOLS_URL
       )
     } else if (Sys.info()['sysname'] == 'Darwin') {
-        platform_msg = gettext('These GNU tools are commonly available, try installing from brew or apt-get')
+      platform_msg = gettext('These GNU tools are commonly available, try installing from brew or apt-get')
     } else {
       platform_msg = gettext(
         'These GNU tools are commonly available from the Linux package manager for your system'
@@ -80,7 +80,7 @@ check_potools_sys_reqs = function(which = SYSTEM_REQUIREMENTS) {
 }
 # nocov end
 
-list_package_files = function(dir, subdir, subsubdirs = character(), pattern) {
+list_package_files = function(dir, subdir, subsubdirs = character(), pattern = NULL) {
   subdir = file.path(dir, subdir)
   files = list.files(subdir, pattern = pattern)
   for (subsubdir in subsubdirs) {
@@ -189,4 +189,4 @@ is_outdated <- function(src, dst) {
 
 is_testing = function() identical(Sys.getenv("TESTTHAT"), "true")
 
-is_gnu_gettext = function() any(grepl("GNU gettext", system('gettext --version', intern=TRUE)))
+is_gnu_gettext = function() any(grepl("GNU gettext", system('gettext --version', intern=TRUE), fixed = TRUE))

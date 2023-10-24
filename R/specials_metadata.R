@@ -40,6 +40,7 @@ get_specials_metadata = function(x) {
   redirect_idx = meta$redirect_start > 0L
   if (any(template_idx & redirect_idx)) {
     if (any(template_idx & !redirect_idx)) stopf(
+      # nolint next: line_length_linter.
       "Invalid templated message. If any %%N$ redirects are used, all templates must be redirected.\n\tRedirected tempates: %s\n\t Un-redirected templates: %s",
       meta$special[template_idx & redirect_idx], meta$special[template_idx & !redirect_idx]
     )
@@ -68,6 +69,7 @@ get_specials_metadata = function(x) {
   if (any(template_idx & redirect_idx)) {
     if (nrow(fail <- meta[ , .N, by = c("redirect_id", "id")][ , .N, by = "redirect_id"][N > 1L])) {
       stopf(
+        # nolint next: line_length_linter.
         "Invalid templated message string with redirects -- all messages pointing to the same input must have identical formats, but received %s",
         meta[
           fail,
@@ -110,6 +112,7 @@ all.equal.specials_metadata = function(target, current, ...) {
   if (anyNA(matched$start.x)) {
     if (isTRUE(all.equal(table(target$id), table(current$id)))) {
       return(gettextf(
+        # nolint next: line_length_linter.
         "received the same set of templates + bordering newlines, but in incorrect order (%s vs %s). Recall that you can use %%$N to do redirect, e.g. to swap the order of '%%d %%s' to be translated more naturally, your translation can use '%%1$s %%2$d'",
         sprintf("[%s]", toString(target$special)), sprintf("[%s]", toString(current$special))
       ))

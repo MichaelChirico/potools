@@ -44,7 +44,7 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
         # add enough blanks for Plural message:
         paste0("\n                ", format(msgid_metadata)),
         language_color(metadata$full_name_eng),
-        plural_range_color(.potools$PLURAL_RANGE_STRINGS[.(metadata$plural, jj-1L), range]),
+        plural_range_color(.potools$PLURAL_RANGE_STRINGS[.(metadata$plural, jj - 1L), range]),
         fuzzy_tag,
         domain = "R-potools"
       ))
@@ -93,7 +93,7 @@ unset_prompt_conn <- function() {
 #   (2) readline is _strictly_ interactive -- it can't be tested.
 # See this post for testing:
 #   https://debruine.github.io/posts/interactive-test/
-prompt = function(..., conn = .potools$prompt_conn, require_type) {
+prompt = function(..., conn = .potools$prompt_conn, require_type = NULL) {
   cat(...)
   cat('\n')
   if (inherits(conn, "terminal")) {
@@ -108,7 +108,7 @@ prompt = function(..., conn = .potools$prompt_conn, require_type) {
     # nocov end
   }
   # See #105 / #95... confusing stuff
-  if (missing(require_type)) return(out)
+  if (is.null(require_type)) return(out)
   out = type.convert(out, as.is = TRUE)
   if (typeof(out) == require_type) return(out)
 

@@ -303,7 +303,7 @@
 #' @export
 translate_package = function(
   dir = '.',
-  languages,
+  languages = NULL,
   diagnostics = list(check_cracked_messages, check_untranslated_cat, check_untranslated_src),
   custom_translation_functions = list(R = NULL, src = NULL),
   max_translations = Inf,
@@ -318,7 +318,7 @@ translate_package = function(
   stopifnot(
     'Only one package at a time' = length(dir) == 1L,
     "'dir' must be a character" = is.character(dir),
-    "'languages' must be a character vector" = missing(languages) || is.character(languages),
+    "'languages' must be a character vector" = is.null(languages) || is.character(languages),
     "'diagnostics' should be empty, a function, or list of functions" =
       is.null(diagnostics)
       || is.function(diagnostics)
@@ -392,7 +392,7 @@ translate_package = function(
   }
 
 
-  if (missing(languages)) {
+  if (is.null(languages)) {
     if (verbose) message('No languages provided; finishing')
     return(invisible())
   }
@@ -473,6 +473,7 @@ translate_package = function(
     })
 
     if (verbose) {
+      # nolint start: line_length_linter.
       message(
         "***************************\n",
         "** BEGINNING TRANSLATION **\n",
@@ -484,6 +485,7 @@ translate_package = function(
         " * While the count of templates must match, the _order_ can be changed by using e.g. %2$s to mean 'use the second input as a string here'\n",
         " * Whenever templates or escaping is happening in a string, these will be 'highlighted' by carets (^) in the line below"
       )
+      # nolint end: line_length_linter.
     }
     # NB: loop over rows to facilitate quitting without losing progress
     for (ii in head(new_idx, max_translations)) {

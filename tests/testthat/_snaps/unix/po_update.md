@@ -2,7 +2,7 @@
 
     Code
       po_update(verbose = TRUE, lazy = FALSE)
-    Message <simpleMessage>
+    Message
       Updating 'fr' R translation
       Running system command msgmerge --update './po/R-fr.po' --backup=off --previous './po/R-test.pot'.
       . done.

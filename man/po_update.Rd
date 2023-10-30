@@ -23,11 +23,13 @@ There are four cases:
 \item New messages: added with blank \code{msgstr}.
 \item Deleted messages: marked as deprecated and moved to the bottom of the file.
 \item Major changes to existing messages: appear as an addition and a deletion.
-\item Minor changes to existing messages: will be flagged as fuzzy.\preformatted{#, fuzzy, c-format
+\item Minor changes to existing messages: will be flagged as fuzzy.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{#, fuzzy, c-format
 #| msgid "Generating en@quot translations"
 msgid "Updating '\%s' \%s translation"
 msgstr "memperbarui terjemahan bahasa en@quot..."
-}
+}\if{html}{\out{</div>}}
 
 The previous message is given in comments starting with \verb{#|}.
 Translators need to update the actual (uncommented) \code{msgstr} manually,

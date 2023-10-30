@@ -7,5 +7,6 @@
 ^\.sandbox$
 ^codecov\.yml$
 ^_pkgdown\.yml$
+^\.lintr$
 ^docs$
 ^pkgdown$

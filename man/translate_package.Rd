@@ -6,7 +6,7 @@
 \usage{
 translate_package(
   dir = ".",
-  languages,
+  languages = NULL,
   diagnostics = list(check_cracked_messages, check_untranslated_cat,
     check_untranslated_src),
   custom_translation_functions = list(R = NULL, src = NULL),
@@ -132,7 +132,9 @@ interface to continue building  translations for your workflow.
 
 Suppose you wrote a function \code{stopf()} that is a wrapper of
 \code{stop(gettextf())} used to build templated error messages in R, which makes
-translation easier for translators (see below), e.g.:\if{html}{\out{<div class="sourceCode R">}}\preformatted{stopf = function(fmt, ..., domain = NULL) \{
+translation easier for translators (see below), e.g.:
+
+\if{html}{\out{<div class="sourceCode R">}}\preformatted{stopf = function(fmt, ..., domain = NULL) \{
   stop(gettextf(fmt, ...), domain = domain, call. = FALSE)
 \}
 }\if{html}{\out{</div>}}
@@ -140,7 +142,9 @@ translation easier for translators (see below), e.g.:\if{html}{\out{<div class="
 Note that \code{potools} itself uses just such a wrapper internally to build
 error messages! To extract strings from calls in your package to \code{stopf()}
 and mark them for translation, use the argument
-\code{custom_translation_functions}:\if{html}{\out{<div class="sourceCode R">}}\preformatted{get_message_data(
+\code{custom_translation_functions}:
+
+\if{html}{\out{<div class="sourceCode R">}}\preformatted{get_message_data(
   '/path/to/my_package',
   custom_translation_functions = list(R = 'stopf:fmt|1')
 )
@@ -198,7 +202,9 @@ the \code{\link[=check_untranslated_src]{check_untranslated_src()}} diagnostic, 
 
 \subsection{Cracked messages}{
 
-A cracked message is one like:\if{html}{\out{<div class="sourceCode r">}}\preformatted{stop("There are ", n, " good things and ", m, " bad things.")
+A cracked message is one like:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{stop("There are ", n, " good things and ", m, " bad things.")
 }\if{html}{\out{</div>}}
 
 In its current state, translators will be asked to translate three messages
@@ -213,7 +219,9 @@ The message has been cracked; it might not be possible to translate a string
 as generic as "There are" into many languages -- context is key!
 
 To keep the context, the error message should instead be build with
-\code{gettextf} like so:\if{html}{\out{<div class="sourceCode r">}}\preformatted{stop(domain=NA, gettextf("There are \%d good things and \%d bad things."))
+\code{gettextf} like so:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{stop(domain=NA, gettextf("There are \%d good things and \%d bad things."))
 }\if{html}{\out{</div>}}
 
 Now there is only one string to translate! Note that this also allows the
@@ -316,7 +324,7 @@ rm(pkg, tmp_pkg)
 \cr
 \url{https://cran.r-project.org/doc/manuals/r-release/R-ints.html#Internationalization-in-the-R-sources}
 \cr \url{https://developer.r-project.org/Translations30.html} \cr
-\url{https://www.isi-web.org/publications/glossary-of-statistical-terms} \cr
+\url{https://web.archive.org/web/20230108213934/https://www.isi-web.org/resources/glossary-of-statistical-terms} \cr
 \url{https://www.gnu.org/software/gettext/} \cr
 \url{https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes}
 \cr

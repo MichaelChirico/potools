@@ -6,18 +6,15 @@
 \alias{potools-package}
 \title{potools: Tools for Internationalization and Portability in R Packages}
 \description{
-\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Translating messages in R packages is managed using the po
-    top-level directory and the 'gettext' program. This package provides
-    some helper functions for building this support in R packages, e.g.
-    common validation & I/O tasks.
+Translating messages in R packages is managed using the po top-level directory and the 'gettext' program. This package provides some helper functions for building this support in R packages, e.g. common validation & I/O tasks.
 }
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://github.com/MichaelChirico/potools}
-  \item \url{https://michaelchirico.github.io/potools}
+  \item \url{https://michaelchirico.github.io/potools/}
   \item Report bugs at \url{https://github.com/MichaelChirico/potools/issues}
 }
 

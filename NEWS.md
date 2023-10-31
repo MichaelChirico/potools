@@ -1,4 +1,4 @@
-# potools 0.2.3 (in development)
+# potools 0.2.4 (October 2023)
 
 ## New features
 

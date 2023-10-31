@@ -26,7 +26,7 @@ in the translate_package(languages = &quot;es&quot;) call."><meta property="og:i
     
     <a class="navbar-brand me-2" href="../index.html">potools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,7 +85,7 @@ in the <code>translate_package(languages = "es")</code> call.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">translate_package</span><span class="op">(</span></span>
 <span>  dir <span class="op">=</span> <span class="st">"."</span>,</span>
-<span>  <span class="va">languages</span>,</span>
+<span>  languages <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  diagnostics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">check_cracked_messages</span>, <span class="va">check_untranslated_cat</span>,</span>
 <span>    <span class="va">check_untranslated_src</span><span class="op">)</span>,</span>
 <span>  custom_translation_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>R <span class="op">=</span> <span class="cn">NULL</span>, src <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
@@ -218,13 +218,15 @@ the default R tooling for translation (<code>xgettext()</code>, <code>xngettext(
 interface to continue building  translations for your workflow.</p>
 <p>Suppose you wrote a function <code>stopf()</code> that is a wrapper of
 <code>stop(gettextf())</code> used to build templated error messages in R, which makes
-translation easier for translators (see below), e.g.:</p><div class="sourceCode R"><pre><code><span><span class="va">stopf</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">domain</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
+translation easier for translators (see below), e.g.:</p>
+<p></p><div class="sourceCode R"><pre><code><span><span class="va">stopf</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span>, <span class="va">domain</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">...</span><span class="op">)</span>, domain <span class="op">=</span> <span class="va">domain</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre><p></p></div>
 <p>Note that <code>potools</code> itself uses just such a wrapper internally to build
 error messages! To extract strings from calls in your package to <code>stopf()</code>
 and mark them for translation, use the argument
-<code>custom_translation_functions</code>:</p><div class="sourceCode R"><pre><code><span><span class="fu"><a href="../reference/get_message_data.html">get_message_data</a></span><span class="op">(</span></span>
+<code>custom_translation_functions</code>:</p>
+<p></p><div class="sourceCode R"><pre><code><span><span class="fu"><a href="../reference/get_message_data.html">get_message_data</a></span><span class="op">(</span></span>
 <span>  <span class="st">'/path/to/my_package'</span>,</span>
 <span>  custom_translation_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>R <span class="op">=</span> <span class="st">'stopf:fmt|1'</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre><p></p></div>
@@ -275,7 +277,8 @@ the <code><a href="check_untranslated_src.html">check_untranslated_src()</a></co
 <h3 id="cracked-messages">Cracked messages<a class="anchor" aria-label="anchor" href="#cracked-messages"></a></h3>
 
 
-<p>A cracked message is one like:</p><div class="sourceCode r"><pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="va">n</span>, <span class="st">" good things and "</span>, <span class="va">m</span>, <span class="st">" bad things."</span><span class="op">)</span></span></code></pre><p></p></div>
+<p>A cracked message is one like:</p>
+<p></p><div class="sourceCode r"><pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="va">n</span>, <span class="st">" good things and "</span>, <span class="va">m</span>, <span class="st">" bad things."</span><span class="op">)</span></span></code></pre><p></p></div>
 <p>In its current state, translators will be asked to translate three messages
 independently:</p><ul><li><p>"There are"</p></li>
 <li><p>"good things and"</p></li>
@@ -283,7 +286,8 @@ independently:</p><ul><li><p>"There are"</p></li>
 </ul><p>The message has been cracked; it might not be possible to translate a string
 as generic as "There are" into many languages -- context is key!</p>
 <p>To keep the context, the error message should instead be build with
-<code>gettextf</code> like so:</p><div class="sourceCode r"><pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span>domain<span class="op">=</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="st">"There are %d good things and %d bad things."</span><span class="op">)</span><span class="op">)</span></span></code></pre><p></p></div>
+<code>gettextf</code> like so:</p>
+<p></p><div class="sourceCode r"><pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span>domain<span class="op">=</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">gettextf</a></span><span class="op">(</span><span class="st">"There are %d good things and %d bad things."</span><span class="op">)</span><span class="op">)</span></span></code></pre><p></p></div>
 <p>Now there is only one string to translate! Note that this also allows the
 translator to change the word order as they see fit -- for example, in
 Japanese, the grammatical order usually puts the verb last (where in
@@ -351,7 +355,7 @@ that describes what the diagnostic does; it is reproduced in the format
     <p><a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Internationalization" class="external-link">https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Internationalization</a>
 <br><a href="https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Internationalization" class="external-link">https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Internationalization</a>
 <br><a href="https://cran.r-project.org/doc/manuals/r-release/R-ints.html#Internationalization-in-the-R-sources" class="external-link">https://cran.r-project.org/doc/manuals/r-release/R-ints.html#Internationalization-in-the-R-sources</a>
-<br><a href="https://developer.r-project.org/Translations30.html" class="external-link">https://developer.r-project.org/Translations30.html</a> <br><a href="https://www.isi-web.org/publications/glossary-of-statistical-terms" class="external-link">https://www.isi-web.org/publications/glossary-of-statistical-terms</a> <br><a href="https://www.gnu.org/software/gettext/" class="external-link">https://www.gnu.org/software/gettext/</a> <br><a href="https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes" class="external-link">https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes</a>
+<br><a href="https://developer.r-project.org/Translations30.html" class="external-link">https://developer.r-project.org/Translations30.html</a> <br><a href="https://web.archive.org/web/20230108213934/https://www.isi-web.org/resources/glossary-of-statistical-terms" class="external-link">https://web.archive.org/web/20230108213934/https://www.isi-web.org/resources/glossary-of-statistical-terms</a> <br><a href="https://www.gnu.org/software/gettext/" class="external-link">https://www.gnu.org/software/gettext/</a> <br><a href="https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes" class="external-link">https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes</a>
 <br><a href="https://www.gnu.org/software/gettext/manual/html_node/Country-Codes.html#Country-Codes" class="external-link">https://www.gnu.org/software/gettext/manual/html_node/Country-Codes.html#Country-Codes</a>
 <br><a href="https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip" class="external-link">https://www.stats.ox.ac.uk/pub/Rtools/goodies/gettext-tools.zip</a>
 <br><a href="https://saimana.com/list-of-country-locale-code/" class="external-link">https://saimana.com/list-of-country-locale-code/</a></p>

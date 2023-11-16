@@ -46,7 +46,8 @@ ecosystem in general. Here is a smattering of such tools that I've come across:
  - Poedit - https://poedit.net/ - GUI Software for writing translations
  - Gtranslator - https://wiki.gnome.org/Apps/Gtranslator - GNOME Translation editor
  - Lokalize - https://userbase.kde.org/Lokalize - KDE's Computer-Aided Translation system
- - Virtaal - https://virtaal.translatehouse.org/?id=virtaal/index - Another FOSS software for translation
- - Pootle - https://pootle.translatehouse.org/ - Apparently related to Virtaal, and apparently there's even [a paper](https://www.academia.edu/16211610/A_Comparative_Study_of_Two_FOSS_Localisation_Tools_Pootle_and_Virtaal) written comparing the two
- - Localization Toolkit - https://toolkit.translatehouse.org/ - Again I'm not sure the difference vs. Virtaal & Pootle
+ - Virtaal - https://virtaal.translatehouse.org/ - Another FOSS software for translation on the desktop; not actively maintained
+ - Pootle - https://pootle.translatehouse.org/ - Web-based translation server, from the same team as Virtaal ([thesis comparing both](https://archive-ouverte.unige.ch/unige:75916)); not actively maintained
+ - Translate Toolkit - https://toolkit.translatehouse.org/ - Command-line utilities and Python library underlying Virtaal and Pootle, and even Weblate
+ - Weblate - https://weblate.org/ - Web-based translation server with git integration, [used by the R project](https://translate.rx.studio/) for its core and recommended packages [(the latter since the 2023 Sprint)](https://contributor.r-project.org/r-project-sprint-2023/projects/weblate-improvements/)
  - PO mode in Emacs - https://www.emacswiki.org/emacs/PoMode

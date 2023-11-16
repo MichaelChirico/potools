@@ -49,5 +49,5 @@ ecosystem in general. Here is a smattering of such tools that I've come across:
  - Virtaal - https://virtaal.translatehouse.org/ - Another FOSS software for translation on the desktop; not actively maintained
  - Pootle - https://pootle.translatehouse.org/ - Web-based translation server, from the same team as Virtaal ([thesis comparing both](https://archive-ouverte.unige.ch/unige:75916)); not actively maintained
  - Translate Toolkit - https://toolkit.translatehouse.org/ - Command-line utilities and Python library underlying Virtaal and Pootle, and even Weblate
- - Weblate - https://weblate.org/ - Web-based translation server with git integration, [used by the R project](https://translate.rx.studio/) and its core and recommended packages [since the 2023 Sprint](https://contributor.r-project.org/r-project-sprint-2023/projects/weblate-improvements/)
+ - Weblate - https://weblate.org/ - Web-based translation server with git integration, [used by the R project](https://translate.rx.studio/) for its core and recommended packages [(the latter since the 2023 Sprint)](https://contributor.r-project.org/r-project-sprint-2023/projects/weblate-improvements/)
  - PO mode in Emacs - https://www.emacswiki.org/emacs/PoMode

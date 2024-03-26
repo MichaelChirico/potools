@@ -79,13 +79,13 @@ set_prompt_conn <- function() {
     conn <- file(conn, "r")
   }
   assign("prompt_conn", conn, envir=.potools)
-  return(invisible())
+  invisible()
 }
 
 unset_prompt_conn <- function() {
-  if (!exists("prompt_conn", envir=.potools) || inherits(.potools$prompt_conn, "terminal")) return(invisible())
-  close(.potools$prompt_conn)
-  return(invisible())
+  if (exists("prompt_conn", envir=.potools) && inherits(.potools$prompt_conn, "terminal"))
+    close(.potools$prompt_conn)
+  invisible()
 }
 
 # would be great to use readline() but it has several fatal flaws:

@@ -54,7 +54,7 @@ run_msgfmt = function(po_file, mo_file, verbose) {
       immediate. = TRUE
     )
   }
-  return(invisible())
+  invisible()
 }
 
 update_en_quot_mo_files <- function(dir, verbose) {
@@ -73,7 +73,7 @@ update_en_quot_mo_files <- function(dir, verbose) {
     )
     unlink(po_file)
   }
-  return(invisible())
+  invisible()
 }
 
 # https://www.gnu.org/software/gettext/manual/html_node/msginit-Invocation.html

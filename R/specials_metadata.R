@@ -127,5 +127,5 @@ all.equal.specials_metadata = function(target, current, ...) {
   # found in x, not y (i.e., in msgid, not msgstr)
 
   # else target/current have the same number of rows
-  return(TRUE)
+  TRUE
 }

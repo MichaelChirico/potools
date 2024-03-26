@@ -47,7 +47,7 @@ po_explain_plurals <- function(language, index) {
       )
     ]
   }
-  return(invisible())
+  invisible()
 }
 
 # just here to generate translations. comes from the PLURAL_RANGE_STRINGS csv

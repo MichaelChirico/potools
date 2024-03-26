@@ -123,10 +123,11 @@ get_po_messages <- function(po_file) {
     msg_j = msg_j + 1L
   }
 
-  # somewhat hacky approach -- strip the comment markers & recurse
+  # somewhat hacky approach -- strip the comment markers & recurse;
+  #   retain the same file pattern to ensure 'message_source' is correct
   writeLines(
     gsub("^#~ ", "", grep("^#~ ", po_lines, value = TRUE)),
-    tmp <- tempfile()
+    tmp <- tempfile(pattern = basename(po_file))
   )
   on.exit(unlink(tmp))
   deprecated = get_po_messages(tmp)

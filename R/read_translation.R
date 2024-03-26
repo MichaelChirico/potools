@@ -83,7 +83,7 @@ set_prompt_conn <- function() {
 }
 
 unset_prompt_conn <- function() {
-  if (exists("prompt_conn", envir=.potools) && inherits(.potools$prompt_conn, "terminal"))
+  if (exists("prompt_conn", envir=.potools) && !inherits(.potools$prompt_conn, "terminal"))
     close(.potools$prompt_conn)
   invisible()
 }

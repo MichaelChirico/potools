@@ -65,7 +65,7 @@ check_cracked_messages = function(message_data) {
     set(dup_messages, ii, "replacement", build_gettextf_call(dup_messages$call_expr[[ii]]))
   }
 
-  return(dup_messages[ , .(call, file, line_number, replacement)])
+  dup_messages[ , .(call, file, line_number, replacement)]
 }
 attr(check_cracked_messages, "diagnostic_tag") =
   "R messaging calls that might be better suited for gettextf for ease of translation"
@@ -105,8 +105,8 @@ count_dots = function(call) {
         call,
         function(x) {
           e = match.call(definition, x)
-          if (is.null(names(e))) return(length(e) - 1L)
-          return(length(e) - sum(names(e) %chin% c("call.", "immediate.", "noBreaks.", "domain", "appendLF")) - 1L)
+          n_excluded = sum(names(e) %chin% c("call.", "immediate.", "noBreaks.", "domain", "appendLF"))
+          length(e) - n_excluded - 1L
         },
         integer(1L)
       )

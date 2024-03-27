@@ -8,7 +8,7 @@ get_directory = function(dir) {
   if (!file.info(dir)$isdir) {
     stopf('%s is not a directory', dir)
   }
-  return(normalizePath(dir))
+  normalizePath(dir)
 }
 
 # check dir is a package & return its name & version
@@ -95,7 +95,7 @@ list_package_files = function(dir, subdir, subsubdirs = character(), pattern = N
 `%is_base_call%` = function(e, f) {
   if (e %is_name% f) return(TRUE)
   if (!is.call(e) || length(e) != 3L) return(FALSE)
-  return(e[[1L]] %is_name% "::" && e[[2L]] %is_name% "base" && e[[3L]] %is_name% f)
+  e[[1L]] %is_name% "::" && e[[2L]] %is_name% "base" && e[[3L]] %is_name% f
 }
 
 gettextify = function(e, sep = '') {

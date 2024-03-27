@@ -197,7 +197,7 @@ parse_r_files = function(dir, is_base) {
     return(out)
   }
   names(out) = r_files
-  return(out)
+  out
 }
 
 # inspired by the --keyword argument in gettext, but customized to make sense for R.
@@ -463,32 +463,32 @@ drop_suppressed_and_named = function(calls_data, expr_data, target_args) {
 build_call = function(lines, comments, params) {
   if (params$line1 == params$line2) {
     return(substr(adjust_tabs(lines[params$line1]), params$col1, params$col2))
-  } else {
-    lines = lines[params$line1:params$line2]
-
-    # substring not substr here so we can eschew providing
-    #   last=nchar(lines[1L]) because we'd need to recalculate it after adjust_tabs()
-    lines[1L] = substring(adjust_tabs(lines[1L]), params$col1)
-    lines[length(lines)] = substring(adjust_tabs(lines[length(lines)]), 1L, params$col2)
-
-    # strip comments, _after_ getting the tab-adjusted column #s
-    for (ii in seq_len(nrow(comments))) {
-      # we've already subset lines, so line numbers have to be re-mapped
-      adj_line_idx = comments$line1[ii] - params$line1 + 1L
-      # column number has to be re-mapped relative to col1 as well, but only on line1 itself
-      col_adj = if (adj_line_idx == 1L) params$col1 else 1L
-      lines[adj_line_idx] = substr(
-        lines[adj_line_idx],
-        1L,
-        comments$col1[ii] - col_adj
-      )
-    }
-
-    # strip internal whitespace across lines in the call
-    #   NB: eventually, this will need to be smarter about multi-line STR_CONST...
-    #       for now, just wave hands around those....
-    return(paste(trimws(lines), collapse = " "))
   }
+
+  lines = lines[params$line1:params$line2]
+
+  # substring not substr here so we can eschew providing
+  #   last=nchar(lines[1L]) because we'd need to recalculate it after adjust_tabs()
+  lines[1L] = substring(adjust_tabs(lines[1L]), params$col1)
+  lines[length(lines)] = substring(adjust_tabs(lines[length(lines)]), 1L, params$col2)
+
+  # strip comments, _after_ getting the tab-adjusted column #s
+  for (ii in seq_len(nrow(comments))) {
+    # we've already subset lines, so line numbers have to be re-mapped
+    adj_line_idx = comments$line1[ii] - params$line1 + 1L
+    # column number has to be re-mapped relative to col1 as well, but only on line1 itself
+    col_adj = if (adj_line_idx == 1L) params$col1 else 1L
+    lines[adj_line_idx] = substr(
+      lines[adj_line_idx],
+      1L,
+      comments$col1[ii] - col_adj
+    )
+  }
+
+  # strip internal whitespace across lines in the call
+  #   NB: eventually, this will need to be smarter about multi-line STR_CONST...
+  #       for now, just wave hands around those....
+  paste(trimws(lines), collapse = " ")
 }
 
 adjust_tabs = function(l) {
@@ -526,7 +526,7 @@ clean_text = function(x) {
   #   e.g. in 'a string with an \"escaped\" quote', the escapes for " disappear after parsing. See #128
   x = gsub("(?:^|(?<![\\\\]))[\\\\](['\"])", "\\1", x, perl = TRUE)
   x = gsub('\\\\', '\\', x, fixed = TRUE)
-  return(x)
+  x
 }
 
 string_schema = function() {

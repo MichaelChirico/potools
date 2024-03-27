@@ -345,7 +345,7 @@ preprocess = function(contents) {
     )
     ii = ii + 1L
   }
-  return(contents)
+  contents
 }
 
 is_outside_char_array = function(char_pos, arrays) {
@@ -410,7 +410,7 @@ match_parens = function(file, contents, arrays) {
     all_parens[idx & lparen, "paren_end" := fcase(!next_paren, next_start)]
     all_parens[ , c("next_paren", "next_start") := NULL]
   }
-  return(all_parens[(lparen)])
+  all_parens[(lparen)]
 }
 
 build_msgid = function(left, right, starts, ends, contents) {
@@ -474,7 +474,7 @@ build_msgid_plural = function(fun, left, right, starts, ends, contents, message_
     msgid = paste(safe_substring(contents, starts[ii:jj - 1L] + 1L, ends[ii:jj - 1L] - 1L), collapse = '')
     msgid_plural = msgid
   }
-  return(list(msgid_plural))
+  list(msgid_plural)
 }
 
 get_grout = function(left, right, starts, ends, contents) {

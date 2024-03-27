@@ -75,10 +75,10 @@ check_untranslated_cat <- function(message_data) {
     set(cat_calls, ii, "replacement", build_suggested_cat_call(cat_calls$call_expr[[ii]]))
   }
 
-  return(cat_calls[
+  cat_calls[
     nzchar(replacement),
     .(call, file, line_number, replacement)
-  ])
+  ]
 }
 attr(check_untranslated_cat, "diagnostic_tag") = "untranslated messaging calls passed through cat()"
 
@@ -124,5 +124,5 @@ build_suggested_cat_call = function(e) {
 no_translated_subcall <- function(e) {
   if (!is.call(e)) return(TRUE)
   if (is.name(e[[1L]]) && e[[1L]] %chin% c("gettext", "gettextf", "ngettext")) return(FALSE)
-  return(all(vapply(e[-1L], no_translated_subcall, logical(1L))))
+  all(vapply(e[-1L], no_translated_subcall, logical(1L)))
 }

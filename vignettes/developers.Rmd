@@ -270,7 +270,7 @@ paste0("<a href='/index.html'>", tr_("Home page"), "</a>")
 
 Generally, you want to help the translator spend as much time as possible helping you out.
 
-## Googling
+### Googling
 
 It's worth noting that that non-English messages are often harder to Google because few non-English languages have a significant presence on StackOverflow.
 A few suggestions:

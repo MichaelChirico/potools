@@ -1,0 +1,510 @@
+# Translation for package developers
+
+In this vignette you’ll learn how to set up your package for
+translation, focusing on translating messages in your R code. It’s aimed
+at a package developers; if you’re translating an existing package, you
+might want to start with
+[`vignette("translators")`](https://michaelchirico.github.io/potools/articles/translators.md).
+
+``` r
+library(potools)
+```
+
+## Basic process
+
+Before we get into the details lets review the basic process:
+
+- You run
+  [`po_extract()`](https://michaelchirico.github.io/potools/reference/po_extract.md)
+  to extract all translatable messages from your R and C code. This
+  creates a `.pot` (po template) file that contains every translatable
+  message.
+
+- A translator calls
+  [`po_create()`](https://michaelchirico.github.io/potools/reference/po_create.md)
+  to generate a `.po` file for their language. A `.po` file consists of
+  pair of lines like:
+
+      msgid "This is the message in English"
+      msgstr ""
+
+  They then replace each `msgstr` line with the appropriate translation:
+
+      msgid "This is the message in English"
+      msgstr "This is the message in another language"
+
+- Either you or the translator uses
+  [`po_compile()`](https://michaelchirico.github.io/potools/reference/po_compile.md)
+  to turn the plain text `.po` files into binary `.mo` files that are
+  distributed with your package.
+
+## Extraction
+
+potools provides two styles for extracting messages for translation:
+`base` and `explicit`, as described below. Once you’ve decided which
+style you want to use, record it in the `DESCRIPTION`:
+
+    Config/potools/style: explicit
+
+And then run
+[`po_extract()`](https://michaelchirico.github.io/potools/reference/po_extract.md)
+to generate the `.pot` file.
+
+### Base style
+
+The base style captures messages the base functions that include
+built-in translation capabilities[¹](#fn1):
+[`message()`](https://rdrr.io/r/base/message.html),
+[`warning()`](https://rdrr.io/r/base/warning.html), and
+[`stop()`](https://rdrr.io/r/base/stop.html). It also captures messages
+from the explicit translation functions
+[`gettext()`](https://rdrr.io/r/base/gettext.html),
+[`gettextf()`](https://rdrr.io/r/base/sprintf.html), and `ngettext().`
+(It does **not**, however, not translate
+[`cat()`](https://rdrr.io/r/base/cat.html)). The advantage of the base
+style, is that it’s very quick to get started with.
+
+[`message()`](https://rdrr.io/r/base/message.html),
+[`warning()`](https://rdrr.io/r/base/warning.html) and
+[`stop()`](https://rdrr.io/r/base/stop.html) concatenate the components
+of `…`:
+
+``` r
+message("This", " is", " a", " message")
+#> This is a message
+warning("This", " is", " a", " warning")
+#> Warning: This is a warning
+stop("This", " is", " an", " error")
+#> Error: This is an error
+```
+
+However, as you’ll learn shortly, this style is unlikely to generate
+messages that are easily translated, so `po_extract(style = "base")`
+will also capture messages from `messagef()`, `warningf()`, and
+`stopf`(). These are equivalents to
+[`message()`](https://rdrr.io/r/base/message.html),
+[`warnings()`](https://rdrr.io/r/base/warnings.html), and
+[`stop()`](https://rdrr.io/r/base/stop.html) that use
+[`sprintf()`](https://rdrr.io/r/base/sprintf.html) style (hence the `f`
+suffix).
+
+These functions are not included in base R, so if you want to use them,
+you’ll need to copy the definitions from below:
+
+``` r
+messagef <- function(fmt, ..., appendLF = TRUE) {
+  msg <- gettextf(fmt, ..., domain = "R-{mypackage}")
+  message(msg, domain = NA, appendLF = appendLF)
+}
+
+warningf <- function(fmt, ..., immediate. = FALSE, noBreaks. = FALSE) {
+  msg <- gettextf(fmt, ..., domain = "R-{mypackage}")
+  warning(msg,
+    domain = NA,
+    call. = FALSE,
+    immediate. = immediate.,
+    noBreaks. = noBreaks.
+  )
+}
+
+stopf <- function(fmt, ...) {
+  msg <- gettextf(fmt, ..., domain = "R-{mypackage}")
+  stop(msg, domain = NA, call. = FALSE)
+}
+```
+
+### Explicit style
+
+The explicit style only captures messages that explicitly flagged for
+translation by [`gettext()`](https://rdrr.io/r/base/gettext.html),
+[`ngettext()`](https://rdrr.io/r/base/gettext.html), or `tr_()`. Like
+`messagef()` and friends, `tr_()` is not provided by R, so you’ll need
+to define it yourself:
+
+``` r
+tr_ <- function(...) {
+  enc2utf8(gettext(paste0(...), domain = "R-{mypackage}"))
+}
+```
+
+The advantage of the explicit style is that it’s very clear which
+messages are ready for translated. The disadvantage is that it’s easy to
+miss string, so in the future we’ll provide automated ways to identify
+strings that haven’t been translated and probably should be.
+
+I’ll use the explicit style in the rest of this vignette because it
+makes it very clear what is being translated.
+
+## Writing good messages
+
+The mechanics of translating your package are quite straightforward. The
+bigger challenge is writing messages that are easy to translate. In
+part, this is an extension of writing messages that are easy to
+understand in English as well! And if it’s hard for a native English
+speaker to understand your message, it’s going to be even harder once
+it’s translated into another language. The following sections give some
+advice about how to write good messages, as inspired by the “[Preparing
+translatable
+strings](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20))”
+section of the gettext[²](#fn2) manual.
+
+### Write full sentences
+
+Generally, you should strive to make sure that each message comes from a
+single string (i.e. lives within a single ““). Take this simple greeting
+where I translate”good” and “morning” individually:
+
+``` r
+name <- "Hadley"
+paste0(tr_("Good"), " ", tr_("morning"), " ", name, "!")
+#> [1] "Good morning Hadley!"
+```
+
+This will pose two challenges for translators:
+
+- When working with `.po` files, translators see each individual string
+  without context, and they may be in a different order to the original
+  source. This can lead either to a poor translation or an expensive
+  journey to the source code to get more context.
+
+      msgid "morning"
+      msgstr ""
+
+      msgid "Good"
+      msgstr ""
+
+- Prose is not like code: you can’t reliably build up sentences from
+  small fragments of text. Even if you can figure out how to do it in
+  English, it’s unlikely the same form will work for other languages.
+
+Instead it’s better to generate the complete message in a single string
+using `glue()` or [`sprintf()`](https://rdrr.io/r/base/sprintf.html)
+[³](#fn3) to interpolate in the parts that vary:
+
+``` r
+glue(tr_("Good morning {name}"))
+#> Good morning Hadley
+sprintf(tr_("Good morning %s"), name)
+#> [1] "Good morning Hadley"
+```
+
+Then the translator sees something like this:
+
+    msgid "Good morning {name}!"
+    msgstr ""
+
+This gives the translator enough context to create a good translation
+and the freedom to change word order to make a grammatically correct
+sentence in their language. We can make the problem more challenging by
+making our greeting more flexible:
+
+``` r
+greet <- function(name, time_of_day) {
+  paste0(tr_("Good"), " ", time_of_day, " ", name, "!")
+}
+greet("Hadley", tr_("morning"))
+#> [1] "Good morning Hadley!"
+greet("Hadley", tr_("afternoon"))
+#> [1] "Good afternoon Hadley!"
+greet("Hadley", tr_("evening"))
+#> [1] "Good evening Hadley!"
+```
+
+This would generate the following sequence of translations for French:
+
+    msgid "Good"
+    msgstr "Bon"
+
+    msgid "morning"
+    msgstr "matin"
+
+    msgid "afternoon"
+    msgstr "après midi"
+
+    msgid "evening"
+    msgstr "soirée"
+
+Unfortunately this breakdown won’t generate correct French. The three
+greetings should be “Bonjour” for morning and afternoon, and “Bonsoir”
+for evening. There are two problems: good morning and good afternoon
+both use bonjour (even though French has different words for morning and
+afternoon; bon après-midi is used as a farewell), and the two word
+English phrases turn into single French words.
+
+If you were translating to
+[Mongolian](https://twitter.com/khorloobatpurev/status/1458044704130437124)
+you’d face a different problem. While Mongolian uses the same times of
+day, it arranges the words *in the opposite order* to English: “Өглөөний
+мэнд” is morning greetings, “Өдрийн мэнд” is afternoon greetings, and
+“Оройн мэнд” is evening greetings.
+
+Again, we need to resolve this problem by moving away from translating
+fragments and towards translating complete sentences. One way to do that
+here would be to restrict ourselves to a fixed set of time points and
+use [`switch()`](https://rdrr.io/r/base/switch.html) to specify the
+greeting:
+
+``` r
+greet <- function(name, time_of_day) {
+  switch(time_of_day,
+    morning = glue(tr_("Good morning {name}!")),
+    afternoon = glue(tr_("Good afternoon {name}!")),
+    evening = glue(tr_("Good evening {name}!"))
+  )
+}
+```
+
+This works for French (and Mongolian):
+
+    msgstr: "Good morning {name}!"
+    msgid: "Bonjour {name}!"
+
+    msgstr: "Good afternoon {name}!"
+    msgid: "Bonjour {name}!"
+
+    msgstr: "Good evening {name}!"
+    msgid: "Bonsoir {name}!"
+
+However, it’s still not a fully general solution as it assumes that the
+time of day is the most important characteristic of a greeting, and that
+the day is broken down into at most three components. Neither is true in
+general:
+
+- [Danish](https://twitter.com/T_Norin/status/1457975164008898560)
+  breaks the time of day in two six parts: (“morgen”), pre-noon
+  (“formiddag”), noon (“middag”), afternoon (“eftermiddag”), evening
+  (“aften”), and night (“nat”).
+
+- In [Swahili](https://twitter.com/larsplus/status/1457963302982672386),
+  the greeting varies based on the relationship between the people:
+  “Shikamoo” is for young to old, “Hujambo” is for old to young, and
+  “Mambo” is for young to young.
+
+Greetings are particularly challenging to translate because of their
+great cultural variation; fortunately most messages in R packages won’t
+require such nuance.
+
+### `sprintf()` vs `glue()`
+
+In R, there are two common ways to interpolate variables into a string:
+[`sprintf()`](https://rdrr.io/r/base/sprintf.html) and `glue()`. There
+are pros and cons to each:
+
+- Using `glue()` requires an additional, if lightweight, dependency, but
+  gives the translator more context (assuming you use informative names
+  for local variables), and makes it easy to rearrange interpolated
+  components:
+
+      msgid "{first} {second} {third}"
+      msgstr "{third} {first} {second}"
+
+  On the other hand, putting the name of the variable in the translated
+  string means that you can’t change it without updating all your
+  translations, and there’s a small risk of it also getting translated.
+
+- [`sprintf()`](https://rdrr.io/r/base/sprintf.html) is built into base
+  R, so is always available. The downside is that it can be hard to
+  figure out what the sentinels refer to and the syntax for rearranging
+  components (which uses `1$`, `2$`) is somewhat arcane.
+
+      msgid "%s %s %s"
+      msgstr "%3$s %1$s %2$s"
+
+The difference may be more important than you realize – as mentioned
+above, some languages (e.g., Turkish, Korean, and Japanese) assemble
+phrases into sentences in a different order. “I have 7 apples” becomes
+“7りんごをもっています” in Japanese, i.e. “7 apples \[I’m\] holding” –
+the verb & subject switched places. The reordering of templates in your
+messages is going to be quite common if you want your messages available
+in more than a very limited set of languages.
+
+### Un-translatable content
+
+You can use interpolation to avoid including un-translatable components
+like URLs or email addresses into a message. This is good practice
+because it saves work for the translators, makes it easier for them to
+see changes to the text, and avoids the chance of a translator
+accidentally introducing a typo. It works something like this:
+
+``` r
+# Instead of this:
+tr_("See <https://r-project.org> to learn more")
+
+# Try this:
+url <- "https://r-project.org"
+glue(tr_("See <{url}> to learn more"))
+```
+
+Similarly, if you’re generating strings that include in HTML, avoid
+including the HTML in the translated string, and instead translate just
+the words:
+
+``` r
+# Instead of this:
+tr_("<a href='/index.html'>Home page</a>")
+
+# Try this:
+paste0("<a href='/index.html'>", tr_("Home page"), "</a>")
+```
+
+Generally, you want to help the translator spend as much time as
+possible helping you out.
+
+### Googling
+
+It’s worth noting that that non-English messages are often harder to
+Google because few non-English languages have a significant presence on
+StackOverflow. A few suggestions:
+
+- You can give error messages a unique identifier (e.g. numbering). This
+  may be harder to do for “established” packages since adding
+  identifiers might be a breaking change. It could also be a headache to
+  keep track of which numbers have been taken, e.g. in a context of
+  concurrent PRs incrementing the error numbering in parallel.
+- End users can switch to an English locale mid-session by running
+  `Sys.setenv(LANGUAGE = 'en')`: error messages will be produced in
+  English until they set `LANGUAGE` again.
+- You could write a custom error wrapper that produces the error both in
+  English and as a translation.
+
+### Plurals
+
+In English, most nouns have different forms for one item (the singular)
+or more than one item (the plural, also used for zero items). Or, more
+formally, in English the [grammatical
+count](https://en.wikipedia.org/wiki/Grammatical_number) has two forms:
+singular and plural. So you might be tempted to construct a sentence
+like this:
+
+``` r
+cows <- function(n) {
+  if (n == 1) {
+    paste0(n, " cow")
+  } else {
+    paste0(n, " cows")
+  }
+}
+paste("I have ", cows(0))
+#> [1] "I have  0 cows"
+paste("I have ", cows(1))
+#> [1] "I have  1 cow"
+paste("I have ", cows(2))
+#> [1] "I have  2 cows"
+```
+
+But this doesn’t always work, even in English:
+
+``` r
+paste0("There are ", cows(0), " in the field")
+#> [1] "There are 0 cows in the field"
+paste0("There are ", cows(1), " in the field")
+#> [1] "There are 1 cow in the field"
+```
+
+Again, we always want to construct a complete sentence:
+
+``` r
+field_cows <- function(n) {
+  if (n == 1) {
+    fmt <- tr_("There is {n} cow in the field")
+  } else {
+    fmt <- tr_("There are {n} cows in the field")
+  }
+  glue(fmt)
+}
+```
+
+But there’s an additional wrinkle here: while English has singular and
+plural, other languages have different forms like singular (1), dual
+(2), and plural (3 or more), or singular (1), paucal (a few), and plural
+(many). So we need to use a different helper:
+`ngettext(n, singular, plural)`:
+
+``` r
+field_cows <- function(n) {
+  glue(ngettext(n,
+    "There is {n} cow in the field",
+    "There are {n} cows in the field"
+  ))
+}
+```
+
+[`ngettext()`](https://rdrr.io/r/base/gettext.html) generates a special
+form in the `.po` file, which shows both singular and plural forms:
+
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
+
+Then the translator can supply any number of translations. Languages
+that don’t have plurals (e.g. Chinese) only need to supply a single
+translation:
+
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
+    msgstr[0] "田裡有{n}頭牛"
+
+Russian has three forms, so it gets three entries (roughly 1, 2-4, and
+everything else):
+
+    msgid "There is {n} cow in the field"
+    msgid_plural "There are {n} cows in the field"
+    msgstr[0] "В поле {xn} корова"
+    msgstr[1] "В поле {n} коровы"
+    msgstr[2] "В поле {n} коров"
+
+Slovenian and Serbian have four forms, Irish has five forms (learn more
+at [bitesize Irish](https://www.bitesize.irish/blog/counting/)), and
+Arabic has six forms. The rules that define which number get which
+message are quite complex and encoded in the “plural form” that’s
+recorded at the top of the `.po` file and looks something like
+`(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)? 1 : 2).`
+However, this is something the translators need to worry about not you,
+and as speakers of the language they should find it easier to puzzle out
+the rules.
+
+### Collapsed lists
+
+In English we typically lists of items like “a, b, or c”, where the use
+of the serial, or [Oxford](https://en.wikipedia.org/wiki/Serial_comma),
+comma being a hotly debated style preference. European languages follow
+the mostly same form, although none use the Oxford comma, and they
+obviously translate “or”[⁴](#fn4). The
+[and](https://github.com/rossellhayes/and) package takes care of these
+details:
+
+``` r
+library(and)
+values <- c("first", "middle", "last")
+or(values)
+#> [1] "first, middle, and last"
+
+# lang is normally retrieve automatically from the environemtn
+# overriding it here to show what a translation looks like:
+or(values, lang = "fr")
+#> [1] "first, middle ou last"
+```
+
+Which also works will in glue:
+
+``` r
+glue(tr_("`x` must be one of {and(values)}"))
+#> `x` must be one of first, middle and last
+```
+
+------------------------------------------------------------------------
+
+1.  You can tell they have translation capabilities because they include
+    the `domain` argument; behind the scenes they all call
+    [`gettext()`](https://rdrr.io/r/base/gettext.html).
+
+2.  gettext is the underlying library that powers R’s translation
+    system.
+
+3.  If you’re using the “base” style, you could instead write
+    `gettextf("Good morning %s", name)`;
+    [`gettextf()`](https://rdrr.io/r/base/sprintf.html) is a version of
+    [`sprintf()`](https://rdrr.io/r/base/sprintf.html) that translates
+    the first argument.
+
+4.  In Spanish and Italian, the word used varies based on the start of
+    the following word.

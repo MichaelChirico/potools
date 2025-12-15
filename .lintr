@@ -1,32 +1,30 @@
-linters: linters_with_defaults(
-    fixed_regex_linter(),
-    function_argument_linter(),
+linters: all_linters(
+    # TODO(michaelchirico): switch to '='.
+    # assignment_linter('='),
+    assignment_linter = NULL,
+    implicit_assignment_linter(allow_lazy = TRUE, allow_scoped = TRUE),
     implicit_integer_linter(allow_colon = TRUE),
     infix_spaces_linter(exclude_operators = c("=", "*", "/")),
-    # TODO(michaelchirico): Enable once quotes used for parallelism are supported
-    # keyword_quote_linter(),
     line_length_linter(120L),
-    string_boundary_linter(),
-    undesirable_function_linter(c(
-      sapply = NA
-    )),
-    # TODO(michaelchirico): Enable after #2245
-    # unnecessary_nested_if_linter(),
-    assignment_linter = NULL,
     # TODO(michaelchirico): reactivate this and spaces_inside_linter()
     #   once they support 'empty' i argument DT[ , j]
     commas_linter = NULL,
     commented_code_linter = NULL,
-    cyclocomp_linter = NULL,
+    cyclocomp_linter = NULL, # TODO(michaelchirico): fix translate_package().
     # TODO(michaelchirico): reactivate this. far too many
     #   false positives for now.
     indentation_linter = NULL,
+    # TODO(michaelchirico): Enable once quotes used for parallelism are supported
+    keyword_quote_linter = NULL,
+    nonportable_path_linter = NULL,
     object_name_linter = NULL,
-    quotes_linter = NULL, # TODO(michaelchirico): switch to "'",
-    spaces_inside_linter = NULL
+    quotes_linter = NULL, # TODO(michaelchirico): switch to "'"
+    spaces_inside_linter = NULL,
+    todo_comment_linter = NULL # TODO(michaelchirico): [hehe] activate this & assign TODOs bugs
   )
 exclusions: list(
     "inst/pkg",
+    "tests/testthat.R" = list(undesirable_function_linter = Inf),
     "tests/testthat" = list(object_usage_linter = Inf),
     "tests/testthat/test_packages",
     "vignettes" = list(

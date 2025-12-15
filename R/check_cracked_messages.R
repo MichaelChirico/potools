@@ -73,15 +73,15 @@ attr(check_cracked_messages, "diagnostic_tag") =
 # take a call like stop("a", i, "b", j) and suggest
 #   stop(domain=NA, gettextf("a%sb%s", i, j))
 build_gettextf_call = function(e) {
-  call <- as.character(e[[1L]])
+  call_str <- as.character(e[[1L]])
   rest <- e[-1L]
   arg_names <- names(rest)
   if (is.null(arg_names) || all(keep_args <- arg_names %chin% c("", "domain"))) {
-    as.character(glue('{call}(domain=NA, {gettextify(rest)})'))
+    as.character(glue('{call_str}(domain=NA, {gettextify(rest)})'))
   } else {
     # if other arguments, e.g. call., appendLF, immediate. are present, keep them with the right call (#227)
     kwargs = toString(paste(names(rest[!keep_args]), "=", vapply(rest[!keep_args], deparse1, character(1L))))
-    as.character(glue('{call}(domain=NA, {gettextify(rest[keep_args])}, {kwargs})'))
+    as.character(glue('{call_str}(domain=NA, {gettextify(rest[keep_args])}, {kwargs})'))
   }
 }
 

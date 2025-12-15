@@ -265,11 +265,11 @@ get_file_src_messages = function(file, custom_params = NULL) {
 parse_src_keywords = function(spec) {
   if (!length(spec)) return(data.table(NULL))
 
-  if (!all(idx <- grepl("[a-zA-Z0-9_]+:[0-9]+", spec))) {
+  if (!all(kwd_idx <- grepl("[a-zA-Z0-9_]+:[0-9]+", spec))) {
     stopf(
       # nolint next: line_length_linter.
       "Invalid custom translator specification(s): %s.\nAll inputs for src must be key-value pairs like fn:arg1. Custom plural messagers are not yet supported.",
-      toString(spec[!idx])
+      toString(spec[!kwd_idx])
     )
   }
 

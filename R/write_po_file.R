@@ -56,7 +56,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     metadata,
     use_base_rules = use_base_rules
   )
-  return(invisible())
+  invisible()
 }
 
 
@@ -333,13 +333,13 @@ wrap_strings = function(str, width) {
       }
       sub_boundaries = gregexpr('[ !,-./:;?|}](?![ !,-./:;?|}])|[^\'](?=\'?%)', sub_str, perl = TRUE)
       sub_str_widths = nchar(sub_str)
-      lines = vapply(
+      wrap_lines = vapply(
         seq_along(sub_str),
         function(jj) wrap_string(sub_str[jj], sub_boundaries[[jj]], sub_str_widths[jj], width),
         character(1L)
       )
       # stitch sub_str components by re-appending the \n, _inside_ the " arrays, then add the outer-outer " to finish
-      out[ii] = paste0('"', paste(lines, collapse = '\\n"\n"'), '"')
+      out[ii] = paste0('"', paste(wrap_lines, collapse = '\\n"\n"'), '"')
     } else {
       out[ii] = paste0('"', wrap_string(str[ii], boundaries[[ii]], str_widths[ii], width), '"')
     }
@@ -372,21 +372,21 @@ wrap_string = function(str, boundary, str_width, line_width) {
 
   # supplement with the total string width for the case that the last word breaks the width
   boundary = c(boundary, str_width)
-  lines = character()
+  str_lines = character()
 
   # 0 not 1 makes the arithmetic nicer below
   start_char = 0L
   # 2 accounts for two " (added below)
   while (any(wide_idx <- boundary > line_width - 2L)) {
     split_idx = max(which(wide_idx)[1L] - 1L, 1L)
-    lines = c(lines, substr(str, start_char + 1L, start_char + boundary[split_idx]))
+    str_lines = c(str_lines, substr(str, start_char + 1L, start_char + boundary[split_idx]))
     start_char = start_char + boundary[split_idx]
     boundary = tail(boundary, -split_idx) - boundary[split_idx]
   }
-  if (start_char < str_width) lines = c(lines, substr(str, start_char + 1L, str_width))
+  if (start_char < str_width) str_lines = c(str_lines, substr(str, start_char + 1L, str_width))
 
   # wrap only internally here -- for the newline-broken case, we need to build the "outer" wrapper idiosyncratically
-  paste(lines, collapse = '"\n"')
+  paste(str_lines, collapse = '"\n"')
 }
 
 make_src_location <- function(files, lines, message_source, use_base_rules) {

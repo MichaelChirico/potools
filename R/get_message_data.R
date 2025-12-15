@@ -95,6 +95,7 @@ get_message_data = function(
   if (verbose && dir.exists(file.path(dir, "R"))) message('Getting R-level messages...')
   r_message_data = get_r_messages(
     dir,
+    # nolint next: backport_linter. False positive on 'R'.
     custom_translation_functions = custom_translation_functions$R,
     style = style,
     is_base = is_base

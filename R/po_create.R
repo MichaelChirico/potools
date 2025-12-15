@@ -20,13 +20,13 @@ po_create <- function(languages, dir = ".", verbose = !is_testing()) {
   po_files <- po_language_files(languages, dir)
 
   for (ii in seq_len(nrow(po_files))) {
-    row <- po_files[ii]
-    if (file.exists(row$po_path)) {
-      if (verbose) messagef("Updating '%s' %s translation", row$language, row$type)
-      run_msgmerge(row$po_path, row$pot_path, previous = TRUE, verbose = verbose)
+    row_ii <- po_files[ii]
+    if (file.exists(row_ii$po_path)) {
+      if (verbose) messagef("Updating '%s' %s translation", row_ii$language, row_ii$type)
+      run_msgmerge(row_ii$po_path, row_ii$pot_path, previous = TRUE, verbose = verbose)
     } else {
-      if (verbose) messagef("Creating '%s' %s translation", row$language, row$type)
-      run_msginit(row$po_path, row$pot_path, locale = row$language, verbose = verbose)
+      if (verbose) messagef("Creating '%s' %s translation", row_ii$language, row_ii$type)
+      run_msginit(row_ii$po_path, row_ii$pot_path, locale = row_ii$language, verbose = verbose)
     }
   }
 

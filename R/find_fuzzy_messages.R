@@ -6,7 +6,7 @@ find_fuzzy_messages <- function(message_data, lang_file) {
     message('Typically, this means the corresponding error messages have been refactored.')
     message('Reproducing these messages here for your reference since they might still provide some utility.')
 
-    dashes = strrep('-', .9*getOption('width'))
+    dashes = strrep('-', 0.9*getOption('width'))
     old_message_data[idx & type == 'singular', {
       if (.N > 0L) {
         message(' ** SINGULAR MESSAGES **')

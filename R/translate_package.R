@@ -333,15 +333,15 @@ translate_package = function(
   desc_data = get_desc_data(dir)
   package <- desc_data['Package']
   is_base <- package == 'base'
-  version <- desc_data['Version']
+  version <- desc_data['Version'] # nolint: object_overwrite_linter.
 
   po_dir <- file.path(dir, 'po')
   r_potfile <- file.path(po_dir, glue("R-{package}.pot"))
   src_potfile <- file.path(po_dir, sprintf("%s.pot", if (is_base) 'R' else package))
-  update = file.exists(po_dir) && (file.exists(r_potfile) || file.exists(src_potfile))
+  tr_update = file.exists(po_dir) && (file.exists(r_potfile) || file.exists(src_potfile))
 
   if (verbose) {
-    if (update) {
+    if (tr_update) {
       # is it worthwhile to try and distinguish the creation time of the
       #  R pot file and the src pot file? probably not...
       messagef(
@@ -353,7 +353,7 @@ translate_package = function(
       messagef("Starting translations for package '%s'", package)
     }
   }
-  if (!update) dir.create(po_dir, showWarnings = FALSE)
+  if (!tr_update) dir.create(po_dir, showWarnings = FALSE)
 
   message_data = get_message_data(dir, custom_translation_functions, verbose=verbose)
 
@@ -409,7 +409,7 @@ translate_package = function(
     message_data[type == 'plural', 'msgstr_plural' := .(list(rep("", metadata$nplurals)))]
 
     lang_file <- file.path(po_dir, glue("R-{language}.po"))
-    if (update && file.exists(lang_file)) {
+    if (tr_update && file.exists(lang_file)) {
       if (verbose) {
         messagef(
           'Found existing R translations for %s (%s/%s) in %s. Running msgmerge...',
@@ -424,7 +424,7 @@ translate_package = function(
     }
 
     lang_file <- file.path(po_dir, glue("{language}.po"))
-    if (update && file.exists(lang_file)) {
+    if (tr_update && file.exists(lang_file)) {
       if (verbose) {
         messagef(
           'Found existing src translations for %s (%s/%s) in %s. Running msgmerge...',
@@ -522,7 +522,7 @@ translate_package = function(
 
   # TODO: reinstate source marker tags, at least for src .pot file & maybe for R .pot file too?
   po_compile(dir, package, verbose = verbose)
-  return(invisible())
+  invisible()
 }
 
 # take from those present in r-devel:

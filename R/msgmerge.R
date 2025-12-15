@@ -4,7 +4,7 @@
 # https://docs.oracle.com/cd/E36784_01/html/E36870/msgmerge-1.html#scrolltoc
 run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
   check_potools_sys_reqs("msgmerge")
-  args <- c(
+  msgmerge_args <- c(
     "--update", shQuote(path.expand(po_file)),
     "--backup=off",
     if (previous) "--previous", #show previous match for fuzzy matches
@@ -12,9 +12,9 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
   )
 
   if (verbose) {
-    message("Running system command msgmerge ", paste(args, collapse = " "), "...")
+    message("Running system command msgmerge ", paste(msgmerge_args, collapse = " "), "...")
   }
-  val <- system2("msgmerge", args, stdout = TRUE, stderr = TRUE)
+  val <- system2("msgmerge", msgmerge_args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
     warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
@@ -27,7 +27,7 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
     warningf("tools::checkPoFile() found some issues in %s", po_file)
     print(res)
   }
-  return(invisible())
+  invisible()
 }
 
 run_msgfmt = function(po_file, mo_file, verbose) {
@@ -80,7 +80,7 @@ update_en_quot_mo_files <- function(dir, verbose) {
 # https://docs.oracle.com/cd/E36784_01/html/E36870/msginit-1.html#scrolltoc
 run_msginit <- function(po_path, pot_path, locale, width = 80L, verbose = TRUE) {
   check_potools_sys_reqs("msginit")
-  args <- c(
+  msginit_args <- c(
     "-i", shQuote(path.expand(pot_path)),
     "-o", shQuote(path.expand(po_path)),
     "-l", shQuote(locale),
@@ -88,13 +88,13 @@ run_msginit <- function(po_path, pot_path, locale, width = 80L, verbose = TRUE) 
     "--no-translator" # don't consult user-email etc
   )
   if (verbose) {
-    message("Running system command msginit ", paste(args, collapse = " "), "...")
+    message("Running system command msginit ", paste(msginit_args, collapse = " "), "...")
   }
-  val <- system2("msginit", args, stdout = TRUE, stderr = TRUE)
+  val <- system2("msginit", msginit_args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     stopf("Running msginit on '%s' failed", pot_path)
   } else if (verbose) {
     messagef(paste(val, collapse = "\n"))
   }
-  return(invisible())
+  invisible()
 }

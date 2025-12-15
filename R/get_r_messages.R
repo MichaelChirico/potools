@@ -219,11 +219,11 @@ parse_r_keywords = function(spec) {
   named_idx = grepl("^[a-zA-Z0-9._]+\\|[0-9]+$", keyval$V2)
   plural_idx = grepl("^[a-zA-Z0-9._]+\\|[0-9]+,[a-zA-Z0-9._]+\\|[0-9]+$", keyval$V2)
   dots_idx = grepl("^[.]{3}[\\](?:[a-zA-Z0-9._]+,)*[a-zA-Z0-9._]+$", keyval$V2)
-  if (any(idx <- !named_idx & !dots_idx & !plural_idx)) {
+  if (any(bad_idx <- !named_idx & !dots_idx & !plural_idx)) {
     stopf(
       # nolint next: line_length_linter.
       "Invalid custom translator specification(s): %s.\nAll inputs for R must be key-value pairs like fn:arg1|n1[,arg2|n2] or fn:...\\arg1,...,argn.",
-      toString(spec[idx])
+      toString(spec[bad_idx])
     )
   }
 

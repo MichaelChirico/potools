@@ -1,18 +1,10 @@
 linters: all_linters(
-    fixed_regex_linter(),
-    function_argument_linter(),
+    # TODO(michaelchirico): switch to '='.
+    # assignment_linter('='),
     implicit_assignment_linter(allow_lazy = TRUE, allow_scoped = TRUE),
     implicit_integer_linter(allow_colon = TRUE),
     infix_spaces_linter(exclude_operators = c("=", "*", "/")),
     line_length_linter(120L),
-    string_boundary_linter(),
-    # undesirable_function_linter(modify_defaults(
-    #   default_undesirable_functions,
-    #   sapply = NA
-    # )),
-    # TODO(michaelchirico): Enable after #2245
-    # unnecessary_nested_if_linter(),
-    assignment_linter = NULL,
     # TODO(michaelchirico): reactivate this and spaces_inside_linter()
     #   once they support 'empty' i argument DT[ , j]
     commas_linter = NULL,
@@ -25,7 +17,7 @@ linters: all_linters(
     keyword_quote_linter = NULL,
     nonportable_path_linter = NULL,
     object_name_linter = NULL,
-    quotes_linter = NULL, # TODO(michaelchirico): switch to "'",
+    quotes_linter = NULL, # TODO(michaelchirico): switch to "'"
     spaces_inside_linter = NULL,
     todo_comment_linter = NULL # TODO(michaelchirico): [hehe] activate this & assign TODOs bugs
   )

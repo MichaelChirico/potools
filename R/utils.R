@@ -22,7 +22,7 @@ get_desc_data = function(dir, fields = c('Package', 'Version')) {
   if (missing(fields) && (nrow(desc_data) != 1L || anyNA(desc_data))) {
     stopf('%s is not a package (missing Package and/or Version field in DESCRIPTION)', normalizePath(dir))
   }
-  return(drop(desc_data))
+  drop(desc_data)
 }
 
 # msgmerge | msgmerge.R | run_msgmerge()
@@ -76,7 +76,7 @@ check_potools_sys_reqs = function(which = SYSTEM_REQUIREMENTS) {
       toString(which[is_missing]), platform_msg
     ))
   }
-  return(TRUE)
+  TRUE
 }
 # nocov end
 
@@ -87,7 +87,7 @@ list_package_files = function(dir, subdir, subsubdirs = character(), pattern = N
     subsubdir_ = file.path(subdir, subsubdir)
     if (dir.exists(subsubdir_)) files = c(files, file.path(subsubdir, list.files(subsubdir_, pattern = pattern)))
   }
-  return(files)
+  files
 }
 
 # patch analogous fix for Bugzilla#18025 here

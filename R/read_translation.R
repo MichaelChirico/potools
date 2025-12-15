@@ -50,6 +50,7 @@ read_translation = function(msgid, type, file, call, fuzzy, msgstr, metadata) {
       ))
     }
   } else {
+    # nolint next: unnecessary_nesting_linter. False positive due to '='; try removing.
     if (fuzzy == 1L) {
       fuzzy_tag = gettextf(
         "\n **Note: a similar message was previously translated as: **\n%s",
@@ -102,7 +103,7 @@ prompt = function(..., conn = .potools$prompt_conn, require_type = NULL) {
     out = readLines(conn, n=1L, encoding="UTF-8")
     # issue often encountered in dev when adjusting the test packages & things get bumped around...
     # nocov start
-    if (is.na(out)) {
+    if (is.na(out)) { # nolint: unnecessary_nesting_linter. False positive due to '='. Try removing.
       stopf("Connection empty when trying to read prompt %s", do.call(paste, list(...)))
     }
     # nocov end
@@ -113,7 +114,7 @@ prompt = function(..., conn = .potools$prompt_conn, require_type = NULL) {
   if (typeof(out) == require_type) return(out)
 
   messagef("Input must be of type '%s', but received '%s'. Trying again.", require_type, typeof(out))
-  return(prompt(..., conn=conn, require_type=require_type))
+  prompt(..., conn=conn, require_type=require_type)
 }
 
 prompt_with_templates = function(msgid_metadata, prompt_msg) {

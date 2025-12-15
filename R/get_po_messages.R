@@ -84,38 +84,38 @@ get_po_messages <- function(po_file) {
 
   msg_j = 1L
   while (msg_j <= length(msgid_start)) {
-    start = msgid_start[msg_j]
-    end = find_msg_end(start)
-    set(po_data, msg_j, 'msgid', build_msg(start, end, 'msgid'))
+    start_j = msgid_start[msg_j]
+    end_j = find_msg_end(start_j)
+    set(po_data, msg_j, 'msgid', build_msg(start_j, end_j, 'msgid'))
 
-    set(po_data, msg_j, 'fuzzy', as.integer(start != 1L && startsWith(po_lines[start - 1L], "#, fuzzy")))
+    set(po_data, msg_j, 'fuzzy', as.integer(start_j != 1L && startsWith(po_lines[start_j - 1L], "#, fuzzy")))
 
-    start = end + 1L
-    end = find_msg_end(start)
-    set(po_data, msg_j, 'msgstr', build_msg(start, end, 'msgstr'))
+    start_j = end_j + 1L
+    end_j = find_msg_end(start_j)
+    set(po_data, msg_j, 'msgstr', build_msg(start_j, end_j, 'msgstr'))
     msg_j = msg_j + 1L
   }
 
   plural_i = 1L
   while (plural_i <= length(msgid_plural_start)) {
-    start = msgid_plural_start[plural_i]
-    end = find_msg_end(start)
-    msg1 = build_msg(start, end, 'msgid')
+    start_j = msgid_plural_start[plural_i]
+    end_j = find_msg_end(start_j)
+    msg1 = build_msg(start_j, end_j, 'msgid')
 
-    set(po_data, msg_j, 'fuzzy', as.integer(start != 1L && startsWith(po_lines[start - 1L], "#, fuzzy")))
+    set(po_data, msg_j, 'fuzzy', as.integer(start_j != 1L && startsWith(po_lines[start_j - 1L], "#, fuzzy")))
 
-    start = end + 1L
-    end = find_msg_end(start)
-    msg2 = build_msg(start, end, 'msgid_plural')
+    start_j = end_j + 1L
+    end_j = find_msg_end(start_j)
+    msg2 = build_msg(start_j, end_j, 'msgid_plural')
 
     set(po_data, msg_j, 'msgid_plural', list(c(msg1, msg2)))
 
-    start = end + 1L
+    start_j = end_j + 1L
     msgstr_plural = character()
-    while (start <= po_length && startsWith(po_lines[start], 'msgstr[')) {
-      end = find_msg_end(start)
-      msgstr_plural = c(msgstr_plural, build_msg(start, end, 'msgstr\\[\\d+\\]'))
-      start = end + 1L
+    while (start_j <= po_length && startsWith(po_lines[start_j], 'msgstr[')) {
+      end_j = find_msg_end(start_j)
+      msgstr_plural = c(msgstr_plural, build_msg(start_j, end_j, 'msgstr\\[\\d+\\]'))
+      start_j = end_j + 1L
     }
     set(po_data, msg_j, 'msgstr_plural', list(msgstr_plural))
 
@@ -125,11 +125,9 @@ get_po_messages <- function(po_file) {
 
   # somewhat hacky approach -- strip the comment markers & recurse;
   #   retain the same file pattern to ensure 'message_source' is correct
-  writeLines(
-    gsub("^#~ ", "", grep("^#~ ", po_lines, value = TRUE)),
-    tmp <- tempfile(pattern = basename(po_file))
-  )
+  tmp <- tempfile(pattern = basename(po_file))
   on.exit(unlink(tmp))
+  writeLines(gsub("^#~ ", "", grep("^#~ ", po_lines, value = TRUE)), tmp)
   deprecated = get_po_messages(tmp)
   if (nrow(deprecated) > 0L) {
     set(deprecated, NULL, 'fuzzy', 2L)

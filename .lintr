@@ -1,6 +1,7 @@
 linters: all_linters(
     # TODO(michaelchirico): switch to '='.
     # assignment_linter('='),
+    assignment_linter = NULL,
     implicit_assignment_linter(allow_lazy = TRUE, allow_scoped = TRUE),
     implicit_integer_linter(allow_colon = TRUE),
     infix_spaces_linter(exclude_operators = c("=", "*", "/")),

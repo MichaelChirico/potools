@@ -32,7 +32,14 @@
 po_update <- function(dir = ".", lazy = TRUE, verbose = !is_testing()) {
   meta <- get_po_metadata(dir)
   if (lazy) {
-    meta <- meta[is_outdated(meta$pot, meta$po)]
+    is_old <- is_outdated(meta$pot, meta$po)
+    if (verbose) {
+      for (ii in which(!is_old)) {
+        row_ii <- meta[ii]
+        catf("Skipping '%s' %s translation (up-to-date)\n", row_ii$language, row_ii$type)
+      }
+    }
+    meta <- meta[is_old]
   }
 
   for (ii in seq_len(nrow(meta))) {

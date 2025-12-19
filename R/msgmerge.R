@@ -12,14 +12,14 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
   )
 
   if (verbose) {
-    message("Running system command msgmerge ", paste(msgmerge_args, collapse = " "), "...")
+    catf("Running system command msgmerge %s ...\n", paste(msgmerge_args, collapse = " "))
   }
   val <- system2("msgmerge", msgmerge_args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
     warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
   } else if (verbose) {
-    messagef(paste(val, collapse = "\n"))
+    writeLines(val)
   }
 
   res <- tools::checkPoFile(po_file, strictPlural = TRUE)
@@ -45,7 +45,7 @@ run_msgfmt = function(po_file, mo_file, verbose) {
     cmd = glue("msgfmt -o {shQuote(mo_file)} {shQuote(po_file)}") # nocov
   }
   if (verbose) {
-    message("Running system command ", cmd, "...")
+    catf("Running system command %s ...\n", cmd)
   }
   if (system(cmd) != 0L) {
     warningf(
@@ -88,13 +88,13 @@ run_msginit <- function(po_path, pot_path, locale, width = 80L, verbose = TRUE) 
     "--no-translator" # don't consult user-email etc
   )
   if (verbose) {
-    message("Running system command msginit ", paste(msginit_args, collapse = " "), "...")
+    catf("Running system command msginit %s...\n", paste(msginit_args, collapse = " "))
   }
   val <- system2("msginit", msginit_args, stdout = TRUE, stderr = TRUE)
   if (!identical(attr(val, "status", exact = TRUE), NULL)) {
     stopf("Running msginit on '%s' failed", pot_path)
   } else if (verbose) {
-    messagef(paste(val, collapse = "\n"))
+    writeLines(val)
   }
   invisible()
 }

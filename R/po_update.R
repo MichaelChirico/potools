@@ -37,7 +37,7 @@ po_update <- function(dir = ".", lazy = TRUE, verbose = !is_testing()) {
 
   for (ii in seq_len(nrow(meta))) {
     row_ii <- meta[ii]
-    if (verbose) messagef("Updating '%s' %s translation", row_ii$language, row_ii$type)
+    if (verbose) catf("Updating '%s' %s translation\n", row_ii$language, row_ii$type)
     run_msgmerge(row_ii$po, row_ii$pot, previous = TRUE, verbose = verbose)
   }
 

@@ -36,7 +36,7 @@ write_po_files <- function(message_data, po_dir, params, template = FALSE, use_b
     ))
   }
 
-  if (verbose) messagef('Writing %s', r_file)
+  if (verbose) catf('Writing %s\n', r_file)
 
   write_po_file(
     message_data[message_source == "R"],

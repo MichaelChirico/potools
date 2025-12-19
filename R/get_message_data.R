@@ -92,7 +92,7 @@ get_message_data = function(
     }
   }
 
-  if (verbose && dir.exists(file.path(dir, "R"))) message('Getting R-level messages...')
+  if (verbose && dir.exists(file.path(dir, "R"))) cat('Getting R-level messages...\n')
   r_message_data = get_r_messages(
     dir,
     # nolint next: backport_linter. False positive on 'R'.
@@ -101,7 +101,7 @@ get_message_data = function(
     is_base = is_base
   )
 
-  if (verbose && dir.exists(file.path(dir, "src"))) message('Getting src-level messages...')
+  if (verbose && dir.exists(file.path(dir, "src"))) cat('Getting src-level messages...\n')
   src_message_data = get_src_messages(
     dir,
     custom_translation_functions = custom_translation_functions$src,

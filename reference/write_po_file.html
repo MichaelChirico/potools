@@ -212,8 +212,8 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">message_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_message_data.html">get_message_data</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'pkg'</span>, package<span class="op">=</span><span class="st">'potools'</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Getting R-level messages...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Getting src-level messages...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Getting R-level messages...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Getting src-level messages...</span>
 <span class="r-in"><span><span class="va">desc_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dcf.html" class="external-link">read.dcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'pkg'</span>, <span class="st">'DESCRIPTION'</span>, package<span class="op">=</span><span class="st">'potools'</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Package'</span>, <span class="st">'Version'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu">po_metadata</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  package <span class="op">=</span> <span class="va">desc_data</span><span class="op">[</span>, <span class="st">"Package"</span><span class="op">]</span>, version <span class="op">=</span> <span class="va">desc_data</span><span class="op">[</span>, <span class="st">"Version"</span><span class="op">]</span>,</span></span>
@@ -314,8 +314,8 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> msgstr ""</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Project-Id-Version: potoolsExample 0.0.1\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2025-12-15 18:38+0000\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: 2025-12-15 18:38+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2025-12-19 09:05+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: 2025-12-19 09:05+0000\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Last-Translator: R User &lt;ruser@gmail.com&gt;\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language-Team: ar_SY\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language: ar_SY\n"</span>
@@ -334,8 +334,8 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> msgstr ""</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Project-Id-Version: potoolsExample 0.0.1\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2025-12-15 18:38+0000\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: 2025-12-15 18:38+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2025-12-19 09:05+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: 2025-12-19 09:05+0000\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Last-Translator: R User &lt;ruser@gmail.com&gt;\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language-Team: ar_SY\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language: ar_SY\n"</span>
@@ -363,7 +363,7 @@ intentional to make it more cumbersome to create non-UTF-8 files.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> msgstr ""</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Project-Id-Version: potoolsExample 0.0.1\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2025-12-15 18:38+0000\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "POT-Creation-Date: 2025-12-19 09:05+0000\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Last-Translator: FULL NAME &lt;EMAIL@ADDRESS&gt;\n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "Language-Team: LANGUAGE &lt;LL@li.org&gt;\n"</span>

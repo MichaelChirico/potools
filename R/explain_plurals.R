@@ -24,10 +24,11 @@ po_explain_plurals <- function(language, index) {
 
   plural_metadata = .potools$PLURAL_RANGE_STRINGS[language_metadata, .SD, on = "plural"]
   if (missing(index)) {
-    language_metadata[, message(domain = NA, sprintf(
+    language_metadata[, messagef(
       ngettext(nplurals, "%s (%s) has %d plural form.", "%s (%s) has %d plural forms."),
-      full_name_eng, full_name_native, nplurals
-    ))]
+      full_name_eng, full_name_native, nplurals,
+      domain = NA
+    )]
     plural_metadata[, message(domain = NA, paste(
       gettextf("  - plural_index = %d applies %s", plural_index, range_translation = gettext(range)),
       collapse = "\n"

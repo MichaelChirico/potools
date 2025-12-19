@@ -344,13 +344,13 @@ translate_package = function(
     if (tr_update) {
       # is it worthwhile to try and distinguish the creation time of the
       #  R pot file and the src pot file? probably not...
-      messagef(
-        "Updating translation template for package '%s' (last updated %s)",
+      catf(
+        "Updating translation template for package '%s' (last updated %s)\n",
         package,
         format(file.info(r_potfile)$atime)
       )
     } else {
-      messagef("Starting translations for package '%s'", package)
+      catf("Starting translations for package '%s'\n", package)
     }
   }
   if (!tr_update) dir.create(po_dir, showWarnings = FALSE)
@@ -358,7 +358,7 @@ translate_package = function(
   message_data = get_message_data(dir, custom_translation_functions, verbose=verbose)
 
   if (!nrow(message_data)) {
-    if (verbose) message('No messages to translate; finishing')
+    if (verbose) cat('No messages to translate; finishing\n')
     return(invisible())
   }
 
@@ -369,7 +369,7 @@ translate_package = function(
   set_prompt_conn()
   on.exit(unset_prompt_conn())
 
-  if (verbose) message('Running message diagnostics...')
+  if (verbose) cat('Running message diagnostics...\n')
 
   for (diagnostic in diagnostics) {
     diagnostic <- match.fun(diagnostic)
@@ -387,13 +387,13 @@ translate_package = function(
   if (l10n_info()[["UTF-8"]]) {
     # on UTF-8 machines we install the en@quot messages too
     # TODO: streamline this -- en_quote is definitely doing some redundant stuff
-    message('Generating en@quot translations')
+    cat('Generating en@quot translations\n')
     update_en_quot_mo_files(dir, verbose)
   }
 
 
   if (is.null(languages)) {
-    if (verbose) message('No languages provided; finishing')
+    if (verbose) cat('No languages provided; finishing\n')
     return(invisible())
   }
 
@@ -411,8 +411,8 @@ translate_package = function(
     lang_file <- file.path(po_dir, glue("R-{language}.po"))
     if (tr_update && file.exists(lang_file)) {
       if (verbose) {
-        messagef(
-          'Found existing R translations for %s (%s/%s) in %s. Running msgmerge...',
+        catf(
+          'Found existing R translations for %s (%s/%s) in %s. Running msgmerge...\n',
           language, metadata$full_name_eng, metadata$full_name_native, lang_file
         )
       }
@@ -426,8 +426,8 @@ translate_package = function(
     lang_file <- file.path(po_dir, glue("{language}.po"))
     if (tr_update && file.exists(lang_file)) {
       if (verbose) {
-        messagef(
-          'Found existing src translations for %s (%s/%s) in %s. Running msgmerge...',
+        catf(
+          'Found existing src translations for %s (%s/%s) in %s. Running msgmerge...\n',
           language, metadata$full_name_eng, metadata$full_name_native, lang_file
         )
       }
@@ -448,15 +448,15 @@ translate_package = function(
     ]
 
     if (!length(new_idx)) {
-      if (verbose) messagef('Translations for %s are up to date! Skipping.', language)
+      if (verbose) catf('Translations for %s are up to date! Skipping.\n', language)
       next
     }
     if (verbose) {
-      messagef(
-        'Beginning new translations for %s (%s/%s); found %d untranslated messages',
+      catf(
+        'Beginning new translations for %s (%s/%s); found %d untranslated messages\n',
         language, metadata$full_name_eng, metadata$full_name_native, length(new_idx)
       )
-      message("(To quit translating, press 'Esc'; progress will be saved)")
+      cat("(To quit translating, press 'Esc'; progress will be saved)\n")
     }
 
     po_params$author = prompt('Thanks! Who should be credited with these translations?')

@@ -22,10 +22,10 @@ po_create <- function(languages, dir = ".", verbose = !is_testing()) {
   for (ii in seq_len(nrow(po_files))) {
     row_ii <- po_files[ii]
     if (file.exists(row_ii$po_path)) {
-      if (verbose) messagef("Updating '%s' %s translation", row_ii$language, row_ii$type)
+      if (verbose) catf("Updating '%s' %s translation\n", row_ii$language, row_ii$type)
       run_msgmerge(row_ii$po_path, row_ii$pot_path, previous = TRUE, verbose = verbose)
     } else {
-      if (verbose) messagef("Creating '%s' %s translation", row_ii$language, row_ii$type)
+      if (verbose) catf("Creating '%s' %s translation\n", row_ii$language, row_ii$type)
       run_msginit(row_ii$po_path, row_ii$pot_path, locale = row_ii$language, verbose = verbose)
     }
   }

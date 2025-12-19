@@ -24,8 +24,8 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
     to_delete <- mo_dirs[!basename(mo_dirs) %in% c(po_metadata$language, "en@quot")]
 
     for (dir in to_delete) {
-      if (verbose) messagef(
-        "Found a compiled translation for %s at %s, but no corresponding .po; deleting",
+      if (verbose) catf(
+        "Found a compiled translation for %s at %s, but no corresponding .po; deleting\n",
         basename(dir), dirname(dir)
       )
       unlink(dir, recursive = TRUE)
@@ -34,7 +34,7 @@ po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
 
   for (ii in seq_len(nrow(po_metadata))) {
     row_ii <- po_metadata[ii]
-    if (verbose) messagef("Recompiling '%s' %s translation", row_ii$language, row_ii$type)
+    if (verbose) catf("Recompiling '%s' %s translation\n", row_ii$language, row_ii$type)
     run_msgfmt(row_ii$po, row_ii$mo, verbose = verbose)
   }
 

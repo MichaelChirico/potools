@@ -3,9 +3,11 @@
 update_metadata = function(language) {
   metadata = data.table(code = language)
 
-  messagef("'%s' is not a known language. ", language, appendLF=FALSE)
   # perhaps refer to http://docs.translatehouse.org/projects/localization-guide/en/latest/l10n/pluralforms.html instead
-  message("Please help supply some metadata about it. You can check https://l10n.gnome.org/teams/<language>")
+  catf(
+    "'%s' is not a known language. Please help supply some metadata about it. You can check %s.\n",
+    language, "https://l10n.gnome.org/teams/<language>"
+  )
   metadata[ , "full_name_eng" := prompt("How would you refer to this language in English?")]
   metadata[ , "full_name_native" := prompt("How would you refer to this language in the language itself?")]
   metadata[ , "nplurals" := prompt(
@@ -38,7 +40,7 @@ update_metadata = function(language) {
   }
   .potools$KNOWN_LANGUAGES = rbind(.potools$KNOWN_LANGUAGES, metadata)
   setkeyv(.potools$KNOWN_LANGUAGES, "code")
-  message("Thanks! Please file an issue on GitHub to get this language recognized permanently")
+  cat("Thanks! Please file an issue on GitHub to get this language recognized permanently\n")
   metadata
 }
 

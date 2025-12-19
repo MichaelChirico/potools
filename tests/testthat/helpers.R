@@ -16,7 +16,7 @@ restore_package <- function(dir, expr, tmp_conn) {
     on.exit(options(old), add = TRUE)
   }
 
-  invisible(capture.output(expr))
+  invisible(expr)
 }
 
 # TODO: I think this can just be replaced by expect_match and expect_no_match in current testthat dev

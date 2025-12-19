@@ -25,25 +25,32 @@ test_that("translate_package handles empty packages", {
     {
       expect_invisible(translate_package(pkg))
 
-      expect_message(translate_package(pkg, verbose=TRUE), "No messages to translate", fixed=TRUE)
+      expect_output(
+        translate_package(pkg, verbose=TRUE),
+        "No messages to translate",
+        fixed=TRUE
+      )
     }
   )
 
   # a package with no R directory (e.g. a data package)
   restore_package(
     pkg <- test_package("r_data_pkg"),
-    expect_message(translate_package(pkg, verbose=TRUE), "No messages to translate", fixed=TRUE)
+    expect_output(
+      translate_package(pkg, verbose=TRUE),
+      "No messages to translate",
+      fixed=TRUE
+    )
   )
 })
 
-test_that("translate_package works on a simple package", {
-  # simple run-through without doing translations
+test_that("works on a simple package (simple run-through without doing translations)", {
   restore_package(
     pkg <- test_package("r_msg"),
     {
-      expect_messages(
+      expect_output(
         translate_package(pkg, verbose=TRUE),
-        c("No languages provided"),
+        "No languages provided",
         fixed = TRUE
       )
 
@@ -52,26 +59,36 @@ test_that("translate_package works on a simple package", {
       pot_file <- "po/R-rMsg.pot"
       expect_true(pot_file %in% pkg_files)
       # testing gettextf's ... arguments are skipped
-      expect_all_match(readLines(file.path(pkg, pot_file)), "don't translate me", invert=TRUE, fixed=TRUE)
+      expect_no_match(readLines(file.path(pkg, pot_file)), "don't translate me", fixed=TRUE)
 
       # Non-UTF-8 machines don't run en@quot translations by default.
       #   Mostly applies to Windows, but can also apply to Unix
       #   (e.g. r-devel-linux-x86_64-debian-clang on CRAN), #191
       if (l10n_info()[["UTF-8"]]) {
-        expect_match(pkg_files, "inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", all = FALSE)
+        expect_match(pkg_files, "inst/po/en@quot/LC_MESSAGES/R-rMsg.mo", all=FALSE)
       }
     }
   )
-  # do translations with mocked input
-  prompts <- restore_package(
-    pkg,
+})
+
+test_that("works on a simple package (including with translations)", {
+  restore_package(
+    pkg <- test_package("r_msg"),
     tmp_conn = mock_translation("test-translate-package-r_msg-1.input"),
     {
-      expect_messages(
-        translate_package(pkg, "zh_CN", verbose=TRUE),
-        c("Beginning new translations", "BEGINNING TRANSLATION", "Recompiling 'zh_CN' R translation"),
+      expect_message(
+        {
+          translation_log <- capture.output(translate_package(pkg, "zh_CN", verbose=TRUE))
+        },
+        "BEGINNING TRANSLATION",
         fixed = TRUE
       )
+
+      expect_match(translation_log, "^---^", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "^^", fixed=TRUE, all=FALSE)
+      
+      expect_match(translation_log, "Beginning new translations", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "Recompiling 'zh_CN' R translation", fixed=TRUE, all=FALSE)
 
       pkg_files <- list.files(pkg, recursive = TRUE)
 
@@ -86,13 +103,13 @@ test_that("translate_package works on a simple package", {
       expect_match(zh_translations, "该起床了", all = FALSE)
     }
   )
-  expect_all_match(prompts, c("^---^", "^^"), fixed=TRUE)
+})
 
-  # all translations already done
+test_that("works on a simple package where translations are already done", {
   restore_package(
-    pkg,
+    pkg <- test_package("r_msg"),
     {
-      expect_messages(
+      expect_output(
         translate_package(pkg, "fa", verbose=TRUE),
         "Translations for fa are up to date! Skipping",
         fixed = TRUE
@@ -103,120 +120,125 @@ test_that("translate_package works on a simple package", {
 
 test_that("translate_package works on package with outdated (fuzzy) translations", {
   # simple run-through without doing translations
-  prompts = restore_package(
+  restore_package(
     pkg <- test_package("r_fuzzy"),
     tmp_conn = mock_translation("test-translate-package-r_fuzzy-1.input"),
     {
-      expect_messages(
-        translate_package(pkg, "zh_CN", verbose=TRUE),
-        c("translations marked as deprecated", "SINGULAR MESSAGES", "PLURAL MESSAGES"),
-        fixed = TRUE
+      expect_message(
+        expect_message(
+          {
+            translation_log <- capture.output(translate_package(pkg, "zh_CN", verbose=TRUE))
+          },
+          "translations marked as deprecated",
+          fixed = TRUE
+        ),
+        "BEGINNING TRANSLATION"
       )
+
+      expect_match(translation_log, "SINGULAR MESSAGES", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "PLURAL MESSAGES", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "a similar message was previously translated as", fixed=TRUE, all=FALSE)
     }
   )
-  expect_match(prompts, "a similar message was previously translated as", all=FALSE)
 })
 
 # NB: keep this test here (not in test-diagnostics) to keep coverage of the diagnostic flow in translate_package()
 test_that("translate_package identifies potential translations in cat() calls", {
-  prompts = restore_package(
+  restore_package(
     pkg <- test_package("r_cat_msg"),
     tmp_conn = mock_translation("test-translate-package-r_cat_message-1.input"),
     {
-      expect_messages(
-        translate_package(pkg, "zh_CN"),
+      expect_message(
+        {
+          translation_log <- capture.output(translate_package(pkg, "zh_CN"))
+        },
         "Found 4 untranslated messaging calls passed through cat()",
         fixed = TRUE
       )
+      expect_match(translation_log, 'cat(gettext("I warned you!"), fill=TRUE)', fixed=TRUE, all=FALSE)
+      expect_match(translation_log, 'cat(gettext("Oh no you\\ndon\'t!"))', fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "Hixxboss", fixed=TRUE, all=FALSE)
+      expect_no_match(translation_log, "shouldn't be translated", fixed=TRUE)
+      expect_no_match(translation_log, "Miss me", fixed=TRUE)
     }
-  )
-  expect_all_match(
-    prompts,
-    c(
-      'cat(gettext("I warned you!"), fill=TRUE)',
-      'cat(gettext("Oh no you\\ndon\'t!"))',
-      "Hixxboss"
-    ),
-    fixed=TRUE
-  )
-  expect_all_match(
-    prompts,
-    c("shouldn't be translated", "Miss me"),
-    fixed=TRUE, invert=TRUE
   )
 })
 
+# NB: this test will fail if test_that is re-run on the same R session since potools'
+#   internal state is altered for the remainder of the session... not sure it's worth changing...
 test_that('Unknown language flow works correctly', {
-  prompts = restore_package(
+  restore_package(
     pkg <- test_package('r_msg'),
     tmp_conn = mock_translation('test-translate-package-r_msg-2.input'),
     {
-      expect_messages(
-        # earlier, did Arabic, but now that's a chosen language. switched two Welsh on the
-        #   (perhaps naive) judgment that it's unlikely to enter our scope anytime soon
-        #   and because there are still several (4) plural forms
-        translate_package(pkg, 'cy'),
-        c(
-          'not a known language', 'Please file an issue',
-          # NB: this test will fail if test_that is re-run on the same R session since potools'
-          #   internal state is altered for the remainder of the session... not sure it's worth changing...
-          "Did not match any known 'plural's"
+      # earlier, did Arabic, but now that's a chosen language. switched two Welsh on the
+      #   (perhaps naive) judgment that it's unlikely to enter our scope anytime soon
+      #   and because there are still several (4) plural forms
+      expect_message(
+        expect_message(
+          {
+            translation_log <- capture.output(translate_package(pkg, 'cy'))
+          },
+          "Did not match any known 'plural's",
+          fixed=TRUE
         ),
-        fixed=TRUE
+        "Input must be of type.*Trying again"
       )
-    }
-  )
-  # also include coverage tests of incorrect templating in supplied translations
-  expect_all_match(
-    prompts,
-    c(
-      'How would you refer to this language in English?',
-      'received the same set of templates',
-      'received 2 unique templated arguments',
-      'received 4 unique templated arguments',
-      'received 5 unique templated arguments'
-    ),
-    fixed=TRUE
-  )
 
-  # whitespace matching for plural is lenient, #183
-  prompts = restore_package(
-    pkg <- test_package('r_msg'),
-    tmp_conn = mock_translation('test-translate-package-r_msg-5.input'),
-    {
-      expect_messages(
-        # Catalan -- romance language with >1 plural
-        translate_package(pkg, 'ca', diagnostics=NULL),
-        c("Did not match any known 'plural's"),
-        fixed=TRUE, invert=TRUE
-      )
+      expect_match(translation_log, 'not a known language', fixed=TRUE, all=FALSE)
+      expect_match(translation_log, 'Please file an issue', fixed=TRUE, all=FALSE)
+
+      # also include coverage tests of incorrect templating in supplied translations
+      expect_match(translation_log, 'How would you refer to this language in English?', fixed=TRUE, all=FALSE)
+      expect_match(translation_log, 'received the same set of templates', fixed=TRUE, all=FALSE)
+      expect_match(translation_log, 'received 2 unique templated arguments', fixed=TRUE, all=FALSE)
+      expect_match(translation_log, 'received 4 unique templated arguments', fixed=TRUE, all=FALSE)
+      expect_match(translation_log, 'received 5 unique templated arguments', fixed=TRUE, all=FALSE)
     }
-  )
-  expect_all_match(
-    prompts,
-    c("when n = 1", "when n is not 1"),
-    fixed = TRUE
   )
 })
 
-test_that('Erroneous messages stop get_specials_metadata', {
+test_that('Whitespace matching for plural is lenient in unknown language flow, #183', {
+  restore_package(
+    pkg <- test_package('r_msg'),
+    tmp_conn = mock_translation('test-translate-package-r_msg-5.input'),
+    {
+      translation_log <- capture.output(translate_package(pkg, 'ca', diagnostics=NULL))
+
+      # Catalan -- romance language with >1 plural
+      expect_no_match(translation_log, "Did not match any known 'plural's", fixed=TRUE)
+      expect_match(translation_log, "when n = 1", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "when n is not 1", fixed=TRUE, all=FALSE)
+    }
+  )
+})
+
+test_that('Erroneous messages stop get_specials_metadata (invalid templated message)', {
   restore_package(
     pkg <- test_package('r_msg'),
     tmp_conn = mock_translation('test-translate-package-r_msg-3.input'),
     {
       expect_error(
-        translate_package(pkg, 'zh_CN', diagnostics = NULL),
+        expect_output(
+          translate_package(pkg, 'zh_CN', diagnostics = NULL),
+          "Writing R-rMsg.pot", fixed = TRUE
+        ),
         'Invalid templated message. If any %N$', fixed = TRUE
       )
     }
   )
+})
 
+test_that('Erroneous messages stop get_specials_metadata (all messages point to the same input)', {
   restore_package(
     pkg <- test_package('r_msg'),
     tmp_conn = mock_translation('test-translate-package-r_msg-4.input'),
     {
       expect_error(
-        translate_package(pkg, 'zh_CN', diagnostics = NULL),
+        expect_output(
+          translate_package(pkg, 'zh_CN', diagnostics = NULL),
+          "Writing R-rMsg.pot", fixed = TRUE
+        ),
         'all messages pointing to the same input', fixed = TRUE
       )
     }
@@ -224,11 +246,18 @@ test_that('Erroneous messages stop get_specials_metadata', {
 })
 
 test_that("Packages with src code work correctly", {
-  prompts = restore_package(
+  restore_package(
     pkg <- test_package('r_src_c'),
     tmp_conn = mock_translation('test-translate-package-r_src_c-1.input'),
     {
-      translate_package(pkg, "zh_CN", diagnostics = check_untranslated_src)
+      translation_log <- capture.output(
+        translate_package(pkg, "zh_CN", diagnostics=check_untranslated_src)
+      )
+      expect_match(translation_log, "Rprintf(_(", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "warning(_(", fixed=TRUE, all=FALSE)
+
+      # error(ngettext(...)) doesn't show error() in check_untranslated_src
+      expect_no_match(translation_log, "Problematic call", fixed=TRUE)
 
       pkg_files <- list.files(pkg, recursive = TRUE)
       expect_true("po/R-zh_CN.po" %in% pkg_files)
@@ -278,37 +307,21 @@ test_that("Packages with src code work correctly", {
       )
     }
   )
-
-  expect_all_match(
-    prompts,
-    c("Rprintf(_(", "warning(_("),
-    fixed = TRUE
-  )
-
-  # error(ngettext(...)) doesn't show error() in check_untranslated_src
-  expect_all_match(
-    prompts,
-    "Problematic call",
-    invert = TRUE, fixed = TRUE
-  )
 })
 
 test_that("Packages with src code & fuzzy messages work", {
-  prompts = restore_package(
+  restore_package(
     pkg <- test_package("r_src_fuzzy"),
     tmp_conn = mock_translation('test-translate-package-r_src_fuzzy-1.input'),
     {
-      expect_messages(
-        translate_package(pkg, "zh_CN", verbose = TRUE),
-        "Found existing src translations",
-        fixed = TRUE
+      expect_output(
+        expect_message(
+          translate_package(pkg, "zh_CN", verbose = TRUE),
+          "BEGINNING TRANSLATION", fixed = TRUE
+        ),
+        "Found existing src translations.*Note: a similar message was previously translated as"
       )
     }
-  )
-  expect_all_match(
-    prompts,
-    "Note: a similar message was previously translated as",
-    fixed = TRUE
   )
 })
 
@@ -317,7 +330,10 @@ test_that("Various edge cases in retrieving/outputting messages in R files are h
   restore_package(
     pkg <- test_package("unusual_msg"),
     {
-      translate_package(pkg, diagnostics = NULL)
+      expect_output(
+        translate_package(pkg, diagnostics = NULL),
+        "Writing R-rMsgUnusual.pot", fixed=TRUE
+      )
 
       r_pot_file <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_file <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
@@ -385,7 +401,11 @@ test_that("use_base_rules=FALSE produces our preferred behavior", {
     pkg <- test_package("unusual_msg"),
     tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
-      translate_package(pkg, "es", copyright = "Mata Hari", diagnostics = NULL)
+      expect_output(
+        translate_package(pkg, "es", copyright = "Mata Hari", diagnostics = NULL),
+        "Writing R-rMsgUnusual.pot", fixed=TRUE
+      )
+
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
@@ -425,7 +445,11 @@ test_that("use_base_rules=TRUE produces base-aligned behavior", {
     pkg <- test_package("unusual_msg"),
     tmp_conn = mock_translation("test-translate-package-unusual_msg-1.input"),
     {
-      translate_package(pkg, "es", use_base_rules = TRUE, diagnostics = NULL)
+      expect_output(
+        translate_package(pkg, "es", use_base_rules = TRUE, diagnostics = NULL),
+        "R-rMsgUnusual.pot", fixed=TRUE
+      )
+
       r_pot_lines <- readLines(file.path(pkg, "po", "R-rMsgUnusual.pot"))
       src_pot_lines <- readLines(file.path(pkg, "po", "rMsgUnusual.pot"))
 
@@ -470,7 +494,10 @@ test_that("use_base_rules is auto-detected", {
   restore_package(
     pkg <- test_package("r-devel/src/library/grDevices"),
     {
-      translate_package(pkg, diagnostics = NULL)
+      expect_output(
+        translate_package(pkg, diagnostics = NULL),
+        "Writing R-grDevices.pot", fixed=TRUE
+      )
 
       r_pot_lines <- readLines(file.path(pkg, 'po', 'R-grDevices.pot'))
       src_pot_lines <- readLines(file.path(pkg, 'po', 'grDevices.pot'))
@@ -529,7 +556,10 @@ test_that("translation of 'base' works correctly", {
       file.copy(tmp_potfiles, correct_potfiles)
       on.exit(unlink(tmp_potfiles), add = TRUE)
 
-      translate_package(pkg, diagnostics = NULL)
+      expect_output(
+        translate_package(pkg, diagnostics = NULL),
+        "Writing R-base.pot", fixed=TRUE
+      )
 
       expect_true(file.exists(file.path(pkg, 'po', 'R-base.pot')))
       expect_true(file.exists(file.path(pkg, 'po', 'R.pot')))
@@ -555,16 +585,14 @@ test_that("translation of 'base' works correctly", {
 })
 
 test_that("max_translations works as expected", {
-  prompts <- restore_package(
+  restore_package(
     pkg <- test_package("r_msg"),
     tmp_conn = mock_translation('test-translate-package-r_msg-1.input'),
     {
-      translate_package(pkg, 'es', max_translations = 1L, diagnostics = NULL)
+      translation_log <- capture.output(
+        translate_package(pkg, 'es', max_translations = 1L, diagnostics = NULL)
+      )
+      expect_no_match(translation_log, "Oh no you don't!")
     }
-  )
-  expect_all_match(
-    prompts,
-    "Oh no you don't!",
-    fixed = TRUE, invert = TRUE
   )
 })

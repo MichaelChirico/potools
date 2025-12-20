@@ -379,6 +379,37 @@ the words:</p>
 possible helping you out.</p>
 </div>
 <div class="section level3">
+<h3 id="skipping-translation">Skipping translation<a class="anchor" aria-label="anchor" href="#skipping-translation"></a>
+</h3>
+<p>Another way to help translators is to not ask them to translate
+things that don’t need translation. There are three ways to suppress
+translation extraction, all using comments:</p>
+<ul>
+<li>
+<p>Add <code># notranslate</code> to the end of a line to prevent
+any messages on that line from being extracted.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Don't extract this message</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"A message for the developer"</span><span class="op">)</span> <span class="co"># notranslate</span></span></code></pre></div>
+</li>
+<li>
+<p>You can also surround a block of code with
+<code># notranslate start</code> and <code># notranslate end</code>. Any
+messages inside that block will not be extracted.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># notranslate start</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"A message for the developer"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Another message for the developer"</span><span class="op">)</span></span>
+<span><span class="co"># notranslate end</span></span></code></pre></div>
+<p>This is useful when you have a block of code that generates messages
+that are not intended for the user.</p>
+</li>
+</ul>
+<p>The same comment works in both R and C/C++ code; in the latter case,
+note that it must be part of a normal C comment,
+e.g. <code>// # notranslate</code>.</p>
+</div>
+<div class="section level3">
 <h3 id="googling">Googling<a class="anchor" aria-label="anchor" href="#googling"></a>
 </h3>
 <p>It’s worth noting that that non-English messages are often harder to
@@ -405,7 +436,7 @@ singular) or more than one item (the plural, also used for zero items).
 Or, more formally, in English the <a href="https://en.wikipedia.org/wiki/Grammatical_number" class="external-link">grammatical
 count</a> has two forms: singular and plural. So you might be tempted to
 construct a sentence like this:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>, <span class="st">" cow"</span><span class="op">)</span></span>
@@ -420,13 +451,13 @@ construct a sentence like this:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"I have "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "I have  2 cows"</span></span></code></pre></div>
 <p>But this doesn’t always work, even in English:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, <span class="st">" in the field"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "There are 0 cows in the field"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"There are "</span>, <span class="fu">cows</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="st">" in the field"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "There are 1 cow in the field"</span></span></code></pre></div>
 <p>Again, we always want to construct a complete sentence:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">fmt</span> <span class="op">&lt;-</span> <span class="fu">tr_</span><span class="op">(</span><span class="st">"There is {n} cow in the field"</span><span class="op">)</span></span>
@@ -440,7 +471,7 @@ and plural, other languages have different forms like singular (1), dual
 (2), and plural (3 or more), or singular (1), paucal (a few), and plural
 (many). So we need to use a different helper:
 <code>ngettext(n, singular, plural)</code>:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_cows</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">glue</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/gettext.html" class="external-link">ngettext</a></span><span class="op">(</span><span class="va">n</span>,</span>
 <span>    <span class="st">"There is {n} cow in the field"</span>,</span>
@@ -485,7 +516,7 @@ mostly same form, although none use the Oxford comma, and they obviously
 translate “or”<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;In Spanish and Italian, the word used varies based on
 the start of the following word.&lt;/p&gt;"><sup>4</sup></a>. The <a href="https://github.com/rossellhayes/and" class="external-link">and</a> package takes care of
 these details:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pkg.rossellhayes.com/and/" class="external-link">and</a></span><span class="op">)</span></span>
 <span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"middle"</span>, <span class="st">"last"</span><span class="op">)</span></span>
 <span><span class="fu">or</span><span class="op">(</span><span class="va">values</span><span class="op">)</span></span>
@@ -496,7 +527,7 @@ these details:</p>
 <span><span class="fu">or</span><span class="op">(</span><span class="va">values</span>, lang <span class="op">=</span> <span class="st">"fr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "first, middle ou last"</span></span></code></pre></div>
 <p>Which also works will in glue:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">glue</span><span class="op">(</span><span class="fu">tr_</span><span class="op">(</span><span class="st">"`x` must be one of {and(values)}"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `x` must be one of first, middle and last</span></span></code></pre></div>
 </div>

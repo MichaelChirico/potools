@@ -93,6 +93,13 @@ A `data.table` with the following schema:
 - `is_templated`, `logical`, whether the string is templatable (e.g.,
   uses `%s` or other formatting markers)
 
+## Skipping translation
+
+It is possible to skip translation for certain messages by adding a
+comment with `# notranslate` on the same line as the message. For more
+details, see the "Skipping translation" section in
+[`vignette("developers", package = "potools")`](https://michaelchirico.github.io/potools/articles/developers.md).
+
 ## See also
 
 [`translate_package()`](https://michaelchirico.github.io/potools/reference/translate_package.md),

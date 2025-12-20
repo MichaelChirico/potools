@@ -5,7 +5,7 @@
 
 .sandbox
 
-potools.Rcheck
+*.Rcheck
 potools_*.tar.gz
 
 tests/testthat/testthat-problems.rds

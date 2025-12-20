@@ -5,6 +5,11 @@
 #' [data.table::data.table()] to facilitate
 #' analyzing this corpus as such.
 #'
+#' @section Skipping translation:
+#' It is possible to skip translation for certain messages by adding a
+#' comment with `# notranslate` on the same line as the message. For more
+#' details, see the "Skipping translation" section in
+#' `vignette("developers", package = "potools")`.
 #'
 #' @param dir Character, default the present directory; a directory in which an
 #' R package is stored.
@@ -56,6 +61,7 @@
 #' @author Michael Chirico
 #' @seealso [`translate_package()`][translate_package],
 #' [`write_po_file()`][write_po_file]
+#' @aliases notranslate
 #' @examples
 #'
 #' pkg <- system.file('pkg', package = 'potools')

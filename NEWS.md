@@ -1,3 +1,10 @@
+# potools (in development)
+
+## Notes
+
+* Better documentation of the `# notranslate` feature to skip extraction of certain messages, e.g.
+  those not intended to be seen by end users or consisting only of symbols (#316).
+
 # potools 0.2.4 (October 2023)
 
 ## New features

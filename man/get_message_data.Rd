@@ -2,6 +2,7 @@
 % Please edit documentation in R/get_message_data.R
 \name{get_message_data}
 \alias{get_message_data}
+\alias{notranslate}
 \title{Extract user-visible messages from a package}
 \usage{
 get_message_data(
@@ -71,6 +72,14 @@ user-visible messages and compiles them as a
 \code{\link[data.table:data.table]{data.table::data.table()}} to facilitate
 analyzing this corpus as such.
 }
+\section{Skipping translation}{
+
+It is possible to skip translation for certain messages by adding a
+comment with \verb{# notranslate} on the same line as the message. For more
+details, see the "Skipping translation" section in
+\code{vignette("developers", package = "potools")}.
+}
+
 \examples{
 
 pkg <- system.file('pkg', package = 'potools')

@@ -270,6 +270,35 @@ paste0("<a href='/index.html'>", tr_("Home page"), "</a>")
 
 Generally, you want to help the translator spend as much time as possible helping you out.
 
+### Skipping translation
+
+Another way to help translators is to not ask them to translate things that don't need translation.
+There are three ways to suppress translation extraction, all using comments:
+
+*   Add `# notranslate` to the end of a line to prevent any messages on that line from being
+    extracted.
+
+    ```r
+    # Don't extract this message
+    message("A message for the developer") # notranslate
+    ```
+
+*   You can also surround a block of code with `# notranslate start` and `# notranslate end`.
+    Any messages inside that block will not be extracted.
+
+    ```r
+    # notranslate start
+    message("A message for the developer")
+    message("Another message for the developer")
+    # notranslate end
+    ```
+    
+    This is useful when you have a block of code that generates messages that are not intended for
+    the user.
+
+The same comment works in both R and C/C++ code; in the latter case, note that it must be part of a
+normal C comment, e.g. `// # notranslate`.
+
 ### Googling
 
 It's worth noting that that non-English messages are often harder to Google because few non-English languages have a significant presence on StackOverflow.

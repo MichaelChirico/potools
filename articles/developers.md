@@ -75,7 +75,8 @@ message("This", " is", " a", " message")
 warning("This", " is", " a", " warning")
 #> Warning: This is a warning
 stop("This", " is", " an", " error")
-#> Error: This is an error
+#> Error:
+#> ! This is an error
 ```
 
 However, as you’ll learn shortly, this style is unlikely to generate
@@ -147,6 +148,50 @@ advice about how to write good messages, as inspired by the “[Preparing
 translatable
 strings](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20))”
 section of the gettext[²](#fn2) manual.
+
+One important point is to avoid templating out sentence fragments,
+especially words. Put message pieces into a template if and only if they
+are untranslatable (e.g., proper nouns, function names/R code).
+
+For example, it is bad practice to conditionally template a word or
+phrase into a message:
+
+``` r
+# BAD
+in_parallel <- TRUE
+run_type <- if (in_parallel) "in parallel" else "sequentially"
+sprintf(tr_("Running job %s."), run_type)
+#> [1] "Running job in parallel."
+```
+
+The translator only sees `"Running job %s."`, and cannot adapt the
+translation for the two cases. It’s much better to use two different,
+complete messages:
+
+``` r
+# GOOD
+in_parallel <- TRUE
+if (in_parallel) {
+  tr_("Running job in parallel.")
+} else {
+  tr_("Running job sequentially.")
+}
+#> [1] "Running job in parallel."
+```
+
+This gives the translator full context. Why is this important? Because
+different words can require entirely different sentence structures in
+other languages. For example, in Polish, “to run \[a job\] sequentially”
+can be expressed with a specific verb, `szeregować`. A natural
+translation of “Running job sequentially.” might be “Szeregowanie
+zadania.”. For “Running job in parallel.”, one would likely use a
+different verb and structure, like “Uruchamianie zadania równolegle.”.
+
+The template in the “BAD” example is too rigid. It forces the translator
+to find a single translation for “Running job %s.” that works with both
+“sequentially” and “in parallel”, which is unnatural and may not even be
+possible. The “GOOD” example, by providing two distinct sentences,
+allows the translator to pick the most idiomatic phrasing for each case.
 
 ### Write full sentences
 

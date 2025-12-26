@@ -332,7 +332,7 @@ for examples of diagnostics.
 <https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Internationalization>  
 <https://cran.r-project.org/doc/manuals/r-release/R-ints.html#Internationalization-in-the-R-sources>  
 <https://developer.r-project.org/Translations30.html>  
-<https://web.archive.org/web/20230108213934/https://www.isi-web.org/resources/glossary-of-statistical-terms>  
+<https://isi-web.org/glossary>  
 <https://www.gnu.org/software/gettext/>  
 <https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes>  
 <https://www.gnu.org/software/gettext/manual/html_node/Country-Codes.html#Country-Codes>  

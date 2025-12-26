@@ -324,7 +324,7 @@ rm(pkg, tmp_pkg)
 \cr
 \url{https://cran.r-project.org/doc/manuals/r-release/R-ints.html#Internationalization-in-the-R-sources}
 \cr \url{https://developer.r-project.org/Translations30.html} \cr
-\url{https://web.archive.org/web/20230108213934/https://www.isi-web.org/resources/glossary-of-statistical-terms} \cr
+\url{https://isi-web.org/glossary} \cr
 \url{https://www.gnu.org/software/gettext/} \cr
 \url{https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes}
 \cr

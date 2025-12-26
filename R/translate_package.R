@@ -268,7 +268,7 @@
 #' \cr
 #' <https://cran.r-project.org/doc/manuals/r-release/R-ints.html#Internationalization-in-the-R-sources>
 #' \cr <https://developer.r-project.org/Translations30.html> \cr
-#' <https://web.archive.org/web/20230108213934/https://www.isi-web.org/resources/glossary-of-statistical-terms> \cr
+#' <https://isi-web.org/glossary> \cr
 #' <https://www.gnu.org/software/gettext/> \cr
 #' <https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html#Usual-Language-Codes>
 #' \cr

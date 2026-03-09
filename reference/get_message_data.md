@@ -2,7 +2,7 @@
 
 This function looks in the R and src directories of a package for
 user-visible messages and compiles them as a
-[`data.table::data.table()`](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+[`data.table::data.table()`](https://rdrr.io/pkg/data.table/man/data.table.html)
 to facilitate analyzing this corpus as such.
 
 ## Usage

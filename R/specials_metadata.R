@@ -100,6 +100,7 @@ format.specials_metadata = function(x, ...) {
 
 # target: msgid [template translation]
 # current: msgstr [received translation]
+#' @method all.equal specials_metadata
 #' @export
 all.equal.specials_metadata = function(target, current, ...) {
   if (nrow(target) != nrow(current)) return(gettextf(

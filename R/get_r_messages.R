@@ -11,10 +11,8 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
   # strip quotation marks now rather than deal with that at write time.
   expr_data[token == 'STR_CONST', text := clean_text(text)]
 
-  setindexv(expr_data, c("file", "line1", "col1", "line2", "col2"))
   setindexv(expr_data, c("file", "id"))
   setindexv(expr_data, c("file", "parent"))
-  setindexv(expr_data, c("token", "text"))
 
   # skip # notranslate lines / blocks
   # comments assigned here & re-used below
@@ -117,15 +115,43 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
     expr_data, on = c('file', parent = 'id'),
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
-  # need to strip comments for build_call, see #59.
-  msg[ , by = c('file', 'line1', 'col1', 'line2', 'col2'),
-    call := build_call(
-      file_lines[[.BY$file]],
-      # match any comments between line1 & line2
-      comments[.(.BY$file, .BY$line1:.BY$line2), .SD, nomatch=NULL],
-      params = .BY
-    )
-  ]
+  u_calls = unique(msg[ , .(file, line1, col1, line2, col2)])
+  calls = character(nrow(u_calls))
+  is_single = u_calls$line1 == u_calls$line2
+
+  if (any(is_single)) {
+    single_idx = which(is_single)
+    for (f in unique(u_calls$file[single_idx])) {
+      f_idx = single_idx[u_calls$file[single_idx] == f]
+      flines = file_lines[[f]]
+      l_nums = u_calls$line1[f_idx]
+      c1 = u_calls$col1[f_idx]
+      c2 = u_calls$col2[f_idx]
+
+      lines_subset = flines[l_nums]
+      if (any(grepl("\t", lines_subset, fixed = TRUE))) {
+        lines_subset = vapply(lines_subset, adjust_tabs, character(1L), USE.NAMES = FALSE)
+      }
+      calls[f_idx] = substr(lines_subset, c1, c2)
+    }
+  }
+
+  if (any(!is_single)) {
+    multi_idx = which(!is_single)
+    for (ii in multi_idx) {
+      f = u_calls$file[ii]
+      l1 = u_calls$line1[ii]
+      c1 = u_calls$col1[ii]
+      l2 = u_calls$line2[ii]
+      c2 = u_calls$col2[ii]
+      flines = file_lines[[f]]
+      cm = comments[.(f, l1:l2), nomatch = NULL]
+      calls[ii] = build_call(flines, cm, list(line1 = l1, col1 = c1, line2 = l2, col2 = c2))
+    }
+  }
+
+  u_calls[ , "call" := calls]
+  msg[u_calls, on = c('file', 'line1', 'col1', 'line2', 'col2'), call := i.call]
 
   # these are the parent's stats
   msg[ , c('parent', 'line1', 'line2', 'col1', 'col2') := NULL]
@@ -316,16 +342,23 @@ get_dots_strings = function(expr_data, funs, arg_names,
 
   # as we search the AST "below" call_neighbors, drop whichever of the excluded expr parents we find.
   #   practically speaking, this is how we disassociate "hi" from stop() in stop(gettext("hi"))
-  exclude_parents = expr_data[
-    expr_data[token == 'SYMBOL_FUNCTION_CALL' & text %chin% exclude, .(file, parent)],
-    on = c('file', id = 'parent'),
-    .(file, id = x.parent)
-  ]
-  # lop off these expr so they can't be found later
-  expr_data = expr_data[!exclude_parents, on = c('file', 'id')]
-
-  # drop '(', ')', ',', and now-orphaned SYMBOL_SUB/EQ_SUB
-  call_neighbors = call_neighbors[token == 'expr'][!exclude_parents, on = c('file', 'id')]
+  exclude_tokens = expr_data[token == 'SYMBOL_FUNCTION_CALL' & text %chin% exclude]
+  if (nrow(exclude_tokens)) {
+    exclude_parents = expr_data[
+      exclude_tokens,
+      on = c('file', id = 'parent'),
+      .(file, id = x.parent)
+    ]
+    if (nrow(exclude_parents)) {
+      # lop off these expr so they can't be found later
+      expr_data = expr_data[!exclude_parents, on = c('file', 'id')]
+      call_neighbors = call_neighbors[token == 'expr'][!exclude_parents, on = c('file', 'id')]
+    } else {
+      call_neighbors = call_neighbors[token == 'expr']
+    }
+  } else {
+    call_neighbors = call_neighbors[token == 'expr']
+  }
   setnames(call_neighbors, 'parent', 'ancestor')
 
   get_strings_from_expr(call_neighbors, expr_data, recursive = recursive)
@@ -378,31 +411,34 @@ get_named_arg_strings = function(expr_data, fun, args, recursive = FALSE, plural
 }
 
 get_strings_from_expr = function(target_expr, expr_data, recursive = FALSE) {
-  strings = string_schema()
+  str_list = list(string_schema())
   while (nrow(target_expr) > 0L) {
     target_expr = expr_data[
       target_expr, on = c('file', parent = 'id'),
       .(file, ancestor = i.ancestor, fname = i.fname, id = x.id, token = x.token, text = x.text)
     ]
-    strings = rbind(
-      strings,
-      target_expr[
-        token == 'STR_CONST',
-        .(file, parent = ancestor, id, fname, msgid = text)
-      ],
-      fill = TRUE
-    )
+    str_consts = target_expr[
+      token == 'STR_CONST',
+      .(file, parent = ancestor, id, fname, msgid = text)
+    ]
+    if (nrow(str_consts)) {
+      str_list[[length(str_list) + 1L]] = str_consts
+    }
     # much cleaner to do this tiny check a small number (e.g. nesting level of 10-15) times
     #   repetitively rather than make a whole separate branch for the once-and-done case
     if (!recursive) break
     target_expr = target_expr[token == "expr"]
   }
-  strings
+  rbindlist(str_list, fill = TRUE)
 }
 
 get_call_args = function(expr_data, calls) {
+  call_tokens = expr_data[token == "SYMBOL_FUNCTION_CALL" & text %chin% calls]
+  if (!nrow(call_tokens)) {
+    return(expr_data[0L, .(file, id, parent, token, text, fname = character())])
+  }
   msg_call_exprs = expr_data[
-    expr_data[token == "SYMBOL_FUNCTION_CALL" & text %chin% calls],
+    call_tokens,
     on = c('file', id = 'parent'),
     .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent, fname = i.text)
   ]
@@ -414,15 +450,13 @@ get_call_args = function(expr_data, calls) {
       .(file, parent = x.parent, token = x.token)
     ]
     # filter out calls like l$stop("x"), keep calls like base::stop("x")
-    msg_call_expr_children = msg_call_expr_children[
-      , by = .(file, parent),
-      # filter .SD here to ensure one row per file/parent, otherwise we get duplicates below
-      if (.N == 1L || 'NS_GET' %chin% token) .SD[token == 'SYMBOL_FUNCTION_CALL']
+    valid_parents = msg_call_expr_children[
+      , if (.N == 1L || 'NS_GET' %chin% token) .(parent = parent[1L]),
+      by = .(file, parent)
     ]
     msg_call_exprs = msg_call_exprs[
-      msg_call_expr_children,
-      on = c('file', call_expr_id = 'parent'),
-      .(file, call_id, call_expr_id, call_parent_id, fname)
+      valid_parents,
+      on = c('file', call_expr_id = 'parent')
     ]
   }
   msg_call_neighbors = expr_data[
@@ -433,29 +467,33 @@ get_call_args = function(expr_data, calls) {
 }
 
 get_named_args = function(calls_data, expr_data, target_args) {
-  # NB: use this instead of flipping the join order since that will find
-  #   a SYMBOL_SUB for every expr rather than an expr for every SYMBOL_SUB. The
-  #   former might return multiple rows if domain= is followed by more named args.
-  #   important in the current logic because we do drop_suppressed before
-  #   running this again, at which point there will be orphaned SYMBOL_SUB
+  sub_data = calls_data[token == "SYMBOL_SUB" & text %chin% target_args]
+  if (!nrow(sub_data)) {
+    return(calls_data[0L, .(file, parent, id, fname, arg_name = character(), arg_value = character())])
+  }
   # summary: rolling backwards from the expr id to the corresponding SYMBOL_SUB id
   named_args = calls_data[token == "expr"][
-    calls_data[token == "SYMBOL_SUB" & text %chin% target_args],
+    sub_data,
     on = c('file', 'parent', 'id'), roll = -Inf,
     .(file, parent, id = x.id, fname = x.fname, arg_name = i.text)
   ]
-  named_args[expr_data, on = c('file', id = 'parent'), arg_value := i.text][]
+  if (nrow(named_args)) {
+    named_args[ , arg_value := expr_data[named_args, on = c('file', parent = 'id'), mult = 'last', x.text]]
+  } else {
+    named_args[ , arg_value := character()]
+  }
+  named_args
 }
 
 drop_suppressed_and_named = function(calls_data, expr_data, target_args) {
   named_args = get_named_args(calls_data, expr_data, target_args)
+  if (!nrow(named_args)) return(calls_data)
   # strip away calls where domain=NA by dropping the common parent's immediate children;
   #   nested expressions without domain=NA will still be there
-  calls_data = calls_data[
-    # text == "NA" implicitly filtering non-literal arg values since those <expr> nodes will have empty text
-    !named_args[arg_name == "domain" & arg_value == "NA"],
-    on = c('file', 'parent')
-  ]
+  suppressed = named_args[arg_name == "domain" & arg_value == "NA"]
+  if (nrow(suppressed)) {
+    calls_data = calls_data[!suppressed, on = c('file', 'parent')]
+  }
   # strip away any other expr associated with named args (note join to id, not parent)
   calls_data[!named_args, on = c('file', 'id')]
 }
@@ -516,16 +554,21 @@ clean_text = function(x) {
     '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^(?s)["\'](.*)["\']$',
     '\\1\\2', x, perl = TRUE
   )
-  # there may be others, these are the main ones... lookback since actual escaped \\n shouldn't be replaced.
-  #   an non-perl approach with capture groups like (^|[^\\])[\\]n fails on consecutive \\n\\n due to greediness
-  x = gsub("(?:^|(?<![\\\\]))[\\\\]n", "\n", x, perl = TRUE)
-  x = gsub("(?:^|(?<![\\\\]))[\\\\]t", "\t", x, perl = TRUE)
-  # maybe stop() instead? \r is blocked by gettext...
-  x = gsub("(?:^|(?<![\\\\]))[\\\\]r", "\r", x, perl = TRUE)
-  # quotes that are escaped _in the text_ are not escaped _in R_ (i.e., after parsing),
-  #   e.g. in 'a string with an \"escaped\" quote', the escapes for " disappear after parsing. See #128
-  x = gsub("(?:^|(?<![\\\\]))[\\\\](['\"])", "\\1", x, perl = TRUE)
-  x = gsub('\\\\', '\\', x, fixed = TRUE)
+  has_bs = grepl('\\', x, fixed = TRUE)
+  if (any(has_bs)) {
+    xb = x[has_bs]
+    # there may be others, these are the main ones... lookback since actual escaped \\n shouldn't be replaced.
+    #   an non-perl approach with capture groups like (^|[^\\])[\\]n fails on consecutive \\n\\n due to greediness
+    xb = gsub("(?:^|(?<![\\\\]))[\\\\]n", "\n", xb, perl = TRUE)
+    xb = gsub("(?:^|(?<![\\\\]))[\\\\]t", "\t", xb, perl = TRUE)
+    # maybe stop() instead? \r is blocked by gettext...
+    xb = gsub("(?:^|(?<![\\\\]))[\\\\]r", "\r", xb, perl = TRUE)
+    # quotes that are escaped _in the text_ are not escaped _in R_ (i.e., after parsing),
+    #   e.g. in 'a string with an \"escaped\" quote', the escapes for " disappear after parsing. See #128
+    xb = gsub("(?:^|(?<![\\\\]))[\\\\](['\"])", "\\1", xb, perl = TRUE)
+    xb = gsub('\\\\', '\\', xb, fixed = TRUE)
+    x[has_bs] = xb
+  }
   x
 }
 

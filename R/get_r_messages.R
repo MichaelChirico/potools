@@ -131,9 +131,12 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
     }
 
     for (i in which(!single_mask)) {
-      l1 = line1[i]; c1 = col1[i]; l2 = line2[i]; c2 = col2[i]
-      cm = if (nrow(file_comm)) file_comm[line1 >= l1 & line1 <= l2] else file_comm[0L]
-      res[i] = build_call(flines, cm, list(line1 = l1, col1 = c1, line2 = l2, col2 = c2))
+      cm = if (nrow(file_comm)) {
+        file_comm[line1 >= l1 & line1 <= l2, env = list(l1 = line1[i], l2 = line2[i])]
+      } else {
+        file_comm[0L]
+      }
+      res[i] = build_call(flines, cm, .SD[i])
     }
     res
   }, by = file]

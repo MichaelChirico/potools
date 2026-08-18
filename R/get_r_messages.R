@@ -124,8 +124,7 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
     single_mask = line1 == line2
     if (any(single_mask)) {
       lines_sub = flines[line1[single_mask]]
-      has_tabs = grepl("\t", lines_sub, fixed = TRUE)
-      if (any(has_tabs)) {
+      if (any(has_tabs <- grepl("\t", lines_sub, fixed = TRUE))) {
         lines_sub[has_tabs] = vapply(lines_sub[has_tabs], adjust_tabs, character(1L), USE.NAMES = FALSE)
       }
       res[single_mask] = substr(lines_sub, col1[single_mask], col2[single_mask])

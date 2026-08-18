@@ -391,7 +391,7 @@ wrap_string = function(str, boundary, str_width, line_width) {
 
 make_src_location <- function(files, lines, message_source, use_base_rules) {
   if (use_base_rules && message_source == "R") return("")
-  s <- paste(glue("{files}:{lines}"), collapse = " ")
+  s <- paste(paste0(files, ":", lines), collapse = " ")
   # branch above implies use_base_rules => message_source == "src"
   # 77 = 80 - nchar("#: "). 80 not 79 is for strwrap. NB: strwrap("012 345", width=4)
   paste0("#: ", if (use_base_rules) strwrap(s, width=77L) else s, "\n", collapse="")

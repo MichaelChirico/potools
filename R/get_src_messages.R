@@ -350,9 +350,9 @@ preprocess = function(contents) {
 
 is_outside_char_array = function(char_pos, arrays) {
   if (char_pos[1L] < 0L) return(logical())
-
-  charDT = data.table(start = char_pos, end = char_pos)
-  is.na(foverlaps(charDT, arrays, by.x = c('start', 'end'), which = TRUE)$yid)
+  if (!nrow(arrays)) return(rep(TRUE, length(char_pos)))
+  idx = findInterval(char_pos, arrays$array_start)
+  idx == 0L | char_pos > arrays$array_end[pmax(1L, idx)]
 }
 
 drop_excluded = function(msg_data, exclusions) {
@@ -383,12 +383,11 @@ match_parens = function(file, contents, arrays) {
     gregexpr("[()]", contents, perl = TRUE)[[1L]],
     gregexpr("(?<=')[()](?=')", contents, perl = TRUE)[[1L]]
   )
-  all_parens = data.table(paren_start = paren_locs, paren_end = paren_locs, key = c("paren_start", "paren_end"))
-  # exclude parens inside arrays, which needn't be balanced
-  in_array = foverlaps(arrays, all_parens, nomatch = NULL, which = TRUE)$yid
-  if (length(in_array)) {
-    all_parens = all_parens[-in_array]
+  if (nrow(arrays) && length(paren_locs) && paren_locs[1L] > 0L) {
+    idx = findInterval(paren_locs, arrays$array_start)
+    paren_locs = paren_locs[idx == 0L | paren_locs > arrays$array_end[pmax(1L, idx)]]
   }
+  all_parens = data.table(paren_start = paren_locs, paren_end = paren_locs, key = c("paren_start", "paren_end"))
 
   # goal: associate lparens with their corresponding rparen. rparens assigned end=-1 for the %in% step below to work
   all_parens[ , "lparen" := substring(contents, paren_start, paren_start) == "("]

@@ -54,9 +54,8 @@ pot_paths <- function(dir, type, package = NULL) {
   }
 
 }
-po_prefix <- function(type = c("R", "src")) {
-  data.table::fifelse(type == "R", "R-", "")
-}
+po_prefix <- function(type = c("R", "src")) fifelse(type == "R", "R-", "")
+
 pot_types <- function(dir = ".") {
   types <- c("R", "src")
   types[file.exists(pot_paths(dir, types))]

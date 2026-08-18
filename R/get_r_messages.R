@@ -1,105 +1,116 @@
 # Spiritual cousin version of tools::{x,xn}gettext. Instead of iterating the AST
-#   as R objects, do so from the parse data given by utils::getParseData().
+#   as R objects or flat table rows, do so using xmlparsedata and xml2 with XPath.
 get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = FALSE, style = c("base", "explicit")) {
   style <- match.arg(style)
 
-  expr_data <- rbindlist(lapply(parse_r_files(dir, is_base), getParseData), idcol = 'file')
-  # R-free package (e.g. a data package) fails, #56
-  if (!nrow(expr_data)) return(r_message_schema())
+  parsed_files <- parse_r_files(dir, is_base)
+  if (!length(parsed_files)) return(r_message_schema())
 
-  setkeyv(expr_data, "file")
-  # strip quotation marks now rather than deal with that at write time.
-  expr_data[token == 'STR_CONST', text := clean_text(text)]
-
-  setindexv(expr_data, c("file", "id"))
-  setindexv(expr_data, c("file", "parent"))
-
-  # skip # notranslate lines / blocks
-  # comments assigned here & re-used below
-  # NB: at the R level, each COMMENT token is restricted to a single line
-  comments = expr_data[token == "COMMENT"]
-  setkeyv(comments, c("file", "line1", "line2"))
-  expr_data = exclude_untranslated(expr_data, comments)
-
-  # on the XML tree, messaging calls look like
-  # <expr>    <- parent of 'msg_call_neighbors'
-  #   <expr>  <- 'msg_call_exprs'; might also be a more complicated expression here e.g. for base::stop()
-  #     <SYMBOL_FUNCTION_CALL>stop</SYMBOL_FUNCTION_CALL>
-  #   </expr>
-  #   <OP-LEFT-PAREN>(</OP-LEFT-PAREN>
-  #   <!-- here is an unnamed argument -->
-  #   <expr> ... </expr>
-  #   <OP-COMMA>,</OP-COMMA>
-  #   <!-- the following three are a named argument -->
-  #   <SYMBOL_SUB>domain</SYMBOL_SUB>
-  #   <EQ_SUB>=</SYMBOL_SUB>
-  #   <expr> ... </expr>
-  #   <!-- mix and match those two types indefinitely -->
-  #   <OP-RIGHT-PAREN>)</OP-RIGHT-PAREN>
-  # </expr>
   dots_funs <- domain_dots_funs(use_conditions = style == "base")
   fmt_funs <- domain_fmt_funs(use_conditions = style == "base")
-
-  singular_strings = rbind(
-    get_dots_strings(expr_data, dots_funs, NON_DOTS_ARGS),
-    # treat gettextf separately since it takes a named argument, and we ignore ...
-    get_named_arg_strings(expr_data, fmt_funs, c(fmt = 1L), recursive = TRUE),
-    # TODO: drop recursive=FALSE option now that exclude= is available? main purpose of recursive=
-    #   was to block cat(gettextf(...)) usage right?
-    get_dots_strings(expr_data, 'cat', c("file", "sep", "fill", "labels", "append"), recursive = FALSE)
-  )
-  plural_strings = get_named_arg_strings(expr_data, 'ngettext', c(msg1 = 2L, msg2 = 3L), plural = TRUE)
-
-  if (style == "explicit") {
-    tr_ <- get_dots_strings(expr_data, 'tr_', character(), recursive = TRUE)
-    tr_n <- get_named_arg_strings(expr_data, 'tr_n', c(singular = 2L, plural = 3L), plural = TRUE)
-
-    singular_strings <- rbind(singular_strings, tr_)
-    plural_strings <- rbind(plural_strings, tr_n)
-  }
-
-  # for plural strings, the ordering within lines doesn't really matter since there's only one .pot entry,
-  #   so just use the parent's location to get the line number
-  plural_strings[ , id := parent]
-
-  # TODO: how hard would it be to run it all at once? i.e. create a fun-arg lookup table and "vectorize" over that
-  #   all at once and for all functions? it would speed things up a bit & also get around the hand-waving now where
-  #   we just specify NON_DOTS_ARGS the same for all the translators (even though they have different signatures)
   if (length(custom_translation_functions)) {
-    custom_params = parse_r_keywords(custom_translation_functions)
-
-    singular_strings = rbind(
-      singular_strings,
-      rbindlist(lapply(
-        custom_params$singular$dots,
-        function(params) get_dots_strings(expr_data, params$fname, params$excluded_args)
-      )),
-      rbindlist(lapply(
-        custom_params$singular$named,
-        function(params) get_named_arg_strings(expr_data, params$fname, params$args)
-      ))
-    )
-
-    plural_strings = rbind(
-      plural_strings,
-      rbindlist(lapply(
-        custom_params$plural,
-        function(params) get_named_arg_strings(expr_data, params$fname, params$args, plural = TRUE)
-      ))
-    )
+    custom_params <- parse_r_keywords(custom_translation_functions)
   } else {
-    custom_params = list()
+    custom_params <- list()
   }
 
-  msg = rbind(
-    singular = singular_strings,
-    plural = plural_strings,
-    idcol = 'type'
-  )
+  msg_list <- list()
 
+  for (f in names(parsed_files)) {
+    p <- parsed_files[[f]]
+    xml_str <- xml_parse_data(p)
+    if (!length(xml_str) || !nzchar(xml_str)) next
+
+    doc <- read_xml(xml_str)
+
+    # 1. skip # notranslate lines / blocks
+    comments <- xml_find_all(doc, "//COMMENT")
+    if (length(comments)) {
+      comm_texts <- xml_text(comments)
+      comm_lines <- as.integer(xml_attr(comments, "line1"))
+
+      inline_mask <- grepl("# notranslate", comm_texts, fixed = TRUE)
+      inline_lines <- unique(comm_lines[inline_mask])
+
+      start_mask <- grepl("# notranslate start", comm_texts, fixed = TRUE)
+      end_mask <- grepl("# notranslate end", comm_texts, fixed = TRUE)
+      starts <- data.table(file = f, line1 = comm_lines[start_mask])
+      ends <- data.table(file = f, line1 = comm_lines[end_mask])
+
+      ranges <- build_exclusion_ranges(starts, ends)
+
+      excl_lines <- inline_lines
+      if (nrow(ranges)) {
+        for (ri in seq_len(nrow(ranges))) {
+          s <- ranges$start[ri]
+          e <- ranges$end[ri]
+          if (s < e - 1L) {
+            excl_lines <- c(excl_lines, (s + 1L):(e - 1L))
+          }
+        }
+      }
+      excl_lines <- unique(excl_lines)
+
+      if (length(excl_lines)) {
+        excl_str <- paste(sprintf("@line1='%d'", excl_lines), collapse = " or ")
+        del_nodes <- xml_find_all(doc, sprintf("//expr[%s]", excl_str))
+        xml_remove(del_nodes)
+      }
+    }
+
+    # 2. Extract messaging calls
+    dots_res <- extract_dots_from_doc(doc, f, dots_funs, NON_DOTS_ARGS, recursive = TRUE)
+    fmt_res  <- extract_named_from_doc(doc, f, fmt_funs, c(fmt = 1L), recursive = TRUE, plural = FALSE)
+    cat_res  <- extract_dots_from_doc(doc, f, "cat", c("file", "sep", "fill", "labels", "append"), recursive = FALSE)
+    nget_res <- extract_named_from_doc(doc, f, "ngettext", c(msg1 = 2L, msg2 = 3L), recursive = FALSE, plural = TRUE)
+
+    sing_list <- list()
+    if (!is.null(dots_res) && nrow(dots_res)) sing_list[[length(sing_list) + 1L]] <- dots_res
+    if (!is.null(fmt_res) && nrow(fmt_res)) sing_list[[length(sing_list) + 1L]] <- fmt_res
+    if (!is.null(cat_res) && nrow(cat_res)) sing_list[[length(sing_list) + 1L]] <- cat_res
+
+    plur_list <- list()
+    if (!is.null(nget_res) && nrow(nget_res)) plur_list[[length(plur_list) + 1L]] <- nget_res
+
+    if (style == "explicit") {
+      tr_res  <- extract_dots_from_doc(doc, f, "tr_", character(), recursive = TRUE)
+      trn_res <- extract_named_from_doc(doc, f, "tr_n", c(singular = 2L, plural = 3L), recursive = FALSE, plural = TRUE)
+      if (!is.null(tr_res) && nrow(tr_res)) sing_list[[length(sing_list) + 1L]] <- tr_res
+      if (!is.null(trn_res) && nrow(trn_res)) plur_list[[length(plur_list) + 1L]] <- trn_res
+    }
+
+    if (length(custom_params)) {
+      for (cp in custom_params$singular$dots) {
+        c_res <- extract_dots_from_doc(doc, f, cp$fname, cp$excluded_args)
+        if (!is.null(c_res) && nrow(c_res)) sing_list[[length(sing_list) + 1L]] <- c_res
+      }
+      for (cp in custom_params$singular$named) {
+        c_res <- extract_named_from_doc(doc, f, cp$fname, cp$args, recursive = FALSE)
+        if (!is.null(c_res) && nrow(c_res)) sing_list[[length(sing_list) + 1L]] <- c_res
+      }
+      for (cp in custom_params$plural) {
+        c_res <- extract_named_from_doc(doc, f, cp$fname, cp$args, recursive = FALSE, plural = TRUE)
+        if (!is.null(c_res) && nrow(c_res)) plur_list[[length(plur_list) + 1L]] <- c_res
+      }
+    }
+
+    dt_list <- list()
+    if (length(sing_list)) dt_list$singular <- rbindlist(sing_list, fill = TRUE)
+    if (length(plur_list)) dt_list$plural <- rbindlist(plur_list, fill = TRUE)
+
+    if (length(dt_list)) {
+      file_msg <- rbindlist(dt_list, idcol = "type", fill = TRUE)
+      msg_list[[f]] <- file_msg
+    }
+  }
+
+  if (!length(msg_list)) return(r_message_schema())
+  msg <- rbindlist(msg_list, fill = TRUE)
   if (!nrow(msg)) return(r_message_schema())
 
-  msg_files = unique(msg$file)
+  if (!"msgid_plural" %in% names(msg)) msg[ , msgid_plural := .(vector("list", .N))]
+
+  msg_files <- unique(msg$file)
   if (is_base) {
     paths <- file.path(dir, 'R', msg_files)
     share_idx <- startsWith(msg_files, 'share/R')
@@ -107,53 +118,55 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
   } else {
     paths <- file.path(dir, 'R', msg_files)
   }
-  file_lines = lapply(normalizePath(paths), readLines, warn = FALSE)
-  names(file_lines) = msg_files
+  file_lines <- lapply(normalizePath(paths), readLines, warn = FALSE)
+  names(file_lines) <- msg_files
 
-  msg[
-    expr_data, on = c('file', parent = 'id'),
-    `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
-  ]
-  u_calls = unique(msg[ , c("file", "line1", "col1", "line2", "col2")])
+  all_comments <- list()
+  for (f in msg_files) {
+    p <- parsed_files[[f]]
+    pd <- getParseData(p)
+    if (!is.null(pd) && nrow(pd)) {
+      cm <- pd[pd$token == "COMMENT", c("line1", "line2", "col1")]
+      if (nrow(cm)) {
+        cm$file <- f
+        all_comments[[f]] <- setDT(cm)
+      }
+    }
+  }
+  comments <- if (length(all_comments)) rbindlist(all_comments) else data.table(file = character(), line1 = integer(), line2 = integer(), col1 = integer())
+  setkeyv(comments, c("file", "line1", "line2"))
+
+  u_calls <- unique(msg[, .(file, line1 = parent_line1, col1 = parent_col1, line2 = parent_line2, col2 = parent_col2)])
   u_calls[ , call := character(.N)]
-  is_single = u_calls$line1 == u_calls$line2
+  is_single <- u_calls$line1 == u_calls$line2
 
   if (any(is_single)) {
     u_calls[is_single, call := {
-      lines_sub = file_lines[[.BY$file]][line1]
+      lines_sub <- file_lines[[.BY$file]][line1]
       if (any(has_tabs <- grepl("\t", lines_sub, fixed = TRUE))) {
-        lines_sub[has_tabs] = vapply(lines_sub[has_tabs], adjust_tabs, character(1L), USE.NAMES = FALSE)
+        lines_sub[has_tabs] <- vapply(lines_sub[has_tabs], adjust_tabs, character(1L), USE.NAMES = FALSE)
       }
       substr(lines_sub, col1, col2)
     }, by = file]
   }
 
-  multi_idx = which(!is_single)
+  multi_idx <- which(!is_single)
   if (length(multi_idx)) {
-    multi = u_calls[multi_idx]
-    ov = foverlaps(multi, comments, which = TRUE, nomatch = NULL)
-    comm_by_call = split(ov$yid, ov$xid)
-
-    calls_res = character(length(multi_idx))
+    multi <- u_calls[multi_idx]
+    ov <- foverlaps(multi, comments, which = TRUE, nomatch = NULL)
+    comm_by_call <- split(ov$yid, ov$xid)
+    calls_res <- character(length(multi_idx))
     for (j in seq_along(multi_idx)) {
-      f = multi$file[j]
-      flines = file_lines[[f]]
-      match_rows = comm_by_call[[as.character(j)]]
-      calls_res[j] = build_call(flines, comments[match_rows], multi[j])
+      f <- multi$file[j]
+      flines <- file_lines[[f]]
+      match_rows <- comm_by_call[[as.character(j)]]
+      cm <- if (length(match_rows)) comments[match_rows] else comments[0L]
+      calls_res[j] <- build_call(flines, cm, multi[j])
     }
     u_calls[multi_idx, call := calls_res]
   }
 
-  msg[u_calls, on = c('file', 'line1', 'col1', 'line2', 'col2'), call := i.call]
-
-  # these are the parent's stats
-  msg[ , c('parent', 'line1', 'line2', 'col1', 'col2') := NULL]
-
-  # now add the child's stats to order within the file
-  msg[
-    expr_data, on = c('file', 'id'),
-    `:=`(line_number = i.line1, column_number = i.col1)
-  ]
+  msg[u_calls, on = .(file, parent_line1 = line1, parent_col1 = col1, parent_line2 = line2, parent_col2 = col2), call := i.call]
 
   # descending 'type' so that "singular" comes before "plural".
   # NB: forder uses C order for file, which happens to match the base behavior to set LC_COLLATE=C
@@ -166,8 +179,8 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
   } else {
     setorderv(msg, c("type", "in_subdir", "file", "line_number", "column_number"), c(-1L, 1L, 1L, 1L, 1L))
   }
-  # kept id, column_number to get order within lines; can drop now
-  msg[ , c('id', 'column_number', 'in_subdir') := NULL]
+
+  msg[ , c("parent_line1", "parent_col1", "parent_line2", "parent_col2", "column_number", "in_subdir") := NULL]
 
   msg[type == 'singular', 'msgid' := escape_string(trimws(msgid))]
   msg[type == 'plural', 'msgid_plural' := lapply(msgid_plural, escape_string)]
@@ -178,7 +191,7 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
   #   You are trying to join data.tables where %s has 0 columns.
   msg[type == 'singular', 'is_repeat' := duplicated(msgid)]
 
-  known_translators = c(dots_funs, 'ngettext', fmt_funs, get_fnames(custom_params))
+  known_translators <- c(dots_funs, 'ngettext', fmt_funs, get_fnames(custom_params))
   if (style == "explicit") {
     known_translators <- c(known_translators, "tr", "tr_")
   }
@@ -188,7 +201,208 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
   msg[ , "is_templated" := fname %chin% fmt_funs]
   msg[ , "fname" := NULL]
 
+  col_order <- c("type", "file", "msgid", "msgid_plural", "call", "line_number", if (is_base) "in_share", "is_repeat", "is_marked_for_translation", "is_templated")
+  setcolorder(msg, col_order)
+
   msg[]
+}
+
+# Helper to extract line and column coordinates of an XML node
+get_node_coords <- function(node) {
+  list(
+    line1 = as.integer(xml_attr(node, "line1")),
+    col1 = as.integer(xml_attr(node, "col1")),
+    line2 = as.integer(xml_attr(node, "line2")),
+    col2 = as.integer(xml_attr(node, "col2"))
+  )
+}
+
+# Helper to extract STR_CONST nodes under an expression, respecting non-recursion and excluded calls
+extract_strings_from_node <- function(expr_node, recursive = TRUE, exclude_fns = c('gettext', 'gettextf', 'ngettext')) {
+  if (!recursive) {
+    str_nodes <- xml_find_all(expr_node, "./STR_CONST")
+    return(str_nodes)
+  }
+
+  fn_check <- paste(sprintf("text() = '%s'", exclude_fns), collapse = " or ")
+  if (length(exclude_fns)) {
+    is_self_excl <- length(xml_find_all(expr_node, sprintf("self::expr[expr[1][SYMBOL_FUNCTION_CALL[%s] and (count(*) = 1 or NS_GET or NS_GET_INT)] and OP-LEFT-PAREN]", fn_check))) > 0
+    if (is_self_excl) return(xml_find_all(expr_node, "./doesnotexist"))
+  }
+
+  all_strs <- xml_find_all(expr_node, ".//STR_CONST")
+  if (!length(all_strs) || !length(exclude_fns)) return(all_strs)
+
+  xpath_excl_calls <- sprintf(".//expr[expr[1][SYMBOL_FUNCTION_CALL[%s] and (count(*) = 1 or NS_GET or NS_GET_INT)] and OP-LEFT-PAREN]", fn_check)
+  excl_calls <- xml_find_all(expr_node, xpath_excl_calls)
+
+  if (!length(excl_calls)) return(all_strs)
+
+  keep <- rep(TRUE, length(all_strs))
+  for (ec in excl_calls) {
+    ec_strs <- xml_find_all(ec, ".//STR_CONST")
+    if (length(ec_strs)) {
+      ec_coords <- paste(xml_attr(ec_strs, "line1"), xml_attr(ec_strs, "col1"),
+                         xml_attr(ec_strs, "line2"), xml_attr(ec_strs, "col2"))
+      all_coords <- paste(xml_attr(all_strs, "line1"), xml_attr(all_strs, "col1"),
+                          xml_attr(all_strs, "line2"), xml_attr(all_strs, "col2"))
+      keep[all_coords %in% ec_coords] <- FALSE
+    }
+  }
+  all_strs[keep]
+}
+
+# Extract strings from ... arguments for functions like stop, warning, gettext, cat
+extract_dots_from_doc <- function(doc, f, fnames, non_dots_args = NON_DOTS_ARGS,
+                                  recursive = TRUE, exclude_fns = c('gettext', 'gettextf', 'ngettext')) {
+  fn_filter <- paste(sprintf("text() = '%s'", fnames), collapse = " or ")
+  xpath_calls <- sprintf("//expr[
+    expr[1][SYMBOL_FUNCTION_CALL[%s] and (count(*) = 1 or NS_GET or NS_GET_INT)]
+    and OP-LEFT-PAREN
+    and not(SYMBOL_SUB[text() = 'domain']/following-sibling::expr[1][. = 'NA'])
+  ]", fn_filter)
+
+  call_nodes <- xml_find_all(doc, xpath_calls)
+  if (!length(call_nodes)) return(NULL)
+
+  res_list <- list()
+  for (cn in call_nodes) {
+    fn_name <- xml_text(xml_find_first(cn, "expr[1]//SYMBOL_FUNCTION_CALL"))
+    call_coords <- get_node_coords(cn)
+
+    all_arg_exprs <- xml_find_all(cn, "./expr[position() > 1]")
+    if (!length(all_arg_exprs)) next
+
+    if (length(non_dots_args)) {
+      excl_sub_filter <- paste(sprintf("text() = '%s'", non_dots_args), collapse = " or ")
+      excl_args <- xml_find_all(cn, sprintf("./SYMBOL_SUB[%s]/following-sibling::expr[1]", excl_sub_filter))
+      if (length(excl_args)) {
+        excl_coords <- paste(xml_attr(excl_args, "line1"), xml_attr(excl_args, "col1"))
+        arg_coords <- paste(xml_attr(all_arg_exprs, "line1"), xml_attr(all_arg_exprs, "col1"))
+        all_arg_exprs <- all_arg_exprs[!arg_coords %in% excl_coords]
+      }
+    }
+
+    if (!length(all_arg_exprs)) next
+
+    for (arg in all_arg_exprs) {
+      str_nodes <- extract_strings_from_node(arg, recursive = recursive, exclude_fns = exclude_fns)
+      if (length(str_nodes)) {
+        for (sn in str_nodes) {
+          txt <- clean_text(xml_text(sn))
+          l_num <- as.integer(xml_attr(sn, "line1"))
+          c_num <- as.integer(xml_attr(sn, "col1"))
+          res_list[[length(res_list) + 1L]] <- list(
+            file = f,
+            parent_line1 = call_coords$line1, parent_col1 = call_coords$col1,
+            parent_line2 = call_coords$line2, parent_col2 = call_coords$col2,
+            line_number = l_num, column_number = c_num,
+            fname = fn_name,
+            msgid = txt
+          )
+        }
+      }
+    }
+  }
+  if (!length(res_list)) return(NULL)
+  rbindlist(res_list)
+}
+
+# Extract strings from named arguments for functions like gettextf, ngettext, tr_n
+extract_named_from_doc <- function(doc, f, fnames, target_args, recursive = FALSE, plural = FALSE) {
+  fn_filter <- paste(sprintf("text() = '%s'", fnames), collapse = " or ")
+  xpath_calls <- sprintf("//expr[
+    expr[1][SYMBOL_FUNCTION_CALL[%s] and (count(*) = 1 or NS_GET or NS_GET_INT)]
+    and OP-LEFT-PAREN
+    and not(SYMBOL_SUB[text() = 'domain']/following-sibling::expr[1][. = 'NA'])
+  ]", fn_filter)
+
+  call_nodes <- xml_find_all(doc, xpath_calls)
+  if (!length(call_nodes)) return(NULL)
+
+  res_list <- list()
+  for (cn in call_nodes) {
+    fn_name <- xml_text(xml_find_first(cn, "expr[1]//SYMBOL_FUNCTION_CALL"))
+    call_coords <- get_node_coords(cn)
+
+    sub_nodes <- xml_find_all(cn, "./SYMBOL_SUB")
+    sub_names <- xml_text(sub_nodes)
+
+    target_names <- names(target_args)
+    has_named <- any(target_names %in% sub_names)
+
+    target_expr_nodes <- list()
+
+    if (has_named) {
+      if (!all(target_names %in% sub_names)) {
+        missing_args <- target_names[!target_names %in% sub_names]
+        stopf(
+          "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
+          call_coords$line1, f, fn_name, toString(missing_args)
+        )
+      }
+      for (arg_nm in target_names) {
+        target_expr_nodes[[arg_nm]] <- xml_find_first(cn, sprintf("./SYMBOL_SUB[text()='%s']/following-sibling::expr[1]", arg_nm))
+      }
+    } else {
+      all_child_exprs <- xml_find_all(cn, "./expr")
+      for (arg_nm in target_names) {
+        pos <- target_args[[arg_nm]]
+        idx <- pos + 1L
+        if (idx <= length(all_child_exprs)) {
+          target_expr_nodes[[arg_nm]] <- all_child_exprs[[idx]]
+        }
+      }
+    }
+
+    if (!length(target_expr_nodes)) next
+
+    if (plural) {
+      str_parts <- list()
+      for (arg_nm in target_names) {
+        en <- target_expr_nodes[[arg_nm]]
+        if (is.null(en) || inherits(en, "xml_missing")) next
+        str_nodes <- extract_strings_from_node(en, recursive = recursive)
+        if (length(str_nodes)) {
+          str_parts[[arg_nm]] <- clean_text(xml_text(str_nodes[[1L]]))
+        }
+      }
+      if (length(str_parts) == length(target_names)) {
+        res_list[[length(res_list) + 1L]] <- list(
+          file = f,
+          parent_line1 = call_coords$line1, parent_col1 = call_coords$col1,
+          parent_line2 = call_coords$line2, parent_col2 = call_coords$col2,
+          line_number = call_coords$line1, column_number = call_coords$col1,
+          fname = fn_name,
+          msgid = NA_character_,
+          msgid_plural = list(unlist(str_parts, use.names = FALSE))
+        )
+      }
+    } else {
+      for (arg_nm in target_names) {
+        en <- target_expr_nodes[[arg_nm]]
+        if (is.null(en) || inherits(en, "xml_missing")) next
+        str_nodes <- extract_strings_from_node(en, recursive = recursive)
+        if (length(str_nodes)) {
+          for (sn in str_nodes) {
+            txt <- clean_text(xml_text(sn))
+            l_num <- as.integer(xml_attr(sn, "line1"))
+            c_num <- as.integer(xml_attr(sn, "col1"))
+            res_list[[length(res_list) + 1L]] <- list(
+              file = f,
+              parent_line1 = call_coords$line1, parent_col1 = call_coords$col1,
+              parent_line2 = call_coords$line2, parent_col2 = call_coords$col2,
+              line_number = l_num, column_number = c_num,
+              fname = fn_name,
+              msgid = txt
+            )
+          }
+        }
+      }
+    }
+  }
+  if (!length(res_list)) return(NULL)
+  rbindlist(res_list)
 }
 
 # parse the R files in a directory.
@@ -284,34 +498,6 @@ get_fnames = function(params) {
   ))
 }
 
-exclude_untranslated = function(expr_data, comments) {
-  # single-line exclusions
-  inline_idx <- grepl("# notranslate", comments$text, fixed = TRUE)
-  if (any(inline_idx)) {
-    expr_data = expr_data[
-      !comments[(inline_idx)],
-      on = c("file", "line1")
-    ]
-  }
-
-  starts = comments[grepl("# notranslate start", text, fixed = TRUE)]
-  ends = comments[grepl("# notranslate end", text, fixed = TRUE)]
-
-  ranges = build_exclusion_ranges(starts, ends)
-  if (nrow(ranges)) {
-    expr_data = expr_data[!ranges, on = .(file == file, line1 > start, line1 < end)]
-  }
-
-  expr_data
-}
-
-# these functions all have a domain= argument. taken from the xgettext source, but could be
-#   refreshed with the following (skipping bindtextdomain and .makeMessage):
-# for (obj in ls(BASE <- asNamespace('base'))) {
-#     if (!is.function(f <- get(obj, envir = BASE))) next
-#     if (is.null(f_args <- args(f))) next
-#     if (any(names(formals(f_args)) == 'domain')) cat(obj, '\n')
-# }
 domain_dots_funs <- function(use_conditions = TRUE) {
   c(
     "gettext",
@@ -323,161 +509,7 @@ domain_fmt_funs <- function(use_conditions = TRUE) {
   paste0(domain_dots_funs(use_conditions), "f")
 }
 
-#
 NON_DOTS_ARGS = c("domain", "call.", "appendLF", "immediate.", "noBreaks.")
-
-# for functions (e.g. domain_dots_funs) where we extract strings from ... arguments
-get_dots_strings = function(expr_data, funs, arg_names,
-                            exclude = c('gettext', 'gettextf', 'ngettext'),
-                            recursive = TRUE) {
-  call_neighbors = get_call_args(expr_data, funs)
-  call_neighbors = drop_suppressed_and_named(call_neighbors, expr_data, arg_names)
-
-  # as we search the AST "below" call_neighbors, drop whichever of the excluded expr parents we find.
-  #   practically speaking, this is how we disassociate "hi" from stop() in stop(gettext("hi"))
-  exclude_tokens = expr_data[token == 'SYMBOL_FUNCTION_CALL' & text %chin% exclude]
-  call_neighbors = call_neighbors[token == 'expr']
-  # nolint next: line_length_linter.
-  if (nrow(exclude_tokens) && nrow(exclude_parents <- expr_data[exclude_tokens, on=c('file', id='parent'), .(file, id=x.parent)])) {
-    # lop off these expr so they can't be found later
-    expr_data = expr_data[!exclude_parents, on = c('file', 'id')]
-    call_neighbors = call_neighbors[!exclude_parents, on = c('file', 'id')]
-  }
-  setnames(call_neighbors, 'parent', 'ancestor')
-
-  get_strings_from_expr(call_neighbors, expr_data, recursive = recursive)
-}
-
-# for functions (e.g. ngettext, gettextf) where we extract strings from named arguments
-# arg_names should be a key-value vector, the names give the arguments' names, the values
-#   give their position in the signature (e.g. gettextf's target argument is 'fmt', hence
-#   we pass `c(fmt = 1L)`; for ngettext, we'd use `c(msg1 = 2L, msg2 = 3L)`).
-# NB: this is a poor man's version of match.call(), whose actual dynamics are much harder
-#   to imitate. I think it's reasonable to work in some simple cases & expect end users to
-#   conform to that if they want this to work correctly (famous last words...)
-get_named_arg_strings = function(expr_data, fun, args, recursive = FALSE, plural = FALSE) {
-  call_neighbors = get_call_args(expr_data, fun)
-  call_neighbors = drop_suppressed_and_named(call_neighbors, expr_data, "domain")
-  setnames(call_neighbors, 'parent', 'ancestor')
-
-  string_expr = call_neighbors[
-    , by = c('file', 'fname', 'ancestor'),
-    {
-      idx = shift(token, fill = '') == 'SYMBOL_SUB' & shift(text, fill = '') %chin% names(args)
-      if (any(idx) & !all(matched <- names(args) %chin% text[token == 'SYMBOL_SUB'])) {
-        stopf(
-          # nolint next: line_length_linter.
-          "In line %s of %s, found a call to %s that names only some of its messaging arguments explicitly. Expected all of [%s] to be named. Please name all or none of these arguments.",
-          expr_data[.BY, on = c(id = 'ancestor'), line1[1L]], .BY$file, .BY$fname, toString(names(args)[!matched])
-        )
-      }
-      .(id = id[idx])
-    }
-  ]
-
-  call_neighbors = call_neighbors[!string_expr, on = c('file', 'ancestor')]
-  if (nrow(call_neighbors)) {
-    string_expr = rbind(
-      string_expr,
-      call_neighbors[token == 'expr', by = c('file', 'fname', 'ancestor'), .(id = id[args + 1L])]
-    )
-  }
-
-  strings = get_strings_from_expr(string_expr, expr_data, recursive = recursive)
-  # TODO: do this directly in get_strings_from_expr()? be more careful that messages are in the right order?
-  if (plural && nrow(strings)) {
-    strings = strings[
-      , by = c('file', 'parent', 'fname'),
-      .(id = id[1L], msgid = NA_character_, msgid_plural = list(msgid))
-    ]
-  }
-  strings
-}
-
-get_strings_from_expr = function(target_expr, expr_data, recursive = FALSE) {
-  str_list = list(string_schema())
-  while (nrow(target_expr) > 0L) {
-    target_expr = expr_data[
-      target_expr, on = c('file', parent = 'id'),
-      .(file, ancestor = i.ancestor, fname = i.fname, id = x.id, token = x.token, text = x.text)
-    ]
-    str_consts = target_expr[
-      token == 'STR_CONST',
-      .(file, parent = ancestor, id, fname, msgid = text)
-    ]
-    if (nrow(str_consts)) {
-      str_list[[length(str_list) + 1L]] = str_consts
-    }
-    # much cleaner to do this tiny check a small number (e.g. nesting level of 10-15) times
-    #   repetitively rather than make a whole separate branch for the once-and-done case
-    if (!recursive) break
-    target_expr = target_expr[token == "expr"]
-  }
-  rbindlist(str_list, fill = TRUE)
-}
-
-get_call_args = function(expr_data, calls) {
-  call_tokens = expr_data[token == "SYMBOL_FUNCTION_CALL" & text %chin% calls]
-  if (!nrow(call_tokens)) {
-    return(expr_data[0L, .(file, id, parent, token, text, fname = character())])
-  }
-  msg_call_exprs = expr_data[
-    call_tokens,
-    on = c('file', id = 'parent'),
-    .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent, fname = i.text,
-      is_indirect = i.line1 != x.line1 | i.col1 != x.col1)
-  ]
-  if (any(msg_call_exprs$is_indirect)) {
-    prefix_calls = msg_call_exprs[(is_indirect)]
-    prefix_children = expr_data[
-      prefix_calls,
-      on = c('file', parent = 'call_expr_id'),
-      .(file, parent = x.parent, token = x.token)
-    ]
-    ns_get = prefix_children[token == 'NS_GET']
-    invalid_parents = prefix_children[!ns_get, on = c('file', 'parent')]
-    if (nrow(invalid_parents)) {
-      msg_call_exprs = msg_call_exprs[!invalid_parents, on = c('file', call_expr_id = 'parent')]
-    }
-  }
-  msg_call_neighbors = expr_data[
-    msg_call_exprs, on = c('file', parent = 'call_parent_id'),
-    .(file, id = x.id, parent = x.parent, token = x.token, text = x.text, fname)
-  ]
-  msg_call_neighbors[token %chin% c('expr', 'SYMBOL_SUB')]
-}
-
-get_named_args = function(calls_data, expr_data, target_args) {
-  sub_data = calls_data[token == "SYMBOL_SUB" & text %chin% target_args]
-  if (!nrow(sub_data)) {
-    return(calls_data[0L, .(file, parent, id, fname, arg_name = character(), arg_value = character())])
-  }
-  # summary: rolling backwards from the expr id to the corresponding SYMBOL_SUB id
-  named_args = calls_data[token == "expr"][
-    sub_data,
-    on = c('file', 'parent', 'id'), roll = -Inf,
-    .(file, parent, id = x.id, fname = x.fname, arg_name = i.text)
-  ]
-  if (nrow(named_args)) {
-    named_args[ , arg_value := expr_data[named_args, on = c('file', parent = 'id'), mult = 'last', x.text]]
-  } else {
-    named_args[ , arg_value := character()]
-  }
-  named_args
-}
-
-drop_suppressed_and_named = function(calls_data, expr_data, target_args) {
-  named_args = get_named_args(calls_data, expr_data, target_args)
-  if (!nrow(named_args)) return(calls_data)
-  # strip away calls where domain=NA by dropping the common parent's immediate children;
-  #   nested expressions without domain=NA will still be there
-  suppressed = named_args[arg_name == "domain" & arg_value == "NA"]
-  if (nrow(suppressed)) {
-    calls_data = calls_data[!suppressed, on = c('file', 'parent')]
-  }
-  # strip away any other expr associated with named args (note join to id, not parent)
-  calls_data[!named_args, on = c('file', 'id')]
-}
 
 build_call = function(lines, comments, params) {
   if (params$line1 == params$line2) {
@@ -551,19 +583,6 @@ clean_text = function(x) {
   xb = gsub('\\\\', '\\', xb, fixed = TRUE)
   x[has_backslash] = xb
   x
-}
-
-string_schema = function() {
-  data.table(
-    file = character(),
-    # needed to build the call
-    parent = integer(),
-    # needed to order the strings correctly within the call
-    id = integer(),
-    fname = character(),
-    msgid = character(),
-    msgid_plural = list()
-  )
 }
 
 # the schema for empty edge cases

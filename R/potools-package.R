@@ -7,6 +7,8 @@
 #' @importFrom glue glue glue_data
 #' @importFrom stats setNames
 #' @importFrom utils getParseData globalVariables head tail type.convert
+#' @importFrom xml2 read_xml xml_attr xml_find_all xml_find_first xml_remove xml_text
+#' @importFrom xmlparsedata xml_parse_data
 "_PACKAGE"
 
 ## usethis namespace: start

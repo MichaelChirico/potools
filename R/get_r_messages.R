@@ -116,7 +116,7 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
   u_calls = unique(msg[ , .(file, line1, col1, line2, col2)])
-  calls = character(nrow(u_calls))
+  u_calls[ , call := character(.N)]
   is_single = u_calls$line1 == u_calls$line2
 
   if (any(is_single)) {
@@ -132,7 +132,7 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
       if (any(grepl("\t", lines_subset, fixed = TRUE))) {
         lines_subset = vapply(lines_subset, adjust_tabs, character(1L), USE.NAMES = FALSE)
       }
-      calls[f_idx] = substr(lines_subset, c1, c2)
+      u_calls[f_idx, call := substr(lines_subset, c1, c2)]
     }
   }
 
@@ -146,11 +146,10 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
       c2 = u_calls$col2[ii]
       flines = file_lines[[f]]
       cm = comments[.(f, l1:l2), nomatch = NULL]
-      calls[ii] = build_call(flines, cm, list(line1 = l1, col1 = c1, line2 = l2, col2 = c2))
+      u_calls[ii, call := build_call(flines, cm, list(line1 = l1, col1 = c1, line2 = l2, col2 = c2))]
     }
   }
 
-  u_calls[ , "call" := calls]
   msg[u_calls, on = c('file', 'line1', 'col1', 'line2', 'col2'), call := i.call]
 
   # these are the parent's stats

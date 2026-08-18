@@ -89,6 +89,8 @@ test_that("works on a simple package (including with translations)", {
       
       expect_match(translation_log, "Beginning new translations", fixed=TRUE, all=FALSE)
       expect_match(translation_log, "Recompiling 'zh_CN' R translation", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "Running system command msgfmt", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "5 translated messages.", fixed=TRUE, all=FALSE)
 
       pkg_files <- list.files(pkg, recursive = TRUE)
 
@@ -138,6 +140,8 @@ test_that("translate_package works on package with outdated (fuzzy) translations
       expect_match(translation_log, "SINGULAR MESSAGES", fixed=TRUE, all=FALSE)
       expect_match(translation_log, "PLURAL MESSAGES", fixed=TRUE, all=FALSE)
       expect_match(translation_log, "a similar message was previously translated as", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "Running system command msgfmt", fixed=TRUE, all=FALSE)
+      expect_match(translation_log, "3 translated messages.", fixed=TRUE, all=FALSE)
     }
   )
 })

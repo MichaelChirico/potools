@@ -24,6 +24,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Michael Chirico \email{MichaelChirico4@gmail.com}
   \item Hadley Wickham
 }
 

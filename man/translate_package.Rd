@@ -26,7 +26,7 @@ Must be a valid language accepted by gettext. This almost always takes
 the form of (1) an ISO 639 2-letter language code; or (2) \code{ll_CC}, where
 \code{ll} is an ISO 639 2-letter language code and \code{CC} is an ISO 3166 2-letter
 country code e.g. \code{es} for Spanish, \code{es_AR} for Argentinian Spanish, \code{ro}
-for Romanian, etc. See \code{\link[base:locales]{base::Sys.getlocale()}} for some helpful tips
+for Romanian, etc. See \code{\link[base:Sys.getlocale]{base::Sys.getlocale()}} for some helpful tips
 about how to tell which locales are currently available on your machine, and
 see the References below for some web resources listing more locales.}
 
@@ -104,8 +104,8 @@ There are some discrepancies in the default behavior of
 \code{translate_package} and the translation workflow used to generate the
 \file{.po}/\file{.pot} files for R itself (mainly, the suite of functions
 from \code{tools}, \code{\link[tools:update_pkg_po]{tools::update_pkg_po()}},
-\code{\link[tools:xgettext]{tools::xgettext2pot()}}, \code{\link[tools:xgettext]{tools::xgettext()}}, and
-\code{\link[tools:xgettext]{tools::xngettext()}}). They should only be superficial (e.g.,
+\code{\link[tools:xgettext2pot]{tools::xgettext2pot()}}, \code{\link[tools:xgettext]{tools::xgettext()}}, and
+\code{\link[tools:xngettext]{tools::xngettext()}}). They should only be superficial (e.g.,
 whitespace or comments), but nevertheless may represent a barrier to
 smoothly submitting patchings to R Core. To make the process of translating
 base R and the default packages (\code{tools}, \code{utils}, \code{stats},
@@ -335,7 +335,7 @@ rm(pkg, tmp_pkg)
 \seealso{
 \code{\link[=get_message_data]{get_message_data()}}, \code{\link[=write_po_file]{write_po_file()}},
 \code{\link[tools:xgettext]{tools::xgettext()}}, \code{\link[tools:update_pkg_po]{tools::update_pkg_po()}},
-\code{\link[tools:checkPoFiles]{tools::checkPoFile()}}, \code{\link[base:gettext]{base::gettext()}}
+\code{\link[tools:checkPoFile]{tools::checkPoFile()}}, \code{\link[base:gettext]{base::gettext()}}
 }
 \author{
 Michael Chirico

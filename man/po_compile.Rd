@@ -4,7 +4,7 @@
 \alias{po_compile}
 \title{Compile \code{.po} files to \code{.mo}}
 \usage{
-po_compile(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE)
+po_compile(dir = ".", package = NULL, lazy = TRUE, verbose = !is_testing())
 }
 \arguments{
 \item{dir}{Path to package root directory.}
@@ -15,7 +15,8 @@ po_compile(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE)
 \item{lazy}{If \code{TRUE}, only \code{.mo} functions that are older than
 \code{.po} files be updated}
 
-\item{verbose}{If \code{TRUE}, print information as it goes.}
+\item{verbose}{Logical, default \code{TRUE} (except during testing). Should
+extra information about progress, etc. be reported?}
 }
 \description{
 This function compiles the plain text \code{.po} files that translators work

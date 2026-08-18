@@ -7,6 +7,7 @@ might want to start with
 [`vignette("translators")`](https://michaelchirico.github.io/potools/articles/translators.md).
 
 ``` r
+
 library(potools)
 ```
 
@@ -53,7 +54,7 @@ to generate the `.pot` file.
 ### Base style
 
 The base style captures messages the base functions that include
-built-in translation capabilities[¹](#fn1):
+built-in translation capabilities[^1]:
 [`message()`](https://rdrr.io/r/base/message.html),
 [`warning()`](https://rdrr.io/r/base/warning.html), and
 [`stop()`](https://rdrr.io/r/base/stop.html). It also captures messages
@@ -70,6 +71,7 @@ style, is that it’s very quick to get started with.
 of `…`:
 
 ``` r
+
 message("This", " is", " a", " message")
 #> This is a message
 warning("This", " is", " a", " warning")
@@ -93,6 +95,7 @@ These functions are not included in base R, so if you want to use them,
 you’ll need to copy the definitions from below:
 
 ``` r
+
 messagef <- function(fmt, ..., appendLF = TRUE) {
   msg <- gettextf(fmt, ..., domain = "R-{mypackage}")
   message(msg, domain = NA, appendLF = appendLF)
@@ -123,6 +126,7 @@ translation by [`gettext()`](https://rdrr.io/r/base/gettext.html),
 to define it yourself:
 
 ``` r
+
 tr_ <- function(...) {
   enc2utf8(gettext(paste0(...), domain = "R-{mypackage}"))
 }
@@ -147,7 +151,7 @@ it’s translated into another language. The following sections give some
 advice about how to write good messages, as inspired by the “[Preparing
 translatable
 strings](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings%20(Inspired%20by%20from%20))”
-section of the gettext[²](#fn2) manual.
+section of the gettext[^2] manual.
 
 One important point is to avoid templating out sentence fragments,
 especially words. Put message pieces into a template if and only if they
@@ -157,6 +161,7 @@ For example, it is bad practice to conditionally template a word or
 phrase into a message:
 
 ``` r
+
 # BAD
 in_parallel <- TRUE
 run_type <- if (in_parallel) "in parallel" else "sequentially"
@@ -169,6 +174,7 @@ translation for the two cases. It’s much better to use two different,
 complete messages:
 
 ``` r
+
 # GOOD
 in_parallel <- TRUE
 if (in_parallel) {
@@ -200,6 +206,7 @@ single string (i.e. lives within a single ““). Take this simple greeting
 where I translate”good” and “morning” individually:
 
 ``` r
+
 name <- "Hadley"
 paste0(tr_("Good"), " ", tr_("morning"), " ", name, "!")
 #> [1] "Good morning Hadley!"
@@ -224,9 +231,10 @@ This will pose two challenges for translators:
 
 Instead it’s better to generate the complete message in a single string
 using `glue()` or [`sprintf()`](https://rdrr.io/r/base/sprintf.html)
-[³](#fn3) to interpolate in the parts that vary:
+[^3] to interpolate in the parts that vary:
 
 ``` r
+
 glue(tr_("Good morning {name}"))
 #> Good morning Hadley
 sprintf(tr_("Good morning %s"), name)
@@ -244,6 +252,7 @@ sentence in their language. We can make the problem more challenging by
 making our greeting more flexible:
 
 ``` r
+
 greet <- function(name, time_of_day) {
   paste0(tr_("Good"), " ", time_of_day, " ", name, "!")
 }
@@ -290,6 +299,7 @@ use [`switch()`](https://rdrr.io/r/base/switch.html) to specify the
 greeting:
 
 ``` r
+
 greet <- function(name, time_of_day) {
   switch(time_of_day,
     morning = glue(tr_("Good morning {name}!")),
@@ -372,6 +382,7 @@ see changes to the text, and avoids the chance of a translator
 accidentally introducing a typo. It works something like this:
 
 ``` r
+
 # Instead of this:
 tr_("See <https://r-project.org> to learn more")
 
@@ -385,6 +396,7 @@ including the HTML in the translated string, and instead translate just
 the words:
 
 ``` r
+
 # Instead of this:
 tr_("<a href='/index.html'>Home page</a>")
 
@@ -405,6 +417,7 @@ translation extraction, all using comments:
   that line from being extracted.
 
   ``` r
+
   # Don't extract this message
   message("A message for the developer") # notranslate
   ```
@@ -414,6 +427,7 @@ translation extraction, all using comments:
   extracted.
 
   ``` r
+
   # notranslate start
   message("A message for the developer")
   message("Another message for the developer")
@@ -454,6 +468,7 @@ singular and plural. So you might be tempted to construct a sentence
 like this:
 
 ``` r
+
 cows <- function(n) {
   if (n == 1) {
     paste0(n, " cow")
@@ -472,6 +487,7 @@ paste("I have ", cows(2))
 But this doesn’t always work, even in English:
 
 ``` r
+
 paste0("There are ", cows(0), " in the field")
 #> [1] "There are 0 cows in the field"
 paste0("There are ", cows(1), " in the field")
@@ -481,6 +497,7 @@ paste0("There are ", cows(1), " in the field")
 Again, we always want to construct a complete sentence:
 
 ``` r
+
 field_cows <- function(n) {
   if (n == 1) {
     fmt <- tr_("There is {n} cow in the field")
@@ -498,6 +515,7 @@ plural, other languages have different forms like singular (1), dual
 `ngettext(n, singular, plural)`:
 
 ``` r
+
 field_cows <- function(n) {
   glue(ngettext(n,
     "There is {n} cow in the field",
@@ -545,11 +563,12 @@ In English we typically lists of items like “a, b, or c”, where the use
 of the serial, or [Oxford](https://en.wikipedia.org/wiki/Serial_comma),
 comma being a hotly debated style preference. European languages follow
 the mostly same form, although none use the Oxford comma, and they
-obviously translate “or”[⁴](#fn4). The
+obviously translate “or”[^4]. The
 [and](https://github.com/rossellhayes/and) package takes care of these
 details:
 
 ``` r
+
 library(and)
 values <- c("first", "middle", "last")
 or(values)
@@ -564,24 +583,23 @@ or(values, lang = "fr")
 Which also works will in glue:
 
 ``` r
+
 glue(tr_("`x` must be one of {and(values)}"))
 #> `x` must be one of first, middle and last
 ```
 
-------------------------------------------------------------------------
-
-1.  You can tell they have translation capabilities because they include
-    the `domain` argument; behind the scenes they all call
+[^1]: You can tell they have translation capabilities because they
+    include the `domain` argument; behind the scenes they all call
     [`gettext()`](https://rdrr.io/r/base/gettext.html).
 
-2.  gettext is the underlying library that powers R’s translation
+[^2]: gettext is the underlying library that powers R’s translation
     system.
 
-3.  If you’re using the “base” style, you could instead write
+[^3]: If you’re using the “base” style, you could instead write
     `gettextf("Good morning %s", name)`;
     [`gettextf()`](https://rdrr.io/r/base/sprintf.html) is a version of
     [`sprintf()`](https://rdrr.io/r/base/sprintf.html) that translates
     the first argument.
 
-4.  In Spanish and Italian, the word used varies based on the start of
+[^4]: In Spanish and Italian, the word used varies based on the start of
     the following word.

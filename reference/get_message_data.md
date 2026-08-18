@@ -112,6 +112,7 @@ Michael Chirico
 ## Examples
 
 ``` r
+
 pkg <- system.file('pkg', package = 'potools')
 get_message_data(pkg)
 #> Getting R-level messages...

@@ -1,6 +1,7 @@
 # Translation for package translators
 
 ``` r
+
 library(potools)
 ```
 
@@ -159,11 +160,12 @@ The following sections describe four important message variations:
 
 You can tell if message uses [glue](https://glue.tidyverse.org) because
 it will contain pairs of braces:
-[`{}`](https://rdrr.io/r/base/Paren.html)[¹](#fn1). glue evaluates any R
-code in between [`{}`](https://rdrr.io/r/base/Paren.html) and inserts
-the results into the string:
+[`{}`](https://rdrr.io/r/base/Paren.html)[^1]. glue evaluates any R code
+in between [`{}`](https://rdrr.io/r/base/Paren.html) and inserts the
+results into the string:
 
 ``` r
+
 name <- "Michael"
 glue::glue("Hi {name}!")
 #> Hi Michael!
@@ -191,6 +193,7 @@ contain a format specifier like `%s` (a string), `%i` (an integer), or
 placeholders with values:
 
 ``` r
+
 name <- "Michael"
 sprintf("Hi %s!", name)
 #> [1] "Hi Michael!"
@@ -211,6 +214,7 @@ order to make grammatical sense in your language, you can put `1$`, `2$`
 etc. after the `%` to refer to variable in that position.
 
 ``` r
+
 sprintf("%s %s %s", "first", "second", "third")
 #> [1] "first second third"
 sprintf("%2$s %1$s %3$s", "first", "second", "third")
@@ -323,7 +327,5 @@ cases:
   You’ll need to double check the translation and remove “fuzzy” once
   you’re done.
 
-------------------------------------------------------------------------
-
-1.  Also, the package should have a dependency on `glue`, probably in
+[^1]: Also, the package should have a dependency on `glue`, probably in
     Imports, but maybe in Depends or Suggests.

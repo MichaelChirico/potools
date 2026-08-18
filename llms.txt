@@ -22,12 +22,14 @@ and was designed by [Allison Horst](https://www.allisonhorst.com).
 Start by installing the released version potools from CRAN:
 
 ``` r
+
 install.packages("potools")
 ```
 
 Or the development version from GitHub:
 
 ``` r
+
 # install.packages("remotes")
 remotes::install_github("MichaelChirico/potools")
 ```

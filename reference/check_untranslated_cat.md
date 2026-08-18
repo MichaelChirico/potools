@@ -58,6 +58,7 @@ Michael Chirico
 ## Examples
 
 ``` r
+
 pkg <- file.path(system.file(package = 'potools'), 'pkg')
 # copy to a temporary location to be able to read/write/update below
 tmp_pkg <- file.path(tempdir(), "pkg")

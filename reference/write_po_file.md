@@ -175,6 +175,7 @@ Michael Chirico
 ## Examples
 
 ``` r
+
 message_data <- get_message_data(system.file('pkg', package='potools'))
 #> Getting R-level messages...
 #> Getting src-level messages...
@@ -278,8 +279,8 @@ print(metadata)
 #> msgstr ""
 #> "Project-Id-Version: potoolsExample 0.0.1\n"
 #> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"
-#> "POT-Creation-Date: 2026-03-09 18:41+0000\n"
-#> "PO-Revision-Date: 2026-03-09 18:41+0000\n"
+#> "POT-Creation-Date: 2026-08-18 20:32+0000\n"
+#> "PO-Revision-Date: 2026-08-18 20:32+0000\n"
 #> "Last-Translator: R User <ruser@gmail.com>\n"
 #> "Language-Team: ar_SY\n"
 #> "Language: ar_SY\n"
@@ -298,8 +299,8 @@ writeLines(readLines(tmp_po))
 #> msgstr ""
 #> "Project-Id-Version: potoolsExample 0.0.1\n"
 #> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"
-#> "POT-Creation-Date: 2026-03-09 18:41+0000\n"
-#> "PO-Revision-Date: 2026-03-09 18:41+0000\n"
+#> "POT-Creation-Date: 2026-08-18 20:32+0000\n"
+#> "PO-Revision-Date: 2026-08-18 20:32+0000\n"
 #> "Last-Translator: R User <ruser@gmail.com>\n"
 #> "Language-Team: ar_SY\n"
 #> "Language: ar_SY\n"
@@ -327,7 +328,7 @@ writeLines(readLines(tmp_pot))
 #> msgstr ""
 #> "Project-Id-Version: potoolsExample 0.0.1\n"
 #> "Report-Msgid-Bugs-To: https://github.com/ruser/potoolsExample/issues\n"
-#> "POT-Creation-Date: 2026-03-09 18:41+0000\n"
+#> "POT-Creation-Date: 2026-08-18 20:32+0000\n"
 #> "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 #> "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 #> "Language-Team: LANGUAGE <LL@li.org>\n"

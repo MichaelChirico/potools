@@ -33,6 +33,7 @@ input; the last one is optional and suggests to the user a way to repair
 any “unhealthy” messages.
 
 ``` r
+
 check_spelling = function(message_data) {
   # if aspell isn't installed, this won't work; be sure to return an object with the right schema anyway
   if (!nzchar(Sys.which("aspell"))) {
@@ -118,6 +119,7 @@ We can check how the diagnostic works on a simple test package
 `GreatSpelling` created for this vignette.
 
 ``` r
+
 library(potools)
 great_spelling_messages = get_message_data("GreatSpelling")
 ```
@@ -125,6 +127,7 @@ great_spelling_messages = get_message_data("GreatSpelling")
     ## Getting R-level messages...
 
 ``` r
+
 # showing the structure of the messagedata for this package
 great_spelling_messages
 ```
@@ -146,6 +149,7 @@ great_spelling_messages
     ## 3:           2     FALSE                      TRUE        FALSE
 
 ``` r
+
 # running our diagnostic
 check_spelling(great_spelling_messages)
 ```

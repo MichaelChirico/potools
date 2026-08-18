@@ -18,7 +18,7 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
   # comments assigned here & re-used below
   # NB: at the R level, each COMMENT token is restricted to a single line
   comments = expr_data[token == "COMMENT"]
-  setkeyv(comments, c("file", "line1"))
+  setkeyv(comments, c("file", "line1", "line2"))
   expr_data = exclude_untranslated(expr_data, comments)
 
   # on the XML tree, messaging calls look like
@@ -116,30 +116,35 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
   u_calls = unique(msg[ , .(file, line1, col1, line2, col2)])
-  u_calls[ , call := {
-    flines = file_lines[[.BY$file]]
-    file_comm = comments[.(.BY$file), nomatch = NULL]
-    res = character(.N)
+  u_calls[ , call := character(.N)]
+  is_single = u_calls$line1 == u_calls$line2
 
-    single_mask = line1 == line2
-    if (any(single_mask)) {
-      lines_sub = flines[line1[single_mask]]
+  if (any(is_single)) {
+    u_calls[is_single, call := {
+      lines_sub = file_lines[[.BY$file]][line1]
       if (any(has_tabs <- grepl("\t", lines_sub, fixed = TRUE))) {
         lines_sub[has_tabs] = vapply(lines_sub[has_tabs], adjust_tabs, character(1L), USE.NAMES = FALSE)
       }
-      res[single_mask] = substr(lines_sub, col1[single_mask], col2[single_mask])
-    }
+      substr(lines_sub, col1, col2)
+    }, by = file]
+  }
 
-    for (i in which(!single_mask)) {
-      cm = if (nrow(file_comm)) {
-        file_comm[line1 >= l1 & line1 <= l2, env = list(l1 = line1[i], l2 = line2[i])]
-      } else {
-        file_comm[0L]
-      }
-      res[i] = build_call(flines, cm, .SD[i])
+  multi_idx = which(!is_single)
+  if (length(multi_idx)) {
+    multi = u_calls[multi_idx]
+    ov = foverlaps(multi, comments, by.x = c("file", "line1", "line2"), by.y = c("file", "line1", "line2"), which = TRUE, nomatch = NULL)
+    comm_by_call = split(ov$yid, ov$xid)
+
+    calls_res = character(length(multi_idx))
+    for (j in seq_along(multi_idx)) {
+      f = multi$file[j]
+      flines = file_lines[[f]]
+      match_rows = comm_by_call[[as.character(j)]]
+      cm = if (length(match_rows)) comments[match_rows] else comments[0L]
+      calls_res[j] = build_call(flines, cm, multi[j])
     }
-    res
-  }, by = file]
+    u_calls[multi_idx, call := calls_res]
+  }
 
   msg[u_calls, on = c('file', 'line1', 'col1', 'line2', 'col2'), call := i.call]
 

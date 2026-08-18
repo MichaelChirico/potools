@@ -116,36 +116,30 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
   u_calls = unique(msg[ , .(file, line1, col1, line2, col2)])
-  u_calls[ , call := character(.N)]
-  is_single = u_calls$line1 == u_calls$line2
+  u_calls[ , call := {
+    flines = file_lines[[.BY$file]]
+    file_comm = comments[.(.BY$file), nomatch = NULL]
+    res = character(.N)
 
-  if (any(is_single)) {
-    single_idx = which(is_single)
-    for (f in unique(u_calls$file[single_idx])) {
-      f_idx = single_idx[u_calls$file[single_idx] == f]
-      flines = file_lines[[f]]
-      l_nums = u_calls$line1[f_idx]
-      c1 = u_calls$col1[f_idx]
-      c2 = u_calls$col2[f_idx]
-
-      lines_subset = flines[l_nums]
-      if (any(grepl("\t", lines_subset, fixed = TRUE))) {
-        lines_subset = vapply(lines_subset, adjust_tabs, character(1L), USE.NAMES = FALSE)
+    single_mask = line1 == line2
+    if (any(single_mask)) {
+      lines_sub = flines[line1[single_mask]]
+      if (any(grepl("\t", lines_sub, fixed = TRUE))) {
+        lines_sub = vapply(lines_sub, adjust_tabs, character(1L), USE.NAMES = FALSE)
       }
-      u_calls[f_idx, call := substr(lines_subset, c1, c2)]
+      res[single_mask] = substr(lines_sub, col1[single_mask], col2[single_mask])
     }
-  }
 
-  for (ii in which(!is_single)) {
-    f = u_calls$file[ii]
-    l1 = u_calls$line1[ii]
-    c1 = u_calls$col1[ii]
-    l2 = u_calls$line2[ii]
-    c2 = u_calls$col2[ii]
-    flines = file_lines[[f]]
-    cm = comments[.(f, l1:l2), nomatch = NULL]
-    u_calls[ii, call := build_call(flines, cm, list(line1 = l1, col1 = c1, line2 = l2, col2 = c2))]
-  }
+    if (any(!single_mask)) {
+      multi_idx = which(!single_mask)
+      for (i in multi_idx) {
+        l1 = line1[i]; c1 = col1[i]; l2 = line2[i]; c2 = col2[i]
+        cm = if (nrow(file_comm)) file_comm[line1 >= l1 & line1 <= l2] else file_comm[0L]
+        res[i] = build_call(flines, cm, list(line1 = l1, col1 = c1, line2 = l2, col2 = c2))
+      }
+    }
+    res
+  }, by = file]
 
   msg[u_calls, on = c('file', 'line1', 'col1', 'line2', 'col2'), call := i.call]
 

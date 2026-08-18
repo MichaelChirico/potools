@@ -136,18 +136,15 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
     }
   }
 
-  if (any(!is_single)) {
-    multi_idx = which(!is_single)
-    for (ii in multi_idx) {
-      f = u_calls$file[ii]
-      l1 = u_calls$line1[ii]
-      c1 = u_calls$col1[ii]
-      l2 = u_calls$line2[ii]
-      c2 = u_calls$col2[ii]
-      flines = file_lines[[f]]
-      cm = comments[.(f, l1:l2), nomatch = NULL]
-      u_calls[ii, call := build_call(flines, cm, list(line1 = l1, col1 = c1, line2 = l2, col2 = c2))]
-    }
+  for (ii in which(!is_single)) {
+    f = u_calls$file[ii]
+    l1 = u_calls$line1[ii]
+    c1 = u_calls$col1[ii]
+    l2 = u_calls$line2[ii]
+    c2 = u_calls$col2[ii]
+    flines = file_lines[[f]]
+    cm = comments[.(f, l1:l2), nomatch = NULL]
+    u_calls[ii, call := build_call(flines, cm, list(line1 = l1, col1 = c1, line2 = l2, col2 = c2))]
   }
 
   msg[u_calls, on = c('file', 'line1', 'col1', 'line2', 'col2'), call := i.call]

@@ -15,7 +15,7 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
     catf("Running system command msgmerge %s ...\n", paste(msgmerge_args, collapse = " "))
   }
   val <- system2("msgmerge", msgmerge_args, stdout = TRUE, stderr = TRUE)
-  if (!identical(attr(val, "status", exact = TRUE), NULL)) {
+  if (!is.null(attr(val, "status", exact = TRUE))) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
     warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
   } else if (verbose) {
@@ -48,7 +48,7 @@ run_msgfmt = function(po_file, mo_file, verbose) {
     catf("Running system command msgfmt %s ...\n", paste(msgfmt_args, collapse = " "))
   }
   val <- system2("msgfmt", msgfmt_args, stdout = TRUE, stderr = TRUE)
-  if (!identical(attr(val, "status", exact = TRUE), NULL)) {
+  if (!is.null(attr(val, "status", exact = TRUE))) {
     warningf(
       "running msgfmt on %s failed.\nHere is the po file:\n%s",
       basename(po_file), paste(readLines(po_file), collapse = "\n"),

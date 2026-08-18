@@ -10,9 +10,9 @@
 #' `DESCRIPTION`.
 #' @param lazy If `TRUE`, only `.mo` functions that are older than
 #' `.po` files be updated
-#' @param verbose If `TRUE`, print information as it goes.
+#' @inheritParams po_extract
 #' @export
-po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE) {
+po_compile = function(dir = ".", package = NULL, lazy = TRUE, verbose = !is_testing()) {
   po_metadata <- get_po_metadata(dir = dir, package = package)
   dir_create(dirname(po_metadata$mo))
 

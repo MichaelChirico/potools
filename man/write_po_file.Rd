@@ -166,7 +166,7 @@ rm(message_data, desc_data, metadata, tmp_po, tmp_pot)
 }
 \seealso{
 \code{\link[=translate_package]{translate_package()}}, \code{\link[=get_message_data]{get_message_data()}},
-\code{\link[tools:xgettext]{tools::xgettext2pot()}}, \code{\link[tools:update_pkg_po]{tools::update_pkg_po()}}
+\code{\link[tools:xgettext2pot]{tools::xgettext2pot()}}, \code{\link[tools:update_pkg_po]{tools::update_pkg_po()}}
 }
 \author{
 Michael Chirico

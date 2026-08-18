@@ -23,7 +23,7 @@ Error messages built like
 in general hard for translators -- the correct
 translation may be in a totally different order (e.g., this is often the
 case for Japanese). It is preferable instead to use
-\code{\link[base:sprintf]{base::gettextf()}} to build a templated message like
+\code{\link[base:gettextf]{base::gettextf()}} to build a templated message like
 \code{stop(gettextf("You gave \%d arguments but \%d are needed.", n, m))}.
 Translators are then free to rearrange the template to put the numeric
 pattern where it fits most naturally in the target language.

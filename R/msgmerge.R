@@ -15,7 +15,7 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
     catf("Running system command msgmerge %s ...\n", paste(msgmerge_args, collapse = " "))
   }
   val <- system2("msgmerge", msgmerge_args, stdout = TRUE, stderr = TRUE)
-  if (!identical(attr(val, "status", exact = TRUE), NULL)) {
+  if (!is.null(attr(val, "status", exact = TRUE))) {
     # nocov these warnings? i don't know how to trigger them as of this writing.
     warningf("Running msgmerge on './po/%s' failed:\n  %s", basename(po_file), paste(val, collapse = "\n"))
   } else if (verbose) {
@@ -32,27 +32,30 @@ run_msgmerge <- function(po_file, pot_file, previous = FALSE, verbose = TRUE) {
 
 run_msgfmt = function(po_file, mo_file, verbose) {
   check_potools_sys_reqs("msgfmt")
-  use_stats <- if (verbose) '--statistics' else ''
 
   po_file <- path.expand(po_file)
   mo_file <- path.expand(mo_file)
 
   # See #218, #221. Solaris msgfmt doesn't support -c or --statistics
   #   see also https://bugs.r-project.org/show_bug.cgi?id=18150
-  if (is_gnu_gettext()) {
-    cmd = glue("msgfmt -c {use_stats} -o {shQuote(mo_file)} {shQuote(po_file)}")
-  } else {
-    cmd = glue("msgfmt -o {shQuote(mo_file)} {shQuote(po_file)}") # nocov
-  }
+  msgfmt_args <- c(
+    if (is_gnu_gettext()) c("-c", if (verbose) "--statistics"),
+    "-o", shQuote(mo_file),
+    shQuote(po_file)
+  )
+
   if (verbose) {
-    catf("Running system command %s ...\n", cmd)
+    catf("Running system command msgfmt %s ...\n", paste(msgfmt_args, collapse = " "))
   }
-  if (system(cmd) != 0L) {
+  val <- system2("msgfmt", msgfmt_args, stdout = TRUE, stderr = TRUE)
+  if (!is.null(attr(val, "status", exact = TRUE))) {
     warningf(
       "running msgfmt on %s failed.\nHere is the po file:\n%s",
       basename(po_file), paste(readLines(po_file), collapse = "\n"),
       immediate. = TRUE
     )
+  } else if (verbose && length(val)) {
+    writeLines(val)
   }
   invisible()
 }

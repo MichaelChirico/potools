@@ -27,5 +27,19 @@ test_that("po_compile() can handle UTF-8 msgstr", {
   l[grep('msgstr ""', l)[2L]] <- 'msgstr "\U00A1Hello!"'
   cat(l, file = r_es_po, sep = "\n")
 
-  expect_no_error(po_compile(temp, verbose=FALSE))
+  expect_silent(po_compile(temp))
+})
+
+test_that("user is told what's happening in po_compile", {
+  temp <- local_test_package(
+    `R/foo.R` = "foo <- function() message('Hello!')"
+  )
+
+  po_extract(temp)
+  po_create("es", temp)
+
+  log <- capture.output(po_compile(temp, lazy = FALSE, verbose = TRUE))
+  expect_match(log, "Recompiling 'es' R translation", fixed = TRUE, all = FALSE)
+  expect_match(log, "Running system command msgfmt", fixed = TRUE, all = FALSE)
+  expect_match(log, "0 translated messages, 1 untranslated message.", fixed = TRUE, all = FALSE)
 })

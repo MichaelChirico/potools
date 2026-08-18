@@ -50,7 +50,7 @@ used for live translations.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">po_compile</span><span class="op">(</span>dir <span class="op">=</span> <span class="st">"."</span>, package <span class="op">=</span> <span class="cn">NULL</span>, lazy <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">po_compile</span><span class="op">(</span>dir <span class="op">=</span> <span class="st">"."</span>, package <span class="op">=</span> <span class="cn">NULL</span>, lazy <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="op">!</span><span class="fu">is_testing</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,7 +72,8 @@ used for live translations.</p>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>If <code>TRUE</code>, print information as it goes.</p></dd>
+<dd><p>Logical, default <code>TRUE</code> (except during testing). Should
+extra information about progress, etc. be reported?</p></dd>
 
 </dl></div>
 

@@ -7,7 +7,7 @@ used for live translations.
 ## Usage
 
 ``` r
-po_compile(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE)
+po_compile(dir = ".", package = NULL, lazy = TRUE, verbose = !is_testing())
 ```
 
 ## Arguments
@@ -27,4 +27,5 @@ po_compile(dir = ".", package = NULL, lazy = TRUE, verbose = TRUE)
 
 - verbose:
 
-  If `TRUE`, print information as it goes.
+  Logical, default `TRUE` (except during testing). Should extra
+  information about progress, etc. be reported?

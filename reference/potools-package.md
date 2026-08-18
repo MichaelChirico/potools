@@ -21,4 +21,6 @@ Useful links:
 
 Authors:
 
+- Michael Chirico <MichaelChirico4@gmail.com>
+
 - Hadley Wickham

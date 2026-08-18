@@ -425,24 +425,21 @@ get_call_args = function(expr_data, calls) {
   msg_call_exprs = expr_data[
     call_tokens,
     on = c('file', id = 'parent'),
-    .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent, fname = i.text)
+    .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent, fname = i.text,
+      is_direct = i.line1 == x.line1 & i.col1 == x.col1)
   ]
-  # if not, just skip to a join to get the right schema & return
-  if (nrow(msg_call_exprs)) {
-    msg_call_expr_children = expr_data[
-      msg_call_exprs,
+  if (any(!msg_call_exprs$is_direct)) {
+    prefix_calls = msg_call_exprs[(!is_direct)]
+    prefix_children = expr_data[
+      prefix_calls,
       on = c('file', parent = 'call_expr_id'),
       .(file, parent = x.parent, token = x.token)
     ]
-    # filter out calls like l$stop("x"), keep calls like base::stop("x")
-    valid_parents = msg_call_expr_children[
-      , if (.N == 1L || 'NS_GET' %chin% token) .(parent = parent[1L]),
-      by = .(file, parent)
-    ]
-    msg_call_exprs = msg_call_exprs[
-      valid_parents,
-      on = c('file', call_expr_id = 'parent')
-    ]
+    ns_get = prefix_children[token == 'NS_GET']
+    invalid_parents = prefix_children[!ns_get, on = c('file', 'parent')]
+    if (nrow(invalid_parents)) {
+      msg_call_exprs = msg_call_exprs[!invalid_parents, on = c('file', call_expr_id = 'parent')]
+    }
   }
   msg_call_neighbors = expr_data[
     msg_call_exprs, on = c('file', parent = 'call_parent_id'),

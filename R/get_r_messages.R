@@ -342,19 +342,10 @@ get_dots_strings = function(expr_data, funs, arg_names,
   # as we search the AST "below" call_neighbors, drop whichever of the excluded expr parents we find.
   #   practically speaking, this is how we disassociate "hi" from stop() in stop(gettext("hi"))
   exclude_tokens = expr_data[token == 'SYMBOL_FUNCTION_CALL' & text %chin% exclude]
-  if (nrow(exclude_tokens)) {
-    exclude_parents = expr_data[
-      exclude_tokens,
-      on = c('file', id = 'parent'),
-      .(file, id = x.parent)
-    ]
-    if (nrow(exclude_parents)) {
-      # lop off these expr so they can't be found later
-      expr_data = expr_data[!exclude_parents, on = c('file', 'id')]
-      call_neighbors = call_neighbors[token == 'expr'][!exclude_parents, on = c('file', 'id')]
-    } else {
-      call_neighbors = call_neighbors[token == 'expr']
-    }
+  if (nrow(exclude_tokens) && nrow(exclude_parents <- expr_data[exclude_tokens, on=c('file', id='parent'), .(file, id=x.parent)])) {
+    # lop off these expr so they can't be found later
+    expr_data = expr_data[!exclude_parents, on = c('file', 'id')]
+    call_neighbors = call_neighbors[token == 'expr'][!exclude_parents, on = c('file', 'id')]
   } else {
     call_neighbors = call_neighbors[token == 'expr']
   }

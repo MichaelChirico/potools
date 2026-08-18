@@ -139,8 +139,7 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
       f = multi$file[j]
       flines = file_lines[[f]]
       match_rows = comm_by_call[[as.character(j)]]
-      cm = if (length(match_rows)) comments[match_rows] else comments[0L]
-      calls_res[j] = build_call(flines, cm, multi[j])
+      calls_res[j] = build_call(flines, comments[match_rows], multi[j])
     }
     u_calls[multi_idx, call := calls_res]
   }
@@ -338,6 +337,7 @@ get_dots_strings = function(expr_data, funs, arg_names,
   #   practically speaking, this is how we disassociate "hi" from stop() in stop(gettext("hi"))
   exclude_tokens = expr_data[token == 'SYMBOL_FUNCTION_CALL' & text %chin% exclude]
   call_neighbors = call_neighbors[token == 'expr']
+  # nolint next: line_length_linter.
   if (nrow(exclude_tokens) && nrow(exclude_parents <- expr_data[exclude_tokens, on=c('file', id='parent'), .(file, id=x.parent)])) {
     # lop off these expr so they can't be found later
     expr_data = expr_data[!exclude_parents, on = c('file', 'id')]
@@ -425,10 +425,10 @@ get_call_args = function(expr_data, calls) {
     call_tokens,
     on = c('file', id = 'parent'),
     .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent, fname = i.text,
-      is_direct = i.line1 == x.line1 & i.col1 == x.col1)
+      is_indirect = i.line1 != x.line1 | i.col1 != x.col1)
   ]
-  if (!all(msg_call_exprs$is_direct)) {
-    prefix_calls = msg_call_exprs[(!is_direct)]
+  if (any(msg_call_exprs$is_indirect)) {
+    prefix_calls = msg_call_exprs[(is_indirect)]
     prefix_children = expr_data[
       prefix_calls,
       on = c('file', parent = 'call_expr_id'),

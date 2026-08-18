@@ -110,12 +110,11 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
   file_lines = lapply(normalizePath(paths), readLines, warn = FALSE)
   names(file_lines) = msg_files
 
-
   msg[
     expr_data, on = c('file', parent = 'id'),
     `:=`(line1 = i.line1, col1 = i.col1, line2 = i.line2, col2 = i.col2)
   ]
-  u_calls = unique(msg[ , .(file, line1, col1, line2, col2)])
+  u_calls = unique(msg[ , c("file", "line1", "col1", "line2", "col2")])
   u_calls[ , call := character(.N)]
   is_single = u_calls$line1 == u_calls$line2
 
@@ -132,7 +131,7 @@ get_r_messages <- function(dir, custom_translation_functions = NULL, is_base = F
   multi_idx = which(!is_single)
   if (length(multi_idx)) {
     multi = u_calls[multi_idx]
-    ov = foverlaps(multi, comments, by.x = c("file", "line1", "line2"), by.y = c("file", "line1", "line2"), which = TRUE, nomatch = NULL)
+    ov = foverlaps(multi, comments, which = TRUE, nomatch = NULL)
     comm_by_call = split(ov$yid, ov$xid)
 
     calls_res = character(length(multi_idx))

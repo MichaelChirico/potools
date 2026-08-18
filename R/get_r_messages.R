@@ -536,21 +536,21 @@ clean_text = function(x) {
     '^[rR]["\'][-]*[\\[({](.*)[\\])}][-]*["\']$|^(?s)["\'](.*)["\']$',
     '\\1\\2', x, perl = TRUE
   )
-  has_bs = grepl('\\', x, fixed = TRUE)
-  if (any(has_bs)) {
-    xb = x[has_bs]
-    # there may be others, these are the main ones... lookback since actual escaped \\n shouldn't be replaced.
-    #   an non-perl approach with capture groups like (^|[^\\])[\\]n fails on consecutive \\n\\n due to greediness
-    xb = gsub("(?:^|(?<![\\\\]))[\\\\]n", "\n", xb, perl = TRUE)
-    xb = gsub("(?:^|(?<![\\\\]))[\\\\]t", "\t", xb, perl = TRUE)
-    # maybe stop() instead? \r is blocked by gettext...
-    xb = gsub("(?:^|(?<![\\\\]))[\\\\]r", "\r", xb, perl = TRUE)
-    # quotes that are escaped _in the text_ are not escaped _in R_ (i.e., after parsing),
-    #   e.g. in 'a string with an \"escaped\" quote', the escapes for " disappear after parsing. See #128
-    xb = gsub("(?:^|(?<![\\\\]))[\\\\](['\"])", "\\1", xb, perl = TRUE)
-    xb = gsub('\\\\', '\\', xb, fixed = TRUE)
-    x[has_bs] = xb
-  }
+  has_backslash = grepl('\\', x, fixed = TRUE)
+  if (!any(has_backslash)) return(x)
+
+  xb = x[has_backslash]
+  # there may be others, these are the main ones... lookback since actual escaped \\n shouldn't be replaced.
+  #   an non-perl approach with capture groups like (^|[^\\])[\\]n fails on consecutive \\n\\n due to greediness
+  xb = gsub("(?:^|(?<![\\\\]))[\\\\]n", "\n", xb, perl = TRUE)
+  xb = gsub("(?:^|(?<![\\\\]))[\\\\]t", "\t", xb, perl = TRUE)
+  # maybe stop() instead? \r is blocked by gettext...
+  xb = gsub("(?:^|(?<![\\\\]))[\\\\]r", "\r", xb, perl = TRUE)
+  # quotes that are escaped _in the text_ are not escaped _in R_ (i.e., after parsing),
+  #   e.g. in 'a string with an \"escaped\" quote', the escapes for " disappear after parsing. See #128
+  xb = gsub("(?:^|(?<![\\\\]))[\\\\](['\"])", "\\1", xb, perl = TRUE)
+  xb = gsub('\\\\', '\\', xb, fixed = TRUE)
+  x[has_backslash] = xb
   x
 }
 

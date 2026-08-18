@@ -428,7 +428,7 @@ get_call_args = function(expr_data, calls) {
     .(file, call_id = i.id, call_expr_id = x.id, call_parent_id = x.parent, fname = i.text,
       is_direct = i.line1 == x.line1 & i.col1 == x.col1)
   ]
-  if (any(!msg_call_exprs$is_direct)) {
+  if (!all(msg_call_exprs$is_direct)) {
     prefix_calls = msg_call_exprs[(!is_direct)]
     prefix_children = expr_data[
       prefix_calls,
